@@ -1,5 +1,7 @@
 #pragma once
 
+#include <functional>
+
 #include "Platform/Types.h"
 
 #include "Foundation/API.h"

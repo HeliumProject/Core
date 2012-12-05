@@ -3,8 +3,6 @@
 #include "Platform/Types.h"
 #include "Platform/Assert.h"
 
-#include "Math/API.h"
-
 #if HELIUM_CC_CL
 # pragma warning( push )
 # pragma warning( disable : 4530 ) // C++ exception handler used, but unwind semantics are not enabled. Specify /EHsc
