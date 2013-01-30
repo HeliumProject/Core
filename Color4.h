@@ -7,12 +7,16 @@
 #include "Math/API.h"
 #include "Foundation/Math.h"
 #include "Math/Color3.h"
+#include "Reflect/Structure.h"
 
 namespace Helium
 {
 	class HELIUM_MATH_API Color4
 	{
 	public:
+		REFLECT_DECLARE_BASE_STRUCTURE(Color4);
+		static void PopulateComposite( Reflect::Composite& comp );
+
 		uint8_t r, g, b, a;
 
 		Color4            () : r(0), g(0), b(0), a(255) {}
