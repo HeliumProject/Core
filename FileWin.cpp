@@ -52,7 +52,7 @@ File::File()
 
 File::~File()
 {
-	Close();
+	HELIUM_VERIFY( Close() );
 }
 
 bool File::IsOpen() const
@@ -93,7 +93,13 @@ bool File::Open( const tchar_t* filename, FileMode mode, bool truncate )
 
 bool File::Close()
 {
-	return 1 == ::CloseHandle( m_Handle );
+	if ( IsOpen() && !::CloseHandle( m_Handle ) )
+	{
+		return false;
+	}
+
+	m_Handle = INVALID_HANDLE_VALUE;
+	return true;
 }
 
 bool File::Read( void* buffer, size_t numberOfBytesToRead, size_t* numberOfBytesRead )
@@ -236,7 +242,7 @@ Directory::Directory( const tstring& path )
 
 Directory::~Directory()
 {
-	Close();
+	HELIUM_VERIFY( Close() );
 }
 
 bool Directory::IsOpen()
@@ -281,6 +287,7 @@ bool Directory::Close()
 		return false;
 	}
 
+	m_Handle = INVALID_HANDLE_VALUE;
 	return true;
 }
 
