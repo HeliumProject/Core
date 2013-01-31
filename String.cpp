@@ -62,7 +62,7 @@ static int CompareStringHelper( const T* a, const T* b, size_t count )
 	const T *pA = a, *pB = b;
 	for ( size_t i=0; i<=min && i<count; i++ ) // note: compare against the null terminator
 	{
-		result = C( *pA, *pB );
+		result = C( *pA++, *pB++ );
 		if ( result != 0 )
 		{
 			return result;
