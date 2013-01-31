@@ -20,7 +20,7 @@ static uint64_t FromWindowsTime( FILETIME time )
 	return (ticks - 116444736000000000) / 10000000;
 }
 
-static void FromWindowsAttributes( DWORD attrs, uint32_t mode )
+static void FromWindowsAttributes( DWORD attrs, uint32_t& mode )
 {
 	mode |= ( attrs & FILE_ATTRIBUTE_READONLY ) ? StatusModes::Read : ( StatusModes::Read | StatusModes::Write );
 	mode |= ( attrs & FILE_ATTRIBUTE_DIRECTORY ) ? StatusModes::Directory : StatusModes::None;
