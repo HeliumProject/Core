@@ -55,6 +55,8 @@ static int CompareStringHelper( const T* a, const T* b, size_t count )
 	size_t lenA = StringLength( a );
 	size_t lenB = StringLength( b );
 	size_t min = lenA < lenB ? lenA : lenB;
+
+	count = count > 0 ? count : min;
 	
 	int result;
 	const T *pA = a, *pB = b;
