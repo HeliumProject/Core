@@ -32,6 +32,6 @@ void Exception::SetMessage( const tchar_t* msgFormat, ... )
 void Exception::SetMessage( const tchar_t* msgFormat, va_list msgArgs )
 {
     tchar_t msgBuffer[ERROR_STRING_BUF_SIZE];
-    StringPrint( msgBuffer, sizeof(msgBuffer) / sizeof( tchar_t ), msgFormat, msgArgs );
+    StringPrintArgs( msgBuffer, sizeof(msgBuffer) / sizeof( tchar_t ), msgFormat, msgArgs );
     m_Message = msgBuffer;
 }
