@@ -85,7 +85,10 @@ void DirectoryIterator::GetFiles( const FilePath& path, std::set< Helium::FilePa
     {
         for ( DirectoryIterator dir( path, DirectoryFlags::SkipFiles ); !dir.IsDone(); dir.Next() )
         {
-            GetFiles( dir.GetItem().m_Path, paths, recursive );
+            if ( dir.GetItem().m_Path.IsDirectory() )
+            {
+                GetFiles( dir.GetItem().m_Path, paths, recursive );
+            }
         }
     }
 }
