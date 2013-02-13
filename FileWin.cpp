@@ -302,7 +302,7 @@ void Helium::GetFullPath( const tchar_t* path, tstring& fullPath )
 	HELIUM_TCHAR_TO_WIDE( path, convertedPath );
 	DWORD fullPathNameCount = ::GetFullPathName( convertedPath, 0, NULL, NULL );
 	wchar_t* fullPathName = (wchar_t*)alloca( sizeof(wchar_t) * fullPathNameCount );
-	uint32_t result = ::GetFullPathName( convertedPath, MAX_PATH, fullPathName, NULL );
+	uint32_t result = ::GetFullPathName( convertedPath, fullPathNameCount, fullPathName, NULL );
 
 	HELIUM_WIDE_TO_TCHAR( fullPathName, convertedFullPathName );
 	fullPath = convertedFullPathName;
