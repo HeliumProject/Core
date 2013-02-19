@@ -25,12 +25,22 @@ bool Helium::ConvertString( const std::string& src, std::wstring& dest )
 {
 	size_t length = GetConvertedStringLength( src.c_str() );
 	dest.resize( length );
-	return ConvertString( src.c_str(), const_cast<wchar_t*>( dest.data() ), dest.length() );
+	bool success = ConvertString( src.c_str(), const_cast<wchar_t*>( dest.data() ), dest.length() );
+    if (success)
+    {
+        dest.resize( length - 1 );
+    }
+    return success;
 }
 
 bool Helium::ConvertString( const std::wstring& src, std::string& dest )
 {
 	size_t length = GetConvertedStringLength( src.c_str() );
 	dest.resize( length );
-	return ConvertString( src.c_str(), const_cast<char*>( dest.data() ), dest.length() );
+	bool success = ConvertString( src.c_str(), const_cast<char*>( dest.data() ), dest.length() );
+    if (success)
+    {
+        dest.resize( length - 1 );
+    }
+    return success;
 }
