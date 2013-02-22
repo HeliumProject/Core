@@ -37,6 +37,15 @@
 #  define HELIUM_CPU_X86 1
 #  define HELIUM_CPU_X86_32 1
 # endif
+#elif defined( __gnu_linux__)
+# define HELIUM_OS_LINUX 1
+# if defined( __x86_64__ )
+#  define HELIUM_CPU_X86 1
+#  define HELIUM_CPU_X86_64 1
+# else
+#  define HELIUM_CPU_X86 1
+#  define HELIUM_CPU_X86_32 1
+# endif
 #else
 # error Unsupported platform.
 #endif
@@ -74,4 +83,8 @@
 
 #if HELIUM_OS_MAC
 # include "Platform/SystemMac.h"
+#endif
+
+#if HELIUM_OS_LINUX
+# include "Platform/SystemLinux.h"
 #endif

@@ -13,7 +13,12 @@
 # endif
 #endif
 
-#include <type_traits>
+#if defined(__GNUG__)
+/* gcc puts tr1 in a strange place */
+# include <tr1/type_traits>
+#else
+# include <type_traits>
+#endif
 
 #if HELIUM_CC_CL
 #pragma warning( pop )
