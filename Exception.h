@@ -54,6 +54,8 @@ namespace Helium
 	HELIUM_PLATFORM_API bool IsDebuggerPresent();
 
 #if !HELIUM_RELEASE && !HELIUM_PROFILE
+	HELIUM_PLATFORM_API bool InitializeSymbols( const tstring& path = TXT("") );
+	HELIUM_PLATFORM_API bool GetSymbolsInitialized();
 	HELIUM_PLATFORM_API size_t GetStackTrace( void** ppStackTraceArray, size_t stackTraceArraySize, size_t skipCount = 1 );
 	HELIUM_PLATFORM_API void GetAddressSymbol( tstring& rSymbol, void* pAddress );
 	HELIUM_PLATFORM_API void DebugLog( const tchar_t* pMessage );

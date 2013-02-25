@@ -89,7 +89,8 @@ namespace Helium
 	};
 
 	// Init (need to specify the search paths to the pdbs if they aren't with the executables)
-	HELIUM_PLATFORM_API bool InitializeSymbols( const tstring& path = TXT("") );
+	HELIUM_PLATFORM_API bool InitializeSymbols( const tstring& path );
+	HELIUM_PLATFORM_API bool GetSymbolsInitialized();
 
 	// Query information from a bare address (should be pretty safe to call)
 	HELIUM_PLATFORM_API tstring GetSymbolInfo( uintptr_t adr, bool enumLoadedModules = true );

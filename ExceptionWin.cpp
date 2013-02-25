@@ -37,13 +37,15 @@ static bool g_Initialized = false;
 static void PrintToString(tstring& str, const tchar_t* fmt, ...)
 {
 	va_list args;
+
 	va_start(args, fmt);
 
-	size_t needed = StringPrint(NULL, 0, fmt, args);
+	size_t needed = StringPrintArgs(NULL, 0, fmt, args) + 1;
 	tchar_t* buf = (tchar_t*)alloca( sizeof(tchar_t) * needed );
 
-	StringPrint(buf, sizeof(buf), fmt, args);
-	buf[ sizeof(buf)/sizeof(buf[0]) - 1] = 0; 
+	StringPrintArgs(buf, sizeof(buf) * needed, fmt, args);
+	buf[ needed - 1] = 0; 
+
 	va_end(args);
 
 	str += buf;
@@ -136,6 +138,11 @@ bool Helium::InitializeSymbols(const tstring& path)
 	return true;
 }
 
+bool Helium::GetSymbolsInitialized()
+{
+    return g_Initialized;
+}
+
 tstring Helium::GetSymbolInfo(uintptr_t adr, bool enumLoadedModules)
 {
 	HELIUM_ASSERT( g_Initialized );
@@ -196,8 +203,9 @@ tstring Helium::GetSymbolInfo(uintptr_t adr, bool enumLoadedModules)
 
 		if ( SymFromAddr(GetCurrentProcess(), adr, &disp, symbolInfo) != 0 )
 		{
+			HELIUM_WIDE_TO_TCHAR(symbolInfo->Name, convertedSymbolName);
 			// success, copy the symbol info
-			StringPrint(symbol, TXT("%s + 0x%X"), symbolInfo->Name, disp);
+			StringPrint(symbol, TXT("%s + 0x%X"), convertedSymbolName, disp);
 
 			//
 			// Now find source line information
