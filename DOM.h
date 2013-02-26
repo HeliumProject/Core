@@ -5,9 +5,12 @@
 
 #include "Foundation/API.h"
 #include "Foundation/SmartPtr.h"
+#include "Foundation/FilePath.h"
+
 #include "Reflect/Object.h"
 #include "Reflect/DataDeduction.h"
-#include "Foundation/FilePath.h"
+
+#include "Persist/API.h"
 
 namespace Helium
 {
@@ -24,7 +27,7 @@ namespace Helium
         class DocumentObject;
         typedef Helium::StrongPtr< DocumentObject > DocumentObjectPtr;
 
-        class HELIUM_REFLECT_API DocumentNode : public Reflect::Object
+        class HELIUM_PERSIST_API DocumentNode : public Reflect::Object
         {
         public:
             REFLECT_DECLARE_ABSTRACT( DocumentNode, Object );
@@ -79,12 +82,12 @@ namespace Helium
 
         protected:
             Document*           m_Document;
-            DocumentObject*    m_Parent;
+            DocumentObject*     m_Parent;
             DocumentNode*       m_Next;
             DocumentNode*       m_Previous;
         };
 
-        class HELIUM_REFLECT_API DocumentAttribute : public DocumentNode
+        class HELIUM_PERSIST_API DocumentAttribute : public DocumentNode
         {
         public:
             REFLECT_DECLARE_OBJECT( DocumentAttribute, DocumentNode );
@@ -156,7 +159,7 @@ namespace Helium
         typedef Helium::Signature< const DocumentHierarchyChangingArgs& > DocumentHierarchyChangingSignature;
         typedef Helium::Signature< const DocumentHierarchyChangeArgs& > DocumentHierarchyChangedSignature;
 
-        class HELIUM_REFLECT_API DocumentObject : public DocumentNode
+        class HELIUM_PERSIST_API DocumentObject : public DocumentNode
         {
         public:
             REFLECT_DECLARE_OBJECT( DocumentObject, DocumentNode );
@@ -249,7 +252,7 @@ namespace Helium
             DocumentHierarchyChangedSignature::Event    m_ChildRemoved;
         };
 
-        class HELIUM_REFLECT_API Document : public DocumentObject
+        class HELIUM_PERSIST_API Document : public DocumentObject
         {
         public:
             REFLECT_DECLARE_OBJECT( Document, DocumentObject );

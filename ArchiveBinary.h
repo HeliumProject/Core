@@ -45,13 +45,13 @@
 //    };
 //
 
-#define REFLECT_ARCHIVE_VERBOSE
+#define PERSIST_ARCHIVE_VERBOSE
 
 namespace Helium
 {
     namespace Reflect
     {
-        class HELIUM_REFLECT_API ArchiveBinary : public Archive
+        class HELIUM_PERSIST_API ArchiveBinary : public Archive
         {
         public: 
             static const uint32_t CURRENT_VERSION; 
@@ -62,7 +62,7 @@ namespace Helium
             // The stream to use
             CharStreamPtr m_Stream;
 
-#ifdef REFLECT_ARCHIVE_VERBOSE
+#ifdef PERSIST_ARCHIVE_VERBOSE
             // Indent helper
             Indent<tchar_t> m_Indent;
 #endif

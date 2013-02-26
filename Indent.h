@@ -11,7 +11,7 @@ namespace Helium
         class Indent
         {
         private:
-            HELIUM_REFLECT_API static C m_Space;
+            HELIUM_PERSIST_API static C m_Space;
 
             // Indent spacing
             unsigned int m_Indent;

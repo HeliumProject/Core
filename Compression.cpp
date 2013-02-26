@@ -1,4 +1,4 @@
-#include "ReflectPch.h"
+#include "PersistPch.h"
 #include "Compression.h" 
 #include "Exceptions.h" 
 
@@ -61,7 +61,7 @@ struct zlibInputStream : public z_stream
 // 
 int Reflect::CompressToStream(CharStream& reflectStream, const char* data, uint32_t size)
 {
-    REFLECT_SCOPE_TIMER((""));
+    PERSIST_SCOPE_TIMER((""));
 
     const uint32_t compressBufferSize = ZLIB_BUFFER_SIZE;
     char      compressBuffer[compressBufferSize]; 
@@ -104,7 +104,7 @@ int Reflect::CompressToStream(CharStream& reflectStream, const char* data, uint3
 
 int Reflect::DecompressFromStream(CharStream& reflectStream, int inputBytes, char* output, int outputBytes)
 {
-    REFLECT_SCOPE_TIMER((""));
+    PERSIST_SCOPE_TIMER((""));
 
     const uint32_t fileBufferSize = ZLIB_BUFFER_SIZE;
     char      fileBuffer[fileBufferSize]; 

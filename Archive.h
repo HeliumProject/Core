@@ -14,13 +14,14 @@
 #include "Foundation/Event.h"
 #include "Foundation/SmartPtr.h"
 
-#include "Reflect/API.h"
 #include "Reflect/Class.h"
 #include "Reflect/Exceptions.h"
 #include "Reflect/ArchiveStream.h" 
 
+#include "Persist/API.h"
+
 // enable verbose archive printing
-//#define REFLECT_ARCHIVE_VERBOSE
+//#define PERSIST_ARCHIVE_VERBOSE
 
 namespace Helium
 {
@@ -104,7 +105,7 @@ namespace Helium
         // Archive base class
         //
 
-        class HELIUM_REFLECT_API Archive : public Helium::RefCountBase< Archive >
+        class HELIUM_PERSIST_API Archive : public Helium::RefCountBase< Archive >
         {
         protected:
             friend class RefCountBase< Archive >;
@@ -220,10 +221,10 @@ namespace Helium
         typedef Helium::SmartPtr< Archive > ArchivePtr;
 
         // Get parser for a file
-        HELIUM_REFLECT_API ArchivePtr GetArchive( const FilePath& path, ArchiveType archiveType = ArchiveTypes::Auto, ByteOrder byteOrder = Helium::PlatformByteOrder );
+        HELIUM_PERSIST_API ArchivePtr GetArchive( const FilePath& path, ArchiveType archiveType = ArchiveTypes::Auto, ByteOrder byteOrder = Helium::PlatformByteOrder );
 
-        HELIUM_REFLECT_API bool ToArchive( const FilePath& path, ObjectPtr object, ArchiveType archiveType = ArchiveTypes::Auto, tstring* error = NULL, ByteOrder byteOrder = Helium::PlatformByteOrder );
-        HELIUM_REFLECT_API bool ToArchive( const FilePath& path, const std::vector< ObjectPtr >& objects, ArchiveType archiveType = ArchiveTypes::Auto, tstring* error = NULL, ByteOrder byteOrder = Helium::PlatformByteOrder );
+        HELIUM_PERSIST_API bool ToArchive( const FilePath& path, ObjectPtr object, ArchiveType archiveType = ArchiveTypes::Auto, tstring* error = NULL, ByteOrder byteOrder = Helium::PlatformByteOrder );
+        HELIUM_PERSIST_API bool ToArchive( const FilePath& path, const std::vector< ObjectPtr >& objects, ArchiveType archiveType = ArchiveTypes::Auto, tstring* error = NULL, ByteOrder byteOrder = Helium::PlatformByteOrder );
 
         template <class T>
         Helium::StrongPtr<T> FromArchive( const FilePath& path, ArchiveType archiveType = ArchiveTypes::Auto, ByteOrder byteOrder = Helium::PlatformByteOrder )

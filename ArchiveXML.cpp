@@ -1,4 +1,4 @@
-#include "ReflectPch.h"
+#include "PersistPch.h"
 #include "Reflect/ArchiveXML.h"
 
 #include "Reflect/Object.h"
@@ -16,7 +16,7 @@ using namespace Helium::Reflect;
 
 const uint32_t ArchiveXML::CURRENT_VERSION = 4;
 
-#define REFLECT_ARCHIVE_VERBOSE
+#define PERSIST_ARCHIVE_VERBOSE
 
 #pragma TODO("Structures still have an extra <Object Type=\"StructureType\">, eliminate that with removing the type check for Data")
 
@@ -93,7 +93,7 @@ ArchiveXML::~ArchiveXML()
 
 void ArchiveXML::Open( bool write )
 {
-#ifdef REFLECT_ARCHIVE_VERBOSE
+#ifdef PERSIST_ARCHIVE_VERBOSE
     Log::Debug(TXT("Opening file '%s'\n"), m_Path.c_str());
 #endif
 
@@ -126,7 +126,7 @@ void ArchiveXML::Close()
 
 void ArchiveXML::Read()
 {
-    REFLECT_SCOPE_TIMER(( "Reflect - XML Read" ));
+    PERSIST_SCOPE_TIMER(( "Reflect - XML Read" ));
 
     ArchiveStatus info( *this, ArchiveStates::Starting );
     e_Status.Raise( info );
@@ -138,7 +138,7 @@ void ArchiveXML::Read()
 
     // deserialize main file objects
     {
-        REFLECT_SCOPE_TIMER( ("Read Objects") );
+        PERSIST_SCOPE_TIMER( ("Read Objects") );
         DeserializeArray(m_Objects, ArchiveFlags::Status);
     }
 
@@ -152,7 +152,7 @@ void ArchiveXML::Read()
 
 void ArchiveXML::Write()
 {
-    REFLECT_SCOPE_TIMER(( "Reflect - XML Write" ));
+    PERSIST_SCOPE_TIMER(( "Reflect - XML Write" ));
 
     ArchiveStatus info( *this, ArchiveStates::Starting );
     e_Status.Raise( info );
@@ -162,7 +162,7 @@ void ArchiveXML::Write()
 
     // serialize main file objects
     {
-        REFLECT_SCOPE_TIMER( ("Write Objects") );
+        PERSIST_SCOPE_TIMER( ("Write Objects") );
         SerializeArray(m_Objects, ArchiveFlags::Status);
     }
 
@@ -363,7 +363,7 @@ void ArchiveXML::DeserializeInstance(ObjectPtr& object)
 
     if (object.ReferencesObject())
     {
-#ifdef REFLECT_ARCHIVE_VERBOSE
+#ifdef PERSIST_ARCHIVE_VERBOSE
         m_Indent.Get(stdout);
         Log::Print(TXT("Deserializing %s\n"), object->GetClass()->m_Name);
         m_Indent.Push();
@@ -406,7 +406,7 @@ void ArchiveXML::DeserializeInstance(ObjectPtr& object)
 
         object->PostDeserialize( NULL );
 
-#ifdef REFLECT_ARCHIVE_VERBOSE
+#ifdef PERSIST_ARCHIVE_VERBOSE
         m_Indent.Pop();
 #endif
     }
@@ -414,7 +414,7 @@ void ArchiveXML::DeserializeInstance(ObjectPtr& object)
 
 void ArchiveXML::DeserializeInstance( void* structure, const Structure* type )
 {
-#ifdef REFLECT_ARCHIVE_VERBOSE
+#ifdef PERSIST_ARCHIVE_VERBOSE
     m_Indent.Get(stdout);
     Log::Print(TXT("Deserializing %s\n"), type->m_Name);
     m_Indent.Push();
@@ -424,7 +424,7 @@ void ArchiveXML::DeserializeInstance( void* structure, const Structure* type )
     m_Iterator.Advance();
     DeserializeFields(structure, type);
 
-#ifdef REFLECT_ARCHIVE_VERBOSE
+#ifdef PERSIST_ARCHIVE_VERBOSE
     m_Indent.Pop();
 #endif
 }
@@ -459,7 +459,7 @@ void ArchiveXML::DeserializeFields(Object* object)
             m_DeserializingFieldStack[deserializing_field_index].m_Field = field;
             if ( field )
             {
-#ifdef REFLECT_ARCHIVE_VERBOSE
+#ifdef PERSIST_ARCHIVE_VERBOSE
                 m_Indent.Get(stdout);
                 Log::Print(TXT("Deserializing field %s\n"), field->m_Name);
                 m_Indent.Push();
@@ -511,7 +511,7 @@ void ArchiveXML::DeserializeFields(Object* object)
                 object->ProcessUnknown( unknown, field ? Crc32( field->m_Name ) : 0 );
             }
 
-#ifdef REFLECT_ARCHIVE_VERBOSE
+#ifdef PERSIST_ARCHIVE_VERBOSE
             m_Indent.Pop();
 #endif
         }
@@ -549,7 +549,7 @@ void ArchiveXML::DeserializeFields( void* structure, const Structure* type )
             m_DeserializingFieldStack[deserializing_field_index].m_Field = field;
             if ( field )
             {
-#ifdef REFLECT_ARCHIVE_VERBOSE
+#ifdef PERSIST_ARCHIVE_VERBOSE
                 m_Indent.Get(stdout);
                 Log::Debug(TXT("Deserializing field %s\n"), field->m_Name);
                 m_Indent.Push();
@@ -582,7 +582,7 @@ void ArchiveXML::DeserializeFields( void* structure, const Structure* type )
                 }
             }
 
-#ifdef REFLECT_ARCHIVE_VERBOSE
+#ifdef PERSIST_ARCHIVE_VERBOSE
             m_Indent.Pop();
 #endif
         }
@@ -616,7 +616,7 @@ void ArchiveXML::DeserializeArray( ArrayPusher& push, uint32_t flags )
         // advance to the first child (the first array element)
         m_Iterator.Advance();
 
-#ifdef REFLECT_ARCHIVE_VERBOSE
+#ifdef PERSIST_ARCHIVE_VERBOSE
         m_Indent.Get(stdout);
         Log::Print(TXT("Deserializing objects\n"));
         m_Indent.Push();
@@ -670,7 +670,7 @@ void ArchiveXML::DeserializeArray( ArrayPusher& push, uint32_t flags )
         m_Iterator.Advance();
     }
 
-#ifdef REFLECT_ARCHIVE_VERBOSE
+#ifdef PERSIST_ARCHIVE_VERBOSE
     m_Indent.Pop();
 #endif
 
@@ -826,12 +826,13 @@ void Helium::Reflect::ArchiveXML::ParseStream()
 
     // while there is data, parse buffer
     {
-        REFLECT_SCOPE_TIMER( ("Parse XML") );
+        PERSIST_SCOPE_TIMER( ("Parse XML") );
 
+		bool parsedOk = true;
         long step = 0;
         const unsigned bufferSizeInBytes = 4096;
         char* buffer = static_cast< char* >( alloca( bufferSizeInBytes ) );
-        while (!m_Stream->Fail() && !m_Abort)
+        while (parsedOk && !m_Stream->Fail() && !m_Abort)
         {
             m_Progress = (int)(((float)(step++ * bufferSizeInBytes) / (float)m_Size) * 100.0f);
 
@@ -840,7 +841,7 @@ void Helium::Reflect::ArchiveXML::ParseStream()
             m_Stream->ReadBuffer(buffer, bufferSizeInBytes / sizeof(tchar_t));
             int bytesRead = static_cast<int>(m_Stream->ElementsRead());
 
-            m_Document.ParseBuffer(buffer, bytesRead * sizeof(tchar_t), bytesRead == 0);
+            parsedOk = m_Document.Parse(buffer, bytesRead * sizeof(tchar_t), bytesRead == 0);
         }
     }
 

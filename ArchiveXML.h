@@ -8,7 +8,7 @@ namespace Helium
 {
     namespace Reflect
     {
-        class HELIUM_REFLECT_API ArchiveXML : public Archive
+        class HELIUM_PERSIST_API ArchiveXML : public Archive
         {
         public: 
             static const uint32_t CURRENT_VERSION; 

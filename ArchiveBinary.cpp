@@ -1,4 +1,4 @@
-#include "ReflectPch.h"
+#include "PersistPch.h"
 #include "Reflect/ArchiveBinary.h"
 
 #include "Reflect/Object.h"
@@ -71,7 +71,7 @@ ArchiveBinary::ArchiveBinary()
 
 void ArchiveBinary::Open( bool write )
 {
-#ifdef REFLECT_ARCHIVE_VERBOSE
+#ifdef PERSIST_ARCHIVE_VERBOSE
     Log::Print(TXT("Opening file '%s'\n"), m_Path.c_str());
 #endif
 
@@ -102,7 +102,7 @@ void ArchiveBinary::Close()
 
 void ArchiveBinary::Read()
 {
-    REFLECT_SCOPE_TIMER( ("Reflect - Binary Read") );
+    PERSIST_SCOPE_TIMER( ("Reflect - Binary Read") );
 
     ArchiveStatus info( *this, ArchiveStates::Starting );
     e_Status.Raise( info );
@@ -156,7 +156,7 @@ void ArchiveBinary::Read()
 
     // deserialize main file objects
     {
-        REFLECT_SCOPE_TIMER( ("Read Objects") );
+        PERSIST_SCOPE_TIMER( ("Read Objects") );
         DeserializeArray(m_Objects, ArchiveFlags::Status);
     }
 
@@ -177,7 +177,7 @@ void ArchiveBinary::Read()
 
 void ArchiveBinary::Write()
 {
-    REFLECT_SCOPE_TIMER( ("Reflect - Binary Write") );
+    PERSIST_SCOPE_TIMER( ("Reflect - Binary Write") );
 
     ArchiveStatus info( *this, ArchiveStates::Starting );
     e_Status.Raise( info );
@@ -192,7 +192,7 @@ void ArchiveBinary::Write()
 
     // serialize main file objects
     {
-        REFLECT_SCOPE_TIMER( ("Write Objects") );
+        PERSIST_SCOPE_TIMER( ("Write Objects") );
         SerializeArray(m_Objects, ArchiveFlags::Status);
     }
 
@@ -218,7 +218,7 @@ void ArchiveBinary::SerializeInstance(Object* object)
     uint32_t start_offset = (uint32_t)m_Stream->TellWrite();
     m_Stream->Write(&start_offset); 
 
-#ifdef REFLECT_ARCHIVE_VERBOSE
+#ifdef PERSIST_ARCHIVE_VERBOSE
     m_Indent.Get(stdout);
     Log::Print( TXT( "Serializing %s\n" ), object->GetClass()->m_Name );
     m_Indent.Push();
@@ -268,7 +268,7 @@ void ArchiveBinary::SerializeInstance(Object* object)
     // seek back to the end of the stream
     m_Stream->SeekWrite(0, std::ios_base::end);
 
-#ifdef REFLECT_ARCHIVE_VERBOSE
+#ifdef PERSIST_ARCHIVE_VERBOSE
     m_Indent.Pop();
 #endif
 }
@@ -283,7 +283,7 @@ void ArchiveBinary::SerializeInstance( void* structure, const Structure* type )
     uint32_t start_offset = (uint32_t)m_Stream->TellWrite();
     m_Stream->Write(&start_offset); 
 
-#ifdef REFLECT_ARCHIVE_VERBOSE
+#ifdef PERSIST_ARCHIVE_VERBOSE
     m_Indent.Get(stdout);
     Log::Print( TXT( "Serializing %s\n" ), type->m_Name );
     m_Indent.Push();
@@ -321,7 +321,7 @@ void ArchiveBinary::SerializeInstance( void* structure, const Structure* type )
     // seek back to the end of the stream
     m_Stream->SeekWrite(0, std::ios_base::end);
 
-#ifdef REFLECT_ARCHIVE_VERBOSE
+#ifdef PERSIST_ARCHIVE_VERBOSE
     m_Indent.Pop();
 #endif
 }
@@ -354,7 +354,7 @@ void ArchiveBinary::SerializeFields( Object* object )
                 uint32_t fieldNameCrc = Crc32( field->m_Name );
                 m_Stream->Write(&fieldNameCrc); 
 
-#ifdef REFLECT_ARCHIVE_VERBOSE
+#ifdef PERSIST_ARCHIVE_VERBOSE
                 m_Indent.Get(stdout);
                 Log::Print(TXT("Serializing field %s (class %s)\n"), field->m_Name, field->m_DataClass->m_Name);
                 m_Indent.Push();
@@ -367,7 +367,7 @@ void ArchiveBinary::SerializeFields( Object* object )
                 // might be useful to cache the data object here
                 data->Disconnect();               
 
-#ifdef REFLECT_ARCHIVE_VERBOSE
+#ifdef PERSIST_ARCHIVE_VERBOSE
                 m_Indent.Pop();
 #endif
 
@@ -408,7 +408,7 @@ void ArchiveBinary::SerializeFields( void* structure, const Structure* type )
                 uint32_t fieldNameCrc = Crc32( field->m_Name );
                 m_Stream->Write(&fieldNameCrc); 
 
-#ifdef REFLECT_ARCHIVE_VERBOSE
+#ifdef PERSIST_ARCHIVE_VERBOSE
                 m_Indent.Get(stdout);
                 Log::Print(TXT("Serializing field %s (class %s)\n"), field->m_Name, field->m_DataClass->m_Name);
                 m_Indent.Push();
@@ -419,7 +419,7 @@ void ArchiveBinary::SerializeFields( void* structure, const Structure* type )
                 // might be useful to cache the data object here
                 data->Disconnect();               
 
-#ifdef REFLECT_ARCHIVE_VERBOSE
+#ifdef PERSIST_ARCHIVE_VERBOSE
                 m_Indent.Pop();
 #endif
 
@@ -450,7 +450,7 @@ void ArchiveBinary::SerializeArray( ConstIteratorType begin, ConstIteratorType e
     int32_t size = (int32_t)( end - begin );
     m_Stream->Write(&size); 
 
-#ifdef REFLECT_ARCHIVE_VERBOSE
+#ifdef PERSIST_ARCHIVE_VERBOSE
     m_Indent.Get(stdout);
     Log::Print(TXT("Serializing %d objects\n"), size);
     m_Indent.Push();
@@ -476,7 +476,7 @@ void ArchiveBinary::SerializeArray( ConstIteratorType begin, ConstIteratorType e
         e_Status.Raise( info );
     }
 
-#ifdef REFLECT_ARCHIVE_VERBOSE
+#ifdef PERSIST_ARCHIVE_VERBOSE
     m_Indent.Pop();
 #endif
 
@@ -528,7 +528,7 @@ void ArchiveBinary::DeserializeInstance(ObjectPtr& object)
 
     if (object.ReferencesObject())
     {
-#ifdef REFLECT_ARCHIVE_VERBOSE
+#ifdef PERSIST_ARCHIVE_VERBOSE
         m_Indent.Get(stdout);
         Log::Print(TXT("Deserializing %s\n"), object->GetClass()->m_Name);
         m_Indent.Push();
@@ -555,7 +555,7 @@ void ArchiveBinary::DeserializeInstance(ObjectPtr& object)
 
         object->PostDeserialize( NULL );
 
-#ifdef REFLECT_ARCHIVE_VERBOSE
+#ifdef PERSIST_ARCHIVE_VERBOSE
         m_Indent.Pop();
 #endif
     }
@@ -563,7 +563,7 @@ void ArchiveBinary::DeserializeInstance(ObjectPtr& object)
 
 void ArchiveBinary::DeserializeInstance( void* structure, const Structure* type )
 {
-#ifdef REFLECT_ARCHIVE_VERBOSE
+#ifdef PERSIST_ARCHIVE_VERBOSE
     m_Indent.Get(stdout);
     Log::Print(TXT("Deserializing %s\n"), type->m_Name);
     m_Indent.Push();
@@ -573,7 +573,7 @@ void ArchiveBinary::DeserializeInstance( void* structure, const Structure* type 
     //Allocate();
     DeserializeFields(structure, type);
 
-#ifdef REFLECT_ARCHIVE_VERBOSE
+#ifdef PERSIST_ARCHIVE_VERBOSE
     m_Indent.Pop();
 #endif
 }
@@ -605,7 +605,7 @@ void ArchiveBinary::DeserializeFields(Object* object)
         m_DeserializingFieldStack[deserializing_field_index].m_Field = field;
         if ( field )
         {
-#ifdef REFLECT_ARCHIVE_VERBOSE
+#ifdef PERSIST_ARCHIVE_VERBOSE
             m_Indent.Get(stdout);
             Log::Print(TXT("Deserializing field %s\n"), field->m_Name);
             m_Indent.Push();
@@ -657,7 +657,7 @@ void ArchiveBinary::DeserializeFields(Object* object)
             object->ProcessUnknown( unknown, field ? Crc32( field->m_Name ) : 0 );
         }
 
-#ifdef REFLECT_ARCHIVE_VERBOSE
+#ifdef PERSIST_ARCHIVE_VERBOSE
         m_Indent.Pop();
 #endif
     }
@@ -696,7 +696,7 @@ void ArchiveBinary::DeserializeFields( void* structure, const Structure* type )
         m_DeserializingFieldStack[deserializing_field_index].m_Field = field;
         if ( field )
         {
-#ifdef REFLECT_ARCHIVE_VERBOSE
+#ifdef PERSIST_ARCHIVE_VERBOSE
             m_Indent.Get(stdout);
             Log::Print(TXT("Deserializing field %s\n"), field->m_Name);
             m_Indent.Push();
@@ -729,7 +729,7 @@ void ArchiveBinary::DeserializeFields( void* structure, const Structure* type )
 			}
         }
 
-#ifdef REFLECT_ARCHIVE_VERBOSE
+#ifdef PERSIST_ARCHIVE_VERBOSE
         m_Indent.Pop();
 #endif
     }
@@ -762,7 +762,7 @@ void ArchiveBinary::DeserializeArray( ArrayPusher& push, uint32_t flags )
     int32_t element_count = -1;
     m_Stream->Read(&element_count); 
 
-#ifdef REFLECT_ARCHIVE_VERBOSE
+#ifdef PERSIST_ARCHIVE_VERBOSE
     m_Indent.Get(stdout);
     Log::Debug(TXT("Deserializing %d objects\n"), element_count);
     m_Indent.Push();
@@ -816,7 +816,7 @@ void ArchiveBinary::DeserializeArray( ArrayPusher& push, uint32_t flags )
         }
     }
 
-#ifdef REFLECT_ARCHIVE_VERBOSE
+#ifdef PERSIST_ARCHIVE_VERBOSE
     m_Indent.Pop();
 #endif
 

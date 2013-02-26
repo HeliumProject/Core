@@ -1,4 +1,4 @@
-#include "ReflectPch.h"
+#include "PersistPch.h"
 #include "Reflect/Archive.h"
 
 #include "Platform/Locks.h"
@@ -7,6 +7,7 @@
 
 #include "Foundation/Log.h"
 #include "Foundation/Profile.h"
+
 #include "Reflect/Object.h"
 #include "Reflect/DataDeduction.h"
 #include "Reflect/Version.h"
@@ -60,7 +61,7 @@ void Archive::Put( const std::vector< ObjectPtr >& objects )
 
 ObjectPtr Archive::Get( const Class* searchClass )
 {
-    REFLECT_SCOPE_TIMER( ( "%s", m_Path.c_str() ) );
+    PERSIST_SCOPE_TIMER( ( "%s", m_Path.c_str() ) );
 
     std::vector< ObjectPtr > objects;
     Get( objects );
@@ -86,7 +87,7 @@ ObjectPtr Archive::Get( const Class* searchClass )
 
 void Archive::Get( std::vector< ObjectPtr >& objects )
 {
-    REFLECT_SCOPE_TIMER( ( "%s", m_Path.c_str() ) );
+    PERSIST_SCOPE_TIMER( ( "%s", m_Path.c_str() ) );
 
     Log::Debug( TXT( "Parsing '%s'\n" ), m_Path.c_str() );
 
@@ -162,7 +163,7 @@ bool Reflect::ToArchive( const FilePath& path, const std::vector< ObjectPtr >& o
     HELIUM_ASSERT( objects.size() > 0 );
     HELIUM_ASSERT( byteOrder == ByteOrders::BigEndian || byteOrder == ByteOrders::LittleEndian ); // should be a known byteorder
 
-    REFLECT_SCOPE_TIMER( ( "%s", path.c_str() ) );
+    PERSIST_SCOPE_TIMER( ( "%s", path.c_str() ) );
 
     path.MakePath();
 
