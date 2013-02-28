@@ -218,6 +218,8 @@ namespace Helium
 	protected:
 #if HELIUM_OS_WIN
 		unsigned long m_Key;
+#elif HELIUM_OS_LINUX
+		pthread_key_t m_Key;
 #else
 # error Implement ThreadLocalPointer for this platform.
 #endif

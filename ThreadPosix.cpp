@@ -52,7 +52,7 @@ bool Thread::Valid()
 
 ThreadLocalPointer::ThreadLocalPointer()
 {
-#ifdef PS3_POSIX
+#if defined(PS3_POSIX) || defined(HELIUM_OS_LINUX)
     int status = pthread_key_create(&m_Key, NULL);
     HELIUM_ASSERT( status == 0 && "Could not create pthread_key");
 #endif
@@ -64,7 +64,7 @@ ThreadLocalPointer::ThreadLocalPointer()
 
 ThreadLocalPointer::~ThreadLocalPointer()
 {
-#ifdef PS3_POSIX
+#if defined(PS3_POSIX) || defined(HELIUM_OS_LINUX)
     pthread_key_delete(m_Key);
 #endif
 
@@ -73,7 +73,7 @@ ThreadLocalPointer::~ThreadLocalPointer()
 
 void* ThreadLocalPointer::GetPointer()
 {
-#ifdef PS3_POSIX
+#if defined(PS3_POSIX) || defined(HELIUM_OS_LINUX)
     return pthread_getspecific(m_Key);
 #endif
 
@@ -83,7 +83,7 @@ void* ThreadLocalPointer::GetPointer()
 
 void ThreadLocalPointer::SetPointer(void* pointer)
 {
-#ifdef PS3_POSIX
+#if defined(PS3_POSIX) || defined(HELIUM_OS_LINUX)
     pthread_setspecific(m_Key, pointer);
 #endif
 
