@@ -110,7 +110,7 @@
 /// @return  Pointer to the newly created array, if successful.
 ///
 /// @see HELIUM_DELETE_A()
-#define HELIUM_NEW_A( ALLOCATOR, TYPE, COUNT ) Helium::NewArrayHelper< T >( ALLOCATOR, COUNT )
+#define HELIUM_NEW_A( ALLOCATOR, TYPE, COUNT ) Helium::NewArrayHelper< TYPE >( ALLOCATOR, COUNT )
 
 /// Destroy a single object allocated from a specific heap or allocator.
 ///
