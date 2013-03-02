@@ -209,7 +209,7 @@ void Redirect(const tstring& fileName, const tchar_t* str, bool stampNewLine = t
 			time += currentTime.dstflag ? 1 : 0;
 			uint32_t hour = time % 24;
 
-			length = StringPrint( temp, count, TXT("[%02d:%02d:%02d.%03d TID:%d] %s"), hour, min, sec, milli, GetCurrentThreadId(), str );
+			length = StringPrint( temp, count, TXT("[%02d:%02d:%02d.%03d TID:%d] %s"), hour, min, sec, milli, GetCurrentThreadID(), str );
 		}
 		else
 		{
