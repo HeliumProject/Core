@@ -104,6 +104,8 @@ int64_t Helium::Abs( int64_t value )
 #else
     return llabs( value );
 #endif
+#elif HELIUM_OS_LINUX
+    return llabs( value );
 #else
 #error TODO: Implement 64-bit Abs() on this platform/compiler.
 #endif
