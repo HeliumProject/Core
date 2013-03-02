@@ -263,7 +263,7 @@ size_t Helium::Log2( uint64_t value )
 
     return bitIndex;
 #elif HELIUM_CC_GCC
-    HELIUM_COMPILE_ASSERT( sizeof( long long ) == 64 );
+    HELIUM_COMPILE_ASSERT( sizeof( long long ) == 8 ); /* sizeof is in bytes. JWS 2-27-13 */
 
     return ( 63 - __builtin_clzll( static_cast< unsigned long long >( value ) ) );
 #else
