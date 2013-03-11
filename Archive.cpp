@@ -1,5 +1,5 @@
 #include "PersistPch.h"
-#include "Reflect/Archive.h"
+#include "Persist/Archive.h"
 
 #include "Platform/Locks.h"
 #include "Platform/Process.h"
@@ -10,10 +10,9 @@
 
 #include "Reflect/Object.h"
 #include "Reflect/DataDeduction.h"
-#include "Reflect/Version.h"
 #include "Reflect/Registry.h"
-#include "Reflect/ArchiveXML.h"
-#include "Reflect/ArchiveBinary.h"
+
+#include "Persist/ArchiveBinary.h"
 
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -21,218 +20,194 @@
 
 using namespace Helium;
 using namespace Helium::Reflect;
-
-Archive::Archive( const FilePath& path, ByteOrder byteOrder )
-: m_Path( path )
-, m_ByteOrder( byteOrder )
-, m_Progress( 0 )
-, m_SearchClass( NULL )
-, m_Abort( false )
-, m_Mode( ArchiveModes::Read )
-{
-    HELIUM_ASSERT( !m_Path.empty() );
-}
+using namespace Helium::Persist;
 
 Archive::Archive()
-: m_ByteOrder( ByteOrders::LittleEndian )
-, m_Progress( 0 )
-, m_SearchClass( NULL )
-, m_Abort( false )
-, m_Mode( ArchiveModes::Read )
+	: m_Progress( 0 )
+	, m_Abort( false )
+	, m_Mode( ArchiveModes::Read )
 {
+}
+
+Archive::Archive( const FilePath& path )
+	: m_Path( path )
+	, m_Progress( 0 )
+	, m_Abort( false )
+	, m_Mode( ArchiveModes::Read )
+{
+	HELIUM_ASSERT( !m_Path.empty() );
 }
 
 Archive::~Archive()
 {
 }
 
-#pragma TODO( "Add support for writing objects piecemeal into the archive in Put" )
-
 void Archive::Put( Object* object )
 {
-    m_Objects.push_back( object );
-}
-
-void Archive::Put( const std::vector< ObjectPtr >& objects )
-{
-    m_Objects.reserve( m_Objects.size() + objects.size() );
-    m_Objects.insert( m_Objects.end(), objects.begin(), objects.end() );
+	m_Object = object;
 }
 
 ObjectPtr Archive::Get( const Class* searchClass )
 {
-    PERSIST_SCOPE_TIMER( ( "%s", m_Path.c_str() ) );
+	PERSIST_SCOPE_TIMER( ( "%s", m_Path.c_str() ) );
 
-    std::vector< ObjectPtr > objects;
-    Get( objects );
+	ObjectPtr object;
+	Get( object );
 
-    if ( searchClass == NULL )
-    {
-        searchClass = Reflect::GetClass< Object >();
-    }
+	if ( searchClass == NULL )
+	{
+		searchClass = Reflect::GetClass< Object >();
+	}
 
-    ObjectPtr result = NULL;
-    std::vector< ObjectPtr >::iterator itr = objects.begin();
-    std::vector< ObjectPtr >::iterator end = objects.end();
-    for ( ; itr != end; ++itr )
-    {
-        if ( (*itr)->IsClass( searchClass ) )
-        {
-            return *itr;
-        }
-    }
-
-    return NULL;
+	if ( object->IsClass( searchClass ) )
+	{
+		return object;
+	}
+	else
+	{
+		return NULL;
+	}
 }
 
-void Archive::Get( std::vector< ObjectPtr >& objects )
+void Archive::Get( ObjectPtr& object )
 {
-    PERSIST_SCOPE_TIMER( ( "%s", m_Path.c_str() ) );
+	PERSIST_SCOPE_TIMER( ( "%s", m_Path.c_str() ) );
 
-    Log::Debug( TXT( "Parsing '%s'\n" ), m_Path.c_str() );
+	Log::Debug( TXT( "Parsing '%s'\n" ), m_Path.c_str() );
 
-    if ( Helium::IsDebuggerPresent() )
-    {
-        Open();
-        Read();
-        Close(); 
-    }
-    else
-    {
-        try
-        {
-            Open();
+	if ( Helium::IsDebuggerPresent() )
+	{
+		Open();
+		Read();
+		Close(); 
+	}
+	else
+	{
+		try
+		{
+			Open();
 
-            try
-            {
-                Read();
-            }
-            catch (...)
-            {
-                Close();
-                throw;
-            }
+			try
+			{
+				Read();
+			}
+			catch (...)
+			{
+				Close();
+				throw;
+			}
 
-            Close(); 
-        }
-        catch (Helium::Exception& ex)
-        {
-            tstringstream str;
-            str << "While reading '" << m_Path.c_str() << "': " << ex.Get();
-            ex.Set( str.str() );
-            throw;
-        }
-    }
+			Close(); 
+		}
+		catch (Helium::Exception& ex)
+		{
+			tstringstream str;
+			str << "While reading '" << m_Path.c_str() << "': " << ex.Get();
+			ex.Set( str.str() );
+			throw;
+		}
+	}
 
-    objects = m_Objects;
+	object = m_Object;
 }
 
-ArchivePtr Reflect::GetArchive( const FilePath& path, ArchiveType archiveType, ByteOrder byteOrder )
+ArchivePtr Persist::GetArchive( const FilePath& path, ArchiveType archiveType )
 {
-    switch ( archiveType )
-    {
-    case ArchiveTypes::Auto:
-        if ( path.Exists() )
-        {
-#pragma TODO( "Check the file's existing type and return it." )
-        }
-        // fall through to binary if the file doesn't exist
-    case ArchiveTypes::Binary:
-        return new ArchiveBinary( path, byteOrder );
+	switch ( archiveType )
+	{
+	case ArchiveTypes::Auto:
+		{
+			if ( CaseInsensitiveCompareString( path.Extension().c_str(), TXT( "reflect" ) ) )
+			{
+				return new ArchiveBinary( path );
+			}
+			break;
+		}
 
-    case ArchiveTypes::XML:
-        return new ArchiveXML( path, byteOrder );
+	case ArchiveTypes::Binary:
+		return new ArchiveBinary( path );
 
-    default:
-        throw Reflect::StreamException( TXT( "Unknown archive type" ) );
-    }
+	default:
+		HELIUM_ASSERT( false );
+		break;
+	}
 
-    return NULL;
+	throw Reflect::StreamException( TXT( "Unknown archive type" ) );
 }
 
-bool Reflect::ToArchive( const FilePath& path, ObjectPtr object, ArchiveType archiveType, tstring* error, ByteOrder byteOrder )
+bool Persist::ToArchive( const FilePath& path, ObjectPtr object, ArchiveType archiveType, tstring* error )
 {
-    std::vector< ObjectPtr > objects;
-    objects.push_back( object );
-    return ToArchive( path, objects, archiveType, error, byteOrder );
-}
+	HELIUM_ASSERT( !path.empty() );
+	PERSIST_SCOPE_TIMER( ( "%s", path.c_str() ) );
 
-bool Reflect::ToArchive( const FilePath& path, const std::vector< ObjectPtr >& objects, ArchiveType archiveType, tstring* error, ByteOrder byteOrder )
-{
-    HELIUM_ASSERT( !path.empty() );
-    HELIUM_ASSERT( objects.size() > 0 );
-    HELIUM_ASSERT( byteOrder == ByteOrders::BigEndian || byteOrder == ByteOrders::LittleEndian ); // should be a known byteorder
+	path.MakePath();
 
-    PERSIST_SCOPE_TIMER( ( "%s", path.c_str() ) );
+	// build a path to a unique file for this process
+	FilePath safetyPath( path.Directory() + Helium::GetProcessString() );
+	safetyPath.ReplaceExtension( path.Extension() );
 
-    path.MakePath();
+	ArchivePtr archive = GetArchive( safetyPath, archiveType );
+	archive->Put( object );
 
-    // build a path to a unique file for this process
-    FilePath safetyPath( path.Directory() + Helium::GetProcessString() );
-    safetyPath.ReplaceExtension( path.Extension() );
+	// generate the file to the safety location
+	if ( Helium::IsDebuggerPresent() )
+	{
+		archive->Open( true );
+		archive->Write();
+		archive->Close();
+	}
+	else
+	{
+		bool open = false;
 
-    ArchivePtr archive = GetArchive( safetyPath, archiveType, byteOrder );
-    archive->Put( objects );
+		try
+		{
+			archive->Open( true );
+			open = true;
+			archive->Write();
+			archive->Close(); 
+		}
+		catch ( Helium::Exception& ex )
+		{
+			tstringstream str;
+			str << "While writing '" << path.c_str() << "': " << ex.Get();
 
-    // generate the file to the safety location
-    if ( Helium::IsDebuggerPresent() )
-    {
-        archive->Open( true );
-        archive->Write();
-        archive->Close();
-    }
-    else
-    {
-        bool open = false;
+			if ( error )
+			{
+				*error = str.str();
+			}
 
-        try
-        {
-            archive->Open( true );
-            open = true;
-            archive->Write();
-            archive->Close(); 
-        }
-        catch ( Helium::Exception& ex )
-        {
-            tstringstream str;
-            str << "While writing '" << path.c_str() << "': " << ex.Get();
-            
-            if ( error )
-            {
-                *error = str.str();
-            }
+			if ( open )
+			{
+				archive->Close();
+			}
 
-            if ( open )
-            {
-                archive->Close();
-            }
+			safetyPath.Delete();
+			return false;
+		}
+	}
 
-            safetyPath.Delete();
-            return false;
-        }
-    }
+	try
+	{
+		// delete the destination file
+		path.Delete();
 
-    try
-    {
-        // delete the destination file
-        path.Delete();
+		// move the written file to the destination location
+		safetyPath.Move( path );
+	}
+	catch ( Helium::Exception& ex )
+	{
+		tstringstream str;
+		str << "While moving '" << safetyPath.c_str() << "' to '" << path.c_str() << "': " << ex.Get();
 
-        // move the written file to the destination location
-        safetyPath.Move( path );
-    }
-    catch ( Helium::Exception& ex )
-    {
-        tstringstream str;
-        str << "While moving '" << safetyPath.c_str() << "' to '" << path.c_str() << "': " << ex.Get();
-        
-        if ( error )
-        {
-            *error = str.str();
-        }
+		if ( error )
+		{
+			*error = str.str();
+		}
 
-        safetyPath.Delete();
-        return false;
-    }
+		safetyPath.Delete();
+		return false;
+	}
 
-    return true;
+	return true;
 }

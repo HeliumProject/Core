@@ -1,22 +1,14 @@
 #pragma once
 
-#include <memory>
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <vector>
-#include <stack>
-
 #include "Platform/Assert.h"
 
-#include "Foundation/Log.h" 
-#include "Foundation/FilePath.h"
 #include "Foundation/Event.h"
+#include "Foundation/FilePath.h"
+#include "Foundation/Log.h" 
 #include "Foundation/SmartPtr.h"
 
 #include "Reflect/Class.h"
 #include "Reflect/Exceptions.h"
-#include "Reflect/ArchiveStream.h" 
 
 #include "Persist/API.h"
 
@@ -25,225 +17,192 @@
 
 namespace Helium
 {
-    namespace Reflect
-    {
-        class Archive;
+	namespace Persist
+	{
+		class Archive;
 
-        namespace ArchiveFlags
-        {
-            enum ArchiveFlag
-            {
-                Status  = 1 << 0, // Display status reporting
-                Sparse  = 1 << 1, // Allow sparse array populations for failed objects
-            };
-        }
+		namespace ArchiveFlags
+		{
+			enum ArchiveFlag
+			{
+				Status  = 1 << 0, // Display status reporting
+				Sparse  = 1 << 1, // Allow sparse array populations for failed objects
+			};
+		}
 
-        namespace ArchiveTypes
-        {
-            enum ArchiveType
-            {
-                Auto,
-                Binary,
-                XML,
-                Base
-            };
-        }
-        typedef ArchiveTypes::ArchiveType ArchiveType;
+		namespace ArchiveTypes
+		{
+			enum ArchiveType
+			{
+				Auto,
+				Binary,
+				Json,
+				Base
+			};
+		}
+		typedef ArchiveTypes::ArchiveType ArchiveType;
 
-        namespace ArchiveModes
-        {
-            enum ArchiveMode
-            {
-                Read,
-                Write,
-            };
-        }
+		namespace ArchiveModes
+		{
+			enum ArchiveMode
+			{
+				Read,
+				Write,
+			};
+		}
 
-        typedef ArchiveModes::ArchiveMode ArchiveMode;
+		typedef ArchiveModes::ArchiveMode ArchiveMode;
 
-        //
-        // Status reporting
-        //
+		//
+		// Status reporting
+		//
 
-        namespace ArchiveStates
-        {
-            enum ArchiveState
-            {
-                Starting,
-                PreProcessing,
-                ArchiveStarting,
-                ObjectProcessed,
-                ArchiveComplete,
-                PostProcessing,
-                Complete,
-                Publishing,
-            };
-        }
-        typedef ArchiveStates::ArchiveState ArchiveState;
+		namespace ArchiveStates
+		{
+			enum ArchiveState
+			{
+				Starting,
+				PreProcessing,
+				ArchiveStarting,
+				ObjectProcessed,
+				ArchiveComplete,
+				PostProcessing,
+				Complete,
+				Publishing,
+			};
+		}
+		typedef ArchiveStates::ArchiveState ArchiveState;
 
-        struct ArchiveStatus
-        {
-            ArchiveStatus( const Archive& archive, const ArchiveState& state )
-                : m_Archive( archive )
-                , m_State( state )
-                , m_Progress ( 0 )
-                , m_Abort ( false )
-            {
-            }
+		struct ArchiveStatus
+		{
+			ArchiveStatus( const Archive& archive, const ArchiveState& state )
+				: m_Archive( archive )
+				, m_State( state )
+				, m_Progress ( 0 )
+				, m_Abort ( false )
+			{
+			}
 
-            const Archive&  m_Archive;
-            ArchiveState    m_State;
-            int             m_Progress;
-            tstring         m_Info;
+			const Archive&  m_Archive;
+			ArchiveState    m_State;
+			int             m_Progress;
+			tstring         m_Info;
 
-            // flag this if you want to give up
-            mutable bool    m_Abort;
-        };
-        typedef Helium::Signature< const ArchiveStatus& > ArchiveStatusSignature;
+			// flag this if you want to give up
+			mutable bool    m_Abort;
+		};
+		typedef Helium::Signature< const ArchiveStatus& > ArchiveStatusSignature;
 
-        //
-        // Archive base class
-        //
+		//
+		// Archive base class
+		//
 
-        class HELIUM_PERSIST_API Archive : public Helium::RefCountBase< Archive >
-        {
-        protected:
-            friend class RefCountBase< Archive >;
+		class HELIUM_PERSIST_API Archive : public Helium::RefCountBase< Archive >
+		{
+		protected:
+			friend class RefCountBase< Archive >;
 
-            Archive( const FilePath& path, ByteOrder byteOrder = Helium::PlatformByteOrder );
-            Archive();
-            ~Archive();
+			Archive();
+			Archive( const FilePath& path );
+			~Archive();
 
-        public:
-            const Helium::FilePath& GetPath() const
-            {
-                return m_Path;
-            }
+		public:
+			const Helium::FilePath& GetPath() const
+			{
+				return m_Path;
+			}
 
-            ArchiveMode GetMode() const
-            {
-                return m_Mode;
-            }
+			ArchiveMode GetMode() const
+			{
+				return m_Mode;
+			}
 
-            virtual ArchiveType GetType() const
-            {
-                return ArchiveTypes::Base;
-            }
+			virtual ArchiveType GetType() const
+			{
+				return ArchiveTypes::Base;
+			}
 
-            //
-            // Virutal functionality, meant to be overridden by Binary/XML/etc. archives
-            //
+			//
+			// Virutal functionality, meant to be overridden by Binary/XML/etc. archives
+			//
 
-            // File Open/Close
-            virtual void Open( bool write = false ) = 0;
-            virtual void Close() = 0;
+			// File Open/Close
+			virtual void Open( bool write = false ) = 0;
+			virtual void Close() = 0;
 
-            // Begins parsing the InputStream
-            virtual void Read() = 0;
+			// Begins parsing the InputStream
+			virtual void Read() = 0;
 
-            // Write to the OutputStream
-            virtual void Write() = 0;
+			// Write to the OutputStream
+			virtual void Write() = 0;
 
-            //
-            // Event API
-            //
+			//
+			// Event API
+			//
 
-            ArchiveStatusSignature::Event e_Status;
+			ArchiveStatusSignature::Event e_Status;
 
-            //
-            // Get objects from the file
-            //
+			//
+			// Get objects from the file
+			//
 
-            void Put( Object* object );
-            void Put( const std::vector< ObjectPtr >& objects );
+			void Put( Reflect::Object* object );
+			Reflect::ObjectPtr Get( const Reflect::Class* searchClass = NULL );
+			void Get( Reflect::ObjectPtr& object );
 
-            ObjectPtr Get( const Class* searchClass = NULL );
-            void Get( std::vector< ObjectPtr >& objects );
+			// Get a single object of the specified type in the archive
+			template <class T>
+			Helium::StrongPtr<T> Get()
+			{
+				Reflect::ObjectPtr found = Get( Reflect::GetClass<T>() );
 
-            // Get a single object of the specified type in the archive
-            template <class T>
-            Helium::StrongPtr<T> Get()
-            {
-                ObjectPtr found = Get( Reflect::GetClass<T>() );
+				if (found.ReferencesObject())
+				{
+					return SafeCast<T>( found );
+				}
+				else
+				{
+					return NULL;
+				}
+			}
 
-                if (found.ReferencesObject())
-                {
-                    return SafeCast<T>( found );
-                }
-                else
-                {
-                    return NULL;
-                }
-            }
+		protected:
+			// The number of bytes Parsed so far
+			unsigned m_Progress;
 
-            // Get all objects of the specified type in the archive
-            template< class T >
-            void Get( std::vector< Helium::StrongPtr<T> >& objects )
-            {
-                std::vector< ObjectPtr > archiveObjects;
-                Get( archiveObjects );
+			// The abort status
+			bool m_Abort;
 
-                std::vector< ObjectPtr >::iterator itr = archiveObjects.begin();
-                std::vector< ObjectPtr >::iterator end = archiveObjects.end();
-                for( ; itr != end; ++itr )
-                {
-                    T* casted = Reflect::SafeCast< T >( *itr )
-                    if( casted ) 
-                    {
-                        objects.push_back( casted );
-                    }
-                }
-            }
+			// The file we are working with
+			FilePath m_Path;
 
-        protected:
-            // The number of bytes Parsed so far
-            unsigned m_Progress;
+			// The mode
+			ArchiveMode m_Mode;
 
-            // The abort status
-            bool m_Abort;
+			// The array of objects that we've found
+			Reflect::ObjectPtr m_Object;
+		};
 
-            // The file we are working with
-            FilePath m_Path;
+		typedef Helium::SmartPtr< Archive > ArchivePtr;
 
-            // The mode
-            ArchiveMode m_Mode;
+		// Get parser for a file
+		HELIUM_PERSIST_API ArchivePtr GetArchive( const FilePath& path, ArchiveType archiveType = ArchiveTypes::Auto );
 
-            // The byte order
-            ByteOrder m_ByteOrder;
+		// Write an object to a file
+		HELIUM_PERSIST_API bool ToArchive( const FilePath& path, Reflect::ObjectPtr object, ArchiveType archiveType = ArchiveTypes::Auto, tstring* error = NULL );
 
-            // The type to serach for
-            const Class* m_SearchClass;
+		// Parse an object from a file
+		template <class T>
+		Helium::StrongPtr<T> FromArchive( const FilePath& path, ArchiveType archiveType = ArchiveTypes::Auto )
+		{
+			ArchivePtr archive = GetArchive( path, archiveType );
 
-            // The array of objects that we've found
-            std::vector< ObjectPtr > m_Objects;
-        };
+			if ( archive.ReferencesObject() )
+			{
+				return archive->Get< T >();
+			}
 
-        typedef Helium::SmartPtr< Archive > ArchivePtr;
-
-        // Get parser for a file
-        HELIUM_PERSIST_API ArchivePtr GetArchive( const FilePath& path, ArchiveType archiveType = ArchiveTypes::Auto, ByteOrder byteOrder = Helium::PlatformByteOrder );
-
-        HELIUM_PERSIST_API bool ToArchive( const FilePath& path, ObjectPtr object, ArchiveType archiveType = ArchiveTypes::Auto, tstring* error = NULL, ByteOrder byteOrder = Helium::PlatformByteOrder );
-        HELIUM_PERSIST_API bool ToArchive( const FilePath& path, const std::vector< ObjectPtr >& objects, ArchiveType archiveType = ArchiveTypes::Auto, tstring* error = NULL, ByteOrder byteOrder = Helium::PlatformByteOrder );
-
-        template <class T>
-        Helium::StrongPtr<T> FromArchive( const FilePath& path, ArchiveType archiveType = ArchiveTypes::Auto, ByteOrder byteOrder = Helium::PlatformByteOrder )
-        {
-            ArchivePtr archive = GetArchive( path, archiveType, byteOrder );
-
-            if ( archive.ReferencesObject() )
-            {
-                return archive->Get< T >();
-            }
-
-            return NULL;
-        }
-
-        template< class T >
-        void FromArchive( const FilePath& path, std::vector< Helium::StrongPtr<T> >& objects, ArchiveType archiveType = ArchiveTypes::Auto, ByteOrder byteOrder = Helium::PlatformByteOrder )
-        {
-            ArchivePtr archive = GetArchive( path, archiveType, byteOrder );
-            archive->Get< T >( objects );
-        }
-    }
+			return NULL;
+		}
+	}
 }

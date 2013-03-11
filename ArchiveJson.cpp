@@ -1,20 +1,23 @@
 #include "PersistPch.h"
-#include "Reflect/ArchiveXML.h"
+#include "Persist/ArchiveJson.h"
+
+#include "Foundation/Log.h"
+#include "Foundation/SmartPtr.h"
 
 #include "Reflect/Object.h"
 #include "Reflect/Registry.h"
 #include "Reflect/Structure.h"
-#include "Reflect/DataDeduction.h"
-#include "Foundation/Log.h"
-#include "Foundation/SmartPtr.h"
+
+#if REFLECT_REFACTOR
 
 #include <strstream>
 #include <expat.h>
 
 using namespace Helium;
 using namespace Helium::Reflect;
+using namespace Helium::Persist;
 
-const uint32_t ArchiveXML::CURRENT_VERSION = 4;
+const uint32_t ArchiveJson::CURRENT_VERSION = 4;
 
 #define PERSIST_ARCHIVE_VERBOSE
 
@@ -52,7 +55,7 @@ public:
     }
 };
 
-ArchiveXML::ArchiveXML( const FilePath& path, ByteOrder byteOrder )
+ArchiveJson::ArchiveJson( const FilePath& path, ByteOrder byteOrder )
 : Archive( path, byteOrder )
 , m_Version( CURRENT_VERSION )
 , m_Size( 0 )
@@ -62,7 +65,7 @@ ArchiveXML::ArchiveXML( const FilePath& path, ByteOrder byteOrder )
 
 }
 
-ArchiveXML::ArchiveXML()
+ArchiveJson::ArchiveJson()
 : Archive()
 , m_Version( CURRENT_VERSION )
 , m_Size( 0 )
@@ -72,7 +75,7 @@ ArchiveXML::ArchiveXML()
 
 }
 
-ArchiveXML::ArchiveXML( TCharStream *stream, bool write /*= false */ )
+ArchiveJson::ArchiveJson( TCharStream *stream, bool write /*= false */ )
 : Archive()
 , m_Version( CURRENT_VERSION )
 , m_Size( 0 )
@@ -83,7 +86,7 @@ ArchiveXML::ArchiveXML( TCharStream *stream, bool write /*= false */ )
     OpenStream(stream, write);
 }
 
-ArchiveXML::~ArchiveXML()
+ArchiveJson::~ArchiveJson()
 {
     if (m_Stream)
     {
@@ -91,7 +94,7 @@ ArchiveXML::~ArchiveXML()
     }
 }
 
-void ArchiveXML::Open( bool write )
+void ArchiveJson::Open( bool write )
 {
 #ifdef PERSIST_ARCHIVE_VERBOSE
     Log::Debug(TXT("Opening file '%s'\n"), m_Path.c_str());
@@ -101,7 +104,7 @@ void ArchiveXML::Open( bool write )
     OpenStream( stream, write );
 }
 
-void ArchiveXML::OpenStream( TCharStream* stream, bool write )
+void ArchiveJson::OpenStream( TCharStream* stream, bool write )
 {
     // save the mode here, so that we safely refer to it later.
     m_Mode = (write) ? ArchiveModes::Write : ArchiveModes::Read; 
@@ -116,7 +119,7 @@ void ArchiveXML::OpenStream( TCharStream* stream, bool write )
     m_Stream = stream;
 }
 
-void ArchiveXML::Close()
+void ArchiveJson::Close()
 {
     HELIUM_ASSERT( m_Stream );
 
@@ -124,9 +127,9 @@ void ArchiveXML::Close()
     m_Stream = NULL; 
 }
 
-void ArchiveXML::Read()
+void ArchiveJson::Read()
 {
-    PERSIST_SCOPE_TIMER(( "Reflect - XML Read" ));
+    PERSIST_SCOPE_TIMER(( "Reflect - Json Read" ));
 
     ArchiveStatus info( *this, ArchiveStates::Starting );
     e_Status.Raise( info );
@@ -150,9 +153,9 @@ void ArchiveXML::Read()
     e_Status.Raise( info );
 }
 
-void ArchiveXML::Write()
+void ArchiveJson::Write()
 {
-    PERSIST_SCOPE_TIMER(( "Reflect - XML Write" ));
+    PERSIST_SCOPE_TIMER(( "Reflect - Json Write" ));
 
     ArchiveStatus info( *this, ArchiveStates::Starting );
     e_Status.Raise( info );
@@ -172,17 +175,17 @@ void ArchiveXML::Write()
     e_Status.Raise( info );
 }
 
-void ArchiveXML::SerializeInstance( Object* object )
+void ArchiveJson::SerializeInstance( Object* object )
 {
     SerializeInstance( object, NULL );
 }
 
-void ArchiveXML::SerializeInstance( void* structure, const Structure* type )
+void ArchiveJson::SerializeInstance( void* structure, const Structure* type )
 {
     SerializeInstance( structure, type, NULL );
 }
 
-void ArchiveXML::SerializeInstance(Object* object, const tchar_t* fieldName)
+void ArchiveJson::SerializeInstance(Object* object, const tchar_t* fieldName)
 {
     if ( object )
     {
@@ -245,7 +248,7 @@ void ArchiveXML::SerializeInstance(Object* object, const tchar_t* fieldName)
     }
 }
 
-void ArchiveXML::SerializeInstance( void* structure, const Structure* type, const tchar_t* fieldName )
+void ArchiveJson::SerializeInstance( void* structure, const Structure* type, const tchar_t* fieldName )
 {
     m_Indent.Push();
     m_Indent.Get( *m_Stream );
@@ -269,7 +272,7 @@ void ArchiveXML::SerializeInstance( void* structure, const Structure* type, cons
     m_Indent.Pop();
 }
 
-void ArchiveXML::SerializeFields( Object* object )
+void ArchiveJson::SerializeFields( Object* object )
 {
     const Class* type = object->GetClass();
     HELIUM_ASSERT(type != NULL);
@@ -292,7 +295,7 @@ void ArchiveXML::SerializeFields( Object* object )
     }
 }
 
-void ArchiveXML::SerializeFields( void* structure, const Structure* type )
+void ArchiveJson::SerializeFields( void* structure, const Structure* type )
 {
     DynamicArray< Field >::ConstIterator itr = type->m_Fields.Begin();
     DynamicArray< Field >::ConstIterator end = type->m_Fields.End();
@@ -310,18 +313,18 @@ void ArchiveXML::SerializeFields( void* structure, const Structure* type )
     }
 }
 
-void ArchiveXML::SerializeArray(const std::vector< ObjectPtr >& objects, uint32_t flags)
+void ArchiveJson::SerializeArray(const std::vector< ObjectPtr >& objects, uint32_t flags)
 {
     SerializeArray( objects.begin(), objects.end(), flags );
 }
 
-void ArchiveXML::SerializeArray( const DynamicArray< ObjectPtr >& objects, uint32_t flags )
+void ArchiveJson::SerializeArray( const DynamicArray< ObjectPtr >& objects, uint32_t flags )
 {
     SerializeArray( objects.Begin(), objects.End(), flags );
 }
 
 template< typename ConstIteratorType >
-void ArchiveXML::SerializeArray( ConstIteratorType begin, ConstIteratorType end, uint32_t flags )
+void ArchiveJson::SerializeArray( ConstIteratorType begin, ConstIteratorType end, uint32_t flags )
 {
     size_t size = static_cast< size_t >( end - begin );
 
@@ -346,7 +349,7 @@ void ArchiveXML::SerializeArray( ConstIteratorType begin, ConstIteratorType end,
     }
 }
 
-void ArchiveXML::DeserializeInstance(ObjectPtr& object)
+void ArchiveJson::DeserializeInstance(ObjectPtr& object)
 {
     //
     // If we don't have an object allocated for deserialization, pull one from the stream
@@ -386,7 +389,7 @@ void ArchiveXML::DeserializeInstance(ObjectPtr& object)
                 //data->ConnectField(deserializing_field->m_Instance, deserializing_field->m_Field);
             }
 
-            Helium::XMLElement *element = m_Iterator.GetCurrent();
+            Helium::JsonElement *element = m_Iterator.GetCurrent();
 
             m_Body = &stream;
             data->Deserialize(*this);
@@ -412,7 +415,7 @@ void ArchiveXML::DeserializeInstance(ObjectPtr& object)
     }
 }
 
-void ArchiveXML::DeserializeInstance( void* structure, const Structure* type )
+void ArchiveJson::DeserializeInstance( void* structure, const Structure* type )
 {
 #ifdef PERSIST_ARCHIVE_VERBOSE
     m_Indent.Get(stdout);
@@ -429,7 +432,7 @@ void ArchiveXML::DeserializeInstance( void* structure, const Structure* type )
 #endif
 }
 
-void ArchiveXML::DeserializeFields(Object* object)
+void ArchiveJson::DeserializeFields(Object* object)
 {
     if ( m_Iterator.GetCurrent()->GetFirstChild() )
     {
@@ -443,7 +446,7 @@ void ArchiveXML::DeserializeFields(Object* object)
         HELIUM_ASSERT(m_DeserializingFieldStack.GetSize() == (deserializing_field_index + 1));
         //deserializing_field->m_Instance = structure;
         m_DeserializingFieldStack[deserializing_field_index].m_Instance = object;
-        for ( XMLElement* sibling = m_Iterator.GetCurrent(); sibling != NULL; sibling = sibling->GetNextSibling() )
+        for ( JsonElement* sibling = m_Iterator.GetCurrent(); sibling != NULL; sibling = sibling->GetNextSibling() )
         {
             HELIUM_ASSERT( m_Iterator.GetCurrent() == sibling );
 
@@ -524,7 +527,7 @@ void ArchiveXML::DeserializeFields(Object* object)
     }
 }
 
-void ArchiveXML::DeserializeFields( void* structure, const Structure* type )
+void ArchiveJson::DeserializeFields( void* structure, const Structure* type )
 {
     if ( m_Iterator.GetCurrent()->GetFirstChild() )
     {
@@ -538,7 +541,7 @@ void ArchiveXML::DeserializeFields( void* structure, const Structure* type )
         HELIUM_ASSERT(m_DeserializingFieldStack.GetSize() == (deserializing_field_index + 1));
         //deserializing_field->m_Instance = structure;
         m_DeserializingFieldStack[deserializing_field_index].m_Instance = structure;
-        for ( XMLElement* sibling = m_Iterator.GetCurrent(); sibling != NULL; sibling = sibling->GetNextSibling() )
+        for ( JsonElement* sibling = m_Iterator.GetCurrent(); sibling != NULL; sibling = sibling->GetNextSibling() )
         {
             HELIUM_ASSERT( m_Iterator.GetCurrent() == sibling );
 
@@ -598,18 +601,18 @@ void ArchiveXML::DeserializeFields( void* structure, const Structure* type )
     }
 }
 
-void ArchiveXML::DeserializeArray( std::vector< ObjectPtr >& objects, uint32_t flags )
+void ArchiveJson::DeserializeArray( std::vector< ObjectPtr >& objects, uint32_t flags )
 {
     DeserializeArray( StlVectorPusher( objects ), flags );
 }
 
-void ArchiveXML::DeserializeArray( DynamicArray< ObjectPtr >& objects, uint32_t flags )
+void ArchiveJson::DeserializeArray( DynamicArray< ObjectPtr >& objects, uint32_t flags )
 {
     DeserializeArray( DynamicArrayPusher( objects ), flags );
 }
 
 template< typename ArrayPusher >
-void ArchiveXML::DeserializeArray( ArrayPusher& push, uint32_t flags )
+void ArchiveJson::DeserializeArray( ArrayPusher& push, uint32_t flags )
 {
     if ( m_Iterator.GetCurrent()->GetFirstChild() )
     {
@@ -622,7 +625,7 @@ void ArchiveXML::DeserializeArray( ArrayPusher& push, uint32_t flags )
         m_Indent.Push();
 #endif
 
-        for ( XMLElement* sibling = m_Iterator.GetCurrent(); sibling != NULL; sibling = sibling->GetNextSibling() )
+        for ( JsonElement* sibling = m_Iterator.GetCurrent(); sibling != NULL; sibling = sibling->GetNextSibling() )
         {
             HELIUM_ASSERT( m_Iterator.GetCurrent() == sibling );
 
@@ -682,7 +685,7 @@ void ArchiveXML::DeserializeArray( ArrayPusher& push, uint32_t flags )
     }
 }
 
-ObjectPtr ArchiveXML::Allocate()
+ObjectPtr ArchiveJson::Allocate()
 {
     ObjectPtr object;
 
@@ -719,14 +722,14 @@ ObjectPtr ArchiveXML::Allocate()
     return object;
 }
 
-void ArchiveXML::ToString( Object* object, tstring& xml )
+void ArchiveJson::ToString( Object* object, tstring& xml )
 {
     std::vector< ObjectPtr > objects(1);
     objects[0] = object;
     return ToString( objects, xml );
 }
 
-ObjectPtr ArchiveXML::FromString( const tstring& xml, const Class* searchClass )
+ObjectPtr ArchiveJson::FromString( const tstring& xml, const Class* searchClass )
 {
     if ( searchClass == NULL )
     {
@@ -736,7 +739,7 @@ ObjectPtr ArchiveXML::FromString( const tstring& xml, const Class* searchClass )
     tstringstream strStream;
     strStream << xml;
 
-    ArchiveXML archive(new Reflect::TCharStream(&strStream, false), false);
+    ArchiveJson archive(new Reflect::TCharStream(&strStream, false), false);
     archive.m_SearchClass = searchClass;
     archive.Read();
     archive.Close();
@@ -754,43 +757,43 @@ ObjectPtr ArchiveXML::FromString( const tstring& xml, const Class* searchClass )
     return NULL;
 }
 
-void ArchiveXML::ToString( const std::vector< ObjectPtr >& objects, tstring& xml )
+void ArchiveJson::ToString( const std::vector< ObjectPtr >& objects, tstring& xml )
 {
-    //ArchiveXML archive;
+    //ArchiveJson archive;
     tstringstream strStream;
 
-    ArchiveXML archive(new Reflect::TCharStream(&strStream, false), true);
+    ArchiveJson archive(new Reflect::TCharStream(&strStream, false), true);
     archive.m_Objects = objects;
     archive.Write();
     archive.Close();
     xml = strStream.str();
 }
 
-void ArchiveXML::FromString( const tstring& xml, std::vector< ObjectPtr >& objects )
+void ArchiveJson::FromString( const tstring& xml, std::vector< ObjectPtr >& objects )
 {
-    //ArchiveXML archive;
+    //ArchiveJson archive;
     tstringstream strStream;
     strStream << xml;
 
-    ArchiveXML archive(new Reflect::TCharStream(&strStream, false), false);
+    ArchiveJson archive(new Reflect::TCharStream(&strStream, false), false);
     archive.Read();
     archive.Close();
 
     objects = archive.m_Objects;
 }
 
-void Helium::Reflect::ArchiveXML::WriteFileHeader()
+void Helium::Reflect::ArchiveJson::WriteFileHeader()
 {
     *m_Stream << TXT( "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" );
     *m_Stream << TXT( "<Reflect FileFormatVersion=\"" ) << m_Version << TXT( "\">\n" );
 }
 
-void Helium::Reflect::ArchiveXML::WriteFileFooter()
+void Helium::Reflect::ArchiveJson::WriteFileFooter()
 {
     *m_Stream << TXT( "</Reflect>\n\0" );
 }
 
-void Helium::Reflect::ArchiveXML::ReadFileHeader(bool _reparse)
+void Helium::Reflect::ArchiveJson::ReadFileHeader(bool _reparse)
 {
     if (_reparse)
     {
@@ -806,12 +809,12 @@ void Helium::Reflect::ArchiveXML::ReadFileHeader(bool _reparse)
     }
 }
 
-void Helium::Reflect::ArchiveXML::ReadFileFooter()
+void Helium::Reflect::ArchiveJson::ReadFileFooter()
 {
 
 }
 
-void Helium::Reflect::ArchiveXML::ParseStream()
+void Helium::Reflect::ArchiveJson::ParseStream()
 {
     // determine the size of the input stream
     m_Stream->SeekRead(0, std::ios_base::end);
@@ -826,7 +829,7 @@ void Helium::Reflect::ArchiveXML::ParseStream()
 
     // while there is data, parse buffer
     {
-        PERSIST_SCOPE_TIMER( ("Parse XML") );
+        PERSIST_SCOPE_TIMER( ("Parse Json") );
 
 		bool parsedOk = true;
         long step = 0;
@@ -848,33 +851,35 @@ void Helium::Reflect::ArchiveXML::ParseStream()
     m_Iterator.SetCurrent( m_Document.GetRoot() );
 }
 
-void Helium::Reflect::ArchiveXML::WriteSingleObject( Object& object )
+void Helium::Reflect::ArchiveJson::WriteSingleObject( Object& object )
 {
     SerializeInstance(&object);
 }
 
-bool Helium::Reflect::ArchiveXML::BeginReadingSingleObjects()
+bool Helium::Reflect::ArchiveJson::BeginReadingSingleObjects()
 {
     bool return_value = m_Iterator.GetCurrent()->GetFirstChild() != NULL;
     m_Iterator.Advance();
     return return_value;
 }
 
-bool Helium::Reflect::ArchiveXML::ReadSingleObject( ObjectPtr& object )
+bool Helium::Reflect::ArchiveJson::ReadSingleObject( ObjectPtr& object )
 {
     bool return_value = m_Iterator.GetCurrent()->GetNextSibling() != NULL;
     DeserializeInstance(object);
     return return_value;
 }
 
-void Helium::Reflect::ArchiveXML::ReadString( tstring &str )
+void Helium::Reflect::ArchiveJson::ReadString( tstring &str )
 {
     std::streamsize size = GetStream().ElementsAvailable(); 
     str.resize( (size_t)size );
     GetStream().ReadBuffer( const_cast<tchar_t*>( (str).c_str() ), size );
 }
 
-void Helium::Reflect::ArchiveXML::WriteString( const tstring &str )
+void Helium::Reflect::ArchiveJson::WriteString( const tstring &str )
 {
     GetStream() << TXT( "<![CDATA[" ) << str << TXT( "]]>" );
 }
+
+#endif

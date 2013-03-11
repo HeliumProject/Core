@@ -1,14 +1,14 @@
 #pragma once
 
-#include "Reflect/Indent.h"
-#include "Reflect/Archive.h"
-#include "Reflect/XMLDocument.h"
+#include "Persist/Archive.h"
+
+#ifdef REFLECT_REFACTOR
 
 namespace Helium
 {
-    namespace Reflect
+    namespace Persist
     {
-        class HELIUM_PERSIST_API ArchiveXML : public Archive
+        class HELIUM_PERSIST_API ArchiveJson : public Archive
         {
         public: 
             static const uint32_t CURRENT_VERSION; 
@@ -26,10 +26,10 @@ namespace Helium
             bool m_Skip;
 
             // The xml data
-            XMLDocument m_Document;
+            JsonDocument m_Document;
 
             // The current element
-            XMLDocument::Iterator m_Iterator;
+            JsonDocument::Iterator m_Iterator;
 
             // The stream for element bodies
             TCharStream* m_Body;
@@ -37,18 +37,15 @@ namespace Helium
             // The stream for the file
             TCharStreamPtr m_Stream;
 
-            // Indentation helper
-            Indent<tchar_t> m_Indent;
-
         public:
-            ArchiveXML( const FilePath& path, ByteOrder byteOrder = Helium::PlatformByteOrder );
+            ArchiveJson( const FilePath& path, ByteOrder byteOrder = Helium::PlatformByteOrder );
             
             // PMD: Added to give more control to caller to step through objects one-by-one.
-            ArchiveXML( TCharStream *stream, bool write = false );
-            ~ArchiveXML();
+            ArchiveJson( TCharStream *stream, bool write = false );
+            ~ArchiveJson();
 
         private:
-            ArchiveXML();
+            ArchiveJson();
 
         public:
             // Stream access
@@ -65,7 +62,7 @@ namespace Helium
             // The type
             virtual ArchiveType GetType() const
             {
-                return ArchiveTypes::XML;
+                return ArchiveTypes::Json;
             }
 
             virtual void Open( bool write = false ) HELIUM_OVERRIDE;
@@ -77,12 +74,6 @@ namespace Helium
             // Write to the OutputStream
             virtual void Write() HELIUM_OVERRIDE;
 
-        public:
-            // Access indentation
-            Indent<tchar_t>& GetIndent()
-            {
-                return m_Indent;
-            }
 
         public:
             void SerializeInstance( Object* object );
@@ -171,3 +162,5 @@ namespace Helium
         };
     }
 }
+
+#endif

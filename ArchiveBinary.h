@@ -1,9 +1,10 @@
 #pragma once
 
-#include "Indent.h"
-#include "Archive.h"
-
+#include "Foundation/DynamicArray.h"
 #include "Foundation/FilePath.h"
+#include "Foundation/Stream.h"
+
+#include "Persist/Archive.h"
 
 //  
 //    Reflect Binary Format:
@@ -49,154 +50,80 @@
 
 namespace Helium
 {
-    namespace Reflect
-    {
-        class HELIUM_PERSIST_API ArchiveBinary : public Archive
-        {
-        public: 
-            static const uint32_t CURRENT_VERSION; 
+	namespace Persist
+	{
+		class HELIUM_PERSIST_API ArchiveBinary : public Archive
+		{
+		public:
+			ArchiveBinary( const FilePath& path );
+			ArchiveBinary( Stream *stream, bool write = false );
+			~ArchiveBinary();
+			
+			Stream& GetStream()
+			{
+				return *m_Stream;
+			}
 
-        private:
-            friend class Archive;
+			uint32_t GetVersion()
+			{
+				return m_Version; 
+			}
 
-            // The stream to use
-            CharStreamPtr m_Stream;
+		private:
+			virtual ArchiveType GetType() const HELIUM_OVERRIDE;
 
-#ifdef PERSIST_ARCHIVE_VERBOSE
-            // Indent helper
-            Indent<tchar_t> m_Indent;
-#endif
+			// Stream
+			virtual void Open( bool write = false ) HELIUM_OVERRIDE;
+			void OpenStream( Stream* stream, bool write = false );
+			virtual void Close() HELIUM_OVERRIDE; 
+			virtual void Read() HELIUM_OVERRIDE;
+			virtual void Write() HELIUM_OVERRIDE;
 
-            // File format version
-            uint32_t m_Version;
+			// Serialize
+			void SerializeInstance( Reflect::Object* object );
+			void SerializeInstance( void* structure, const Reflect::Structure* type );
+			void SerializeFields( Reflect::Object* object );
+			void SerializeFields( void* structure, const Reflect::Structure* type );
+			void SerializeArray( const DynamicArray< Reflect::ObjectPtr >& objects, uint32_t flags = 0 );
 
-            // File size
-            std::streamoff m_Size;
-
-            // Skip flag
-            bool m_Skip;
-
-            // Data for the current field we are writing
-            struct WriteFields
-            {
-                int32_t         m_Count;
-                std::streamoff  m_CountOffset;
-            };
-
-            // The stack of fields we are writing
-            std::stack<WriteFields> m_FieldStack;
-
-        public:
-            ArchiveBinary( const FilePath& path, ByteOrder byteOrder = Helium::PlatformByteOrder );
-            
-            // PMD: Added to give more control to caller to step through objects one-by-one.
-            ArchiveBinary( CharStream *stream, bool write = false );
-            
-            virtual void Close() HELIUM_OVERRIDE; 
-
-        private:
-            ArchiveBinary();
-
-        public:
-            CharStream& GetStream()
-            {
-                return *m_Stream;
-            }
-
-            uint32_t GetVersion()
-            {
-                return m_Version; 
-            }
-
-        protected:
-            // The type
-            virtual ArchiveType GetType() const
-            {
-                return ArchiveTypes::Binary;
-            }
-
-            virtual void Open( bool write = false ) HELIUM_OVERRIDE;
-            void OpenStream( CharStream* stream, bool write = false );
-
-            // Begins parsing the InputStream
-            virtual void Read() HELIUM_OVERRIDE;
-
-            // Write to the OutputStream
-            virtual void Write() HELIUM_OVERRIDE;
-
-        public:
-            // Serialize
-            void SerializeInstance( Object* object );
-            void SerializeInstance( void* structure, const Structure* type );
-            void SerializeFields( Object* object );
-            void SerializeFields( void* structure, const Structure* type );
-            void SerializeArray( const std::vector< ObjectPtr >& objects, uint32_t flags = 0 );
-            void SerializeArray( const DynamicArray< ObjectPtr >& objects, uint32_t flags = 0 );
-
-        protected:
-            // Helpers
-            template< typename ConstIteratorType >
-            void SerializeArray( ConstIteratorType begin, ConstIteratorType end, uint32_t flags );
-
-        public:
-            // pulls from the stream, or deserializes into a freshly allocated instance
-            void DeserializeInstance( ObjectPtr& object );
-            void DeserializeInstance( void* structure, const Structure* type );
-            void DeserializeFields( Object* object );
-            void DeserializeFields( void* object, const Structure* type );
-            void DeserializeArray( std::vector< ObjectPtr >& objects, uint32_t flags = 0 );
-            void DeserializeArray( DynamicArray< ObjectPtr >& objects, uint32_t flags = 0 );
-
-        public:
-            // This function exists to support deserialization of an object into an existing object. 
-            // DeserializeInstance reads a CRC and size if no object is passed in, otherwise it 
-            // assumes that the CRC/Size header doesn't exist. In this use case, that header is there
-            // and we want to skip it (and verify the object we are passing in is the expected type.) So
-            // this function chomps the header if an object is already provided, or uses that header to
-            // create an object if no object is passed in. Then, we call DeserializeInstance to read
-            // data onto that object per normal behavior.
-            void ReadSingleObject(ObjectPtr& object);
-
-        protected:
-            // Helpers
-            template< typename ArrayPusher >
-            void DeserializeArray( ArrayPusher& push, uint32_t flags );
-            ObjectPtr Allocate();
+			// Deserialize
+			void DeserializeInstance( Reflect::ObjectPtr& object );
+			void DeserializeInstance( void* structure, const Reflect::Structure* type );
+			void DeserializeFields( Reflect::Object* object );
+			void DeserializeFields( void* object, const Reflect::Structure* type );
+			void DeserializeArray( DynamicArray< Reflect::ObjectPtr >& objects, uint32_t flags = 0 );
+			Reflect::ObjectPtr Allocate();
 
 		public:
-            // Reading and writing single object via binary
-            static void       ToStream( Object* object, std::iostream& stream );
-            static ObjectPtr FromStream( std::iostream& stream, const Class* searchClass = NULL );
+			static void               ToStream( Reflect::Object* object, Stream& stream );
+			static Reflect::ObjectPtr FromStream( Stream& stream );
 
-            // Reading and writing multiple objects via binary
-            static void       ToStream( const std::vector< ObjectPtr >& objects, std::iostream& stream );
-            static void       FromStream( std::iostream& stream, std::vector< ObjectPtr >& objects );
-            
-        public:
-            // Blindly read/write a string to xml stream. Allows Data implementations to write strings
-            // the same way.
-            void ReadString(tstring &str);
-            void WriteString(const tstring &str);
+			static const uint32_t CURRENT_VERSION;
 
-        public:
-            struct DeserializingField
-            {
-                void* m_Instance;
-                const Field* m_Field;
-            };
-            
-            const DeserializingField *GetDeserializingField()
-            {
-                if (!m_DeserializingFieldStack.IsEmpty())
-                {
-                    return &m_DeserializingFieldStack.GetLast();
-                }
+		private:
+			friend class Archive;
 
-                return NULL;
-            }
-       
-        private:
-            DynamicArray<DeserializingField> m_DeserializingFieldStack;
-        };
-    }
+			// The stream to use
+			Stream* m_Stream;
+
+			// Clean up the stream?
+			bool m_CleanupStream;
+
+			// File format version
+			uint32_t m_Version;
+
+			// File size
+			int64_t m_Size;
+
+			// Data for the current field we are writing
+			struct WriteFields
+			{
+				int32_t         m_Count;
+				std::streamoff  m_CountOffset;
+			};
+
+			// The stack of fields we are writing
+			DynamicArray<WriteFields> m_FieldStack;
+		};
+	}
 }
