@@ -36,9 +36,21 @@ T* Helium::AutoPtr< T >::operator->()
 }
 
 template< typename T >
+const T& Helium::AutoPtr< T >::operator*() const
+{
+	return *m_Ptr;
+}
+
+template< typename T >
 T& Helium::AutoPtr< T >::operator*()
 {
 	return *m_Ptr;
+}
+
+template< typename T >
+Helium::AutoPtr< T >::operator bool() const
+{
+	return m_Ptr != 0;
 }
 
 template< typename T >

@@ -134,7 +134,7 @@ size_t BufferedStream::Read( void* pBuffer, size_t size, size_t count )
             int64_t fileOffset = m_pStream->Tell() - m_bufferStart;
             if( fileOffset != 0 )
             {
-                m_pStream->Seek( fileOffset, SeekOrigins::SEEK_ORIGIN_CURRENT );
+                m_pStream->Seek( fileOffset, SeekOrigins::Current );
             }
         }
 
@@ -169,7 +169,7 @@ size_t BufferedStream::Read( void* pBuffer, size_t size, size_t count )
                 int64_t fileOffset = m_pStream->Tell() - m_bufferStart;
                 if( fileOffset != 0 )
                 {
-                    m_bufferStart = m_pStream->Seek( fileOffset, SeekOrigins::SEEK_ORIGIN_CURRENT );
+                    m_bufferStart = m_pStream->Seek( fileOffset, SeekOrigins::Current );
                 }
             }
 
@@ -219,7 +219,7 @@ size_t BufferedStream::Write( const void* pBuffer, size_t size, size_t count )
             int64_t fileOffset = m_pStream->Tell() - m_bufferStart;
             if( fileOffset != 0 )
             {
-                m_pStream->Seek( fileOffset, SeekOrigins::SEEK_ORIGIN_CURRENT );
+                m_pStream->Seek( fileOffset, SeekOrigins::Current );
             }
         }
 
@@ -283,7 +283,7 @@ void BufferedStream::Flush()
             int64_t fileOffset = m_pStream->Tell() - m_bufferStart;
             if( fileOffset != 0 )
             {
-                m_pStream->Seek( fileOffset, SeekOrigins::SEEK_ORIGIN_CURRENT );
+                m_pStream->Seek( fileOffset, SeekOrigins::Current );
             }
         }
 
@@ -449,10 +449,7 @@ size_t ByteSwappingStream::Write( const void* pBuffer, size_t size, size_t count
     {
         for( size_t byteIndex = 0; byteIndex < size; ++byteIndex )
         {
-            size_t bytesWritten = m_pStream->Write(
-                static_cast< const uint8_t* >( pBuffer ) + size - byteIndex - 1,
-                1,
-                1 );
+            size_t bytesWritten = m_pStream->Write( static_cast< const uint8_t* >( pBuffer ) + size - byteIndex - 1, 1, 1 );
             if( bytesWritten != 1 )
             {
                 return blockIndex;

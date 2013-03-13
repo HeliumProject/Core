@@ -249,7 +249,7 @@ bool AddFile( M_OutputFile& files, const tstring& fileName, Stream stream, uint3
 			{
 				if ( append )
 				{
-					f->Seek( 0, SeekOrigins::SEEK_ORIGIN_END );
+					f->Seek( 0, SeekOrigins::End );
 				}
 
 				g_FileManager.Opened( fileName, f );

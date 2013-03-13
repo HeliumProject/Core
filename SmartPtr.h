@@ -15,7 +15,7 @@ namespace Helium
 	// 
 
 	template <typename T>
-	struct AutoPtr
+	struct AutoPtr : NonCopyable
 	{
 	public:
 		AutoPtr( T* ptr = NULL );
@@ -30,7 +30,11 @@ namespace Helium
 
 		const T* operator->() const;
 		T* operator->();
-		T &operator*();
+
+		const T& operator*() const;
+		T& operator*();
+		
+		operator bool() const;
 
 		void Reset(T *_ptr);
 		T* Release();
@@ -49,7 +53,7 @@ namespace Helium
 	// 
 
 	template <typename T>
-	struct ArrayPtr
+	struct ArrayPtr : NonCopyable
 	{
 	public: 
 		ArrayPtr( T* ptr = NULL );

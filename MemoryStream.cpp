@@ -106,27 +106,26 @@ void StaticMemoryStream::Flush()
 /// @copydoc Stream::Seek()
 int64_t StaticMemoryStream::Seek( int64_t offset, SeekOrigin origin )
 {
-    HELIUM_ASSERT( static_cast< size_t >( origin ) < static_cast< size_t >( SeekOrigins::SEEK_ORIGIN_MAX ) );
     HELIUM_ASSERT( IsOpen() );
 
     size_t referenceOffset;
     switch( origin )
     {
-        case SeekOrigins::SEEK_ORIGIN_CURRENT:
+        case SeekOrigins::Current:
         {
             referenceOffset = static_cast< size_t >( m_pCurrent - m_pStart );
 
             break;
         }
 
-        case SeekOrigins::SEEK_ORIGIN_BEGIN:
+        case SeekOrigins::Begin:
         {
             referenceOffset = 0;
 
             break;
         }
 
-        case SeekOrigins::SEEK_ORIGIN_END:
+        case SeekOrigins::End:
         {
             referenceOffset = static_cast< size_t >( m_pEnd - m_pStart );
 
@@ -303,26 +302,24 @@ int64_t DynamicMemoryStream::Seek( int64_t offset, SeekOrigin origin )
         return -1;
     }
 
-    HELIUM_ASSERT( static_cast< size_t >( origin ) < static_cast< size_t >( SeekOrigins::SEEK_ORIGIN_MAX ) );
-
     size_t referenceOffset;
     switch( origin )
     {
-        case SeekOrigins::SEEK_ORIGIN_CURRENT:
+        case SeekOrigins::Current:
         {
             referenceOffset = m_offset;
 
             break;
         }
 
-        case SeekOrigins::SEEK_ORIGIN_BEGIN:
+        case SeekOrigins::Begin:
         {
             referenceOffset = 0;
 
             break;
         }
 
-        case SeekOrigins::SEEK_ORIGIN_END:
+        case SeekOrigins::End:
         {
             referenceOffset = m_pBuffer->GetSize();
 
