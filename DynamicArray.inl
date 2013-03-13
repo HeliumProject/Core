@@ -11,7 +11,7 @@ Helium::ConstArrayIterator< T >::ConstArrayIterator()
 /// @param[in] pElement  Pointer to the current array element.
 template< typename T >
 Helium::ConstArrayIterator< T >::ConstArrayIterator( const T* pElement )
-    : m_pElement( const_cast< T* >( pElement ) )
+	: m_pElement( const_cast< T* >( pElement ) )
 {
 }
 
@@ -21,7 +21,7 @@ Helium::ConstArrayIterator< T >::ConstArrayIterator( const T* pElement )
 template< typename T >
 typename Helium::ConstArrayIterator< T >::ConstReferenceType Helium::ConstArrayIterator< T >::operator*() const
 {
-    return *m_pElement;
+	return *m_pElement;
 }
 
 /// Access the current array element.
@@ -30,7 +30,7 @@ typename Helium::ConstArrayIterator< T >::ConstReferenceType Helium::ConstArrayI
 template< typename T >
 typename Helium::ConstArrayIterator< T >::ConstPointerType Helium::ConstArrayIterator< T >::operator->() const
 {
-    return m_pElement;
+	return m_pElement;
 }
 
 /// Pre-increment operator.
@@ -41,9 +41,9 @@ typename Helium::ConstArrayIterator< T >::ConstPointerType Helium::ConstArrayIte
 template< typename T >
 Helium::ConstArrayIterator< T >& Helium::ConstArrayIterator< T >::operator++()
 {
-    ++m_pElement;
+	++m_pElement;
 
-    return *this;
+	return *this;
 }
 
 /// Post-increment operator.
@@ -54,10 +54,10 @@ Helium::ConstArrayIterator< T >& Helium::ConstArrayIterator< T >::operator++()
 template< typename T >
 Helium::ConstArrayIterator< T > Helium::ConstArrayIterator< T >::operator++( int )
 {
-    ConstArrayIterator result = *this;
-    ++m_pElement;
+	ConstArrayIterator result = *this;
+	++m_pElement;
 
-    return result;
+	return result;
 }
 
 /// Pre-decrement operator.
@@ -68,9 +68,9 @@ Helium::ConstArrayIterator< T > Helium::ConstArrayIterator< T >::operator++( int
 template< typename T >
 Helium::ConstArrayIterator< T >& Helium::ConstArrayIterator< T >::operator--()
 {
-    --m_pElement;
+	--m_pElement;
 
-    return *this;
+	return *this;
 }
 
 /// Post-decrement operator.
@@ -81,10 +81,10 @@ Helium::ConstArrayIterator< T >& Helium::ConstArrayIterator< T >::operator--()
 template< typename T >
 Helium::ConstArrayIterator< T > Helium::ConstArrayIterator< T >::operator--( int )
 {
-    ConstArrayIterator result = *this;
-    --m_pElement;
+	ConstArrayIterator result = *this;
+	--m_pElement;
 
-    return result;
+	return result;
 }
 
 /// In-place addition operator.
@@ -95,9 +95,9 @@ Helium::ConstArrayIterator< T > Helium::ConstArrayIterator< T >::operator--( int
 template< typename T >
 Helium::ConstArrayIterator< T >& Helium::ConstArrayIterator< T >::operator+=( ptrdiff_t offset )
 {
-    m_pElement += offset;
+	m_pElement += offset;
 
-    return *this;
+	return *this;
 }
 
 /// Addition operator.
@@ -108,7 +108,7 @@ Helium::ConstArrayIterator< T >& Helium::ConstArrayIterator< T >::operator+=( pt
 template< typename T >
 Helium::ConstArrayIterator< T > Helium::ConstArrayIterator< T >::operator+( ptrdiff_t offset ) const
 {
-    return ConstArrayIterator( m_pElement + offset );
+	return ConstArrayIterator( m_pElement + offset );
 }
 
 /// In-place subtraction operator.
@@ -119,9 +119,9 @@ Helium::ConstArrayIterator< T > Helium::ConstArrayIterator< T >::operator+( ptrd
 template< typename T >
 Helium::ConstArrayIterator< T >& Helium::ConstArrayIterator< T >::operator-=( ptrdiff_t offset )
 {
-    m_pElement -= offset;
+	m_pElement -= offset;
 
-    return *this;
+	return *this;
 }
 
 /// Subtraction operator.
@@ -132,7 +132,7 @@ Helium::ConstArrayIterator< T >& Helium::ConstArrayIterator< T >::operator-=( pt
 template< typename T >
 Helium::ConstArrayIterator< T > Helium::ConstArrayIterator< T >::operator-( ptrdiff_t offset ) const
 {
-    return ConstArrayIterator( m_pElement - offset );
+	return ConstArrayIterator( m_pElement - offset );
 }
 
 /// Subtraction operator.
@@ -143,7 +143,7 @@ Helium::ConstArrayIterator< T > Helium::ConstArrayIterator< T >::operator-( ptrd
 template< typename T >
 ptrdiff_t Helium::ConstArrayIterator< T >::operator-( const ConstArrayIterator& rOther ) const
 {
-    return ( m_pElement - rOther.m_pElement );
+	return ( m_pElement - rOther.m_pElement );
 }
 
 /// Equality comparison operator.
@@ -154,7 +154,7 @@ ptrdiff_t Helium::ConstArrayIterator< T >::operator-( const ConstArrayIterator& 
 template< typename T >
 bool Helium::ConstArrayIterator< T >::operator==( const ConstArrayIterator& rOther ) const
 {
-    return ( m_pElement == rOther.m_pElement );
+	return ( m_pElement == rOther.m_pElement );
 }
 
 /// Inequality comparison operator.
@@ -165,7 +165,7 @@ bool Helium::ConstArrayIterator< T >::operator==( const ConstArrayIterator& rOth
 template< typename T >
 bool Helium::ConstArrayIterator< T >::operator!=( const ConstArrayIterator& rOther ) const
 {
-    return ( m_pElement != rOther.m_pElement );
+	return ( m_pElement != rOther.m_pElement );
 }
 
 /// Less-than comparison operator.
@@ -176,7 +176,7 @@ bool Helium::ConstArrayIterator< T >::operator!=( const ConstArrayIterator& rOth
 template< typename T >
 bool Helium::ConstArrayIterator< T >::operator<( const ConstArrayIterator& rOther ) const
 {
-    return ( m_pElement < rOther.m_pElement );
+	return ( m_pElement < rOther.m_pElement );
 }
 
 /// Greater-than comparison operator.
@@ -187,7 +187,7 @@ bool Helium::ConstArrayIterator< T >::operator<( const ConstArrayIterator& rOthe
 template< typename T >
 bool Helium::ConstArrayIterator< T >::operator>( const ConstArrayIterator& rOther ) const
 {
-    return ( m_pElement > rOther.m_pElement );
+	return ( m_pElement > rOther.m_pElement );
 }
 
 /// Less-than-or-equals comparison operator.
@@ -198,7 +198,7 @@ bool Helium::ConstArrayIterator< T >::operator>( const ConstArrayIterator& rOthe
 template< typename T >
 bool Helium::ConstArrayIterator< T >::operator<=( const ConstArrayIterator& rOther ) const
 {
-    return ( m_pElement <= rOther.m_pElement );
+	return ( m_pElement <= rOther.m_pElement );
 }
 
 /// Greater-than-or-equals comparison operator.
@@ -209,7 +209,7 @@ bool Helium::ConstArrayIterator< T >::operator<=( const ConstArrayIterator& rOth
 template< typename T >
 bool Helium::ConstArrayIterator< T >::operator>=( const ConstArrayIterator& rOther ) const
 {
-    return ( m_pElement >= rOther.m_pElement );
+	return ( m_pElement >= rOther.m_pElement );
 }
 
 /// Constructor.
@@ -225,7 +225,7 @@ Helium::ArrayIterator< T >::ArrayIterator()
 /// @param[in] pElement  Pointer to the current array element.
 template< typename T >
 Helium::ArrayIterator< T >::ArrayIterator( T* pElement )
-    : ConstArrayIterator< T >( pElement )
+	: ConstArrayIterator< T >( pElement )
 {
 }
 
@@ -235,7 +235,7 @@ Helium::ArrayIterator< T >::ArrayIterator( T* pElement )
 template< typename T >
 typename Helium::ArrayIterator< T >::ReferenceType Helium::ArrayIterator< T >::operator*() const
 {
-    return *ConstArrayIterator< T >::m_pElement;
+	return *ConstArrayIterator< T >::m_pElement;
 }
 
 /// Access the current array element.
@@ -244,7 +244,7 @@ typename Helium::ArrayIterator< T >::ReferenceType Helium::ArrayIterator< T >::o
 template< typename T >
 typename Helium::ArrayIterator< T >::PointerType Helium::ArrayIterator< T >::operator->() const
 {
-    return ConstArrayIterator< T >::m_pElement;
+	return ConstArrayIterator< T >::m_pElement;
 }
 
 /// Pre-increment operator.
@@ -255,9 +255,9 @@ typename Helium::ArrayIterator< T >::PointerType Helium::ArrayIterator< T >::ope
 template< typename T >
 Helium::ArrayIterator< T >& Helium::ArrayIterator< T >::operator++()
 {
-    ++ConstArrayIterator< T >::m_pElement;
+	++ConstArrayIterator< T >::m_pElement;
 
-    return *this;
+	return *this;
 }
 
 /// Post-increment operator.
@@ -268,10 +268,10 @@ Helium::ArrayIterator< T >& Helium::ArrayIterator< T >::operator++()
 template< typename T >
 Helium::ArrayIterator< T > Helium::ArrayIterator< T >::operator++( int )
 {
-    ArrayIterator result = *this;
-    ++ConstArrayIterator< T >::m_pElement;
+	ArrayIterator result = *this;
+	++ConstArrayIterator< T >::m_pElement;
 
-    return result;
+	return result;
 }
 
 /// Pre-decrement operator.
@@ -282,9 +282,9 @@ Helium::ArrayIterator< T > Helium::ArrayIterator< T >::operator++( int )
 template< typename T >
 Helium::ArrayIterator< T >& Helium::ArrayIterator< T >::operator--()
 {
-    --ConstArrayIterator< T >::m_pElement;
+	--ConstArrayIterator< T >::m_pElement;
 
-    return *this;
+	return *this;
 }
 
 /// Post-decrement operator.
@@ -295,10 +295,10 @@ Helium::ArrayIterator< T >& Helium::ArrayIterator< T >::operator--()
 template< typename T >
 Helium::ArrayIterator< T > Helium::ArrayIterator< T >::operator--( int )
 {
-    ArrayIterator result = *this;
-    --ConstArrayIterator< T >::m_pElement;
+	ArrayIterator result = *this;
+	--ConstArrayIterator< T >::m_pElement;
 
-    return result;
+	return result;
 }
 
 /// In-place addition operator.
@@ -309,9 +309,9 @@ Helium::ArrayIterator< T > Helium::ArrayIterator< T >::operator--( int )
 template< typename T >
 Helium::ArrayIterator< T >& Helium::ArrayIterator< T >::operator+=( ptrdiff_t offset )
 {
-    ConstArrayIterator< T >::m_pElement += offset;
+	ConstArrayIterator< T >::m_pElement += offset;
 
-    return *this;
+	return *this;
 }
 
 /// Addition operator.
@@ -322,7 +322,7 @@ Helium::ArrayIterator< T >& Helium::ArrayIterator< T >::operator+=( ptrdiff_t of
 template< typename T >
 Helium::ArrayIterator< T > Helium::ArrayIterator< T >::operator+( ptrdiff_t offset ) const
 {
-    return ArrayIterator( ConstArrayIterator< T >::m_pElement + offset );
+	return ArrayIterator( ConstArrayIterator< T >::m_pElement + offset );
 }
 
 /// In-place subtraction operator.
@@ -333,9 +333,9 @@ Helium::ArrayIterator< T > Helium::ArrayIterator< T >::operator+( ptrdiff_t offs
 template< typename T >
 Helium::ArrayIterator< T >& Helium::ArrayIterator< T >::operator-=( ptrdiff_t offset )
 {
-    ConstArrayIterator< T >::m_pElement -= offset;
+	ConstArrayIterator< T >::m_pElement -= offset;
 
-    return *this;
+	return *this;
 }
 
 /// Subtraction operator.
@@ -346,7 +346,7 @@ Helium::ArrayIterator< T >& Helium::ArrayIterator< T >::operator-=( ptrdiff_t of
 template< typename T >
 Helium::ArrayIterator< T > Helium::ArrayIterator< T >::operator-( ptrdiff_t offset ) const
 {
-    return ArrayIterator( ConstArrayIterator< T >::m_pElement - offset );
+	return ArrayIterator( ConstArrayIterator< T >::m_pElement - offset );
 }
 
 /// Subtraction operator.
@@ -357,7 +357,7 @@ Helium::ArrayIterator< T > Helium::ArrayIterator< T >::operator-( ptrdiff_t offs
 template< typename T >
 ptrdiff_t Helium::ArrayIterator< T >::operator-( const ConstArrayIterator& rOther ) const
 {
-    return ConstArrayIterator< T >::operator-( rOther );
+	return ConstArrayIterator< T >::operator-( rOther );
 }
 
 /// Constructor.
@@ -365,9 +365,9 @@ ptrdiff_t Helium::ArrayIterator< T >::operator-( const ConstArrayIterator& rOthe
 /// This creates an empty array.  No memory is allocated at this time.
 template< typename T, typename Allocator >
 Helium::DynamicArray< T, Allocator >::DynamicArray()
-    : m_pBuffer( NULL )
-    , m_size( 0 )
-    , m_capacity( 0 )
+	: m_pBuffer( NULL )
+	, m_size( 0 )
+	, m_capacity( 0 )
 {
 }
 
@@ -379,17 +379,17 @@ Helium::DynamicArray< T, Allocator >::DynamicArray()
 /// @param[in] size     Number of elements in the given array.
 template< typename T, typename Allocator >
 Helium::DynamicArray< T, Allocator >::DynamicArray( const T* pSource, size_t size )
-    : m_pBuffer( NULL )
-    , m_size( size )
-    , m_capacity( size )
+	: m_pBuffer( NULL )
+	, m_size( size )
+	, m_capacity( size )
 {
-    HELIUM_ASSERT( pSource );
-    if( size != 0 )
-    {
-        m_pBuffer = Allocate( m_size );
-        HELIUM_ASSERT( m_pBuffer );
-        ArrayUninitializedCopy( m_pBuffer, pSource, size );
-    }
+	HELIUM_ASSERT( pSource );
+	if( size != 0 )
+	{
+		m_pBuffer = Allocate( m_size );
+		HELIUM_ASSERT( m_pBuffer );
+		ArrayUninitializedCopy( m_pBuffer, pSource, size );
+	}
 }
 
 /// Copy constructor.
@@ -402,7 +402,7 @@ Helium::DynamicArray< T, Allocator >::DynamicArray( const T* pSource, size_t siz
 template< typename T, typename Allocator >
 Helium::DynamicArray< T, Allocator >::DynamicArray( const DynamicArray& rSource )
 {
-    CopyConstruct( rSource );
+	CopyConstruct( rSource );
 }
 
 /// Copy constructor.
@@ -416,14 +416,14 @@ template< typename T, typename Allocator >
 template< typename OtherAllocator >
 Helium::DynamicArray< T, Allocator >::DynamicArray( const DynamicArray< T, OtherAllocator >& rSource )
 {
-    CopyConstruct( rSource );
+	CopyConstruct( rSource );
 }
 
 /// Destructor.
 template< typename T, typename Allocator >
 Helium::DynamicArray< T, Allocator >::~DynamicArray()
 {
-    Finalize();
+	Finalize();
 }
 
 /// Get the number of elements in this array.
@@ -434,7 +434,7 @@ Helium::DynamicArray< T, Allocator >::~DynamicArray()
 template< typename T, typename Allocator >
 size_t Helium::DynamicArray< T, Allocator >::GetSize() const
 {
-    return m_size;
+	return m_size;
 }
 
 /// Get whether this array is currently empty.
@@ -445,7 +445,7 @@ size_t Helium::DynamicArray< T, Allocator >::GetSize() const
 template< typename T, typename Allocator >
 bool Helium::DynamicArray< T, Allocator >::IsEmpty() const
 {
-    return( m_size == 0 );
+	return( m_size == 0 );
 }
 
 /// Resize this array, retaining any existing data that fits within the new size.
@@ -463,20 +463,20 @@ bool Helium::DynamicArray< T, Allocator >::IsEmpty() const
 template< typename T, typename Allocator >
 void Helium::DynamicArray< T, Allocator >::Resize( size_t size )
 {
-    if( size != m_size )
-    {
-        if( size < m_size )
-        {
-            ArrayInPlaceDestroy( m_pBuffer + size, m_size - size );
-        }
-        else
-        {
-            Grow( size );
-            ArrayInPlaceConstruct< T >( m_pBuffer + m_size, size - m_size );
-        }
+	if( size != m_size )
+	{
+		if( size < m_size )
+		{
+			ArrayInPlaceDestroy( m_pBuffer + size, m_size - size );
+		}
+		else
+		{
+			Grow( size );
+			ArrayInPlaceConstruct< T >( m_pBuffer + m_size, size - m_size );
+		}
 
-        m_size = size;
-    }
+		m_size = size;
+	}
 }
 
 /// Get the maximum number of elements which this array can contain without requiring reallocation of memory.
@@ -487,7 +487,7 @@ void Helium::DynamicArray< T, Allocator >::Resize( size_t size )
 template< typename T, typename Allocator >
 size_t Helium::DynamicArray< T, Allocator >::GetCapacity() const
 {
-    return m_capacity;
+	return m_capacity;
 }
 
 /// Explicitly increase the capacity of this array to support at least the specified number of elements.
@@ -500,12 +500,12 @@ size_t Helium::DynamicArray< T, Allocator >::GetCapacity() const
 template< typename T, typename Allocator >
 void Helium::DynamicArray< T, Allocator >::Reserve( size_t capacity )
 {
-    if( capacity > m_capacity )
-    {
-        m_pBuffer = ResizeBuffer( m_pBuffer, m_size, m_capacity, capacity );
-        HELIUM_ASSERT( m_pBuffer );
-        m_capacity = capacity;
-    }
+	if( capacity > m_capacity )
+	{
+		m_pBuffer = ResizeBuffer( m_pBuffer, m_size, m_capacity, capacity );
+		HELIUM_ASSERT( m_pBuffer );
+		m_capacity = capacity;
+	}
 }
 
 /// Resize the allocated array memory to match the size actually in use.
@@ -514,12 +514,12 @@ void Helium::DynamicArray< T, Allocator >::Reserve( size_t capacity )
 template< typename T, typename Allocator >
 void Helium::DynamicArray< T, Allocator >::Trim()
 {
-    if( m_capacity != m_size )
-    {
-        m_pBuffer = ResizeBuffer( m_pBuffer, m_size, m_capacity, m_size );
-        HELIUM_ASSERT( m_pBuffer || m_size == 0 );
-        m_capacity = m_size;
-    }
+	if( m_capacity != m_size )
+	{
+		m_pBuffer = ResizeBuffer( m_pBuffer, m_size, m_capacity, m_size );
+		HELIUM_ASSERT( m_pBuffer || m_size == 0 );
+		m_capacity = m_size;
+	}
 }
 
 /// Get a pointer to the base of the allocated array buffer.
@@ -528,7 +528,7 @@ void Helium::DynamicArray< T, Allocator >::Trim()
 template< typename T, typename Allocator >
 T* Helium::DynamicArray< T, Allocator >::GetData()
 {
-    return m_pBuffer;
+	return m_pBuffer;
 }
 
 /// Get a pointer to the base of the allocated array buffer.
@@ -537,18 +537,18 @@ T* Helium::DynamicArray< T, Allocator >::GetData()
 template< typename T, typename Allocator >
 const T* Helium::DynamicArray< T, Allocator >::GetData() const
 {
-    return m_pBuffer;
+	return m_pBuffer;
 }
 
 /// Resize the array to zero and free all allocated memory.
 template< typename T, typename Allocator >
 void Helium::DynamicArray< T, Allocator >::Clear()
 {
-    ArrayInPlaceDestroy( m_pBuffer, m_size );
-    Allocator().Free( m_pBuffer );
-    m_pBuffer = NULL;
-    m_size = 0;
-    m_capacity = 0;
+	ArrayInPlaceDestroy( m_pBuffer, m_size );
+	Allocator().Free( m_pBuffer );
+	m_pBuffer = NULL;
+	m_size = 0;
+	m_capacity = 0;
 }
 
 /// Retrieve an iterator referencing the beginning of this array.
@@ -559,7 +559,7 @@ void Helium::DynamicArray< T, Allocator >::Clear()
 template< typename T, typename Allocator >
 typename Helium::DynamicArray< T, Allocator >::Iterator Helium::DynamicArray< T, Allocator >::Begin()
 {
-    return Iterator( m_pBuffer );
+	return Iterator( m_pBuffer );
 }
 
 /// Retrieve a constant iterator referencing the beginning of this array.
@@ -570,7 +570,7 @@ typename Helium::DynamicArray< T, Allocator >::Iterator Helium::DynamicArray< T,
 template< typename T, typename Allocator >
 typename Helium::DynamicArray< T, Allocator >::ConstIterator Helium::DynamicArray< T, Allocator >::Begin() const
 {
-    return ConstIterator( m_pBuffer );
+	return ConstIterator( m_pBuffer );
 }
 
 /// Retrieve an iterator referencing the end of this array.
@@ -581,7 +581,7 @@ typename Helium::DynamicArray< T, Allocator >::ConstIterator Helium::DynamicArra
 template< typename T, typename Allocator >
 typename Helium::DynamicArray< T, Allocator >::Iterator Helium::DynamicArray< T, Allocator >::End()
 {
-    return Iterator( m_pBuffer + m_size );
+	return Iterator( m_pBuffer + m_size );
 }
 
 /// Retrieve a constant iterator referencing the end of this array.
@@ -592,7 +592,7 @@ typename Helium::DynamicArray< T, Allocator >::Iterator Helium::DynamicArray< T,
 template< typename T, typename Allocator >
 typename Helium::DynamicArray< T, Allocator >::ConstIterator Helium::DynamicArray< T, Allocator >::End() const
 {
-    return ConstIterator( m_pBuffer + m_size );
+	return ConstIterator( m_pBuffer + m_size );
 }
 
 /// Get the array element at the specified index.
@@ -603,9 +603,9 @@ typename Helium::DynamicArray< T, Allocator >::ConstIterator Helium::DynamicArra
 template< typename T, typename Allocator >
 T& Helium::DynamicArray< T, Allocator >::GetElement( size_t index )
 {
-    HELIUM_ASSERT( index < m_size );
-    HELIUM_ASSERT( m_pBuffer );
-    return m_pBuffer[ index ];
+	HELIUM_ASSERT( index < m_size );
+	HELIUM_ASSERT( m_pBuffer );
+	return m_pBuffer[ index ];
 }
 
 /// Get the array element at the specified index.
@@ -616,9 +616,9 @@ T& Helium::DynamicArray< T, Allocator >::GetElement( size_t index )
 template< typename T, typename Allocator >
 const T& Helium::DynamicArray< T, Allocator >::GetElement( size_t index ) const
 {
-    HELIUM_ASSERT( index < m_size );
-    HELIUM_ASSERT( m_pBuffer );
-    return m_pBuffer[ index ];
+	HELIUM_ASSERT( index < m_size );
+	HELIUM_ASSERT( m_pBuffer );
+	return m_pBuffer[ index ];
 }
 
 /// Set this array to a copy of a C-style array.
@@ -630,19 +630,19 @@ const T& Helium::DynamicArray< T, Allocator >::GetElement( size_t index ) const
 template< typename T, typename Allocator >
 void Helium::DynamicArray< T, Allocator >::Set( const T* pSource, size_t size )
 {
-    HELIUM_ASSERT( pSource );
-    ArrayInPlaceDestroy( m_pBuffer, m_size );
-    if( size != m_capacity )
-    {
-        m_pBuffer = Reallocate( m_pBuffer, size );
-        HELIUM_ASSERT( m_pBuffer || size == 0 );
-        m_capacity = size;
-    }
+	HELIUM_ASSERT( pSource );
+	ArrayInPlaceDestroy( m_pBuffer, m_size );
+	if( size != m_capacity )
+	{
+		m_pBuffer = Reallocate( m_pBuffer, size );
+		HELIUM_ASSERT( m_pBuffer || size == 0 );
+		m_capacity = size;
+	}
 
-    HELIUM_ASSERT( size == 0 ? m_pBuffer == NULL : m_pBuffer != NULL );
+	HELIUM_ASSERT( size == 0 ? m_pBuffer == NULL : m_pBuffer != NULL );
 
-    m_size = size;
-    ArrayUninitializedCopy( m_pBuffer, pSource, size );
+	m_size = size;
+	ArrayUninitializedCopy( m_pBuffer, pSource, size );
 }
 
 /// Add an element to the end of this array.
@@ -652,10 +652,10 @@ void Helium::DynamicArray< T, Allocator >::Set( const T* pSource, size_t size )
 template< typename T, typename Allocator >
 void Helium::DynamicArray< T, Allocator >::Add( const T& rValue, size_t count )
 {
-    size_t newSize = m_size + count;
-    Grow( newSize );
-    ArrayUninitializedFill( m_pBuffer + m_size, rValue, count );
-    m_size = newSize;
+	size_t newSize = m_size + count;
+	Grow( newSize );
+	ArrayUninitializedFill( m_pBuffer + m_size, rValue, count );
+	m_size = newSize;
 }
 
 /// Add an array of elements to the end of this array.
@@ -665,12 +665,12 @@ void Helium::DynamicArray< T, Allocator >::Add( const T& rValue, size_t count )
 template< typename T, typename Allocator >
 void Helium::DynamicArray< T, Allocator >::AddArray( const T* pValues, size_t count )
 {
-    HELIUM_ASSERT( pValues || count == 0 );
+	HELIUM_ASSERT( pValues || count == 0 );
 
-    size_t newSize = m_size + count;
-    Grow( newSize );
-    ArrayUninitializedCopy( m_pBuffer + m_size, pValues, count );
-    m_size = newSize;
+	size_t newSize = m_size + count;
+	Grow( newSize );
+	ArrayUninitializedCopy( m_pBuffer + m_size, pValues, count );
+	m_size = newSize;
 }
 
 /// Insert an element to the middle of this array.
@@ -681,43 +681,43 @@ void Helium::DynamicArray< T, Allocator >::AddArray( const T* pValues, size_t co
 template< typename T, typename Allocator >
 void Helium::DynamicArray< T, Allocator >::Insert( size_t index, const T& rValue, size_t count )
 {
-    HELIUM_ASSERT( index <= m_size );
+	HELIUM_ASSERT( index <= m_size );
 
-    size_t newSize = m_size + count;
-    if( newSize > m_capacity )
-    {
-        size_t newCapacity = GetGrowCapacity( newSize );
-        T* pNewBuffer = Allocate( newCapacity );
-        HELIUM_ASSERT( pNewBuffer );
-        ArrayUninitializedCopy( pNewBuffer, m_pBuffer, index );
-        ArrayUninitializedFill( pNewBuffer + index, rValue, count );
-        ArrayUninitializedCopy( pNewBuffer + index + count, m_pBuffer + index, m_size - index );
+	size_t newSize = m_size + count;
+	if( newSize > m_capacity )
+	{
+		size_t newCapacity = GetGrowCapacity( newSize );
+		T* pNewBuffer = Allocate( newCapacity );
+		HELIUM_ASSERT( pNewBuffer );
+		ArrayUninitializedCopy( pNewBuffer, m_pBuffer, index );
+		ArrayUninitializedFill( pNewBuffer + index, rValue, count );
+		ArrayUninitializedCopy( pNewBuffer + index + count, m_pBuffer + index, m_size - index );
 
-        Allocator().Free( m_pBuffer );
+		Allocator().Free( m_pBuffer );
 
-        m_pBuffer = pNewBuffer;
-        m_capacity = newCapacity;
-    }
-    else
-    {
-        size_t shiftCount = m_size - index;
-        if( shiftCount <= count )
-        {
-            ArrayUninitializedCopy( m_pBuffer + index + count, m_pBuffer + index, shiftCount );
-            ArrayUninitializedFill( m_pBuffer + m_size, rValue, count - shiftCount );
+		m_pBuffer = pNewBuffer;
+		m_capacity = newCapacity;
+	}
+	else
+	{
+		size_t shiftCount = m_size - index;
+		if( shiftCount <= count )
+		{
+			ArrayUninitializedCopy( m_pBuffer + index + count, m_pBuffer + index, shiftCount );
+			ArrayUninitializedFill( m_pBuffer + m_size, rValue, count - shiftCount );
 
-            ArraySet( m_pBuffer + index, rValue, shiftCount );
-        }
-        else
-        {
-            ArrayUninitializedCopy( m_pBuffer + m_size, m_pBuffer + m_size - count, count );
+			ArraySet( m_pBuffer + index, rValue, shiftCount );
+		}
+		else
+		{
+			ArrayUninitializedCopy( m_pBuffer + m_size, m_pBuffer + m_size - count, count );
 
-            ArrayMove( m_pBuffer + index + count, m_pBuffer + index, shiftCount - count );
-            ArraySet( m_pBuffer + index, rValue, count );
-        }
-    }
+			ArrayMove( m_pBuffer + index + count, m_pBuffer + index, shiftCount - count );
+			ArraySet( m_pBuffer + index, rValue, count );
+		}
+	}
 
-    m_size = newSize;
+	m_size = newSize;
 }
 
 /// Insert an array into to the middle of this array.
@@ -728,44 +728,44 @@ void Helium::DynamicArray< T, Allocator >::Insert( size_t index, const T& rValue
 template< typename T, typename Allocator >
 void Helium::DynamicArray< T, Allocator >::InsertArray( size_t index, const T* pValues, size_t count )
 {
-    HELIUM_ASSERT( index <= m_size );
-    HELIUM_ASSERT( pValues || count == 0 );
+	HELIUM_ASSERT( index <= m_size );
+	HELIUM_ASSERT( pValues || count == 0 );
 
-    size_t newSize = m_size + count;
-    if( newSize > m_capacity )
-    {
-        size_t newCapacity = GetGrowCapacity( newSize );
-        T* pNewBuffer = Allocate( newCapacity );
-        HELIUM_ASSERT( pNewBuffer );
-        ArrayUninitializedCopy( pNewBuffer, m_pBuffer, index );
-        ArrayUninitializedCopy( pNewBuffer + index, pValues, count );
-        ArrayUninitializedCopy( pNewBuffer + index + count, m_pBuffer + index, m_size - index );
+	size_t newSize = m_size + count;
+	if( newSize > m_capacity )
+	{
+		size_t newCapacity = GetGrowCapacity( newSize );
+		T* pNewBuffer = Allocate( newCapacity );
+		HELIUM_ASSERT( pNewBuffer );
+		ArrayUninitializedCopy( pNewBuffer, m_pBuffer, index );
+		ArrayUninitializedCopy( pNewBuffer + index, pValues, count );
+		ArrayUninitializedCopy( pNewBuffer + index + count, m_pBuffer + index, m_size - index );
 
-        Allocator().Free( m_pBuffer );
+		Allocator().Free( m_pBuffer );
 
-        m_pBuffer = pNewBuffer;
-        m_capacity = newCapacity;
-    }
-    else
-    {
-        size_t shiftCount = m_size - index;
-        if( shiftCount <= count )
-        {
-            ArrayUninitializedCopy( m_pBuffer + index + count, m_pBuffer + index, shiftCount );
-            ArrayUninitializedCopy( m_pBuffer + m_size, pValues + shiftCount, count - shiftCount );
+		m_pBuffer = pNewBuffer;
+		m_capacity = newCapacity;
+	}
+	else
+	{
+		size_t shiftCount = m_size - index;
+		if( shiftCount <= count )
+		{
+			ArrayUninitializedCopy( m_pBuffer + index + count, m_pBuffer + index, shiftCount );
+			ArrayUninitializedCopy( m_pBuffer + m_size, pValues + shiftCount, count - shiftCount );
 
-            ArrayCopy( m_pBuffer + index, pValues, shiftCount );
-        }
-        else
-        {
-            ArrayUninitializedCopy( m_pBuffer + m_size, m_pBuffer + m_size - count, count );
+			ArrayCopy( m_pBuffer + index, pValues, shiftCount );
+		}
+		else
+		{
+			ArrayUninitializedCopy( m_pBuffer + m_size, m_pBuffer + m_size - count, count );
 
-            ArrayMove( m_pBuffer + index + count, m_pBuffer + index, shiftCount - count );
-            ArrayCopy( m_pBuffer + index, pValues, count );
-        }
-    }
+			ArrayMove( m_pBuffer + index + count, m_pBuffer + index, shiftCount - count );
+			ArrayCopy( m_pBuffer + index, pValues, count );
+		}
+	}
 
-    m_size = newSize;
+	m_size = newSize;
 }
 
 /// Remove elements from this array.
@@ -780,16 +780,16 @@ void Helium::DynamicArray< T, Allocator >::InsertArray( size_t index, const T* p
 template< typename T, typename Allocator >
 void Helium::DynamicArray< T, Allocator >::Remove( size_t index, size_t count )
 {
-    HELIUM_ASSERT( index <= m_size );
+	HELIUM_ASSERT( index <= m_size );
 
-    size_t shiftStartIndex = index + count;
-    HELIUM_ASSERT( shiftStartIndex <= m_size );
+	size_t shiftStartIndex = index + count;
+	HELIUM_ASSERT( shiftStartIndex <= m_size );
 
-    size_t newSize = m_size - count;
+	size_t newSize = m_size - count;
 
-    ArrayMove( m_pBuffer + index, m_pBuffer + shiftStartIndex, m_size - shiftStartIndex );
-    ArrayInPlaceDestroy( m_pBuffer + newSize, count );
-    m_size = newSize;
+	ArrayMove( m_pBuffer + index, m_pBuffer + shiftStartIndex, m_size - shiftStartIndex );
+	ArrayInPlaceDestroy( m_pBuffer + newSize, count );
+	m_size = newSize;
 }
 
 /// Remove elements from this array, swapping in elements from the end of the array in order to reduce the amount of
@@ -806,28 +806,28 @@ void Helium::DynamicArray< T, Allocator >::Remove( size_t index, size_t count )
 template< typename T, typename Allocator >
 void Helium::DynamicArray< T, Allocator >::RemoveSwap( size_t index, size_t count )
 {
-    HELIUM_ASSERT( index <= m_size );
+	HELIUM_ASSERT( index <= m_size );
 
-    size_t shiftStartIndex = index + count;
-    HELIUM_ASSERT( shiftStartIndex <= m_size );
+	size_t shiftStartIndex = index + count;
+	HELIUM_ASSERT( shiftStartIndex <= m_size );
 
-    size_t newSize = m_size - count;
+	size_t newSize = m_size - count;
 
-    size_t trailingCount = m_size - shiftStartIndex;
-    if( trailingCount <= count )
-    {
-        // We're removing more elements from the array than exist past the end of the range being removed, so
-        // perform a normal shift and destroy.
-        ArrayMove( m_pBuffer + index, m_pBuffer + shiftStartIndex, trailingCount );
-    }
-    else
-    {
-        // Swap elements from the end of the array into the empty space.
-        ArrayCopy( m_pBuffer + index, m_pBuffer + newSize, count );
-    }
+	size_t trailingCount = m_size - shiftStartIndex;
+	if( trailingCount <= count )
+	{
+		// We're removing more elements from the array than exist past the end of the range being removed, so
+		// perform a normal shift and destroy.
+		ArrayMove( m_pBuffer + index, m_pBuffer + shiftStartIndex, trailingCount );
+	}
+	else
+	{
+		// Swap elements from the end of the array into the empty space.
+		ArrayCopy( m_pBuffer + index, m_pBuffer + newSize, count );
+	}
 
-    ArrayInPlaceDestroy( m_pBuffer + newSize, count );
-    m_size = newSize;
+	ArrayInPlaceDestroy( m_pBuffer + newSize, count );
+	m_size = newSize;
 }
 
 /// Remove all elements from this array without modifying its capacity.
@@ -836,7 +836,7 @@ void Helium::DynamicArray< T, Allocator >::RemoveSwap( size_t index, size_t coun
 template< typename T, typename Allocator >
 void Helium::DynamicArray< T, Allocator >::RemoveAll()
 {
-    Remove( 0, m_size );
+	Remove( 0, m_size );
 }
 
 /// Get the first element in this array.
@@ -847,10 +847,10 @@ void Helium::DynamicArray< T, Allocator >::RemoveAll()
 template< typename T, typename Allocator >
 T& Helium::DynamicArray< T, Allocator >::GetFirst()
 {
-    HELIUM_ASSERT( m_size != 0 );
-    HELIUM_ASSERT( m_pBuffer );
+	HELIUM_ASSERT( m_size != 0 );
+	HELIUM_ASSERT( m_pBuffer );
 
-    return m_pBuffer[ 0 ];
+	return m_pBuffer[ 0 ];
 }
 
 /// Get the first element in this array.
@@ -861,10 +861,10 @@ T& Helium::DynamicArray< T, Allocator >::GetFirst()
 template< typename T, typename Allocator >
 const T& Helium::DynamicArray< T, Allocator >::GetFirst() const
 {
-    HELIUM_ASSERT( m_size != 0 );
-    HELIUM_ASSERT( m_pBuffer );
+	HELIUM_ASSERT( m_size != 0 );
+	HELIUM_ASSERT( m_pBuffer );
 
-    return m_pBuffer[ 0 ];
+	return m_pBuffer[ 0 ];
 }
 
 /// Get the last element in this array.
@@ -875,10 +875,10 @@ const T& Helium::DynamicArray< T, Allocator >::GetFirst() const
 template< typename T, typename Allocator >
 T& Helium::DynamicArray< T, Allocator >::GetLast()
 {
-    HELIUM_ASSERT( m_size != 0 );
-    HELIUM_ASSERT( m_pBuffer );
+	HELIUM_ASSERT( m_size != 0 );
+	HELIUM_ASSERT( m_pBuffer );
 
-    return m_pBuffer[ m_size - 1 ];
+	return m_pBuffer[ m_size - 1 ];
 }
 
 /// Get the last element in this array.
@@ -889,10 +889,10 @@ T& Helium::DynamicArray< T, Allocator >::GetLast()
 template< typename T, typename Allocator >
 const T& Helium::DynamicArray< T, Allocator >::GetLast() const
 {
-    HELIUM_ASSERT( m_size != 0 );
-    HELIUM_ASSERT( m_pBuffer );
+	HELIUM_ASSERT( m_size != 0 );
+	HELIUM_ASSERT( m_pBuffer );
 
-    return m_pBuffer[ m_size - 1 ];
+	return m_pBuffer[ m_size - 1 ];
 }
 
 /// Push an element onto the end of this array.
@@ -905,20 +905,22 @@ const T& Helium::DynamicArray< T, Allocator >::GetLast() const
 template< typename T, typename Allocator >
 size_t Helium::DynamicArray< T, Allocator >::Push( const T& rValue )
 {
-    size_t index = m_size;
-    Add( rValue );
+	size_t index = m_size;
+	Add( rValue );
 
-    return index;
+	return index;
 }
 
 /// Remove the last element from this array.
 ///
 /// @see Push()
 template< typename T, typename Allocator >
-void Helium::DynamicArray< T, Allocator >::Pop()
+T Helium::DynamicArray< T, Allocator >::Pop()
 {
-    HELIUM_ASSERT( m_size != 0 );
-    Remove( m_size - 1 );
+	T previousLast = GetLast();
+	HELIUM_ASSERT( m_size != 0 );
+	Remove( m_size - 1 );
+	return previousLast;
 }
 
 /// Swap the contents of this array with another array.
@@ -927,17 +929,17 @@ void Helium::DynamicArray< T, Allocator >::Pop()
 template< typename T, typename Allocator >
 void Helium::DynamicArray< T, Allocator >::Swap( DynamicArray& rArray )
 {
-    T* pBuffer = m_pBuffer;
-    size_t size = m_size;
-    size_t capacity = m_capacity;
+	T* pBuffer = m_pBuffer;
+	size_t size = m_size;
+	size_t capacity = m_capacity;
 
-    m_pBuffer = rArray.m_pBuffer;
-    m_size = rArray.m_size;
-    m_capacity = rArray.m_capacity;
+	m_pBuffer = rArray.m_pBuffer;
+	m_size = rArray.m_size;
+	m_capacity = rArray.m_capacity;
 
-    rArray.m_pBuffer = pBuffer;
-    rArray.m_size = size;
-    rArray.m_capacity = capacity;
+	rArray.m_pBuffer = pBuffer;
+	rArray.m_size = size;
+	rArray.m_capacity = capacity;
 }
 
 /// Find the index that accesses the provided pointer
@@ -946,10 +948,10 @@ void Helium::DynamicArray< T, Allocator >::Swap( DynamicArray& rArray )
 template< typename T, typename Allocator >
 uint32_t Helium::DynamicArray< T, Allocator >::GetIndexOfPointer(const T *pPtr) const
 {
-    HELIUM_ASSERT( pPtr >= m_pBuffer );
-    HELIUM_ASSERT( pPtr < m_pBuffer + m_size );
-    
-    return static_cast< uint32_t >( pPtr - m_pBuffer );
+	HELIUM_ASSERT( pPtr >= m_pBuffer );
+	HELIUM_ASSERT( pPtr < m_pBuffer + m_size );
+	
+	return static_cast< uint32_t >( pPtr - m_pBuffer );
 }
 
 /// Allocate a new object as a new element in this array.
@@ -958,15 +960,15 @@ uint32_t Helium::DynamicArray< T, Allocator >::GetIndexOfPointer(const T *pPtr) 
 template< typename T, typename Allocator >
 T* Helium::DynamicArray< T, Allocator >::New()
 {
-    size_t newSize = m_size + 1;
-    Grow( newSize );
+	size_t newSize = m_size + 1;
+	Grow( newSize );
 
-    T* pObject = new( m_pBuffer + m_size ) T;
-    HELIUM_ASSERT( pObject );
+	T* pObject = new( m_pBuffer + m_size ) T;
+	HELIUM_ASSERT( pObject );
 
-    m_size = newSize;
+	m_size = newSize;
 
-    return pObject;
+	return pObject;
 }
 
 #define HELIUM_IMPLEMENT_DYNARRAY_NEW_Z( Z, N, DATA ) \
@@ -974,15 +976,15 @@ template< typename T, typename Allocator > \
 template< BOOST_PP_ENUM_PARAMS_Z( Z, N, typename Param ) > \
 T* Helium::DynamicArray< T, Allocator >::New( BOOST_PP_ENUM_BINARY_PARAMS_Z( Z, N, const Param, &rParam ) ) \
 { \
-    size_t newSize = m_size + 1; \
-    Grow( newSize ); \
-    \
-    T* pObject = new( m_pBuffer + m_size ) T( BOOST_PP_ENUM_PARAMS_Z( Z, N, rParam ) ); \
-    HELIUM_ASSERT( pObject ); \
-    \
-    m_size = newSize; \
-    \
-    return pObject; \
+	size_t newSize = m_size + 1; \
+	Grow( newSize ); \
+	\
+	T* pObject = new( m_pBuffer + m_size ) T( BOOST_PP_ENUM_PARAMS_Z( Z, N, rParam ) ); \
+	HELIUM_ASSERT( pObject ); \
+	\
+	m_size = newSize; \
+	\
+	return pObject; \
 }
 
 BOOST_PP_REPEAT_FROM_TO( 1, 17, HELIUM_IMPLEMENT_DYNARRAY_NEW_Z, )
@@ -1000,7 +1002,7 @@ BOOST_PP_REPEAT_FROM_TO( 1, 17, HELIUM_IMPLEMENT_DYNARRAY_NEW_Z, )
 template< typename T, typename Allocator >
 Helium::DynamicArray< T, Allocator >& Helium::DynamicArray< T, Allocator >::operator=( const DynamicArray& rSource )
 {
-    return Assign( rSource );
+	return Assign( rSource );
 }
 
 /// Set this array to the contents of the given array.
@@ -1014,9 +1016,9 @@ Helium::DynamicArray< T, Allocator >& Helium::DynamicArray< T, Allocator >::oper
 template< typename T, typename Allocator >
 template< typename OtherAllocator >
 Helium::DynamicArray< T, Allocator >& Helium::DynamicArray< T, Allocator >::operator=(
-    const DynamicArray< T, OtherAllocator >& rSource )
+	const DynamicArray< T, OtherAllocator >& rSource )
 {
-    return Assign( rSource );
+	return Assign( rSource );
 }
 
 /// Get the array element at the specified index.
@@ -1027,9 +1029,9 @@ Helium::DynamicArray< T, Allocator >& Helium::DynamicArray< T, Allocator >::oper
 template< typename T, typename Allocator >
 T& Helium::DynamicArray< T, Allocator >::operator[]( ptrdiff_t index )
 {
-    HELIUM_ASSERT( static_cast< size_t >( index ) < m_size );
-    HELIUM_ASSERT( m_pBuffer );
-    return m_pBuffer[ index ];
+	HELIUM_ASSERT( static_cast< size_t >( index ) < m_size );
+	HELIUM_ASSERT( m_pBuffer );
+	return m_pBuffer[ index ];
 }
 
 /// Get the array element at the specified index.
@@ -1040,9 +1042,9 @@ T& Helium::DynamicArray< T, Allocator >::operator[]( ptrdiff_t index )
 template< typename T, typename Allocator >
 const T& Helium::DynamicArray< T, Allocator >::operator[]( ptrdiff_t index ) const
 {
-    HELIUM_ASSERT( static_cast< size_t >( index ) < m_size );
-    HELIUM_ASSERT( m_pBuffer );
-    return m_pBuffer[ index ];
+	HELIUM_ASSERT( static_cast< size_t >( index ) < m_size );
+	HELIUM_ASSERT( m_pBuffer );
+	return m_pBuffer[ index ];
 }
 
 /// Equality comparison operator.
@@ -1056,7 +1058,7 @@ const T& Helium::DynamicArray< T, Allocator >::operator[]( ptrdiff_t index ) con
 template< typename T, typename Allocator >
 bool Helium::DynamicArray< T, Allocator >::operator==( const DynamicArray& rOther ) const
 {
-    return Equals( rOther );
+	return Equals( rOther );
 }
 
 /// Equality comparison operator.
@@ -1071,7 +1073,7 @@ template< typename T, typename Allocator >
 template< typename OtherAllocator >
 bool Helium::DynamicArray< T, Allocator >::operator==( const DynamicArray< T, OtherAllocator >& rOther ) const
 {
-    return Equals( rOther );
+	return Equals( rOther );
 }
 
 /// Inequality comparison operator.
@@ -1084,7 +1086,7 @@ bool Helium::DynamicArray< T, Allocator >::operator==( const DynamicArray< T, Ot
 template< typename T, typename Allocator >
 bool Helium::DynamicArray< T, Allocator >::operator!=( const DynamicArray& rOther ) const
 {
-    return !Equals( rOther );
+	return !Equals( rOther );
 }
 
 /// Inequality comparison operator.
@@ -1098,7 +1100,7 @@ template< typename T, typename Allocator >
 template< typename OtherAllocator >
 bool Helium::DynamicArray< T, Allocator >::operator!=( const DynamicArray< T, OtherAllocator >& rOther ) const
 {
-    return !Equals( rOther );
+	return !Equals( rOther );
 }
 
 /// Get the capacity to which this array should grow if growing to support the desired number of elements.
@@ -1109,8 +1111,8 @@ bool Helium::DynamicArray< T, Allocator >::operator!=( const DynamicArray< T, Ot
 template< typename T, typename Allocator >
 size_t Helium::DynamicArray< T, Allocator >::GetGrowCapacity( size_t desiredCount ) const
 {
-    HELIUM_ASSERT( desiredCount > m_capacity );
-    return Max< size_t >( desiredCount, m_capacity + m_capacity / 2 + 1 );
+	HELIUM_ASSERT( desiredCount > m_capacity );
+	return Max< size_t >( desiredCount, m_capacity + m_capacity / 2 + 1 );
 }
 
 /// Increase the capacity of this array according to the normal growth rules.
@@ -1119,14 +1121,14 @@ size_t Helium::DynamicArray< T, Allocator >::GetGrowCapacity( size_t desiredCoun
 template< typename T, typename Allocator >
 void Helium::DynamicArray< T, Allocator >::Grow( size_t capacity )
 {
-    if( capacity > m_capacity )
-    {
-        capacity = GetGrowCapacity( capacity );
-        m_pBuffer = ResizeBuffer( m_pBuffer, m_size, m_capacity, capacity );
-        HELIUM_ASSERT( m_pBuffer );
+	if( capacity > m_capacity )
+	{
+		capacity = GetGrowCapacity( capacity );
+		m_pBuffer = ResizeBuffer( m_pBuffer, m_size, m_capacity, capacity );
+		HELIUM_ASSERT( m_pBuffer );
 
-        m_capacity = capacity;
-    }
+		m_capacity = capacity;
+	}
 }
 
 /// Allocate and construct a copy of the specified object, assuming all data in this object is uninitialized.
@@ -1136,27 +1138,27 @@ template< typename T, typename Allocator >
 template< typename OtherAllocator >
 void Helium::DynamicArray< T, Allocator >::CopyConstruct( const DynamicArray< T, OtherAllocator >& rSource )
 {
-    m_pBuffer = NULL;
+	m_pBuffer = NULL;
 
-    size_t size = rSource.m_size;
-    m_size = size;
-    m_capacity = size;
+	size_t size = rSource.m_size;
+	m_size = size;
+	m_capacity = size;
 
-    if( size )
-    {
-        m_pBuffer = Allocate( size );
-        HELIUM_ASSERT( m_pBuffer );
-        HELIUM_ASSERT( rSource.m_pBuffer );
-        ArrayUninitializedCopy( m_pBuffer, rSource.m_pBuffer, size );
-    }
+	if( size )
+	{
+		m_pBuffer = Allocate( size );
+		HELIUM_ASSERT( m_pBuffer );
+		HELIUM_ASSERT( rSource.m_pBuffer );
+		ArrayUninitializedCopy( m_pBuffer, rSource.m_pBuffer, size );
+	}
 }
 
 /// Free all allocated resources, but don't clear out any variables unless necessary.
 template< typename T, typename Allocator >
 void Helium::DynamicArray< T, Allocator >::Finalize()
 {
-    ArrayInPlaceDestroy( m_pBuffer, m_size );
-    Allocator().Free( m_pBuffer );
+	ArrayInPlaceDestroy( m_pBuffer, m_size );
+	Allocator().Free( m_pBuffer );
 }
 
 /// Assignment operator implementation.
@@ -1171,15 +1173,15 @@ void Helium::DynamicArray< T, Allocator >::Finalize()
 template< typename T, typename Allocator >
 template< typename OtherAllocator >
 Helium::DynamicArray< T, Allocator >& Helium::DynamicArray< T, Allocator >::Assign(
-    const DynamicArray< T, OtherAllocator >& rSource )
+	const DynamicArray< T, OtherAllocator >& rSource )
 {
-    if( this != &rSource )
-    {
-        Finalize();
-        CopyConstruct( rSource );
-    }
+	if( this != &rSource )
+	{
+		Finalize();
+		CopyConstruct( rSource );
+	}
 
-    return *this;
+	return *this;
 }
 
 /// Test whether this array has the same elements (in the same order) as the given array.
@@ -1192,23 +1194,23 @@ template< typename T, typename Allocator >
 template< typename OtherAllocator >
 bool Helium::DynamicArray< T, Allocator >::Equals( const DynamicArray< T, OtherAllocator >& rOther ) const
 {
-    size_t size = m_size;
-    if( size != rOther.m_size )
-    {
-        return false;
-    }
+	size_t size = m_size;
+	if( size != rOther.m_size )
+	{
+		return false;
+	}
 
-    const T* pThisBuffer = m_pBuffer;
-    const T* pOtherBuffer = rOther.m_pBuffer;
-    for( size_t index = 0; index < size; ++index )
-    {
-        if( !( pThisBuffer[ index ] == pOtherBuffer[ index ] ) )
-        {
-            return false;
-        }
-    }
+	const T* pThisBuffer = m_pBuffer;
+	const T* pOtherBuffer = rOther.m_pBuffer;
+	for( size_t index = 0; index < size; ++index )
+	{
+		if( !( pThisBuffer[ index ] == pOtherBuffer[ index ] ) )
+		{
+			return false;
+		}
+	}
 
-    return true;
+	return true;
 }
 
 /// Allocate memory for the specified number of elements, accounting for non-standard alignment requirements.
@@ -1221,7 +1223,7 @@ bool Helium::DynamicArray< T, Allocator >::Equals( const DynamicArray< T, OtherA
 template< typename T, typename Allocator >
 T* Helium::DynamicArray< T, Allocator >::Allocate( size_t count )
 {
-    return Allocate( count, std::integral_constant< bool, ( std::alignment_of< T >::value > 8 ) >() );
+	return Allocate( count, std::integral_constant< bool, ( std::alignment_of< T >::value > 8 ) >() );
 }
 
 /// Allocate() implementation for types requiring a specific alignment.
@@ -1235,7 +1237,7 @@ T* Helium::DynamicArray< T, Allocator >::Allocate( size_t count )
 template< typename T, typename Allocator >
 T* Helium::DynamicArray< T, Allocator >::Allocate( size_t count, const std::true_type& /*rNeedsAlignment*/ )
 {
-    return static_cast< T* >( Allocator().AllocateAligned( std::alignment_of< T >::value, sizeof( T ) * count ) );
+	return static_cast< T* >( Allocator().AllocateAligned( std::alignment_of< T >::value, sizeof( T ) * count ) );
 }
 
 /// Allocate() implementation for types that can use the default alignment.
@@ -1249,7 +1251,7 @@ T* Helium::DynamicArray< T, Allocator >::Allocate( size_t count, const std::true
 template< typename T, typename Allocator >
 T* Helium::DynamicArray< T, Allocator >::Allocate( size_t count, const std::false_type& /*rNeedsAlignment*/ )
 {
-    return static_cast< T* >( Allocator().Allocate( sizeof( T ) * count ) );
+	return static_cast< T* >( Allocator().Allocate( sizeof( T ) * count ) );
 }
 
 /// Reallocate memory for the specified number of elements, accounting for non-standard alignment requirements.
@@ -1263,10 +1265,10 @@ T* Helium::DynamicArray< T, Allocator >::Allocate( size_t count, const std::fals
 template< typename T, typename Allocator >
 T* Helium::DynamicArray< T, Allocator >::Reallocate( T* pMemory, size_t count )
 {
-    return Reallocate(
-        pMemory,
-        count,
-        std::integral_constant< bool, ( std::alignment_of< T >::value > 8 ) >() );
+	return Reallocate(
+		pMemory,
+		count,
+		std::integral_constant< bool, ( std::alignment_of< T >::value > 8 ) >() );
 }
 
 /// Reallocate() implementation for types requiring a specific alignment.
@@ -1281,22 +1283,22 @@ T* Helium::DynamicArray< T, Allocator >::Reallocate( T* pMemory, size_t count )
 template< typename T, typename Allocator >
 T* Helium::DynamicArray< T, Allocator >::Reallocate( T* pMemory, size_t count, const std::true_type& /*rNeedsAlignment*/ )
 {
-    Allocator allocator;
+	Allocator allocator;
 
-    size_t existingSize = allocator.GetMemorySize( pMemory );
-    size_t newSize = sizeof( T ) * count;
-    if( existingSize != newSize )
-    {
-        T* pNewMemory = static_cast< T* >( allocator.AllocateAligned(
-            std::alignment_of< T >::value,
-            newSize ) );
-        HELIUM_ASSERT( pNewMemory || newSize == 0 );
-        MemoryCopy( pNewMemory, pMemory, Min( existingSize, newSize ) );
-        allocator.Free( pMemory );
-        pMemory = pNewMemory;
-    }
+	size_t existingSize = allocator.GetMemorySize( pMemory );
+	size_t newSize = sizeof( T ) * count;
+	if( existingSize != newSize )
+	{
+		T* pNewMemory = static_cast< T* >( allocator.AllocateAligned(
+			std::alignment_of< T >::value,
+			newSize ) );
+		HELIUM_ASSERT( pNewMemory || newSize == 0 );
+		MemoryCopy( pNewMemory, pMemory, Min( existingSize, newSize ) );
+		allocator.Free( pMemory );
+		pMemory = pNewMemory;
+	}
 
-    return pMemory;
+	return pMemory;
 }
 
 /// Reallocate() implementation for types that can use the default alignment.
@@ -1310,11 +1312,11 @@ T* Helium::DynamicArray< T, Allocator >::Reallocate( T* pMemory, size_t count, c
 /// @see Reallocate()
 template< typename T, typename Allocator >
 T* Helium::DynamicArray< T, Allocator >::Reallocate(
-    T* pMemory,
-    size_t count,
-    const std::false_type& /*rNeedsAlignment*/ )
+	T* pMemory,
+	size_t count,
+	const std::false_type& /*rNeedsAlignment*/ )
 {
-    return static_cast< T* >( Allocator().Reallocate( pMemory, sizeof( T ) * count ) );
+	return static_cast< T* >( Allocator().Reallocate( pMemory, sizeof( T ) * count ) );
 }
 
 /// Resize an array of elements.
@@ -1327,18 +1329,18 @@ T* Helium::DynamicArray< T, Allocator >::Reallocate(
 /// @return  Pointer to the resized array.
 template< typename T, typename Allocator >
 T* Helium::DynamicArray< T, Allocator >::ResizeBuffer(
-    T* pMemory,
-    size_t elementCount,
-    size_t oldCapacity,
-    size_t newCapacity )
+	T* pMemory,
+	size_t elementCount,
+	size_t oldCapacity,
+	size_t newCapacity )
 {
-    return ResizeBuffer(
-        pMemory,
-        elementCount,
-        oldCapacity,
-        newCapacity,
-        std::integral_constant<
-            bool, std::has_trivial_copy< T >::value && std::has_trivial_destructor< T >::value >() );
+	return ResizeBuffer(
+		pMemory,
+		elementCount,
+		oldCapacity,
+		newCapacity,
+		std::integral_constant<
+			bool, std::has_trivial_copy< T >::value && std::has_trivial_destructor< T >::value >() );
 }
 
 /// ResizeBuffer() implementation for types with both a trivial copy constructor and trivial destructor.
@@ -1352,13 +1354,13 @@ T* Helium::DynamicArray< T, Allocator >::ResizeBuffer(
 /// @return  Pointer to the resized array.
 template< typename T, typename Allocator >
 T* Helium::DynamicArray< T, Allocator >::ResizeBuffer(
-    T* pMemory,
-    size_t /*elementCount*/,
-    size_t /*oldCapacity*/,
-    size_t newCapacity,
-    const std::true_type& /*rHasTrivialCopyAndDestructor*/ )
+	T* pMemory,
+	size_t /*elementCount*/,
+	size_t /*oldCapacity*/,
+	size_t newCapacity,
+	const std::true_type& /*rHasTrivialCopyAndDestructor*/ )
 {
-    return Reallocate( pMemory, newCapacity );
+	return Reallocate( pMemory, newCapacity );
 }
 
 /// ResizeBuffer() implementation for types without either a trivial copy constructor or a trivial destructor.
@@ -1372,30 +1374,30 @@ T* Helium::DynamicArray< T, Allocator >::ResizeBuffer(
 /// @return  Pointer to the resized array.
 template< typename T, typename Allocator >
 T* Helium::DynamicArray< T, Allocator >::ResizeBuffer(
-    T* pMemory,
-    size_t elementCount,
-    size_t oldCapacity,
-    size_t newCapacity,
-    const std::false_type& /*rHasTrivialCopyAndDestructor*/ )
+	T* pMemory,
+	size_t elementCount,
+	size_t oldCapacity,
+	size_t newCapacity,
+	const std::false_type& /*rHasTrivialCopyAndDestructor*/ )
 {
-    HELIUM_ASSERT( elementCount <= oldCapacity );
-    HELIUM_ASSERT( elementCount <= newCapacity );
+	HELIUM_ASSERT( elementCount <= oldCapacity );
+	HELIUM_ASSERT( elementCount <= newCapacity );
 
-    T* pNewMemory = pMemory;
+	T* pNewMemory = pMemory;
 
-    if( oldCapacity != newCapacity )
-    {
-        pNewMemory = NULL;
-        if( newCapacity )
-        {
-            pNewMemory = Allocate( newCapacity );
-            HELIUM_ASSERT( pNewMemory );
-            ArrayUninitializedCopy( pNewMemory, pMemory, elementCount );
-        }
+	if( oldCapacity != newCapacity )
+	{
+		pNewMemory = NULL;
+		if( newCapacity )
+		{
+			pNewMemory = Allocate( newCapacity );
+			HELIUM_ASSERT( pNewMemory );
+			ArrayUninitializedCopy( pNewMemory, pMemory, elementCount );
+		}
 
-        ArrayInPlaceDestroy( pMemory, elementCount );
-        Allocator().Free( pMemory );
-    }
+		ArrayInPlaceDestroy( pMemory, elementCount );
+		Allocator().Free( pMemory );
+	}
 
-    return pNewMemory;
+	return pNewMemory;
 }

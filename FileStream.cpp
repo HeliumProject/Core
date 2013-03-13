@@ -16,15 +16,15 @@ using namespace Helium;
 ///          longer needed.
 FileStream* FileStream::OpenFileStream( const tchar_t* pPath, uint32_t modeFlags, bool bTruncate )
 {
-    FileStream* pStream = new FileStream();
-    HELIUM_ASSERT( pStream );
-    if( !pStream->Open( pPath, modeFlags, bTruncate ) )
-    {
-        delete pStream;
-        return NULL;
-    }
+	FileStream* pStream = new FileStream();
+	HELIUM_ASSERT( pStream );
+	if( !pStream->Open( pPath, modeFlags, bTruncate ) )
+	{
+		delete pStream;
+		return NULL;
+	}
 
-    return pStream;
+	return pStream;
 }
 
 /// Attempt to open a file with a new file stream object.
@@ -39,7 +39,7 @@ FileStream* FileStream::OpenFileStream( const tchar_t* pPath, uint32_t modeFlags
 ///          longer needed.
 FileStream* FileStream::OpenFileStream( const String& rPath, uint32_t modeFlags, bool bTruncate )
 {
-    return OpenFileStream( *rPath, modeFlags, bTruncate );
+	return OpenFileStream( *rPath, modeFlags, bTruncate );
 }
 
 /// Constructor.
@@ -51,7 +51,7 @@ FileStream::FileStream()
 /// Destructor.
 FileStream::~FileStream()
 {
-    Close();
+	Close();
 }
 
 /// @copydoc Stream::Close()
@@ -63,112 +63,112 @@ void FileStream::Close()
 /// @copydoc Stream::IsOpen()
 bool FileStream::IsOpen() const
 {
-    return m_File.IsOpen();
+	return m_File.IsOpen();
 }
 
 /// @copydoc Stream::Read()
 size_t FileStream::Read( void* pBuffer, size_t size, size_t count )
 {
-    HELIUM_ASSERT_MSG( m_File.IsOpen(), TXT( "File not open" ) );
-    HELIUM_ASSERT_MSG( m_modeFlags & MODE_READ, TXT( "File not open for reading" ) );
-    if( !m_File.IsOpen() || !( m_modeFlags & MODE_READ ) )
-    {
-        return 0;
-    }
+	HELIUM_ASSERT_MSG( m_File.IsOpen(), TXT( "File not open" ) );
+	HELIUM_ASSERT_MSG( m_modeFlags & MODE_READ, TXT( "File not open for reading" ) );
+	if( !m_File.IsOpen() || !( m_modeFlags & MODE_READ ) )
+	{
+		return 0;
+	}
 
-    size_t byteCount = size * count;
-    size_t bytesRead = 0;
-    HELIUM_VERIFY( m_File.Read( pBuffer, byteCount, &bytesRead ) );
-
-    return ( bytesRead / size );
+	size_t byteCount = size * count;
+	size_t bytesRead = 0;
+	HELIUM_VERIFY( m_File.Read( pBuffer, byteCount, &bytesRead ) );
+	HELIUM_ASSERT( bytesRead % size == 0 );
+	return ( bytesRead / size );
 }
 
 /// @copydoc Stream::Write()
 size_t FileStream::Write( const void* pBuffer, size_t size, size_t count )
 {
-    HELIUM_ASSERT_MSG( m_File.IsOpen(), TXT( "File not open" ) );
-    HELIUM_ASSERT_MSG( m_modeFlags & MODE_WRITE, TXT( "File not open for writing" ) );
+	HELIUM_ASSERT_MSG( m_File.IsOpen(), TXT( "File not open" ) );
+	HELIUM_ASSERT_MSG( m_modeFlags & MODE_WRITE, TXT( "File not open for writing" ) );
 	if( !m_File.IsOpen() || !( m_modeFlags & MODE_WRITE ) )
-    {
-        return 0;
-    }
+	{
+		return 0;
+	}
 
-    size_t byteCount = size * count;
-    size_t bytesWritten = 0;
-    HELIUM_VERIFY( m_File.Write( pBuffer, byteCount, &bytesWritten ) );
+	size_t byteCount = size * count;
+	size_t bytesWritten = 0;
+	HELIUM_VERIFY( m_File.Write( pBuffer, byteCount, &bytesWritten ) );
 
-    return ( bytesWritten / size );
+	return ( bytesWritten / size );
 }
 
 /// @copydoc Stream::Flush()
 void FileStream::Flush()
 {
-    HELIUM_ASSERT_MSG( m_File.IsOpen(), TXT( "File not open" ) );
+	HELIUM_ASSERT_MSG( m_File.IsOpen(), TXT( "File not open" ) );
 
-    // Only files open for writing need to be flushed.
-    if( m_File.IsOpen() && ( m_modeFlags & MODE_WRITE ) )
-    {
-        HELIUM_VERIFY( m_File.Flush() );
-    }
+	// Only files open for writing need to be flushed.
+	if( m_File.IsOpen() && ( m_modeFlags & MODE_WRITE ) )
+	{
+		HELIUM_VERIFY( m_File.Flush() );
+	}
 }
 
 /// @copydoc Stream::Seek()
 int64_t FileStream::Seek( int64_t offset, SeekOrigin origin )
 {
 	if( !m_File.IsOpen() )
-    {
-        HELIUM_ASSERT_MSG_FALSE( TXT( "File not open" ) );
-        return -1;
-    }
+	{
+		HELIUM_ASSERT_MSG_FALSE( TXT( "File not open" ) );
+		return -1;
+	}
 
-    return m_File.Seek( offset, origin );
+	return m_File.Seek( offset, origin );
 }
 
 /// @copydoc Stream::Tell()
 int64_t FileStream::Tell() const
 {
-    if( !m_File.IsOpen() )
-    {
-        HELIUM_ASSERT_MSG_FALSE( TXT( "File not open" ) );
-        return -1;
-    }
+	if( !m_File.IsOpen() )
+	{
+		HELIUM_ASSERT_MSG_FALSE( TXT( "File not open" ) );
+		return -1;
+	}
 
-    return m_File.Tell();
+	return m_File.Tell();
 }
 
 /// @copydoc Stream::GetSize()
 int64_t FileStream::GetSize() const
 {
 	if( !m_File.IsOpen() )
-    {
-        HELIUM_ASSERT_MSG_FALSE( TXT( "File not open" ) );
-        return -1;
-    }
+	{
+		HELIUM_ASSERT_MSG_FALSE( TXT( "File not open" ) );
+		return -1;
+	}
 
-    return m_File.GetSize();
+	return m_File.GetSize();
 }
 
 /// @copydoc FileStream::OpenActual()
 bool FileStream::Open( const tchar_t* pPath, uint32_t modeFlags, bool bTruncate )
 {
-    HELIUM_ASSERT( pPath );
+	HELIUM_ASSERT( pPath );
 
-    // Verify that at least one mode flag is given.
-    if( !( modeFlags & ( MODE_READ | MODE_WRITE ) ) )
-    {
-        HELIUM_ASSERT_MSG_FALSE( TXT( "At least one FileStream::EMode flag must be set" ) );
-        return false;
-    }
+	// Verify that at least one mode flag is given.
+	if( !( modeFlags & ( MODE_READ | MODE_WRITE ) ) )
+	{
+		HELIUM_ASSERT_MSG_FALSE( TXT( "At least one FileStream::EMode flag must be set" ) );
+		return false;
+	}
 
-    // Close any currently open file.
-    Close();
+	// Close any currently open file.
+	Close();
 
 	HELIUM_ASSERT( !m_File.IsOpen() );
 	if ( !m_File.Open( pPath, (Helium::FileMode)modeFlags, bTruncate ) )
-    {
-        return false;
-    }
+	{
+		return false;
+	}
 
-    m_modeFlags = modeFlags;
-    return true;
+	m_modeFlags = modeFlags;
+	return true;
 }
