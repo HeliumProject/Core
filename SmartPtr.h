@@ -6,8 +6,8 @@
 namespace Helium
 {
 	//
-	// This is a simple manager for a C-style array allocated with new [].
-	//  We don't use auto_ptr because of the delete semantics. 
+	// This is a delete-helper for a heap allocated object.
+	//  We don't use auto_ptr because its generally terrible.
 	//  This class is probably only good for the simplest use cases.
 	// 
 	// example: 
@@ -17,16 +17,14 @@ namespace Helium
 	template <typename T>
 	struct AutoPtr : NonCopyable
 	{
+		HELIUM_COMPILE_ASSERT( sizeof( T ) > 1 );
+
 	public:
 		AutoPtr( T* ptr = NULL );
-
-	private:
-		AutoPtr( const AutoPtr& rhs );
-
-	public:
 		~AutoPtr();
 
 		T* Ptr();
+		const T* Ptr() const;
 
 		const T* operator->() const;
 		T* operator->();
@@ -36,16 +34,18 @@ namespace Helium
 		
 		operator bool() const;
 
-		void Reset(T *_ptr);
+		bool IsOrphan();
+		void Orphan( bool orphan = true );
+		void Reset(T *ptr, bool carryOrphan = true );
 		T* Release();
 
 	private: 
-		T* m_Ptr; 
+		uintptr_t m_Ptr;
 	};
 	
 	//
 	// This is a simple manager for a C-style array allocated with new [].
-	//  We don't use auto_ptr because of the delete semantics. 
+	//  We don't use AutoPtr because of the delete semantics. 
 	//  This class is probably only good for the simplest use cases.
 	// 
 	// example: 
@@ -57,11 +57,6 @@ namespace Helium
 	{
 	public: 
 		ArrayPtr( T* ptr = NULL );
-
-	private:
-		ArrayPtr( const ArrayPtr& rhs );
-
-	public:
 		~ArrayPtr();
 
 		T* Ptr();

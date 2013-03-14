@@ -1,84 +1,104 @@
 template< typename T >
-Helium::AutoPtr< T >::AutoPtr( T* ptr = NULL )
-	: m_Ptr( ptr )
+Helium::AutoPtr< T >::AutoPtr( T* ptr )
 {
-
-}
-
-template< typename T >
-Helium::AutoPtr< T >::AutoPtr( const AutoPtr& rhs )
-{
-
+	Reset( ptr );
 }
 
 template< typename T >
 Helium::AutoPtr< T >::~AutoPtr()
 {
-	delete m_Ptr; 
+	delete Ptr(); 
 }
 
 template< typename T >
 T* Helium::AutoPtr< T >::Ptr()
 {
-	return m_Ptr; 
+	return reinterpret_cast< T* >( m_Ptr & ~1 );
+}
+
+template< typename T >
+const T* Helium::AutoPtr< T >::Ptr() const
+{
+	return reinterpret_cast< T* >( m_Ptr & ~1 );
 }
 
 template< typename T >
 const T* Helium::AutoPtr< T >::operator->() const
 {
-	return m_Ptr;
+	return Ptr();
 }
 
 template< typename T >
 T* Helium::AutoPtr< T >::operator->()
 {
-	return m_Ptr;
+	return Ptr();
 }
 
 template< typename T >
 const T& Helium::AutoPtr< T >::operator*() const
 {
-	return *m_Ptr;
+	return *Ptr();
 }
 
 template< typename T >
 T& Helium::AutoPtr< T >::operator*()
 {
-	return *m_Ptr;
+	return *Ptr();
 }
 
 template< typename T >
 Helium::AutoPtr< T >::operator bool() const
 {
-	return m_Ptr != 0;
+	return Ptr() != 0;
 }
 
 template< typename T >
-void Helium::AutoPtr< T >::Reset(T *_ptr)
+bool Helium::AutoPtr< T >::IsOrphan()
 {
-	if (_ptr != m_Ptr)
+	return ( m_Ptr & 1 ) != 0;
+}
+
+template< typename T >
+void Helium::AutoPtr< T >::Orphan( bool orphan )
+{
+	if ( orphan )
 	{
-		delete m_Ptr;
+		m_Ptr |= 1;
 	}
-	m_Ptr = _ptr;
+	else
+	{
+		m_Ptr &= ~1;
+	}
+}
+
+template< typename T >
+void Helium::AutoPtr< T >::Reset(T* ptr, bool carryOrphan)
+{
+	bool orphan = IsOrphan();
+	T* prev = Ptr();
+	if (ptr != prev)
+	{
+		delete prev;
+	}
+	uintptr_t next = reinterpret_cast<uintptr_t>( ptr );
+	HELIUM_ASSERT( ( next & 1 ) == 0 ); // this class only works for non-single-byte-aligned allocations!
+	m_Ptr = next;
+	if ( carryOrphan )
+	{
+		Orphan( orphan );
+	}
 }
 
 template< typename T >
 T* Helium::AutoPtr< T >::Release()
 {
-	T *return_value = m_Ptr;
+	T* return_value = Ptr();
 	m_Ptr = NULL;
 	return return_value;
 }
 
 template< typename T >
 Helium::ArrayPtr< T >::ArrayPtr( T* ptr = NULL ) : m_Ptr( ptr )
-{
-
-}
-
-template< typename T >
-Helium::ArrayPtr< T >::ArrayPtr( const ArrayPtr& rhs )
 {
 
 }
