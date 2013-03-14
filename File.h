@@ -15,11 +15,9 @@ namespace Helium
 		/// Stream seek origin.
 		enum SeekOrigin
 		{
-			SEEK_ORIGIN_INVALID = -1,
-			SEEK_ORIGIN_CURRENT,  ///< Seek relative to the current location.
-			SEEK_ORIGIN_BEGIN,    ///< Seek relative to the beginning of the stream.
-			SEEK_ORIGIN_END,      ///< Seek relative to the end of the stream.
-			SEEK_ORIGIN_MAX,
+			Current,  ///< Seek relative to the current location.
+			Begin,    ///< Seek relative to the beginning of the stream.
+			End,      ///< Seek relative to the end of the stream.
 		};
 	};
 	typedef SeekOrigins::SeekOrigin SeekOrigin;
@@ -29,8 +27,8 @@ namespace Helium
 		/// File access mode flags.
 		enum FileMode
 		{
-			MODE_READ	= ( 1 << 0 ),  ///< Read access.
-			MODE_WRITE	= ( 1 << 1 ),  ///< Write access.
+			Read  = ( 1 << 0 ),  ///< Read access.
+			Write = ( 1 << 1 ),  ///< Write access.
 		};
 	};
 	typedef FileModes::FileMode FileMode;

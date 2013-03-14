@@ -63,25 +63,25 @@ bool File::IsOpen() const
 bool File::Open( const tchar_t* filename, FileMode mode, bool truncate )
 {
 	DWORD desiredAccess = 0;
-	if( mode & FileModes::MODE_READ )
+	if( mode & FileModes::Read )
 	{
 		desiredAccess |= GENERIC_READ;
 	}
 
-	if( mode & FileModes::MODE_WRITE )
+	if( mode & FileModes::Write )
 	{
 		desiredAccess |= GENERIC_WRITE;
 	}
 
 	// Allow other files to read if we are not writing to the file.
 	DWORD shareMode = 0;
-	if( !( mode & FileModes::MODE_WRITE ) )
+	if( !( mode & FileModes::Write ) )
 	{
 		shareMode |= FILE_SHARE_READ;
 	}
 
 	DWORD createDisposition = OPEN_EXISTING;
-	if( mode & FileModes::MODE_WRITE )
+	if( mode & FileModes::Write )
 	{
 		createDisposition = ( truncate ? CREATE_ALWAYS : OPEN_ALWAYS );
 	}
@@ -147,15 +147,13 @@ bool File::Flush()
 
 int64_t File::Seek( int64_t offset, SeekOrigin origin )
 {
-	HELIUM_ASSERT_MSG( static_cast< size_t >( origin ) <= static_cast< size_t >( SeekOrigins::SEEK_ORIGIN_MAX ), TXT( "Invalid seek origin" ) );
-
 	LARGE_INTEGER moveDistance;
 	moveDistance.QuadPart = offset;
 
 	DWORD moveMethod =
-		( origin == SeekOrigins::SEEK_ORIGIN_CURRENT
+		( origin == SeekOrigins::Current
 		? FILE_CURRENT
-		: ( origin == SeekOrigins::SEEK_ORIGIN_BEGIN ? FILE_BEGIN : FILE_END ) );
+		: ( origin == SeekOrigins::Begin ? FILE_BEGIN : FILE_END ) );
 
 	LARGE_INTEGER filePointer;
 	filePointer.QuadPart = 0;
