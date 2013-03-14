@@ -25,7 +25,6 @@ using namespace Helium::Persist;
 Archive::Archive()
 	: m_Progress( 0 )
 	, m_Abort( false )
-	, m_Mode( ArchiveModes::Read )
 {
 }
 
@@ -33,7 +32,6 @@ Archive::Archive( const FilePath& path )
 	: m_Path( path )
 	, m_Progress( 0 )
 	, m_Abort( false )
-	, m_Mode( ArchiveModes::Read )
 {
 	HELIUM_ASSERT( !m_Path.empty() );
 }
@@ -42,76 +40,41 @@ Archive::~Archive()
 {
 }
 
-void Archive::Put( Object* object )
+ArchiveWriter::ArchiveWriter( ObjectIdentifier& identifier )
+	: m_Identifier( identifier )
 {
-	m_Object = object;
+
 }
 
-ObjectPtr Archive::Get( const Class* searchClass )
+ArchiveWriter::ArchiveWriter( const FilePath& filePath, ObjectIdentifier& identifier )
+	: Archive( filePath )
+	, m_Identifier( identifier )
 {
-	PERSIST_SCOPE_TIMER( ( "%s", m_Path.c_str() ) );
-
-	ObjectPtr object;
-	Get( object );
-
-	if ( searchClass == NULL )
-	{
-		searchClass = Reflect::GetClass< Object >();
-	}
-
-	if ( object->IsClass( searchClass ) )
-	{
-		return object;
-	}
-	else
-	{
-		return NULL;
-	}
 }
 
-void Archive::Get( ObjectPtr& object )
+ArchiveMode ArchiveWriter::GetMode() const
 {
-	PERSIST_SCOPE_TIMER( ( "%s", m_Path.c_str() ) );
-
-	Log::Debug( TXT( "Parsing '%s'\n" ), m_Path.c_str() );
-
-	if ( Helium::IsDebuggerPresent() )
-	{
-		Open();
-		Read();
-		Close(); 
-	}
-	else
-	{
-		try
-		{
-			Open();
-
-			try
-			{
-				Read();
-			}
-			catch (...)
-			{
-				Close();
-				throw;
-			}
-
-			Close(); 
-		}
-		catch (Helium::Exception& ex)
-		{
-			tstringstream str;
-			str << "While reading '" << m_Path.c_str() << "': " << ex.Get();
-			ex.Set( str.str() );
-			throw;
-		}
-	}
-
-	object = m_Object;
+	return ArchiveModes::Write;
 }
 
-ArchivePtr Persist::GetArchive( const FilePath& path, ArchiveType archiveType )
+ArchiveReader::ArchiveReader( ObjectResolver& resolver )
+	: m_Resolver( resolver )
+{
+
+}
+
+ArchiveReader::ArchiveReader( const FilePath& filePath, ObjectResolver& resolver )
+	: Archive ( filePath )
+	, m_Resolver( resolver )
+{
+}
+
+ArchiveMode ArchiveReader::GetMode() const
+{
+	return ArchiveModes::Read;
+}
+
+ArchiveWriterPtr Persist::GetWriter( const FilePath& path, ObjectIdentifier& identifier, ArchiveType archiveType )
 {
 	switch ( archiveType )
 	{
@@ -119,13 +82,13 @@ ArchivePtr Persist::GetArchive( const FilePath& path, ArchiveType archiveType )
 		{
 			if ( CaseInsensitiveCompareString( path.Extension().c_str(), TXT( "reflect" ) ) )
 			{
-				return new ArchiveBinary( path );
+				return new ArchiveWriterBinary( path, identifier );
 			}
 			break;
 		}
 
 	case ArchiveTypes::Binary:
-		return new ArchiveBinary( path );
+		return new ArchiveWriterBinary( path, identifier );
 
 	default:
 		HELIUM_ASSERT( false );
@@ -135,10 +98,35 @@ ArchivePtr Persist::GetArchive( const FilePath& path, ArchiveType archiveType )
 	throw Reflect::StreamException( TXT( "Unknown archive type" ) );
 }
 
-bool Persist::ToArchive( const FilePath& path, ObjectPtr object, ArchiveType archiveType, tstring* error )
+ArchiveReaderPtr Persist::GetReader( const FilePath& path, ObjectResolver& resolver, ArchiveType archiveType )
+{
+	switch ( archiveType )
+	{
+	case ArchiveTypes::Auto:
+		{
+			if ( CaseInsensitiveCompareString( path.Extension().c_str(), TXT( "reflect" ) ) )
+			{
+				return new ArchiveReaderBinary( path, resolver );
+			}
+			break;
+		}
+
+	case ArchiveTypes::Binary:
+		return new ArchiveReaderBinary( path, resolver );
+
+	default:
+		HELIUM_ASSERT( false );
+		break;
+	}
+
+	throw Reflect::StreamException( TXT( "Unknown archive type" ) );
+}
+
+bool Persist::ToArchive( const FilePath& path, ObjectPtr object, ObjectIdentifier& identifier, ArchiveType archiveType, tstring* error )
 {
 	HELIUM_ASSERT( !path.empty() );
 	PERSIST_SCOPE_TIMER( ( "%s", path.c_str() ) );
+	Log::Debug( TXT( "Generating '%s'\n" ), path.c_str() );
 
 	path.MakePath();
 
@@ -146,13 +134,13 @@ bool Persist::ToArchive( const FilePath& path, ObjectPtr object, ArchiveType arc
 	FilePath safetyPath( path.Directory() + Helium::GetProcessString() );
 	safetyPath.ReplaceExtension( path.Extension() );
 
-	ArchivePtr archive = GetArchive( safetyPath, archiveType );
+	ArchiveWriterPtr archive = GetWriter( safetyPath, identifier, archiveType );
 	archive->Put( object );
 
 	// generate the file to the safety location
 	if ( Helium::IsDebuggerPresent() )
 	{
-		archive->Open( true );
+		archive->Open();
 		archive->Write();
 		archive->Close();
 	}
@@ -162,7 +150,7 @@ bool Persist::ToArchive( const FilePath& path, ObjectPtr object, ArchiveType arc
 
 		try
 		{
-			archive->Open( true );
+			archive->Open();
 			open = true;
 			archive->Write();
 			archive->Close(); 
@@ -210,4 +198,51 @@ bool Persist::ToArchive( const FilePath& path, ObjectPtr object, ArchiveType arc
 	}
 
 	return true;
+}
+
+template<>
+StrongPtr< Object > Persist::FromArchive( const FilePath& path, ObjectResolver& resolver, ArchiveType archiveType )
+{
+	HELIUM_ASSERT( !path.empty() );
+	PERSIST_SCOPE_TIMER( ( "%s", path.c_str() ) );
+	Log::Debug( TXT( "Parsing '%s'\n" ), path.c_str() );
+
+	ArchiveReaderPtr archive = GetReader( path, resolver, archiveType );
+
+	if ( Helium::IsDebuggerPresent() )
+	{
+		archive->Open();
+		archive->Read();
+		archive->Close(); 
+	}
+	else
+	{
+		try
+		{
+			archive->Open();
+
+			try
+			{
+				archive->Read();
+			}
+			catch (...)
+			{
+				archive->Close();
+				throw;
+			}
+
+			archive->Close(); 
+		}
+		catch (Helium::Exception& ex)
+		{
+			tstringstream str;
+			str << "While reading '" << path.c_str() << "': " << ex.Get();
+			ex.Set( str.str() );
+			throw;
+		}
+	}
+
+	ObjectPtr object;
+	archive->Get( object );
+	return object;
 }

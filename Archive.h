@@ -7,6 +7,7 @@
 #include "Foundation/Log.h" 
 #include "Foundation/SmartPtr.h"
 
+#include "Reflect/Data.h"
 #include "Reflect/Class.h"
 #include "Reflect/Exceptions.h"
 
@@ -37,7 +38,6 @@ namespace Helium
 				Auto,
 				Binary,
 				Json,
-				Base
 			};
 		}
 		typedef ArchiveTypes::ArchiveType ArchiveType;
@@ -53,10 +53,6 @@ namespace Helium
 
 		typedef ArchiveModes::ArchiveMode ArchiveMode;
 
-		//
-		// Status reporting
-		//
-
 		namespace ArchiveStates
 		{
 			enum ArchiveState
@@ -68,7 +64,6 @@ namespace Helium
 				ArchiveComplete,
 				PostProcessing,
 				Complete,
-				Publishing,
 			};
 		}
 		typedef ArchiveStates::ArchiveState ArchiveState;
@@ -87,15 +82,9 @@ namespace Helium
 			ArchiveState    m_State;
 			int             m_Progress;
 			tstring         m_Info;
-
-			// flag this if you want to give up
-			mutable bool    m_Abort;
+			mutable bool    m_Abort; // flag this if you want to give up
 		};
 		typedef Helium::Signature< const ArchiveStatus& > ArchiveStatusSignature;
-
-		//
-		// Archive base class
-		//
 
 		class HELIUM_PERSIST_API Archive : public Helium::RefCountBase< Archive >
 		{
@@ -107,102 +96,71 @@ namespace Helium
 			~Archive();
 
 		public:
-			const Helium::FilePath& GetPath() const
-			{
-				return m_Path;
-			}
+			virtual ArchiveType GetType() const = 0;
+			virtual ArchiveMode GetMode() const = 0;
+			inline const Helium::FilePath& GetPath() const;
 
-			ArchiveMode GetMode() const
-			{
-				return m_Mode;
-			}
+			inline void Get( Reflect::ObjectPtr& object );
+			inline void Put( Reflect::Object* object );
 
-			virtual ArchiveType GetType() const
-			{
-				return ArchiveTypes::Base;
-			}
-
-			//
-			// Virutal functionality, meant to be overridden by Binary/XML/etc. archives
-			//
-
-			// File Open/Close
-			virtual void Open( bool write = false ) = 0;
+			virtual void Open() = 0;
 			virtual void Close() = 0;
-
-			// Begins parsing the InputStream
-			virtual void Read() = 0;
-
-			// Write to the OutputStream
-			virtual void Write() = 0;
-
-			//
-			// Event API
-			//
 
 			ArchiveStatusSignature::Event e_Status;
 
-			//
-			// Get objects from the file
-			//
-
-			void Put( Reflect::Object* object );
-			Reflect::ObjectPtr Get( const Reflect::Class* searchClass = NULL );
-			void Get( Reflect::ObjectPtr& object );
-
-			// Get a single object of the specified type in the archive
-			template <class T>
-			Helium::StrongPtr<T> Get()
-			{
-				Reflect::ObjectPtr found = Get( Reflect::GetClass<T>() );
-
-				if (found.ReferencesObject())
-				{
-					return SafeCast<T>( found );
-				}
-				else
-				{
-					return NULL;
-				}
-			}
-
 		protected:
-			// The number of bytes Parsed so far
-			unsigned m_Progress;
-
-			// The abort status
-			bool m_Abort;
-
-			// The file we are working with
-			FilePath m_Path;
-
-			// The mode
-			ArchiveMode m_Mode;
-
-			// The array of objects that we've found
+			uint32_t           m_Progress; // in bytes
+			bool               m_Abort;
+			FilePath           m_Path;
 			Reflect::ObjectPtr m_Object;
 		};
-
 		typedef Helium::SmartPtr< Archive > ArchivePtr;
 
-		// Get parser for a file
-		HELIUM_PERSIST_API ArchivePtr GetArchive( const FilePath& path, ArchiveType archiveType = ArchiveTypes::Auto );
-
-		// Write an object to a file
-		HELIUM_PERSIST_API bool ToArchive( const FilePath& path, Reflect::ObjectPtr object, ArchiveType archiveType = ArchiveTypes::Auto, tstring* error = NULL );
-
-		// Parse an object from a file
-		template <class T>
-		Helium::StrongPtr<T> FromArchive( const FilePath& path, ArchiveType archiveType = ArchiveTypes::Auto )
+		class HELIUM_PERSIST_API ArchiveWriter : public Archive
 		{
-			ArchivePtr archive = GetArchive( path, archiveType );
+		public:
+			ArchiveWriter( Reflect::ObjectIdentifier& identifier );
+			ArchiveWriter( const FilePath& path, Reflect::ObjectIdentifier& identifier );
 
-			if ( archive.ReferencesObject() )
-			{
-				return archive->Get< T >();
-			}
+			virtual ArchiveMode GetMode() const HELIUM_OVERRIDE;
+			virtual void Write() = 0;
 
-			return NULL;
-		}
+		protected:
+			Reflect::ObjectIdentifier&  m_Identifier;
+		};
+		typedef Helium::SmartPtr< ArchiveWriter > ArchiveWriterPtr;
+
+		class HELIUM_PERSIST_API ArchiveReader : public Archive
+		{
+		public:
+			ArchiveReader( Reflect::ObjectResolver& resolver );
+			ArchiveReader( const FilePath& path, Reflect::ObjectResolver& resolver );
+
+			virtual ArchiveMode GetMode() const HELIUM_OVERRIDE;
+			virtual void Read() = 0;
+
+		protected:
+			Reflect::ObjectResolver&    m_Resolver;
+		};
+		typedef Helium::SmartPtr< ArchiveReader > ArchiveReaderPtr;
+
+		//
+		// Static API, top level functions
+		//
+
+		HELIUM_PERSIST_API ArchiveWriterPtr GetWriter( const FilePath& path, Reflect::ObjectIdentifier& identifier, ArchiveType archiveType = ArchiveTypes::Auto );
+		HELIUM_PERSIST_API ArchiveReaderPtr GetReader( const FilePath& path, Reflect::ObjectResolver& resolver, ArchiveType archiveType = ArchiveTypes::Auto );
+
+		HELIUM_PERSIST_API bool
+			ToArchive( const FilePath& path, Reflect::ObjectPtr object, Reflect::ObjectIdentifier& identifier, ArchiveType archiveType = ArchiveTypes::Auto, tstring* error = NULL );
+
+		template <class T> Helium::StrongPtr<T>
+			FromArchive( const FilePath& path, Reflect::ObjectResolver& resolver, ArchiveType archiveType = ArchiveTypes::Auto );
+		
+		template <>
+		HELIUM_PERSIST_API Helium::StrongPtr< Reflect::Object >
+			FromArchive( const FilePath& path, Reflect::ObjectResolver& resolver, ArchiveType archiveType  );
 	}
 }
+
+#include "Persist/Archive.inl"

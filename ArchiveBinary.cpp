@@ -13,107 +13,48 @@ using namespace Helium;
 using namespace Helium::Reflect;
 using namespace Helium::Persist;
 
-const uint32_t ArchiveBinary::CURRENT_VERSION = 8;
+const uint32_t Persist::BINARY_CURRENT_VERSION = 8;
 
-ArchiveBinary::ArchiveBinary( const FilePath& path )
-: Archive( path )
-, m_Stream( NULL )
-, m_CleanupStream( false )
-, m_Version( CURRENT_VERSION )
-, m_Size( 0 )
+ArchiveWriterBinary::ArchiveWriterBinary( const FilePath& path, Reflect::ObjectIdentifier& identifier )
+: ArchiveWriter( path, identifier )
 {
 }
 
-ArchiveBinary::ArchiveBinary( Stream *stream, bool write /* = false */ )
-: m_Stream( NULL )
-, m_CleanupStream( false )
-, m_Version( CURRENT_VERSION )
-, m_Size( 0 )
+ArchiveWriterBinary::ArchiveWriterBinary( Stream *stream, Reflect::ObjectIdentifier& identifier )
+	: ArchiveWriter( identifier )
 {
-	OpenStream(stream, write);
+	OpenStream( stream, false );
 }
 
-ArchiveBinary::~ArchiveBinary()
-{
-	if ( m_CleanupStream )
-	{
-		delete m_Stream;
-	}
-}
-
-ArchiveType ArchiveBinary::GetType() const
+ArchiveType ArchiveWriterBinary::GetType() const
 {
 	return ArchiveTypes::Binary;
 }
 
-void ArchiveBinary::Open( bool write )
+void ArchiveWriterBinary::Open()
 {
 #ifdef PERSIST_ARCHIVE_VERBOSE
 	Log::Print(TXT("Opening file '%s'\n"), m_Path.c_str());
 #endif
 
 	FileStream* stream = new FileStream();
-	stream->Open(  m_Path, write ? FileStream::MODE_WRITE : FileStream::MODE_READ );
-	m_CleanupStream = true;
-
-	OpenStream( stream, write );
+	stream->Open( m_Path, FileStream::MODE_WRITE );
+	OpenStream( stream, true );
 }
 
-void ArchiveBinary::OpenStream( Stream* stream, bool write )
+void ArchiveWriterBinary::OpenStream( Stream* stream, bool cleanup )
 {
-	m_Stream = stream; 
-	m_Mode = (write) ? ArchiveModes::Write : ArchiveModes::Read; 
+	m_Stream.Reset( stream, !cleanup );
 }
 
-void ArchiveBinary::Close()
+void ArchiveWriterBinary::Close()
 {
 	HELIUM_ASSERT( m_Stream );
 	m_Stream->Close(); 
-	m_Stream = NULL; 
+	m_Stream.Release(); 
 }
 
-void ArchiveBinary::Read()
-{
-	PERSIST_SCOPE_TIMER( ("Reflect - Binary Read") );
-
-	ArchiveStatus info( *this, ArchiveStates::Starting );
-	e_Status.Raise( info );
-
-	m_Abort = false;
-
-	// determine the size of the input stream
-	m_Stream->Seek(0, SeekOrigins::End);
-	m_Size = m_Stream->Tell();
-	m_Stream->Seek(0, SeekOrigins::Begin);
-
-	// fail on an empty input stream
-	if ( m_Size == 0 )
-	{
-		throw Reflect::StreamException( TXT( "Input stream is empty (%s)" ), m_Path.c_str() );
-	}
-
-	// read version
-	m_Stream->Read( m_Version );
-	if (m_Version != CURRENT_VERSION)
-	{
-		throw Reflect::StreamException( TXT( "Input stream version for '%s' is not what is currently supported (input: %d, current: %d)\n" ), m_Path.c_str(), m_Version, CURRENT_VERSION); 
-	}
-
-	DynamicArray< ObjectPtr > objects;
-
-	// deserialize main file objects
-	{
-		PERSIST_SCOPE_TIMER( ("Read Objects") );
-		DeserializeArray(objects, ArchiveFlags::Status);
-	}
-
-#pragma TODO("Link objects")
-
-	info.m_State = ArchiveStates::Complete;
-	e_Status.Raise( info );
-}
-
-void ArchiveBinary::Write()
+void ArchiveWriterBinary::Write()
 {
 	PERSIST_SCOPE_TIMER( ("Reflect - Binary Write") );
 
@@ -121,8 +62,7 @@ void ArchiveBinary::Write()
 	e_Status.Raise( info );
 
 	// write version
-	HELIUM_ASSERT( m_Version == CURRENT_VERSION );
-	m_Stream->Write( m_Version ); 
+	m_Stream->Write( BINARY_CURRENT_VERSION ); 
 
 	DynamicArray< ObjectPtr > objects;
 
@@ -141,7 +81,7 @@ void ArchiveBinary::Write()
 	e_Status.Raise( info );
 }
 
-void ArchiveBinary::SerializeInstance(Object* object)
+void ArchiveWriterBinary::SerializeInstance(Object* object)
 {
 	// write the crc of the class of object (used to factory allocate an instance when reading)
 	uint32_t classCrc = 0;
@@ -197,7 +137,7 @@ void ArchiveBinary::SerializeInstance(Object* object)
 	m_Stream->Seek(0, SeekOrigins::End);
 }
 
-void ArchiveBinary::SerializeInstance( void* structure, const Structure* type )
+void ArchiveWriterBinary::SerializeInstance( void* structure, const Structure* type )
 {
 	// write the crc of the class of structure (used to factory allocate an instance when reading)
 	uint32_t typeCrc = Crc32( type->m_Name );
@@ -244,7 +184,7 @@ void ArchiveBinary::SerializeInstance( void* structure, const Structure* type )
 	m_Stream->Seek(0, SeekOrigins::End);
 }
 
-void ArchiveBinary::SerializeFields( Object* object )
+void ArchiveWriterBinary::SerializeFields( Object* object )
 {
 	const Composite* composite = object->GetClass();
 
@@ -280,7 +220,7 @@ void ArchiveBinary::SerializeFields( Object* object )
 				case ReflectionTypes::ScalarData:
 					{
 						ScalarData* data = static_cast< ScalarData* >( field->m_Data );
-						data->Serialize( DataInstance( object, field ), *m_Stream );
+						data->Serialize( DataInstance( object, field ), *m_Stream, m_Identifier );
 						break;
 					}
 #pragma TODO("Containers")
@@ -313,7 +253,7 @@ void ArchiveBinary::SerializeFields( Object* object )
 	m_Stream->Write(&terminator); 
 }
 
-void ArchiveBinary::SerializeFields( void* instance, const Reflect::Structure* composite )
+void ArchiveWriterBinary::SerializeFields( void* instance, const Reflect::Structure* composite )
 {
 	DynamicArray< const Composite* > bases;
 	for ( const Composite* current = composite; current != NULL; current = current->m_Base )
@@ -345,7 +285,7 @@ void ArchiveBinary::SerializeFields( void* instance, const Reflect::Structure* c
 				case ReflectionTypes::ScalarData:
 					{
 						ScalarData* data = static_cast< ScalarData* >( field->m_Data );
-						data->Serialize( DataInstance( instance, field ), *m_Stream );
+						data->Serialize( DataInstance( instance, field ), *m_Stream, m_Identifier );
 						break;
 					}
 #pragma TODO("Containers")
@@ -376,7 +316,7 @@ void ArchiveBinary::SerializeFields( void* instance, const Reflect::Structure* c
 	m_Stream->Write(&terminator);
 }
 
-void ArchiveBinary::SerializeArray( const DynamicArray< ObjectPtr >& objects, uint32_t flags )
+void ArchiveWriterBinary::SerializeArray( const DynamicArray< ObjectPtr >& objects, uint32_t flags )
 {
 	int32_t size = (int32_t)( objects.GetSize() );
 	m_Stream->Write(&size); 
@@ -409,7 +349,101 @@ void ArchiveBinary::SerializeArray( const DynamicArray< ObjectPtr >& objects, ui
 	m_Stream->Write(&terminator); 
 }
 
-void ArchiveBinary::DeserializeInstance(ObjectPtr& object)
+void ArchiveWriterBinary::ToStream( Object* object, Stream& stream, ObjectIdentifier& identifier )
+{
+	ArchiveWriterBinary archive ( &stream, identifier );
+	archive.m_Object = object;
+	archive.Write();   
+	archive.Close(); 
+}
+
+ArchiveReaderBinary::ArchiveReaderBinary( const FilePath& path, ObjectResolver& resolver )
+: ArchiveReader( path, resolver )
+, m_Stream( NULL )
+, m_Version( 0 )
+, m_Size( 0 )
+{
+}
+
+ArchiveReaderBinary::ArchiveReaderBinary( Stream *stream, ObjectResolver& resolver )
+: ArchiveReader( resolver )
+, m_Stream( NULL )
+, m_Version( 0 )
+, m_Size( 0 )
+{
+	OpenStream( stream, false );
+}
+
+ArchiveType ArchiveReaderBinary::GetType() const
+{
+	return ArchiveTypes::Binary;
+}
+
+void ArchiveReaderBinary::Open()
+{
+#ifdef PERSIST_ARCHIVE_VERBOSE
+	Log::Print(TXT("Opening file '%s'\n"), m_Path.c_str());
+#endif
+
+	FileStream* stream = new FileStream();
+	stream->Open( m_Path, FileStream::MODE_READ );
+	OpenStream( stream, true );
+}
+
+void ArchiveReaderBinary::OpenStream( Stream* stream, bool cleanup )
+{
+	m_Stream.Reset( stream, !cleanup );
+}
+
+void ArchiveReaderBinary::Close()
+{
+	HELIUM_ASSERT( m_Stream );
+	m_Stream->Close(); 
+	m_Stream.Release(); 
+}
+
+void ArchiveReaderBinary::Read()
+{
+	PERSIST_SCOPE_TIMER( ("Reflect - Binary Read") );
+
+	ArchiveStatus info( *this, ArchiveStates::Starting );
+	e_Status.Raise( info );
+
+	m_Abort = false;
+
+	// determine the size of the input stream
+	m_Stream->Seek(0, SeekOrigins::End);
+	m_Size = m_Stream->Tell();
+	m_Stream->Seek(0, SeekOrigins::Begin);
+
+	// fail on an empty input stream
+	if ( m_Size == 0 )
+	{
+		throw Reflect::StreamException( TXT( "Input stream is empty (%s)" ), m_Path.c_str() );
+	}
+
+	// read version
+	m_Stream->Read( m_Version );
+	if (m_Version != BINARY_CURRENT_VERSION)
+	{
+		throw Reflect::StreamException( TXT( "Input stream version for '%s' is not what is currently supported (input: %d, current: %d)\n" ), m_Path.c_str(), m_Version, BINARY_CURRENT_VERSION); 
+	}
+
+	DynamicArray< ObjectPtr > objects;
+
+	// deserialize main file objects
+	{
+		PERSIST_SCOPE_TIMER( ("Read Objects") );
+		DeserializeArray(objects, ArchiveFlags::Status);
+	}
+
+#pragma TODO("Link objects")
+
+	info.m_State = ArchiveStates::Complete;
+	e_Status.Raise( info );
+}
+
+void ArchiveReaderBinary::DeserializeInstance(ObjectPtr& object)
 {
 	//
 	// If we don't have an object allocated for deserialization, pull one from the stream
@@ -438,7 +472,7 @@ void ArchiveBinary::DeserializeInstance(ObjectPtr& object)
 	}
 }
 
-void ArchiveBinary::DeserializeInstance( void* structure, const Structure* type )
+void ArchiveReaderBinary::DeserializeInstance( void* structure, const Structure* type )
 {
 #ifdef PERSIST_ARCHIVE_VERBOSE
 	Log::Print(TXT("Deserializing %s\n"), type->m_Name);
@@ -447,7 +481,7 @@ void ArchiveBinary::DeserializeInstance( void* structure, const Structure* type 
 	DeserializeFields(structure, type);
 }
 
-void ArchiveBinary::DeserializeFields(Object* object)
+void ArchiveReaderBinary::DeserializeFields(Object* object)
 {
 	int32_t fieldCount = -1;
 	m_Stream->Read(fieldCount); 
@@ -473,7 +507,7 @@ void ArchiveBinary::DeserializeFields(Object* object)
 			case ReflectionTypes::ScalarData:
 				{
 					ScalarData* data = static_cast< ScalarData* >( field->m_Data );
-					data->Deserialize( DataInstance( object, field ), *m_Stream, /* raiseChanged = */ false );
+					data->Deserialize( DataInstance( object, field ), *m_Stream, m_Resolver, /* raiseChanged = */ false );
 					break;
 				}
 #pragma TODO("Containers")
@@ -520,7 +554,7 @@ void ArchiveBinary::DeserializeFields(Object* object)
 	}
 }
 
-void ArchiveBinary::DeserializeFields( void* instance, const Structure* type )
+void ArchiveReaderBinary::DeserializeFields( void* instance, const Structure* type )
 {
 	int32_t fieldCount = -1;
 	m_Stream->Read(fieldCount);    
@@ -541,7 +575,7 @@ void ArchiveBinary::DeserializeFields( void* instance, const Structure* type )
 			case ReflectionTypes::ScalarData:
 				{
 					ScalarData* data = static_cast< ScalarData* >( field->m_Data );
-					data->Deserialize( DataInstance( instance, field ), *m_Stream, /* raiseChanged = */ false );
+					data->Deserialize( DataInstance( instance, field ), *m_Stream, m_Resolver, /* raiseChanged = */ false );
 					break;
 				}
 #pragma TODO("Containers")
@@ -571,7 +605,7 @@ void ArchiveBinary::DeserializeFields( void* instance, const Structure* type )
 	}
 }
 
-void ArchiveBinary::DeserializeArray( DynamicArray< ObjectPtr >& objects, uint32_t flags )
+void ArchiveReaderBinary::DeserializeArray( DynamicArray< ObjectPtr >& objects, uint32_t flags )
 {
 	uint32_t startOffset = (uint32_t)m_Stream->Tell();
 
@@ -626,7 +660,7 @@ void ArchiveBinary::DeserializeArray( DynamicArray< ObjectPtr >& objects, uint32
 	}
 }
 
-ObjectPtr ArchiveBinary::Allocate()
+ObjectPtr ArchiveReaderBinary::Allocate()
 {
 	ObjectPtr object;
 
@@ -684,17 +718,9 @@ ObjectPtr ArchiveBinary::Allocate()
 	return object;
 }
 
-void ArchiveBinary::ToStream( Object* object, Stream& stream )
+ObjectPtr ArchiveReaderBinary::FromStream( Stream& stream, ObjectResolver& resolver )
 {
-	ArchiveBinary archive ( &stream, true );
-	archive.m_Object = object;
-	archive.Write();   
-	archive.Close(); 
-}
-
-ObjectPtr ArchiveBinary::FromStream( Stream& stream )
-{
-	ArchiveBinary archive( &stream, false );
+	ArchiveReaderBinary archive( &stream, resolver );
 	archive.Read();
 	archive.Close(); 
 	return archive.m_Object;

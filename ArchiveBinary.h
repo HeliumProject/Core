@@ -52,41 +52,56 @@ namespace Helium
 {
 	namespace Persist
 	{
-		class HELIUM_PERSIST_API ArchiveBinary : public Archive
+		extern const uint32_t BINARY_CURRENT_VERSION;
+
+		class HELIUM_PERSIST_API ArchiveWriterBinary : public ArchiveWriter
 		{
 		public:
-			ArchiveBinary( const FilePath& path );
-			ArchiveBinary( Stream *stream, bool write = false );
-			~ArchiveBinary();
+			ArchiveWriterBinary( const FilePath& path, Reflect::ObjectIdentifier& identifier );
+			ArchiveWriterBinary( Stream *stream, Reflect::ObjectIdentifier& identifier );
 			
-			Stream& GetStream()
-			{
-				return *m_Stream;
-			}
-
-			uint32_t GetVersion()
-			{
-				return m_Version; 
-			}
-
-		private:
 			virtual ArchiveType GetType() const HELIUM_OVERRIDE;
-
-			// Stream
-			virtual void Open( bool write = false ) HELIUM_OVERRIDE;
-			void OpenStream( Stream* stream, bool write = false );
+			virtual void Open() HELIUM_OVERRIDE;
+			void OpenStream( Stream* stream, bool cleanup );
 			virtual void Close() HELIUM_OVERRIDE; 
-			virtual void Read() HELIUM_OVERRIDE;
 			virtual void Write() HELIUM_OVERRIDE;
 
-			// Serialize
+		private:
 			void SerializeInstance( Reflect::Object* object );
 			void SerializeInstance( void* structure, const Reflect::Structure* type );
 			void SerializeFields( Reflect::Object* object );
 			void SerializeFields( void* structure, const Reflect::Structure* type );
 			void SerializeArray( const DynamicArray< Reflect::ObjectPtr >& objects, uint32_t flags = 0 );
 
-			// Deserialize
+		public:
+			static void ToStream( Reflect::Object* object, Stream& stream, Reflect::ObjectIdentifier& identifier );
+
+		private:
+			friend class Archive;
+
+			AutoPtr< Stream > m_Stream;
+
+			struct WriteFields
+			{
+				int32_t         m_Count;
+				std::streamoff  m_CountOffset;
+			};
+			DynamicArray<WriteFields> m_FieldStack;
+		};
+
+		class HELIUM_PERSIST_API ArchiveReaderBinary : public ArchiveReader
+		{
+		public:
+			ArchiveReaderBinary( const FilePath& path, Reflect::ObjectResolver& resolver );
+			ArchiveReaderBinary( Stream *stream, Reflect::ObjectResolver& resolver );
+			
+			virtual ArchiveType GetType() const HELIUM_OVERRIDE;
+			virtual void Open() HELIUM_OVERRIDE;
+			void OpenStream( Stream* stream, bool cleanup );
+			virtual void Close() HELIUM_OVERRIDE; 
+			virtual void Read() HELIUM_OVERRIDE;
+
+		private:
 			void DeserializeInstance( Reflect::ObjectPtr& object );
 			void DeserializeInstance( void* structure, const Reflect::Structure* type );
 			void DeserializeFields( Reflect::Object* object );
@@ -95,35 +110,14 @@ namespace Helium
 			Reflect::ObjectPtr Allocate();
 
 		public:
-			static void               ToStream( Reflect::Object* object, Stream& stream );
-			static Reflect::ObjectPtr FromStream( Stream& stream );
-
-			static const uint32_t CURRENT_VERSION;
+			static Reflect::ObjectPtr FromStream( Stream& stream, Reflect::ObjectResolver& resolver );
 
 		private:
 			friend class Archive;
 
-			// The stream to use
-			Stream* m_Stream;
-
-			// Clean up the stream?
-			bool m_CleanupStream;
-
-			// File format version
+			AutoPtr< Stream > m_Stream;
 			uint32_t m_Version;
-
-			// File size
 			int64_t m_Size;
-
-			// Data for the current field we are writing
-			struct WriteFields
-			{
-				int32_t         m_Count;
-				std::streamoff  m_CountOffset;
-			};
-
-			// The stack of fields we are writing
-			DynamicArray<WriteFields> m_FieldStack;
 		};
 	}
 }
