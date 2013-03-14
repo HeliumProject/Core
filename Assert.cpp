@@ -2,6 +2,8 @@
 #include "Platform/Assert.h"
 #include "Platform/Trace.h"
 #include "Platform/Console.h"
+#include "Platform/Exception.h"
+#include <vector>
 
 #if HELIUM_ASSERT_ENABLED
 
@@ -94,6 +96,27 @@ AssertResult Assert::Trigger(
 	}
 
 	HELIUM_TRACE( TraceLevels::Error, TXT( "%s\n" ), messageText );
+    
+#if !HELIUM_RELEASE && !HELIUM_PROFILE
+    if (Helium::GetSymbolsInitialized())
+    {
+        std::vector<uintptr_t> trace;
+        Helium::GetStackTrace( trace );
+
+        tstring str = TXT("Stack Trace:\n");
+        Helium::TranslateStackTrace( trace, str );
+
+        HELIUM_TRACE( TraceLevels::Error, str.c_str() );
+    }
+    else
+    {
+        tstring str = TXT("Stack trace unavailable - symbols not loaded\n");
+        HELIUM_TRACE( TraceLevels::Error, str.c_str() );
+    }
+#else
+    tstring str = TXT("Stack trace unavailable - symbols not loaded\n");
+    HELIUM_TRACE( TraceLevels::Error, str.c_str() );
+#endif
 
 	// Present the assert message and get how we should proceed.
 	AssertResult result = TriggerImplementation( messageText );
