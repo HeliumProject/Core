@@ -40,13 +40,13 @@ Archive::~Archive()
 {
 }
 
-ArchiveWriter::ArchiveWriter( ObjectIdentifier& identifier )
+ArchiveWriter::ArchiveWriter( ObjectIdentifier* identifier )
 	: m_Identifier( identifier )
 {
 
 }
 
-ArchiveWriter::ArchiveWriter( const FilePath& filePath, ObjectIdentifier& identifier )
+ArchiveWriter::ArchiveWriter( const FilePath& filePath, ObjectIdentifier* identifier )
 	: Archive( filePath )
 	, m_Identifier( identifier )
 {
@@ -57,13 +57,61 @@ ArchiveMode ArchiveWriter::GetMode() const
 	return ArchiveModes::Write;
 }
 
-ArchiveReader::ArchiveReader( ObjectResolver& resolver )
+void ArchiveWriter::Identify( Object* object, Name& identity )
+{
+	if ( m_Identifier )
+	{
+		m_Identifier->Identify( object, identity );
+
+		bool found = false;
+		for ( DynamicArray< ObjectPtr >::ConstIterator itr = m_Objects.Begin(), end = m_Objects.End(); itr != end; ++itr )
+		{
+			if ( itr->Ptr() == object )
+			{
+				found = true;
+				break;
+			}
+		}
+
+		if ( !found )
+		{
+			// this will cause it to be written after the current object-in-progress (see Write)
+			m_Objects.Push( object );
+		}
+	}
+	else
+	{
+		size_t index = Invalid< size_t >();
+		for ( DynamicArray< ObjectPtr >::ConstIterator itr = m_Objects.Begin(), end = m_Objects.End(); itr != end; ++itr )
+		{
+			if ( itr->Ptr() == object )
+			{
+				index = m_Objects.GetIndex( itr );
+				break;
+			}
+		}
+
+		if ( index == Invalid< size_t >() )
+		{
+			index = m_Objects.GetSize();
+
+			// this will cause it to be written after the current object-in-progress (see Write)
+			m_Objects.Push( object );
+		}
+
+		String str;
+		str.Format( "%d", index );
+		identity.Set( str );
+	}
+}
+
+ArchiveReader::ArchiveReader( ObjectResolver* resolver )
 	: m_Resolver( resolver )
 {
 
 }
 
-ArchiveReader::ArchiveReader( const FilePath& filePath, ObjectResolver& resolver )
+ArchiveReader::ArchiveReader( const FilePath& filePath, ObjectResolver* resolver )
 	: Archive ( filePath )
 	, m_Resolver( resolver )
 {
@@ -74,7 +122,43 @@ ArchiveMode ArchiveReader::GetMode() const
 	return ArchiveModes::Read;
 }
 
-ArchiveWriterPtr Persist::GetWriter( const FilePath& path, ObjectIdentifier& identifier, ArchiveType archiveType )
+void ArchiveReader::Resolve( const Name& identity, ObjectPtr& pointer, const Class* pointerClass )
+{
+	if ( m_Resolver )
+	{
+		m_Resolver->Resolve( identity, pointer, pointerClass );
+	}
+	else
+	{
+		uint32_t index = Invalid< uint32_t >();
+		String str ( identity.Get() );
+		str.Parse( "%d", &index );
+
+		Object* found = NULL;
+		if ( index >=0 && index <= m_Objects.GetSize() )
+		{
+			found = m_Objects.GetElement( index );
+		}
+
+		if ( found )
+		{
+			if ( !found->IsClass( pointerClass ) )
+			{
+				Log::Warning( TXT( "Object of type '%s' is not valid for pointer type '%s'" ), pointer->GetClass()->m_Name, pointerClass->m_Name );
+			}
+			else
+			{
+				pointer = found;
+			}
+		}
+		else // not found yet, must be later in the file, add a fixup to try again once the objects are done loading
+		{
+			m_Fixups.Push( Fixup ( identity, pointer, pointerClass ) );
+		}
+	}
+}
+
+ArchiveWriterPtr Persist::GetWriter( const FilePath& path, ObjectIdentifier* identifier, ArchiveType archiveType )
 {
 	switch ( archiveType )
 	{
@@ -95,10 +179,10 @@ ArchiveWriterPtr Persist::GetWriter( const FilePath& path, ObjectIdentifier& ide
 		break;
 	}
 
-	throw Reflect::StreamException( TXT( "Unknown archive type" ) );
+	throw Persist::StreamException( TXT( "Unknown archive type" ) );
 }
 
-ArchiveReaderPtr Persist::GetReader( const FilePath& path, ObjectResolver& resolver, ArchiveType archiveType )
+ArchiveReaderPtr Persist::GetReader( const FilePath& path, ObjectResolver* resolver, ArchiveType archiveType )
 {
 	switch ( archiveType )
 	{
@@ -119,10 +203,10 @@ ArchiveReaderPtr Persist::GetReader( const FilePath& path, ObjectResolver& resol
 		break;
 	}
 
-	throw Reflect::StreamException( TXT( "Unknown archive type" ) );
+	throw Persist::StreamException( TXT( "Unknown archive type" ) );
 }
 
-bool Persist::ToArchive( const FilePath& path, ObjectPtr object, ObjectIdentifier& identifier, ArchiveType archiveType, tstring* error )
+bool Persist::ToArchive( const FilePath& path, ObjectPtr object, ObjectIdentifier* identifier, ArchiveType archiveType, tstring* error )
 {
 	HELIUM_ASSERT( !path.empty() );
 	PERSIST_SCOPE_TIMER( ( "%s", path.c_str() ) );
@@ -201,7 +285,7 @@ bool Persist::ToArchive( const FilePath& path, ObjectPtr object, ObjectIdentifie
 }
 
 template<>
-StrongPtr< Object > Persist::FromArchive( const FilePath& path, ObjectResolver& resolver, ArchiveType archiveType )
+StrongPtr< Object > Persist::FromArchive( const FilePath& path, ObjectResolver* resolver, ArchiveType archiveType )
 {
 	HELIUM_ASSERT( !path.empty() );
 	PERSIST_SCOPE_TIMER( ( "%s", path.c_str() ) );

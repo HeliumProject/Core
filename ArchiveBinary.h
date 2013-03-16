@@ -54,11 +54,13 @@ namespace Helium
 	{
 		extern const uint32_t BINARY_CURRENT_VERSION;
 
+		typedef void (Reflect::Object::*ObjectNotify)( const Reflect::Field* );
+
 		class HELIUM_PERSIST_API ArchiveWriterBinary : public ArchiveWriter
 		{
 		public:
-			ArchiveWriterBinary( const FilePath& path, Reflect::ObjectIdentifier& identifier );
-			ArchiveWriterBinary( Stream *stream, Reflect::ObjectIdentifier& identifier );
+			ArchiveWriterBinary( const FilePath& path, Reflect::ObjectIdentifier* identifier = NULL );
+			ArchiveWriterBinary( Stream *stream, Reflect::ObjectIdentifier* identifier = NULL );
 			
 			virtual ArchiveType GetType() const HELIUM_OVERRIDE;
 			virtual void Open() HELIUM_OVERRIDE;
@@ -67,14 +69,13 @@ namespace Helium
 			virtual void Write() HELIUM_OVERRIDE;
 
 		private:
-			void SerializeInstance( Reflect::Object* object );
-			void SerializeInstance( void* structure, const Reflect::Structure* type );
-			void SerializeFields( Reflect::Object* object );
-			void SerializeFields( void* structure, const Reflect::Structure* type );
 			void SerializeArray( const DynamicArray< Reflect::ObjectPtr >& objects, uint32_t flags = 0 );
+			void SerializeInstance( void* instance, const Reflect::Composite* type, ObjectNotify pre, ObjectNotify post );
+			void SerializeFields( void* instance, const Reflect::Composite* type, ObjectNotify pre, ObjectNotify post );
+			void SerializeField( void* instance, const Reflect::Field* field );
 
 		public:
-			static void ToStream( Reflect::Object* object, Stream& stream, Reflect::ObjectIdentifier& identifier );
+			static void ToStream( Reflect::Object* object, Stream& stream, Reflect::ObjectIdentifier* identifier = NULL );
 
 		private:
 			friend class Archive;
@@ -92,8 +93,8 @@ namespace Helium
 		class HELIUM_PERSIST_API ArchiveReaderBinary : public ArchiveReader
 		{
 		public:
-			ArchiveReaderBinary( const FilePath& path, Reflect::ObjectResolver& resolver );
-			ArchiveReaderBinary( Stream *stream, Reflect::ObjectResolver& resolver );
+			ArchiveReaderBinary( const FilePath& path, Reflect::ObjectResolver* resolver = NULL );
+			ArchiveReaderBinary( Stream *stream, Reflect::ObjectResolver* resolver = NULL );
 			
 			virtual ArchiveType GetType() const HELIUM_OVERRIDE;
 			virtual void Open() HELIUM_OVERRIDE;
@@ -102,15 +103,13 @@ namespace Helium
 			virtual void Read() HELIUM_OVERRIDE;
 
 		private:
-			void DeserializeInstance( Reflect::ObjectPtr& object );
-			void DeserializeInstance( void* structure, const Reflect::Structure* type );
-			void DeserializeFields( Reflect::Object* object );
-			void DeserializeFields( void* object, const Reflect::Structure* type );
 			void DeserializeArray( DynamicArray< Reflect::ObjectPtr >& objects, uint32_t flags = 0 );
-			Reflect::ObjectPtr Allocate();
+			void DeserializeInstance( void* instance, const Reflect::Composite* composite, ObjectNotify pre, ObjectNotify post );
+			void DeserializeFields( void* instance, const Reflect::Composite* composite, ObjectNotify pre, ObjectNotify post );
+			void DeserializeField( void* instance, const Reflect::Field* field );
 
 		public:
-			static Reflect::ObjectPtr FromStream( Stream& stream, Reflect::ObjectResolver& resolver );
+			static Reflect::ObjectPtr FromStream( Stream& stream, Reflect::ObjectResolver* resolver = NULL );
 
 		private:
 			friend class Archive;

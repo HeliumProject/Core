@@ -14,7 +14,7 @@ void Helium::Persist::Archive::Put( Reflect::Object* object )
 }
 
 template <class T>
-Helium::StrongPtr<T> Helium::Persist::FromArchive( const FilePath& path, Reflect::ObjectResolver& resolver, ArchiveType archiveType )
+Helium::StrongPtr<T> Helium::Persist::FromArchive( const FilePath& path, Reflect::ObjectResolver* resolver, ArchiveType archiveType )
 {
 	return SafeCast< T >( Persist::FroArchive< Reflect::Object >( path, resolver, archiveType ) );
 }

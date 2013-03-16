@@ -12,6 +12,7 @@
 #include "Reflect/Exceptions.h"
 
 #include "Persist/API.h"
+#include "Persist/Exceptions.h"
 
 // enable verbose archive printing
 //#define PERSIST_ARCHIVE_VERBOSE
@@ -116,50 +117,81 @@ namespace Helium
 		};
 		typedef Helium::SmartPtr< Archive > ArchivePtr;
 
-		class HELIUM_PERSIST_API ArchiveWriter : public Archive
+		//
+		// Writer
+		//
+
+		class HELIUM_PERSIST_API ArchiveWriter : public Archive, public Reflect::ObjectIdentifier
 		{
 		public:
-			ArchiveWriter( Reflect::ObjectIdentifier& identifier );
-			ArchiveWriter( const FilePath& path, Reflect::ObjectIdentifier& identifier );
+			ArchiveWriter( Reflect::ObjectIdentifier* identifier = NULL );
+			ArchiveWriter( const FilePath& path, Reflect::ObjectIdentifier* identifier = NULL );
 
 			virtual ArchiveMode GetMode() const HELIUM_OVERRIDE;
 			virtual void Write() = 0;
+			virtual void Identify( Reflect::Object* object, Name& identity ) HELIUM_OVERRIDE;
 
 		protected:
-			Reflect::ObjectIdentifier&  m_Identifier;
+			DynamicArray< Reflect::ObjectPtr > m_Objects;
+			Reflect::ObjectIdentifier*         m_Identifier;
 		};
 		typedef Helium::SmartPtr< ArchiveWriter > ArchiveWriterPtr;
 
-		class HELIUM_PERSIST_API ArchiveReader : public Archive
+		//
+		// Reader
+		//
+
+		class HELIUM_PERSIST_API ArchiveReader : public Archive, public Reflect::ObjectResolver
 		{
 		public:
-			ArchiveReader( Reflect::ObjectResolver& resolver );
-			ArchiveReader( const FilePath& path, Reflect::ObjectResolver& resolver );
+			ArchiveReader( Reflect::ObjectResolver* resolver = NULL );
+			ArchiveReader( const FilePath& path, Reflect::ObjectResolver* resolver = NULL );
 
 			virtual ArchiveMode GetMode() const HELIUM_OVERRIDE;
 			virtual void Read() = 0;
+			virtual void Resolve( const Name& identity, Reflect::ObjectPtr& pointer, const Reflect::Class* pointerClass ) HELIUM_OVERRIDE;
 
 		protected:
-			Reflect::ObjectResolver&    m_Resolver;
+			struct Fixup
+			{
+				Fixup( const Fixup& rhs )
+					: m_Identity ( rhs.m_Identity )
+					, m_Pointer( rhs.m_Pointer )
+					, m_PointerClass( rhs.m_PointerClass )
+				{}
+
+				Fixup( const Name& identity, Reflect::ObjectPtr& pointer, const Reflect::Class* pointerClass )
+					: m_Identity( identity )
+					, m_Pointer( pointer )
+					, m_PointerClass( pointerClass )
+				{}
+
+				Name                  m_Identity;
+				Reflect::ObjectPtr&   m_Pointer;
+				const Reflect::Class* m_PointerClass;
+			};
+			DynamicArray< Fixup >              m_Fixups;
+			DynamicArray< Reflect::ObjectPtr > m_Objects;
+			Reflect::ObjectResolver*           m_Resolver;
 		};
 		typedef Helium::SmartPtr< ArchiveReader > ArchiveReaderPtr;
 
 		//
-		// Static API, top level functions
+		// Static API, top level entry points
 		//
 
-		HELIUM_PERSIST_API ArchiveWriterPtr GetWriter( const FilePath& path, Reflect::ObjectIdentifier& identifier, ArchiveType archiveType = ArchiveTypes::Auto );
-		HELIUM_PERSIST_API ArchiveReaderPtr GetReader( const FilePath& path, Reflect::ObjectResolver& resolver, ArchiveType archiveType = ArchiveTypes::Auto );
+		HELIUM_PERSIST_API ArchiveWriterPtr GetWriter( const FilePath& path, Reflect::ObjectIdentifier* identifier, ArchiveType archiveType = ArchiveTypes::Auto );
+		HELIUM_PERSIST_API ArchiveReaderPtr GetReader( const FilePath& path, Reflect::ObjectResolver* resolver, ArchiveType archiveType = ArchiveTypes::Auto );
 
 		HELIUM_PERSIST_API bool
-			ToArchive( const FilePath& path, Reflect::ObjectPtr object, Reflect::ObjectIdentifier& identifier, ArchiveType archiveType = ArchiveTypes::Auto, tstring* error = NULL );
+			ToArchive( const FilePath& path, Reflect::ObjectPtr object, Reflect::ObjectIdentifier* identifier = NULL, ArchiveType archiveType = ArchiveTypes::Auto, tstring* error = NULL );
 
 		template <class T> Helium::StrongPtr<T>
-			FromArchive( const FilePath& path, Reflect::ObjectResolver& resolver, ArchiveType archiveType = ArchiveTypes::Auto );
+			FromArchive( const FilePath& path, Reflect::ObjectResolver* resolver = NULL, ArchiveType archiveType = ArchiveTypes::Auto );
 		
 		template <>
 		HELIUM_PERSIST_API Helium::StrongPtr< Reflect::Object >
-			FromArchive( const FilePath& path, Reflect::ObjectResolver& resolver, ArchiveType archiveType  );
+			FromArchive( const FilePath& path, Reflect::ObjectResolver* resolver, ArchiveType archiveType  );
 	}
 }
 

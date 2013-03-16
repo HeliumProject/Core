@@ -473,7 +473,7 @@ void ArchiveJson::DeserializeFields(Object* object)
                 if (!latentData.ReferencesObject())
                 {
                     // this should never happen, the type id read from the file is bogus
-                    throw Reflect::TypeInformationException( TXT( "Unknown data for field %s (%s)" ), field->m_Name, m_Path.c_str() );
+                    throw Persist::TypeInformationException( TXT( "Unknown data for field %s (%s)" ), field->m_Name, m_Path.c_str() );
 #pragma TODO("Support blind data")
                 }
 
@@ -563,7 +563,7 @@ void ArchiveJson::DeserializeFields( void* structure, const Structure* type )
                 if (!latentData.ReferencesObject())
                 {
                     // this should never happen, the type id read from the file is bogus
-                    throw Reflect::TypeInformationException( TXT( "Unknown data for field %s (%s)" ), field->m_Name, m_Path.c_str() );
+                    throw Persist::TypeInformationException( TXT( "Unknown data for field %s (%s)" ), field->m_Name, m_Path.c_str() );
 #pragma TODO("Support blind data")
                 }
 
@@ -824,7 +824,7 @@ void Helium::Reflect::ArchiveJson::ParseStream()
     // fail on an empty input stream
     if ( m_Size == 0 )
     {
-        throw Reflect::StreamException( TXT( "Input stream is empty" ) );
+        throw Persist::StreamException( TXT( "Input stream is empty" ) );
     }
 
     // while there is data, parse buffer
