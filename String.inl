@@ -545,6 +545,23 @@ void Helium::StringBase< CharType, Allocator >::Pop()
 	}
 }
 
+/// Set this string using "scanf"-style parsing.
+///
+/// @param[in] pFormatString  Format string.
+/// @param[in] ...            Format string arguments.
+template< typename CharType, typename Allocator >
+uint32_t Helium::StringBase< CharType, Allocator >::Parse( const CharType* pFormatString, ... )
+{
+	HELIUM_ASSERT( pFormatString );
+
+	va_list argList;
+	va_start( argList, pFormatString );
+	int result = StringScanArgs( m_buffer.GetData(), pFormatString, argList );
+	va_end( argList );
+
+	return result;
+}
+
 /// Set this string using "printf"-style formatting.
 ///
 /// @param[in] pFormatString  Format string.

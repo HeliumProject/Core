@@ -5,7 +5,7 @@
 
 namespace Helium
 {
-    /// Associative array (not thread-safe).
+    /// Association array (not thread-safe).
     ///
     /// Map stores elements in a contiguous array, similar to DynamicArray.  Compared to SortedMap and HashMap, the memory
     /// footprint is smaller, as no additional data is stored aside from the key-value pairs.  Performance is

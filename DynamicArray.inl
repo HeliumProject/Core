@@ -942,6 +942,16 @@ void Helium::DynamicArray< T, Allocator >::Swap( DynamicArray& rArray )
 	rArray.m_capacity = capacity;
 }
 
+/// Find the index that accesses the provided iterator location
+///
+/// @param[in] itr  Iterator to find the index of.
+template< typename T, typename Allocator >
+uint32_t Helium::DynamicArray< T, Allocator >::GetIndex( const ConstIterator& itr ) const
+{
+	const T* pPtr = &itr.operator*();
+	return GetIndexOfPointer( pPtr );
+}
+
 /// Find the index that accesses the provided pointer
 ///
 /// @param[in] pPtr  Pointer to find the index of.
