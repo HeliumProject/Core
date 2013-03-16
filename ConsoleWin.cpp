@@ -3,6 +3,10 @@
 
 #include "Platform/Assert.h"
 
+#undef _UNICODE
+#include "Platform/ConsoleWin.vsscanf.impl"
+#define _UNICODE 1
+
 #include <stdlib.h>
 
 using namespace Helium;
@@ -40,6 +44,94 @@ static inline int LookupColor( ConsoleColor color )
 }
 
 #pragma TODO("These char overloads are really ASCII, not UTF-8.  Track down some UTF-8 implementations.  -Geoff")
+
+int Helium::Scan(const char* fmt, ...)
+{
+	char buf[1024];
+	fgets( buf, sizeof( buf ), stdin );
+
+	va_list args;
+	va_start(args, fmt);
+	int result = vsscanf( buf, (const unsigned char*)fmt, args );
+	va_end(args);
+	return result;
+}
+
+int Helium::Scan(const wchar_t* fmt, ...)
+{
+	HELIUM_ASSERT( false );
+	return 0;
+}
+
+int Helium::ScanArgs(const char* fmt, va_list args)
+{
+	char buf[1024];
+	fgets( buf, sizeof( buf ), stdin );
+	return vsscanf( buf, (const unsigned char*)fmt, args );
+}
+
+int Helium::ScanArgs(const wchar_t* fmt, va_list args)
+{
+	HELIUM_ASSERT( false );
+	return 0;
+}
+
+int Helium::FileScan(FILE* f, const char* fmt, ...)
+{
+	char buf[1024];
+	fgets( buf, sizeof( buf ), f );
+
+	va_list args;
+	va_start(args, fmt);
+	int result = vsscanf( buf, (const unsigned char*)fmt, args );
+	va_end(args);
+	return result;
+}
+
+int Helium::FileScan(FILE* f, const wchar_t* fmt, ...)
+{
+	HELIUM_ASSERT( false );
+	return 0;
+}
+
+int Helium::FileScanArgs(FILE* f, const char* fmt, va_list args)
+{
+	char buf[1024];
+	fgets( buf, sizeof( buf ), f );
+	return vsscanf( buf, (const unsigned char*)fmt, args );
+}
+
+int Helium::FileScanArgs(FILE* f, const wchar_t* fmt, va_list args)
+{
+	HELIUM_ASSERT( false );
+	return 0;
+}
+
+int Helium::StringScan(const char* str, const char* fmt, ...)
+{
+	va_list args;
+	va_start(args, fmt);
+	int result = vsscanf(str, (const unsigned char*)fmt, args);
+	va_end(args);
+	return result;
+}
+
+int Helium::StringScan(const wchar_t* str, const wchar_t* fmt, ...)
+{
+	HELIUM_ASSERT( false );
+	return 0;
+}
+
+int Helium::StringScanArgs(const char* str, const char* fmt, va_list args)
+{
+	return vsscanf(str, (const unsigned char*)fmt, args);
+}
+
+int Helium::StringScanArgs(const wchar_t* str, const wchar_t* fmt, va_list args)
+{
+	HELIUM_ASSERT( false );
+	return 0;
+}
 
 int Helium::Print(const char* fmt, ...)
 {
