@@ -1,3 +1,4 @@
+#include <string.h>
 namespace Helium
 {
     /// ArrayCopy() implementation for types with a trivial assignment operator.
