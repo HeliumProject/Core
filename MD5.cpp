@@ -522,7 +522,7 @@ tstring Helium::FileMD5(const tstring& filePath, uint32_t packetSize)
     }
 
 	f.Seek( 0, SeekOrigins::SEEK_ORIGIN_END );
-	size_t size = f.Tell();
+	int64_t size = f.Tell();
 	f.Seek( 0, SeekOrigins::SEEK_ORIGIN_BEGIN );
 
     md5_state_t state;
