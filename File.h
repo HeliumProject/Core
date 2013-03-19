@@ -4,6 +4,11 @@
 #include "Platform/Types.h"
 #include "Platform/Utility.h"
 
+#ifdef HELIUM_OS_LINUX
+#include <sys/types.h>
+#include <dirent.h>
+#endif
+
 namespace Helium
 {
 	//
@@ -57,6 +62,8 @@ namespace Helium
 #ifdef HELIUM_OS_WIN
 		// windows.h: HANDLE
 		typedef void* Handle;
+#elif HELIUM_OS_LINUX
+		typedef FILE* Handle;
 #else
 #error Implement File for this platform.
 #endif
@@ -130,6 +137,8 @@ namespace Helium
 
 #if HELIUM_OS_WIN
 		typedef void* Handle;
+#elif HELIUM_OS_LINUX
+		typedef DIR* Handle;
 #else
 #error Implement Directory for this platform.
 #endif
