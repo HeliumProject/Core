@@ -14,7 +14,6 @@
 // Compiler (HELIUM_CC_*) macros:
 // - HELIUM_CC_CL: Microsoft Visual C++
 // - HELIUM_CC_GCC: GCC
-// - HELIUM_CC_SNC: SNC (PS3)
 
 #if defined( _WIN64 )
 # define HELIUM_OS_WIN 1

@@ -1,4 +1,3 @@
-#include <string.h>
 namespace Helium
 {
     /// ArrayCopy() implementation for types with a trivial assignment operator.
@@ -345,11 +344,7 @@ int Helium::MemoryCompare( const void* pMemory0, const void* pMemory1, size_t si
 template< typename T >
 void Helium::ArrayCopy( T* pDest, const T* pSource, size_t count )
 {
-#if defined(__GNUG__)
-    _ArrayCopy( pDest, pSource, count, std::tr1::has_trivial_assign< T >() );
-#else
     _ArrayCopy( pDest, pSource, count, std::has_trivial_assign< T >() );
-#endif
 }
 
 /// Copy an array of data from one region of memory to another, with support for overlapping regions of memory.
@@ -367,11 +362,7 @@ void Helium::ArrayCopy( T* pDest, const T* pSource, size_t count )
 template< typename T >
 void Helium::ArrayMove( T* pDest, const T* pSource, size_t count )
 {
-#if defined(__GNUG__)
-    _ArrayMove( pDest, pSource, count, std::tr1::has_trivial_assign< T >() );
-#else
     _ArrayMove( pDest, pSource, count, std::has_trivial_assign< T >() );
-#endif
 }
 
 /// Set each element in an array to a given value.
@@ -414,11 +405,7 @@ void Helium::ArraySet( T* pDest, const T& rValue, size_t count )
 template< typename T >
 T* Helium::ArrayInPlaceConstruct( void* pMemory, size_t count )
 {
-#if defined(__GNUG__)
-    return _ArrayInPlaceConstruct< T >( pMemory, count, std::tr1::has_trivial_constructor< T >() );
-#else
     return _ArrayInPlaceConstruct< T >( pMemory, count, std::has_trivial_constructor< T >() );
-#endif
 }
 
 /// Call the destructor on each element in the given array without deallocating the array.
@@ -434,11 +421,7 @@ T* Helium::ArrayInPlaceConstruct( void* pMemory, size_t count )
 template< typename T >
 void Helium::ArrayInPlaceDestroy( T* pMemory, size_t count )
 {
-#if defined(__GNUG__)
-    _ArrayInPlaceDestroy( pMemory, count, std::tr1::has_trivial_constructor< T >() );
-#else
     _ArrayInPlaceDestroy( pMemory, count, std::has_trivial_destructor< T >() );
-#endif
 }
 
 /// Construct copies of objects from the source array in the uninitialized destination buffer.
@@ -452,11 +435,7 @@ void Helium::ArrayInPlaceDestroy( T* pMemory, size_t count )
 template< typename T >
 void Helium::ArrayUninitializedCopy( T* pDest, const T* pSource, size_t count )
 {
-#if defined(__GNUG__)
-    _ArrayUninitializedCopy( pDest, pSource, count, std::tr1::has_trivial_copy< T >() );
-#else
     _ArrayUninitializedCopy( pDest, pSource, count, std::has_trivial_copy< T >() );
-#endif
 }
 
 /// Construct copies of the given object in the uninitialized destination buffer.
@@ -474,11 +453,7 @@ void Helium::ArrayUninitializedFill( T* pDest, const T& rValue, size_t count )
         pDest,
         rValue,
         count,
-#if defined(__GNUG__)
-        std::tr1::integral_constant< bool, std::tr1::has_trivial_copy< T >::value && sizeof( T ) == 1 >() );
-#else
         std::integral_constant< bool, std::has_trivial_copy< T >::value && sizeof( T ) == 1 >() );
-#endif
 }
 
 /// Align a value (size or memory address) up to a given byte alignment.

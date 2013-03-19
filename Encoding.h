@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string.h>
+
 #include "Platform/API.h"
 #include "Platform/Types.h"
 

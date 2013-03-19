@@ -14,6 +14,7 @@ _GENERATE_ATOMIC_WORKER(
     {
         return _InterlockedExchange( reinterpret_cast< volatile long* >( &rAtomic ), value );
     } )
+
 _GENERATE_ATOMIC_WORKER(
     int32_t,
     CompareExchange,
@@ -21,6 +22,7 @@ _GENERATE_ATOMIC_WORKER(
     {
         return _InterlockedCompareExchange( reinterpret_cast< volatile long* >( &rAtomic ), value, compare );
     } )
+
 _GENERATE_ATOMIC_WORKER(
     int32_t,
     Increment,
@@ -28,6 +30,7 @@ _GENERATE_ATOMIC_WORKER(
     {
         return _InterlockedIncrement( reinterpret_cast< volatile long* >( &rAtomic ) );
     } )
+
 _GENERATE_ATOMIC_WORKER(
     int32_t,
     Decrement,
@@ -35,6 +38,7 @@ _GENERATE_ATOMIC_WORKER(
     {
         return _InterlockedDecrement( reinterpret_cast< volatile long* >( &rAtomic ) );
     } )
+
 _GENERATE_ATOMIC_WORKER(
     int32_t,
     Add,
@@ -42,6 +46,7 @@ _GENERATE_ATOMIC_WORKER(
     {
         return _InterlockedExchangeAdd( reinterpret_cast< volatile long* >( &rAtomic ), value );
     } )
+
 _GENERATE_ATOMIC_WORKER(
     int32_t,
     Subtract,
@@ -49,6 +54,7 @@ _GENERATE_ATOMIC_WORKER(
     {
         return _InterlockedExchangeAdd( reinterpret_cast< volatile long* >( &rAtomic ), -value );
     } )
+
 _GENERATE_ATOMIC_WORKER(
     int32_t,
     And,
@@ -67,6 +73,7 @@ _GENERATE_ATOMIC_WORKER(
 
         return originalValueNew;
     } )
+
 _GENERATE_ATOMIC_WORKER(
     int32_t,
     Or,
@@ -85,6 +92,7 @@ _GENERATE_ATOMIC_WORKER(
 
         return originalValueNew;
     } )
+
 _GENERATE_ATOMIC_WORKER(
     int32_t,
     Xor,
@@ -105,6 +113,7 @@ _GENERATE_ATOMIC_WORKER(
     } )
 
 #if HELIUM_CPU_X86
+
 _GENERATE_ATOMIC_WORKER(
     template< typename T > T*,
     Exchange,
@@ -114,6 +123,7 @@ _GENERATE_ATOMIC_WORKER(
             reinterpret_cast< volatile long* >( &rAtomic ),
             reinterpret_cast< long >( value ) ) );
     } )
+
 _GENERATE_ATOMIC_WORKER(
     template< typename T > T*,
     CompareExchange,
@@ -124,7 +134,9 @@ _GENERATE_ATOMIC_WORKER(
             reinterpret_cast< long >( value ),
             reinterpret_cast< long >( compare ) ) );
     } )
+
 #else  // HELIUM_CPU_X86
+
 _GENERATE_ATOMIC_WORKER(
     template< typename T > T*,
     Exchange,
@@ -134,6 +146,7 @@ _GENERATE_ATOMIC_WORKER(
             reinterpret_cast< void* volatile * >( &rAtomic ),
             value ) );
     } )
+
 _GENERATE_ATOMIC_WORKER(
     template< typename T > T*,
     CompareExchange,
@@ -144,6 +157,7 @@ _GENERATE_ATOMIC_WORKER(
             value,
             compare ) );
     } )
+
 #endif  // HELIUM_CPU_X86
 
 #undef _GENERATE_ATOMIC_WORKER

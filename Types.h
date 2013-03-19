@@ -136,7 +136,7 @@
 
 /// "tchar_t" string format macro for ptrdiff_t.
 #define TPRIdPD TXT( "Id" )
-// "tchar_t" string format macro for size_t.
+/// "tchar_t" string format macro for size_t.
 #define TPRIuSZ TXT( "Iu" )
 
 //@}

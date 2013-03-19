@@ -1,15 +1,13 @@
-// Windows (non-Itanium platforms) doesn't reorder reads and writes, so memory barriers aren't needed.  As such, all
-// variants of each Atomic*() function are the same.  On the downside, we can't easily debug these functions when using
-// macros to generate them, and build times may be somewhat slower.
 #define _GENERATE_ATOMIC_WORKER( PREFIX, OPERATION, PARAM_LIST, ACTION ) \
     PREFIX Helium::Atomic##OPERATION PARAM_LIST ACTION \
     PREFIX Helium::Atomic##OPERATION##Acquire PARAM_LIST ACTION \
     PREFIX Helium::Atomic##OPERATION##Release PARAM_LIST ACTION \
     PREFIX Helium::Atomic##OPERATION##Unsafe PARAM_LIST ACTION
 
-#if !defined(__GNUC__)
+#if !defined( HELIUM_CC_GCC )
 #error "implement atomics for this compiler"
 #else
+
 /* this is a (maybe too) clever trick for using the right keywords on gcc 4.6 and earlier */
 #if !((__GNUC__ >= 4) && (__GNUC_MINOR__ >= 7))
 # define __atomic_add_fetch __sync_add_and_fetch
@@ -23,6 +21,7 @@
 # define __atomic_fetch_xor __sync_fetch_and_xor
 # define __atomic_fetch_and __sync_fetch_and_and
 #endif
+
 _GENERATE_ATOMIC_WORKER(
     int32_t,
     Exchange,
@@ -34,6 +33,7 @@ _GENERATE_ATOMIC_WORKER(
         return __atomic_exchange_n( reinterpret_cast< volatile int32_t* >( &rAtomic ), value );
 #endif
     } )
+
 _GENERATE_ATOMIC_WORKER(
     int32_t,
     CompareExchange,
@@ -45,6 +45,7 @@ _GENERATE_ATOMIC_WORKER(
         return __atomic_compare_exchange_n( reinterpret_cast< volatile int32_t* >( &rAtomic ), &compare, value );
 #endif
     } )
+
 _GENERATE_ATOMIC_WORKER(
     int32_t,
     Increment,
@@ -52,6 +53,7 @@ _GENERATE_ATOMIC_WORKER(
     {
         return __atomic_add_fetch( reinterpret_cast< volatile int32_t* >( &rAtomic ), 1 );
     } )
+
 _GENERATE_ATOMIC_WORKER(
     int32_t,
     Decrement,
@@ -59,6 +61,7 @@ _GENERATE_ATOMIC_WORKER(
     {
         return __atomic_sub_fetch( reinterpret_cast< volatile int32_t* >( &rAtomic ), 1 );
     } )
+
 _GENERATE_ATOMIC_WORKER(
     int32_t,
     Add,
@@ -66,6 +69,7 @@ _GENERATE_ATOMIC_WORKER(
     {
         return __atomic_fetch_add( reinterpret_cast< volatile int32_t* >( &rAtomic ), value );
     } )
+
 _GENERATE_ATOMIC_WORKER(
     int32_t,
     Subtract,
@@ -73,6 +77,7 @@ _GENERATE_ATOMIC_WORKER(
     {
         return __atomic_fetch_sub( reinterpret_cast< volatile long* >( &rAtomic ), value );
     } )
+
 _GENERATE_ATOMIC_WORKER(
     int32_t,
     And,
@@ -80,6 +85,7 @@ _GENERATE_ATOMIC_WORKER(
     {
         return __atomic_fetch_and( reinterpret_cast< volatile int32_t* >( &rAtomic ), value );
     } )
+
 _GENERATE_ATOMIC_WORKER(
     int32_t,
     Or,
@@ -87,6 +93,7 @@ _GENERATE_ATOMIC_WORKER(
     {
         return __atomic_fetch_or( reinterpret_cast< volatile int32_t* >( &rAtomic ), value );
     } )
+
 _GENERATE_ATOMIC_WORKER(
     int32_t,
     Xor,
@@ -94,8 +101,10 @@ _GENERATE_ATOMIC_WORKER(
     {
         return __atomic_fetch_or( reinterpret_cast< volatile int32_t* >( &rAtomic ), value );
     } )
+
 #if 0
 #if HELIUM_CPU_X86
+
 _GENERATE_ATOMIC_WORKER(
     template< typename T > T*,
     Exchange,
@@ -105,6 +114,7 @@ _GENERATE_ATOMIC_WORKER(
             reinterpret_cast< volatile long* >( &rAtomic ),
             reinterpret_cast< long >( value ) ) );
     } )
+
 _GENERATE_ATOMIC_WORKER(
     template< typename T > T*,
     CompareExchange,
@@ -115,7 +125,9 @@ _GENERATE_ATOMIC_WORKER(
             reinterpret_cast< long >( value ),
             reinterpret_cast< long >( compare ) ) );
     } )
+
 #else  // HELIUM_CPU_X86
+
 _GENERATE_ATOMIC_WORKER(
     template< typename T > T*,
     Exchange,
@@ -135,8 +147,10 @@ _GENERATE_ATOMIC_WORKER(
             value,
             compare ) );
     } )
-#endif  // HELIUM_CPU_X86
-#endif
-#endif //__GNUC__
+
+#endif // HELIUM_CPU_X86
+#endif // 0
+
+#endif //HELIUM_CC_GCC
 
 #undef _GENERATE_ATOMIC_WORKER

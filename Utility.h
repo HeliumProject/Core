@@ -13,8 +13,7 @@
 # endif
 #endif
 
-#if defined(__GNUG__)
-/* gcc puts tr1 in a strange place */
+#if HELIUM_OS_LINUX
 # include <tr1/type_traits>
 #else
 # include <type_traits>
@@ -25,6 +24,7 @@
 #endif
 
 #include <cstdarg>
+#include <string.h>
 
 /// @defgroup utilitymacros General Utility Macros
 //@{

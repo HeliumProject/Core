@@ -1,7 +1,3 @@
-#if defined(HELIUM_OS_LINUX)
-#include <string.h>
-#endif
-
 bool Helium::ConvertString( const char* src, char* dest, size_t destCount )
 {
 	size_t srcCount = strlen( src );

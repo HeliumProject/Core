@@ -26,8 +26,6 @@ namespace Helium
 	HELIUM_PLATFORM_API int StringPrintArgs(wchar_t* dest, size_t destCount, const wchar_t* fmt, va_list args);
 
 	// Deduction of target array size
-	/* gcc doesn't allow inlined variable argument list functions, and it' snot necessary,
-		since the template gets adifferent signature in each file it's included from */
 	template <size_t N>	int StringPrint( char (&dest)[N], const char* fmt, ... );
 	template <size_t N>	int StringPrint( wchar_t (&dest)[N], const wchar_t* fmt, ... );
 	template <size_t N>	HELIUM_FORCEINLINE int StringPrintArgs( char (&dest)[N], const char* fmt, va_list args );
