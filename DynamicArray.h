@@ -104,7 +104,7 @@ namespace Helium
         ArrayIterator& operator-=( ptrdiff_t offset );
         ArrayIterator operator-( ptrdiff_t offset ) const;
 
-        ptrdiff_t operator-( const ConstArrayIterator& rOther ) const;
+        ptrdiff_t operator-( const ConstArrayIterator< T >& rOther ) const;
         //@}
     };
 	

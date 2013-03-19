@@ -1,5 +1,5 @@
 template< typename T >
-Helium::AutoPtr< T >::AutoPtr( T* ptr = NULL )
+Helium::AutoPtr< T >::AutoPtr( T* ptr )
 	: m_Ptr( ptr )
 {
 
@@ -60,7 +60,7 @@ T* Helium::AutoPtr< T >::Release()
 }
 
 template< typename T >
-Helium::ArrayPtr< T >::ArrayPtr( T* ptr = NULL ) : m_Ptr( ptr )
+Helium::ArrayPtr< T >::ArrayPtr( T* ptr ) : m_Ptr( ptr )
 {
 
 }
@@ -457,11 +457,15 @@ Helium::DeepCompareSmartPtr< T >::DeepCompareSmartPtr( const T* pPointer )
 template < typename T >
 bool Helium::DeepCompareSmartPtr< T >::operator<( const DeepCompareSmartPtr& rhs ) const
 {
-	return (*Get()) < (*rhs.Get());
+	//return (*Get()) < (*rhs.Get());
+	//maybe?
+	return (*SmartPtr< T>::Get()) < (*rhs.Get());
 }
 
 template < typename T >
 bool Helium::DeepCompareSmartPtr< T >::operator==( const DeepCompareSmartPtr& rhs ) const
 {
-	return (*Get()) == (*rhs.Get());
+	//return (*Get()) == (*rhs.Get());
+	//maybe?
+	return (*SmartPtr< T>::Get()) == (*rhs.Get());
 }

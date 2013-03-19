@@ -422,7 +422,9 @@ void Helium::Event< ArgsType, RefCountBaseType >::EventImpl::Remove( const Deleg
 	{
 		if ( itr->Valid() && itr->Equals(delegate) )
 		{
-			if ( GetRefCount() == 1 )
+			/* see stackoverflow 5286922 */
+			/* the this is to fix template ambiguity */
+			if ( this->GetRefCount() == 1 )
 			{
 				m_Delegates.erase( itr );
 			}
@@ -446,7 +448,7 @@ void Helium::Event< ArgsType, RefCountBaseType >::EventImpl::RemoveFunction( Fun
 	{
 		if ( itr->Valid() && itr->Equals(function) )
 		{
-			if ( GetRefCount() == 1 )
+			if ( this->GetRefCount() == 1 )
 			{
 				m_Delegates.erase( itr );
 			}
@@ -470,7 +472,7 @@ void Helium::Event< ArgsType, RefCountBaseType >::EventImpl::RemoveMethod( const
 	{
 		if ( itr->Valid() && itr->Equals(instance, method) )
 		{
-			if ( GetRefCount() == 1 )
+			if ( this->GetRefCount() == 1 )
 			{
 				m_Delegates.erase( itr );
 			}

@@ -355,7 +355,7 @@ Helium::ArrayIterator< T > Helium::ArrayIterator< T >::operator-( ptrdiff_t offs
 ///
 /// @return  Offset from the given array iterator to this iterator.
 template< typename T >
-ptrdiff_t Helium::ArrayIterator< T >::operator-( const ConstArrayIterator& rOther ) const
+ptrdiff_t Helium::ArrayIterator< T >::operator-( const ConstArrayIterator< T >& rOther ) const
 {
     return ConstArrayIterator< T >::operator-( rOther );
 }
