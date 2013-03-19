@@ -8,9 +8,13 @@
 #include <netdb.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
+#if PS3_POSIX
 #include <netex/net.h>
 #include <netex/ifctl.h>
 #include <netex/errno.h>
+#elif defined(HELIUM_OS_LINUX)
+#include <errno.h>
+#endif
 #include <arpa/inet.h>
 
 namespace Helium
