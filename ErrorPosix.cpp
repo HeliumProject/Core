@@ -2,12 +2,12 @@
 
 using namespace Helium;
 
-u32 Helium::GetLastError()
+uint32_t Helium::GetLastError()
 {
     return 0xffffffff;
 }
 
-tstring Helium::GetErrorString( u32 errorOverride )
+tstring Helium::GetErrorString( uint32_t errorOverride )
 {
     return "Unknown";
 }
