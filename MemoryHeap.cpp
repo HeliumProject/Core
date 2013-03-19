@@ -6,6 +6,7 @@
 #include "Platform/Locks.h"
 #include "Platform/Thread.h"
 #include "Platform/Trace.h"
+#include "Platform/Types.h"
 
 #ifdef _MSC_VER
 #pragma warning( push )
