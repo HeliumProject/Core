@@ -10,9 +10,6 @@
 #include "Foundation/String.h"
 
 #include <stdio.h>
-#if defined(_WIN32)
-#include <io.h>
-#endif
 #include <time.h>
 #include <sys/timeb.h>
 
@@ -20,7 +17,7 @@
 #include <iostream>
 #include <map>
 
-#if defined(_WIN32)
+#if defined(HELIUM_OS_WIN)
 #include <crtdbg.h>
 #include <shlobj.h>
 #endif

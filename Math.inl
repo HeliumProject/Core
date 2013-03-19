@@ -476,12 +476,20 @@ float32_t Helium::Atan2( float32_t y, float32_t x )
 
 inline bool Helium::IsFinite(float32_t val)
 {
+#if HELIUM_OS_WIN
+    return _finite(val) != 0;
+#else
     return std::isfinite(val) != 0;
+#endif
 }
 
 inline bool Helium::IsFinite(float64_t val)
 {
+#if HELIUM_OS_WIN
+    return _finite(val) != 0;
+#else
     return std::isfinite(val) != 0;
+#endif
 }
 
 //

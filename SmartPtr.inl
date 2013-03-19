@@ -457,15 +457,11 @@ Helium::DeepCompareSmartPtr< T >::DeepCompareSmartPtr( const T* pPointer )
 template < typename T >
 bool Helium::DeepCompareSmartPtr< T >::operator<( const DeepCompareSmartPtr& rhs ) const
 {
-	//return (*Get()) < (*rhs.Get());
-	//maybe?
-	return (*SmartPtr< T>::Get()) < (*rhs.Get());
+	return (*SmartPtr< T >::Get()) < (*rhs.Get());
 }
 
 template < typename T >
 bool Helium::DeepCompareSmartPtr< T >::operator==( const DeepCompareSmartPtr& rhs ) const
 {
-	//return (*Get()) == (*rhs.Get());
-	//maybe?
-	return (*SmartPtr< T>::Get()) == (*rhs.Get());
+	return (*SmartPtr< T >::Get()) == (*rhs.Get());
 }
