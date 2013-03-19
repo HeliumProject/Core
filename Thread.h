@@ -71,7 +71,7 @@ namespace Helium
 		// posix threads are identified as process IDs
 		typedef pid_t id_t;
 		// pthread_create returns 0 on success, otherwise errno on failure
-		static const id_t VALID_ID = 0;
+		static const int VALID_ID = 0;
 #else
 # error Implement Thread for this platform.
 #endif
@@ -84,7 +84,13 @@ namespace Helium
 
 		/// @name Thread Callback
 		//@{
+#if HELIUM_OS_WIN
 		static unsigned int __stdcall ThreadCallback( void* pData );
+#elif HELIUM_OS_LINUX || PS3_POSIX
+		static void * ThreadCallback( void* pData );
+		// is the thread valid (created by pthread_create)
+		bool Valid(void);
+#endif
 		//@}
 
 	public:
