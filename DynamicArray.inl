@@ -1338,7 +1338,11 @@ T* Helium::DynamicArray< T, Allocator >::ResizeBuffer(
         oldCapacity,
         newCapacity,
         std::integral_constant<
+#if defined(__GNUG__) && defined(__GXX_EXPERIMENTAL_CXX0X__)
+            bool, std::tr1::has_trivial_copy< T >::value && std::has_trivial_destructor< T >::value >() );
+#else
             bool, std::has_trivial_copy< T >::value && std::has_trivial_destructor< T >::value >() );
+#endif
 }
 
 /// ResizeBuffer() implementation for types with both a trivial copy constructor and trivial destructor.
