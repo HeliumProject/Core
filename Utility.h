@@ -49,6 +49,13 @@
 /// @return  Byte offset of the specified member.
 #define HELIUM_OFFSET_OF( TYPE, MEMBER ) ( reinterpret_cast< size_t >( &static_cast< TYPE* >( NULL )->MEMBER ) )
 
+/// Get the bitfield with only the most significant bit set.
+///
+/// @param[in] TYPE    Any type (should be numeric).
+///
+/// @return  Constant number of the highest bit set, all other bits zero.
+#define HELIUM_HIGH_BIT( TYPE ) ( 1 << ( sizeof( TYPE ) * 8 ) )
+
 //@}
 
 namespace Helium

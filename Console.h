@@ -7,6 +7,24 @@
 
 namespace Helium
 {
+	// Scan from STDOUT
+	HELIUM_PLATFORM_API int Scan(const char* fmt, ...);
+	HELIUM_PLATFORM_API int Scan(const wchar_t* fmt, ...);
+	HELIUM_PLATFORM_API int ScanArgs(const char* fmt, va_list args);
+	HELIUM_PLATFORM_API int ScanArgs(const wchar_t* fmt, va_list args);
+
+	// Scan from C file handle
+	HELIUM_PLATFORM_API int FileScan(FILE* f, const char* fmt, ...);
+	HELIUM_PLATFORM_API int FileScan(FILE* f, const wchar_t* fmt, ...);
+	HELIUM_PLATFORM_API int FileScanArgs(FILE* f, const char* fmt, va_list args);
+	HELIUM_PLATFORM_API int FileScanArgs(FILE* f, const wchar_t* fmt, va_list args);
+
+	// Scan from string
+	HELIUM_PLATFORM_API int StringScan(const char* str, const char* fmt, ...);
+	HELIUM_PLATFORM_API int StringScan(const wchar_t* str, const wchar_t* fmt, ...);
+	HELIUM_PLATFORM_API int StringScanArgs(const char* str, const char* fmt, va_list args);
+	HELIUM_PLATFORM_API int StringScanArgs(const wchar_t* str, const wchar_t* fmt, va_list args);
+
 	// Print to STDOUT
 	HELIUM_PLATFORM_API int Print(const char* fmt, ...);
 	HELIUM_PLATFORM_API int Print(const wchar_t* fmt, ...);
