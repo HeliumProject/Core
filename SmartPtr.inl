@@ -1,5 +1,6 @@
 template< typename T >
 Helium::AutoPtr< T >::AutoPtr( T* ptr )
+	: m_Ptr( 0 )
 {
 	Reset( ptr );
 }
