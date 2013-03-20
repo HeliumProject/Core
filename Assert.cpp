@@ -96,7 +96,7 @@ AssertResult Assert::Trigger(
 	}
 
 	HELIUM_TRACE( TraceLevels::Error, TXT( "%s\n" ), messageText );
-#if HELIUM_OS_WIN
+#if HELIUM_OS_WIN   
 #if !HELIUM_RELEASE && !HELIUM_PROFILE
     if (Helium::GetSymbolsInitialized())
     {

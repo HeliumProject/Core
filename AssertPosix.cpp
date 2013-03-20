@@ -27,7 +27,7 @@ AssertResult Assert::TriggerImplementation( const tchar_t* pMessageText )
 {
     PRINTF( "%s\n", pMessageText );
 
-    return AssertResults::Type::Break;
+    return AssertResults::Break;
 }
 
 #endif  // HELIUM_ASSERT_ENABLED
