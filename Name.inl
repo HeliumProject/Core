@@ -325,17 +325,3 @@ size_t Helium::Hash< Helium::NameBase< TableType > >::operator()( const NameBase
     // Each name entry has a unique name pointer, so we can use the pointer itself as our hash.
     return static_cast< size_t >( reinterpret_cast< uintptr_t >( rKey.GetDirect() ) );
 }
-
-/// Write a name to the given output stream.
-///
-/// @param[in] rStream  Output stream.
-/// @param[in] rName    Name to write.
-///
-/// @return  Reference to the given output stream.
-template< typename CharType, typename CharTypeTraits, typename NameTableType >
-std::basic_ostream< CharType, CharTypeTraits >& Helium::operator<<(
-    std::basic_ostream< CharType, CharTypeTraits >& rStream,
-    const NameBase< NameTableType >& rName )
-{
-    return ( rStream << *rName );
-}

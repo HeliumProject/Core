@@ -160,3 +160,13 @@ void TUID::Generate( tuid& uid )
 
     uid ^= timeBits;
 }
+
+std::ostream& TUID::HexFormat( std::ostream& base )
+{
+	return base << "0x" << std::setfill( '0' ) << std::setw(16) << std::right << std::hex << std::uppercase;
+}
+
+std::wostream& TUID::HexFormat( std::wostream& base )
+{
+	return base << L"0x" << std::setfill( L'0' ) << std::setw(16) << std::right << std::hex << std::uppercase;
+}

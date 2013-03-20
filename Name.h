@@ -138,58 +138,13 @@ namespace Helium
     typedef CharName Name;
 #endif
 
-    HELIUM_FOUNDATION_API inline std::ostream& operator<<( std::ostream& stream, const Name& id )
-    {
-        stream << id.Get();
-        return stream;
-    }
-
-    HELIUM_FOUNDATION_API inline std::istream& operator>>( std::istream& stream, Name& id )
-    {
-        std::string str;
-        stream >> str;
-
-		String tstr;
-		StringConverter< char, tchar_t >::Convert( tstr, str.c_str() );
-
-		id.Set(tstr);
-        return stream;
-    }
-
-    HELIUM_FOUNDATION_API inline std::wostream& operator<<( std::wostream& stream, const Name& id )
-    {
-        stream << id.Get();
-        return stream;
-    }
-
-    HELIUM_FOUNDATION_API inline std::wistream& operator>>( std::wistream& stream, Name& id )
-    {
-        std::wstring str;
-        stream >> str;
-
-		String tstr;
-		StringConverter< wchar_t, tchar_t >::Convert( tstr, str.c_str() );
-
-        id.Set(tstr);
-        return stream;
-    }
-
-    /// Default Name hash.
+	/// Default Name hash.
     template< typename TableType >
     class Hash< NameBase< TableType > >
     {
     public:
         inline size_t operator()( const NameBase< TableType >& rKey ) const;
     };
-
-    /// @defgroup nameiostream std::iostream Name Support
-    //@{
-
-    template< typename CharType, typename CharTypeTraits, typename NameTableType >
-    std::basic_ostream< CharType, CharTypeTraits >& operator<<(
-        std::basic_ostream< CharType, CharTypeTraits >& rStream, const NameBase< NameTableType >& rName );
-
-    //@}
 }
 
 #include "Foundation/Name.inl"

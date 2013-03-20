@@ -110,27 +110,5 @@ namespace Helium
         {
             return m_Path;
         }
-
-        friend HELIUM_FOUNDATION_API tostream& operator<<( tostream& outStream, const FilePath& p );
-        friend HELIUM_FOUNDATION_API tistream& operator>>( tistream& inStream, FilePath& p );
-        friend HELIUM_FOUNDATION_API std::wostream& operator<<( std::wostream& outStream, const FilePath& p );
-        friend HELIUM_FOUNDATION_API std::wistream& operator>>( std::wistream& inStream, FilePath& p );
     };
-
-    inline tostream& operator<<( tostream& outStream, const FilePath& p )
-    {
-        return outStream << p.Get();
-    }
-
-    inline tistream& operator>>( tistream& inStream, FilePath& p )
-    {
-        tstring str;
-        std::streamsize size = inStream.rdbuf()->in_avail();
-        str.resize( (size_t) size );
-        inStream.read( const_cast<tchar_t*>( str.c_str() ), size );
-
-        p.Set( str );
-
-        return inStream;
-    }
 }

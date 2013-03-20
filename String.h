@@ -278,18 +278,6 @@ namespace Helium
 	/// Default string class.
 	typedef CharString String;
 #endif  // HELIUM_WCHAR_T
-
-	/// @defgroup stringiostream std::iostream String Support
-	//@{
-
-	template< typename CharType, typename CharTypeTraits, typename Allocator >
-	std::basic_ostream< CharType, CharTypeTraits >& operator<<(
-		std::basic_ostream< CharType, CharTypeTraits >& rStream, const StringBase< CharType, Allocator >& rString );
-	template< typename CharType, typename CharTypeTraits, typename Allocator >
-	std::basic_istream< CharType, CharTypeTraits >& operator>>(
-		std::basic_istream< CharType, CharTypeTraits >& rStream, StringBase< CharType, Allocator >& rString );
-
-	//@}
 }
 
 #include "Foundation/String.inl"
