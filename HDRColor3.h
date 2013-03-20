@@ -44,8 +44,8 @@ namespace Helium
 		HDRColor3           operator/ (const HDRColor3& v) const { return HDRColor3 (r / v.r, g / v.g, b / v.b, s); }
 		HDRColor3           operator/ (const uint8_t v) const { return HDRColor3 (r / v, g / v, b / v, s); }
 
-		uint8_t&                 operator[] (const uint32_t i) {  HELIUM_ASSERT(i < 3); return (&r)[i]; }
-		const uint8_t&           operator[] (const uint32_t i) const {  HELIUM_ASSERT(i < 3); return (&r)[i]; }
+		uint8_t&            operator[] (const uint32_t i) {  HELIUM_ASSERT(i < 3); return (&r)[i]; }
+		const uint8_t&      operator[] (const uint32_t i) const {  HELIUM_ASSERT(i < 3); return (&r)[i]; }
 
 		bool                operator== (const HDRColor3& v) const { return (r == v.r && g == v.g && b == v.b && s == v.s); }
 		bool                operator!= (const HDRColor3& v) const { return !(r == v.r && g == v.g && b == v.b && s == v.s); }
@@ -66,13 +66,7 @@ namespace Helium
 		void ToFloat( float32_t& r, float32_t& g, float32_t& b ) const;
 		void ToLinearFloat( float32_t& r, float32_t& g, float32_t& b ) const;
 		void Clamp ( const HDRColor3 &min, const HDRColor3 &mar );
-
-		friend HELIUM_MATH_API tostream& operator<<(tostream& outStream, const HDRColor3& color);
-		friend HELIUM_MATH_API tistream& operator>>(tistream& inStream, HDRColor3& color);
 	};
-
-	typedef std::vector< HDRColor3 > V_HDRColor3;
-	typedef std::vector< V_Color3 > VV_HDRColor3;
 
 	inline void HDRColor3::FromFloat( float32_t r, float32_t g, float32_t b )
 	{
@@ -110,41 +104,5 @@ namespace Helium
 		r = r < min.r ? min.r : ( r > mar.r ) ? mar.r : r;
 		g = g < min.g ? min.g : ( g > mar.g ) ? mar.g : g;
 		b = b < min.b ? min.b : ( b > mar.b ) ? mar.b : b;
-	}
-
-	inline tostream& operator<<(tostream& outStream, const HDRColor3& color)
-	{
-		outStream << (uint16_t)color.r << ", " << (uint16_t)color.g << ", " << (uint16_t)color.b << ", " << color.s;
-
-		return outStream;
-	}
-
-	inline tistream& operator>>(tistream& inStream, HDRColor3& color)
-	{
-		uint16_t r = 0;
-		uint16_t g = 0;
-		uint16_t b = 0;
-		float32_t s = 0.f;
-		tchar_t delim;
-		inStream >> r >> delim >> g >> delim >> b >> delim >> s;
-
-		color.r = (uint8_t)r;
-		color.g = (uint8_t)g;
-		color.b = (uint8_t)b;
-		color.s = s;
-
-		return inStream;
-	}
-
-	inline HDRColor3 ComponentMin( const HDRColor3 &v1, const HDRColor3 &v2 )
-	{
-		HDRColor3 minVec;
-
-		minVec.r = v1.r <= v2.r ? v1.r : v2.r;
-		minVec.g = v1.g <= v2.g ? v1.g : v2.g;
-		minVec.b = v1.b <= v2.b ? v1.b : v2.b;
-		minVec.s = v1.s <= v2.s ? v1.s : v2.s;
-
-		return minVec;
 	}
 }

@@ -67,35 +67,5 @@ namespace Helium
 			vb = b / 255.0f;
 			va = a / 255.0f;
 		}
-
-		friend HELIUM_MATH_API tostream& operator<<(tostream& outStream, const Color4& color);
-		friend HELIUM_MATH_API tistream& operator>>(tistream& inStream, Color4& color);
 	};
-
-	typedef std::vector< Color4 > V_Color4;
-	typedef std::vector< V_Color4 > VV_Color4;
-
-	inline tostream& operator<<(tostream& outStream, const Color4& color)
-	{
-		outStream << (uint16_t)color.r << ", " << (uint16_t)color.g << ", " << (uint16_t)color.b << ", " << (uint16_t)color.a;
-
-		return outStream;
-	}
-
-	inline tistream& operator>>(tistream& inStream, Color4& color)
-	{
-		uint16_t r = 0;
-		uint16_t g = 0;
-		uint16_t b = 0;
-		uint16_t a = 0;
-		tchar_t delim;
-		inStream >> r >> delim >> g >> delim >> b >> delim >> a;
-
-		color.r = (uint8_t)r;
-		color.g = (uint8_t)g;
-		color.b = (uint8_t)b;
-		color.a = (uint8_t)a;
-
-		return inStream;
-	}
 }

@@ -163,8 +163,6 @@ namespace Helium
         static Matrix3        RotateY (float32_t theta);
         static Matrix3        RotateZ (float32_t theta);
 
-        friend HELIUM_MATH_API tostream& operator<<(tostream& outStream, const Matrix3& vector);
-        friend HELIUM_MATH_API tistream& operator>>(tistream& inStream, Matrix3& vector);
         friend class HELIUM_MATH_API Matrix4;
     };
 
@@ -388,45 +386,5 @@ namespace Helium
         HELIUM_ASSERT( oldFirst == GetBasis(first) );
 
         return *this;
-    }
-
-    inline tostream& operator<<(tostream& outStream, const Matrix3& matrix)
-    {
-        outStream << matrix.x.x << ", " << matrix.x.y << ", " << matrix.x.z << ", ";
-        outStream << matrix.y.x << ", " << matrix.y.y << ", " << matrix.y.z << ", ";
-        outStream << matrix.z.x << ", " << matrix.z.y << ", " << matrix.z.z;
-
-        return outStream;
-    }
-
-    inline tistream& operator>>(tistream& inStream, Matrix3& matrix)
-    {
-        inStream >> matrix.x.x;
-        inStream.ignore();
-
-        inStream >> matrix.x.y;
-        inStream.ignore();
-
-        inStream >> matrix.x.z;
-        inStream.ignore();
-
-        inStream >> matrix.y.x;
-        inStream.ignore();
-
-        inStream >> matrix.y.y;
-        inStream.ignore();
-
-        inStream >> matrix.y.z;
-        inStream.ignore();
-
-        inStream >> matrix.z.x;
-        inStream.ignore();
-
-        inStream >> matrix.z.y;
-        inStream.ignore();
-
-        inStream >> matrix.z.z;
-
-        return inStream;
     }
 }

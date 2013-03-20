@@ -210,8 +210,6 @@ namespace Helium
 
         Matrix4&              RowScale( const Vector4& scaleVector );
 
-        friend HELIUM_MATH_API tostream& operator<<(tostream& outStream, const Matrix4& vector);
-        friend HELIUM_MATH_API tistream& operator>>(tistream& inStream, Matrix4& vector);
         friend class HELIUM_MATH_API Matrix3;
     };
 
@@ -549,67 +547,5 @@ namespace Helium
             (m[0][0]*n[0]) + (m[1][0]*n[1]) + (m[2][0]*n[2]),
             (m[0][1]*n[0]) + (m[1][1]*n[1]) + (m[2][1]*n[2]),
             (m[0][2]*n[0]) + (m[1][2]*n[1]) + (m[2][2]*n[2]));
-    }
-
-    inline tostream& operator<<(tostream& outStream, const Matrix4& matrix)
-    {
-        outStream << matrix.x.x << ", " << matrix.x.y << ", " << matrix.x.z << ", " << matrix.x.w << ", ";
-        outStream << matrix.y.x << ", " << matrix.y.y << ", " << matrix.y.z << ", " << matrix.y.w << ", ";
-        outStream << matrix.z.x << ", " << matrix.z.y << ", " << matrix.z.z << ", " << matrix.z.w << ", ";
-        outStream << matrix.t.x << ", " << matrix.t.y << ", " << matrix.t.z << ", " << matrix.t.w;
-
-        return outStream;
-    }
-
-    inline tistream& operator>>(tistream& inStream, Matrix4& matrix)
-    {
-        inStream >> matrix.x.x;
-        inStream.ignore();
-
-        inStream >> matrix.x.y;
-        inStream.ignore();
-
-        inStream >> matrix.x.z;
-        inStream.ignore();
-
-        inStream >> matrix.x.w;
-        inStream.ignore();
-
-        inStream >> matrix.y.x;
-        inStream.ignore();
-
-        inStream >> matrix.y.y;
-        inStream.ignore();
-
-        inStream >> matrix.y.z;
-        inStream.ignore();
-
-        inStream >> matrix.y.w;
-        inStream.ignore();
-
-        inStream >> matrix.z.x;
-        inStream.ignore();
-
-        inStream >> matrix.z.y;
-        inStream.ignore();
-
-        inStream >> matrix.z.z;
-        inStream.ignore();
-
-        inStream >> matrix.z.w;
-        inStream.ignore();
-
-        inStream >> matrix.t.x;
-        inStream.ignore();
-
-        inStream >> matrix.t.y;
-        inStream.ignore();
-
-        inStream >> matrix.t.z;
-        inStream.ignore();
-
-        inStream >> matrix.t.w;
-
-        return inStream;
     }
 }

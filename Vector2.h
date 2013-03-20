@@ -38,24 +38,21 @@ namespace Helium
         // unary negation
         Vector2           operator- () const { return Vector2( -x, -y ); }
 
-        float32_t&              operator[] (const uint32_t i) { HELIUM_ASSERT(i < 2); return (&x)[i]; }
-        const float32_t&        operator[] (const uint32_t i) const { HELIUM_ASSERT(i < 2); return (&x)[i]; }
+        float32_t&        operator[] (const uint32_t i) { HELIUM_ASSERT(i < 2); return (&x)[i]; }
+        const float32_t&  operator[] (const uint32_t i) const { HELIUM_ASSERT(i < 2); return (&x)[i]; }
 
         bool              operator== (const Vector2& v) const { return (x == v.x && y == v.y); }
         bool              operator!= (const Vector2& v) const { return !(x == v.x && y == v.y); }
         bool              Equal (const Vector2& v, float32_t error = 0) const;
         bool              Finite() { return IsFinite(x) && IsFinite(y); }
 
-        float32_t               LengthSquared () const { return x * x + y * y; }
-        float32_t               Length () const;
+        float32_t         LengthSquared () const { return x * x + y * y; }
+        float32_t         Length () const;
 
         Vector2&          Normalize ();
         Vector2           Normalized () const;
 
-        float32_t               Dot (const Vector2& v) const { return (x * v.x + y * v.y); }
-
-        friend HELIUM_MATH_API tostream& operator<<(tostream& outStream, const Vector2& v);
-        friend HELIUM_MATH_API tistream& operator>>(tistream& inStream, Vector2& v);
+        float32_t         Dot (const Vector2& v) const { return (x * v.x + y * v.y); }
     };
 
     typedef std::vector< Vector2 > V_Vector2;
@@ -93,22 +90,5 @@ namespace Helium
     {
         Vector2 result = *this;
         return result.Normalize();
-    }
-
-    inline tostream& operator<<(tostream& outStream, const Vector2& vector)
-    {
-        outStream << vector.x << ", " << vector.y;
-
-        return outStream;
-    }
-
-    inline tistream& operator>>(tistream& inStream, Vector2& vector)
-    {
-        inStream >> vector.x;
-        inStream.ignore();
-
-        inStream >> vector.y;
-
-        return inStream;
     }
 }

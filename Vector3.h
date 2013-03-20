@@ -51,26 +51,23 @@ namespace Helium
         Vector3           operator/ (const Vector3& v) const { return Vector3 (x / v.x, y / v.y, z / v.z); }
         Vector3           operator/ (const float32_t v) const { return Vector3 (x / v, y / v, z / v); }
 
-        float32_t&              operator[] (const uint32_t i) {  HELIUM_ASSERT(i < 3); return (&x)[i]; }
-        const float32_t&        operator[] (const uint32_t i) const {  HELIUM_ASSERT(i < 3); return (&x)[i]; }
+        float32_t&        operator[] (const uint32_t i) {  HELIUM_ASSERT(i < 3); return (&x)[i]; }
+        const float32_t&  operator[] (const uint32_t i) const {  HELIUM_ASSERT(i < 3); return (&x)[i]; }
 
         bool              operator== (const Vector3& v) const { return (x == v.x && y == v.y && z == v.z); }
         bool              operator!= (const Vector3& v) const { return !(x == v.x && y == v.y && z == v.z); }
         bool              Equal (const Vector3& v, float32_t error = 0) const;
         bool              Finite() { return IsFinite(x) && IsFinite(y) && IsFinite(z); }
 
-        float32_t               LengthSquared () const { return x * x + y * y + z * z; }
-        float32_t               Length () const;
+        float32_t         LengthSquared () const { return x * x + y * y + z * z; }
+        float32_t         Length () const;
 
         Vector3&          Normalize ();
         Vector3           Normalized () const;
 
-        float32_t               Dot (const Vector3& v) const; 
+        float32_t         Dot (const Vector3& v) const; 
         Vector3           Cross (const Vector3& v) const;
         void              Clamp ( const Vector3 &min, const Vector3 &max );
-
-        friend HELIUM_MATH_API tostream& operator<<(tostream& outStream, const Vector3& vector);
-        friend HELIUM_MATH_API tistream& operator>>(tistream& inStream, Vector3& vector);
     };
 
     typedef std::vector< Vector3 > V_Vector3;
@@ -129,58 +126,4 @@ namespace Helium
         y = y < min.y ? min.y : ( y > max.y ) ? max.y : y; 
         z = z < min.z ? min.z : ( z > max.z ) ? max.z : z; 
     }
-
-    inline tostream& operator<<(tostream& outStream, const Vector3& vector)
-    {
-        outStream << vector.x << ", " << vector.y << ", " << vector.z;
-
-        return outStream;
-    }
-
-    inline tistream& operator>>(tistream& inStream, Vector3& vector)
-    {
-        inStream >> vector.x;
-        inStream.ignore();
-
-        inStream >> vector.y;
-        inStream.ignore();
-
-        inStream >> vector.z;
-
-        return inStream;
-    }
-
-    inline Vector3 ComponentMax( const Vector3 &v1, const Vector3 &v2 )
-    {
-        Vector3 maxVec;
-
-        maxVec.x = v1.x >= v2.x ? v1.x : v2.x;
-        maxVec.y = v1.y >= v2.y ? v1.y : v2.y;
-        maxVec.z = v1.z >= v2.z ? v1.z : v2.z;
-
-        return maxVec;
-    }
-
-    inline Vector3 ComponentMin( const Vector3 &v1, const Vector3 &v2 )
-    {
-        Vector3 minVec;
-
-        minVec.x = v1.x <= v2.x ? v1.x : v2.x;
-        minVec.y = v1.y <= v2.y ? v1.y : v2.y;
-        minVec.z = v1.z <= v2.z ? v1.z : v2.z;
-
-        return minVec;
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    //
-    //  - performs a fast lookup (using a multi-map) of the specified position vector in the position array.
-    //  - the purpose of the min and max keys (versus just a single key) is to avoid missing possible
-    //     matches at the edge conditions because the keys are converted to ints from floats.
-    //  - returns the index of the position vector or -1 if it was not found
-    //
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    typedef std::multimap<int32_t, int32_t> MM_i32;
-    int32_t HELIUM_MATH_API LookupPosInArray( const Vector3& pos, int32_t min_key, int32_t max_key, V_Vector3& pos_array, MM_i32& pos_lookup , float32_t threshold);
 }

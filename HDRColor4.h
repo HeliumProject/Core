@@ -61,13 +61,7 @@ namespace Helium
 		void ToFloat( float32_t& r, float32_t& g, float32_t& b, float32_t& a );
 		void ToLinearFloat( float32_t& r, float32_t& g, float32_t& b, float32_t& a );
 		void Clamp ( const HDRColor4 &min, const HDRColor4 &mar );
-
-		friend HELIUM_MATH_API tostream& operator<<(tostream& outStream, const HDRColor4& color);
-		friend HELIUM_MATH_API tistream& operator>>(tistream& inStream, HDRColor4& color);
 	};
-
-	typedef std::vector< HDRColor4 > V_HDRColor4;
-	typedef std::vector< V_Color4 > VV_HDRColor4;
 
 	inline void HDRColor4::FromFloat( float32_t r, float32_t g, float32_t b, float32_t a )
 	{
@@ -111,44 +105,5 @@ namespace Helium
 		g = g < min.g ? min.g : ( g > mar.g ) ? mar.g : g;
 		b = b < min.b ? min.b : ( b > mar.b ) ? mar.b : b;
 		a = a < min.a ? min.a : ( a > mar.a ) ? mar.a : a;
-	}
-
-	inline tostream& operator<<(tostream& outStream, const HDRColor4& color)
-	{
-		outStream << (uint16_t)color.r << ", " << (uint16_t)color.g << ", " << (uint16_t)color.b << ", " << (uint16_t)color.b << ", " << color.s;
-
-		return outStream;
-	}
-
-	inline tistream& operator>>(tistream& inStream, HDRColor4& color)
-	{
-		uint16_t r = 0;
-		uint16_t g = 0;
-		uint16_t b = 0;
-		uint16_t a = 0;
-		float32_t s = 0.f;
-		tchar_t delim;
-		inStream >> r >> delim >> g >> delim >> b >> delim >> a >> delim >> s;
-
-		color.r = (uint8_t)r;
-		color.g = (uint8_t)g;
-		color.b = (uint8_t)b;
-		color.a = (uint8_t)a;
-		color.s = s;
-
-		return inStream;
-	}
-
-	inline HDRColor4 ComponentMin( const HDRColor4 &v1, const HDRColor4 &v2 )
-	{
-		HDRColor4 minVec;
-
-		minVec.r = v1.r <= v2.r ? v1.r : v2.r;
-		minVec.g = v1.g <= v2.g ? v1.g : v2.g;
-		minVec.b = v1.b <= v2.b ? v1.b : v2.b;
-		minVec.a = v1.a <= v2.a ? v1.a : v2.a;
-		minVec.s = v1.s <= v2.s ? v1.s : v2.s;
-
-		return minVec;
 	}
 }

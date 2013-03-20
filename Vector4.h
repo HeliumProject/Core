@@ -50,27 +50,24 @@ namespace Helium
         // unary negation
         Vector4           operator- () const { return Vector4( -x, -y, -z, -w ); }
 
-        float32_t&              operator[] (const uint32_t i) {  HELIUM_ASSERT(i < 4); return (&x)[i]; }
-        const float32_t&        operator[] (const uint32_t i) const {  HELIUM_ASSERT(i < 4); return (&x)[i]; }
+        float32_t&        operator[] (const uint32_t i) {  HELIUM_ASSERT(i < 4); return (&x)[i]; }
+        const float32_t&  operator[] (const uint32_t i) const {  HELIUM_ASSERT(i < 4); return (&x)[i]; }
 
         bool              operator== (const Vector4& v) const { return (x == v.x && y == v.y && z == v.z && w == v.w); }
         bool              operator!= (const Vector4& v) const { return !(x == v.x && y == v.y && z == v.z && w == v.w); }
         bool              Equal (const Vector4& v, float32_t error = 0) const;
         bool              Finite() { return IsFinite(x) && IsFinite(y) && IsFinite(z) && IsFinite(w); }
 
-        float32_t               LengthSquared () const { return x * x + y * y + z * z + w * w; }
-        float32_t               Length () const;
+        float32_t         LengthSquared () const { return x * x + y * y + z * z + w * w; }
+        float32_t         Length () const;
 
         Vector4&          Normalize ();
         Vector4           Normalized () const;
 
-        float32_t               Dot (const Vector4& other) const; 
+        float32_t         Dot (const Vector4& other) const; 
         Vector4           Cross (const Vector4& v) const;
 
         void              Transform (const Matrix4& m);
-
-        friend HELIUM_MATH_API tostream& operator<<(tostream& outStream, const Vector4& vector);
-        friend HELIUM_MATH_API tistream& operator>>(tistream& inStream, Vector4& vector);
     };
 
     typedef std::vector< Vector4 > V_Vector4;
@@ -119,28 +116,5 @@ namespace Helium
     inline Vector4 Vector4::Cross(const Vector4& v) const
     {
         return Vector4 (y*v.z - z*v.y, z*v.x - x*v.z, x*v.y - y*v.x, 0);
-    }
-
-    inline tostream& operator<<(tostream& outStream, const Vector4& vector)
-    {
-        outStream << vector.x << ", " << vector.y << ", " << vector.z << ", " << vector.w;
-
-        return outStream;
-    }
-
-    inline tistream& operator>>(tistream& inStream, Vector4& vector)
-    {
-        inStream >> vector.x;
-        inStream.ignore();
-
-        inStream >> vector.y;
-        inStream.ignore();
-
-        inStream >> vector.z;
-        inStream.ignore();
-
-        inStream >> vector.w;
-
-        return inStream;
     }
 }
