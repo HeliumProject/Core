@@ -1,7 +1,7 @@
 #include "MathPch.h"
 #include "Math/Color3.h"
 #include "Math/Color4.h"
-#include "Reflect/Data/DataDeduction.h"
+#include "Reflect/DataDeduction.h"
 
 REFLECT_DEFINE_BASE_STRUCTURE( Helium::Color4 );
 
