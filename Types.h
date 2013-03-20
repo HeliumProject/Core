@@ -332,7 +332,6 @@ typedef double float64_t;
 #include <string>
 #include <fstream>
 #include <sstream>
-#include <strstream>
 
 #ifdef _UNICODE
 # ifndef UNICODE
