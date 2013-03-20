@@ -1,5 +1,5 @@
 #include "Platform/Condition.h"
-#include "Platform/Platform.h"
+//#include "Platform/Platform.h"
 
 #include "Platform/Assert.h"
 
@@ -123,9 +123,14 @@ void event_reset(Condition::Handle* evt)
     pthread_mutex_unlock (&evt->lock);
 }
 
-Condition::Condition()
+/// Constructor.
+///
+/// @param[in] resetMode      Whether the condition should automatically reset after releasing a thread when signaled
+///                           or whether the condition will remain signaled until Reset() is called.
+/// @param[in] bInitialState  True to initialize this condition in the signaled state, false to initialize non-signaled.
+Condition::Condition( bool bManualReset, bool bInitialState )
 {
-    event_init(&m_Handle, true, false);
+    event_init(&m_Handle, bManualReset, bInitialState);
 }
 
 Condition::~Condition()
@@ -143,7 +148,7 @@ void Condition::Reset()
     event_reset(&m_Handle);
 }
 
-bool Condition::Wait(u32 timeout)
+bool Condition::Wait(uint32_t timeout)
 {
     HELIUM_ASSERT( timeout == 0xffffffff ); // not supported
     event_wait(&m_Handle);

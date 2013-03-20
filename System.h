@@ -14,7 +14,6 @@
 // Compiler (HELIUM_CC_*) macros:
 // - HELIUM_CC_CL: Microsoft Visual C++
 // - HELIUM_CC_GCC: GCC
-// - HELIUM_CC_SNC: SNC (PS3)
 
 #if defined( _WIN64 )
 # define HELIUM_OS_WIN 1
@@ -34,6 +33,15 @@
 #  define HELIUM_CPU_X86_64 1
 # else
 #  define HELIUM_OS_MAC32 1
+#  define HELIUM_CPU_X86 1
+#  define HELIUM_CPU_X86_32 1
+# endif
+#elif defined( __gnu_linux__)
+# define HELIUM_OS_LINUX 1
+# if defined( __x86_64__ )
+#  define HELIUM_CPU_X86 1
+#  define HELIUM_CPU_X86_64 1
+# else
 #  define HELIUM_CPU_X86 1
 #  define HELIUM_CPU_X86_32 1
 # endif
@@ -74,4 +82,8 @@
 
 #if HELIUM_OS_MAC
 # include "Platform/SystemMac.h"
+#endif
+
+#if HELIUM_OS_LINUX
+# include "Platform/SystemLinux.h"
 #endif

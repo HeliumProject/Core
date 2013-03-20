@@ -65,6 +65,13 @@ namespace Helium
 		/// Invalid thread ID value.  Note that this can vary between platforms, so it should not be assumed to be any
 		/// value in particular.
 		static const id_t INVALID_ID = 0;
+#elif HELIUM_OS_LINUX
+		// Posix threads handle
+		typedef pthread_t Handle;
+		// posix threads are identified as process IDs
+		typedef pid_t id_t;
+		// pthread_create returns 0 on success, otherwise errno on failure
+		static const int VALID_ID = 0;
 #else
 # error Implement Thread for this platform.
 #endif
@@ -77,7 +84,13 @@ namespace Helium
 
 		/// @name Thread Callback
 		//@{
+#if HELIUM_OS_WIN
 		static unsigned int __stdcall ThreadCallback( void* pData );
+#elif HELIUM_OS_LINUX
+		static void * ThreadCallback( void* pData );
+		// is the thread valid (created by pthread_create)
+		bool Valid(void);
+#endif
 		//@}
 
 	public:
@@ -211,6 +224,8 @@ namespace Helium
 	protected:
 #if HELIUM_OS_WIN
 		unsigned long m_Key;
+#elif HELIUM_OS_LINUX
+		pthread_key_t m_Key;
 #else
 # error Implement ThreadLocalPointer for this platform.
 #endif

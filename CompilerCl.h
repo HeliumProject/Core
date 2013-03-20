@@ -22,12 +22,6 @@
 #if _MSC_VER < 1600
 // ceil() flawed in vs2008 headers
 #pragma warning( disable : 4985 )
-// Import tr1 into std for vs2008
-namespace std
-{
-	namespace tr1 {}
-	using namespace tr1;
-}
 #endif
 
 /// Declare a class method as overriding a virtual method of a parent class.
@@ -46,6 +40,9 @@ namespace std
 /// Attribute for explicitly defining a pointer or reference as not being externally aliased.
 #define HELIUM_RESTRICT __restrict
 
+/// C99 is never supported in cl
+#define HELIUM_C99 0
+
 /// Prefix macro for declaring type or variable alignment.
 ///
 /// @param[in] ALIGNMENT  Byte alignment (must be a power of two).
@@ -55,3 +52,10 @@ namespace std
 ///
 /// @param[in] ALIGNMENT  Byte alignment (must be a power of two).
 #define HELIUM_ALIGN_POST( ALIGNMENT )
+
+// Import tr1 into std
+namespace std
+{
+	namespace tr1 {}
+	using namespace tr1;
+}

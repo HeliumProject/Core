@@ -26,8 +26,8 @@ namespace Helium
 	HELIUM_PLATFORM_API int StringPrintArgs(wchar_t* dest, size_t destCount, const wchar_t* fmt, va_list args);
 
 	// Deduction of target array size
-	template <size_t N>	HELIUM_FORCEINLINE int StringPrint( char (&dest)[N], const char* fmt, ... );
-	template <size_t N>	HELIUM_FORCEINLINE int StringPrint( wchar_t (&dest)[N], const wchar_t* fmt, ... );
+	template <size_t N>	int StringPrint( char (&dest)[N], const char* fmt, ... );
+	template <size_t N>	int StringPrint( wchar_t (&dest)[N], const wchar_t* fmt, ... );
 	template <size_t N>	HELIUM_FORCEINLINE int StringPrintArgs( char (&dest)[N], const char* fmt, va_list args );
 	template <size_t N>	HELIUM_FORCEINLINE int StringPrintArgs( wchar_t (&dest)[N], const wchar_t* fmt, va_list args );
 

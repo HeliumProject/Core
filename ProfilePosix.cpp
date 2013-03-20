@@ -4,7 +4,7 @@
 #include <pthread.h>
 #include <assert.h>
 
-void Helium::TraceFile::Open(const tchar* file)
+void Helium::TraceFile::Open(const tchar_t* file)
 {
 
 }
@@ -14,43 +14,43 @@ void Helium::TraceFile::Close()
 
 }
 
-void Helium::TraceFile::Write(const tchar* data, int size)
+void Helium::TraceFile::Write(const tchar_t* data, int size)
 {
 
 }
 
-const tchar* Helium::TraceFile::GetFilePath()
+const tchar_t* Helium::TraceFile::GetFilePath()
 {
     return NULL;
 }
 
-u64 Helium::TimerGetClock()
+uint64_t Helium::TimerGetClock()
 {
-    u64 time = 0;
+    uint64_t time = 0;
     HELIUM_BREAK();
     return time;
 }
 
-float Helium::CyclesToMillis(u64 cycles)
+float Helium::CyclesToMillis(uint64_t cycles)
 {
-    return (f64)cycles * (f64)(1000.0 / 79800000ULL);
+    return (float64_t)cycles * (float64_t)(1000.0 / 79800000ULL);
 }
 
-float Helium::TimeTaken(u64 start_time)
+float Helium::TimeTaken(uint64_t start_time)
 {
-    u64 time = TimerGetClock() - start_time;
+    uint64_t time = TimerGetClock() - start_time;
     return CyclesToMillis(time);
 }
 
-void Helium::ReportTime(const tchar* segment, u64 start_time, double& total_millis)
+void Helium::ReportTime(const tchar_t* segment, uint64_t start_time, double& total_millis)
 {
-    u64 time = TimerGetClock() - start_time;
+    uint64_t time = TimerGetClock() - start_time;
     double millis = CyclesToMillis(time);
     printf("%s took %f ms\n", segment, millis);
     total_millis += millis;
 }
 
-u64 Helium::GetTotalMemory()
+uint64_t Helium::GetTotalMemory()
 {
     return 256 * (1 << 20);
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <stddef.h>
 
 #include "Platform/System.h"
 
@@ -302,6 +303,14 @@
 // Use inttypes.h where available; we simply try to provide relevant type definitions for platforms that don't provide
 // it.
 #include <inttypes.h>
+
+#if defined(__GNUC__)
+/*these two are compiler defined */
+/// "tchar_t" string format macro for ptrdiff_t.
+#define TPRIdPD TXT( "td" )
+// "tchar_t" string format macro for size_t.
+#define TPRIuSZ TXT( "zu" )
+#endif
 
 #endif  // HELIUM_CC_CL
 

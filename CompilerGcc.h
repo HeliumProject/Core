@@ -20,6 +20,14 @@
 /// Attribute for explicitly defining a pointer or reference as not being externally aliased.
 #define HELIUM_RESTRICT __restrict
 
+#if __STDC_VERSION__ >= 199901L
+/// C99 is supported
+# define HELIUM_C99 1
+#else
+/// C99 is not supported
+# define HELIUM_C99 0
+#endif
+
 /// Prefix macro for declaring type or variable alignment.
 ///
 /// @param[in] ALIGNMENT  Byte alignment (must be a power of two).
@@ -29,3 +37,10 @@
 ///
 /// @param[in] ALIGNMENT  Byte alignment (must be a power of two).
 #define HELIUM_ALIGN_POST( ALIGNMENT ) __attribute__( ( aligned( ALIGNMENT ) ) )
+
+// Import tr1 into std for vs2008
+namespace std
+{
+	namespace tr1 {}
+	using namespace tr1;
+}

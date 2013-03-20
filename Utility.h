@@ -13,13 +13,18 @@
 # endif
 #endif
 
-#include <type_traits>
+#if HELIUM_OS_LINUX
+# include <tr1/type_traits>
+#else
+# include <type_traits>
+#endif
 
 #if HELIUM_CC_CL
 #pragma warning( pop )
 #endif
 
 #include <cstdarg>
+#include <string.h>
 
 /// @defgroup utilitymacros General Utility Macros
 //@{

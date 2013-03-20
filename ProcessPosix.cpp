@@ -1,4 +1,5 @@
 #include "Platform/Process.h"
+#include "Platform/Assert.h"
 
 int Helium::Execute( const tstring& command, bool showWindow, bool block )
 {
@@ -18,8 +19,11 @@ tstring Helium::GetProcessString()
     return TXT( "" );
 }
 
+/*
+// not implemented, and not used anywhere else in helium
 tstring Helium::GetCrashdumpDirectory()
 {
     HELIUM_BREAK();
     return TXT("");
 }
+*/

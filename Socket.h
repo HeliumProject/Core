@@ -3,7 +3,7 @@
 #ifdef HELIUM_OS_WIN
 # include "Platform/SocketWin.h"
 #else
-# include "POSIX/Socket.h"
+# include "Platform/SocketPosix.h"
 #endif
 
 #include "Platform/Condition.h"
