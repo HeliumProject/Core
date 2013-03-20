@@ -203,7 +203,7 @@ bool FilePath::Create() const
 	}
 
 	File f;
-	if ( !f.Open( m_Path.c_str(), FileModes::MODE_WRITE, true ) )
+	if ( !f.Open( m_Path.c_str(), FileModes::Write, true ) )
 	{
 		return false;
 	}

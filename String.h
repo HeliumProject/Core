@@ -84,6 +84,7 @@ namespace Helium
 		void Pop();
 
 		void Format( const CharType* pFormatString, ... );
+		uint32_t Parse( const CharType* pFormatString, ... );
 		//@}
 
 		/// @name Parsing

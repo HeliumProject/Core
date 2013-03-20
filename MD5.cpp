@@ -516,7 +516,7 @@ tstring Helium::MD5(const tstring& data)
 tstring Helium::FileMD5(const tstring& filePath, uint32_t packetSize)
 {
     File f;
-    if ( !f.Open( filePath.c_str(), FileModes::MODE_READ ) )
+    if ( !f.Open( filePath.c_str(), FileModes::Read ) )
     {
         throw Helium::Exception( TXT( "Unable to open %s for read" ), filePath.c_str());
     }

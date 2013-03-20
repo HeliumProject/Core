@@ -181,6 +181,7 @@ namespace Helium
 
 		void Swap( DynamicArray& rArray );
 
+		uint32_t GetIndex( const ConstIterator& itr ) const;
 		uint32_t GetIndexOfPointer(const T *_ptr) const;
 		//@}
 

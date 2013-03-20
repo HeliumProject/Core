@@ -253,7 +253,7 @@ bool AddFile( M_OutputFile& files, const tstring& fileName, Stream stream, uint3
 		if (fileName != TXT( "" ))
 		{
 			File* f = new File;
-			if ( f->Open( fileName.c_str(), FileModes::MODE_WRITE ) )
+			if ( f->Open( fileName.c_str(), FileModes::Write ) )
 			{
 				if ( append )
 				{
