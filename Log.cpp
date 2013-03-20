@@ -10,7 +10,6 @@
 #include "Foundation/String.h"
 
 #include <stdio.h>
-#include <io.h>
 #include <time.h>
 #include <sys/timeb.h>
 
@@ -18,8 +17,10 @@
 #include <iostream>
 #include <map>
 
+#if defined(HELIUM_OS_WIN)
 #include <crtdbg.h>
 #include <shlobj.h>
+#endif
 
 using namespace Helium;
 using namespace Helium::Log;
@@ -199,8 +200,15 @@ void Redirect(const tstring& fileName, const tchar_t* str, bool stampNewLine = t
 		tchar_t* temp = (tchar_t*)alloca( sizeof(tchar_t) * count );
 		if ( stampNewLine )
 		{
+#if defined(HELIUM_OS_WIN)
 			_timeb currentTime;
 			_ftime( &currentTime );
+#elif defined(HELIUM_OS_LINUX)
+			struct timeb currentTime;
+			ftime( &currentTime );
+#else
+# error "define timeb for this platform"
+#endif
 
 			uint32_t time = (uint32_t) currentTime.time;
 			uint32_t milli = currentTime.millitm;
@@ -209,7 +217,7 @@ void Redirect(const tstring& fileName, const tchar_t* str, bool stampNewLine = t
 			time += currentTime.dstflag ? 1 : 0;
 			uint32_t hour = time % 24;
 
-			length = StringPrint( temp, count, TXT("[%02d:%02d:%02d.%03d TID:%d] %s"), hour, min, sec, milli, GetCurrentThreadId(), str );
+			length = StringPrint( temp, count, TXT("[%02d:%02d:%02d.%03d TID:%d] %s"), hour, min, sec, milli, GetCurrentThreadID(), str );
 		}
 		else
 		{
@@ -463,7 +471,8 @@ void Log::PrintString(const tchar_t* string, Stream stream, Level level, Console
 				Helium::PrintString((Helium::ConsoleColor)color, stream == Streams::Error ? stderr : stdout, statement.m_String);
 
 				// raise the printed event
-				g_PrintedEvent.Raise( PrintedArgs (statement) );
+				PrintedArgs pa(statement);
+				g_PrintedEvent.Raise( pa );
 			}
 
 			// send the text to the debugger, if no debugger nothing happens

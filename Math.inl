@@ -104,6 +104,8 @@ int64_t Helium::Abs( int64_t value )
 #else
     return llabs( value );
 #endif
+#elif HELIUM_OS_LINUX
+    return llabs( value );
 #else
 #error TODO: Implement 64-bit Abs() on this platform/compiler.
 #endif
@@ -263,7 +265,7 @@ size_t Helium::Log2( uint64_t value )
 
     return bitIndex;
 #elif HELIUM_CC_GCC
-    HELIUM_COMPILE_ASSERT( sizeof( long long ) == 64 );
+    HELIUM_COMPILE_ASSERT( sizeof( long long ) == 8 ); /* sizeof is in bytes. JWS 2-27-13 */
 
     return ( 63 - __builtin_clzll( static_cast< unsigned long long >( value ) ) );
 #else
@@ -474,12 +476,20 @@ float32_t Helium::Atan2( float32_t y, float32_t x )
 
 inline bool Helium::IsFinite(float32_t val)
 {
+#if HELIUM_OS_WIN
     return _finite(val) != 0;
+#else
+    return std::isfinite(val) != 0;
+#endif
 }
 
 inline bool Helium::IsFinite(float64_t val)
 {
+#if HELIUM_OS_WIN
     return _finite(val) != 0;
+#else
+    return std::isfinite(val) != 0;
+#endif
 }
 
 //

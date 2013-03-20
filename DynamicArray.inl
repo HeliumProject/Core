@@ -355,7 +355,7 @@ Helium::ArrayIterator< T > Helium::ArrayIterator< T >::operator-( ptrdiff_t offs
 ///
 /// @return  Offset from the given array iterator to this iterator.
 template< typename T >
-ptrdiff_t Helium::ArrayIterator< T >::operator-( const ConstArrayIterator& rOther ) const
+ptrdiff_t Helium::ArrayIterator< T >::operator-( const ConstArrayIterator< T >& rOther ) const
 {
 	return ConstArrayIterator< T >::operator-( rOther );
 }
@@ -1334,13 +1334,12 @@ T* Helium::DynamicArray< T, Allocator >::ResizeBuffer(
 	size_t oldCapacity,
 	size_t newCapacity )
 {
-	return ResizeBuffer(
-		pMemory,
-		elementCount,
-		oldCapacity,
-		newCapacity,
-		std::integral_constant<
-			bool, std::has_trivial_copy< T >::value && std::has_trivial_destructor< T >::value >() );
+    return ResizeBuffer(
+        pMemory,
+        elementCount,
+        oldCapacity,
+        newCapacity,
+        std::integral_constant< bool, std::has_trivial_copy< T >::value && std::has_trivial_destructor< T >::value >() );
 }
 
 /// ResizeBuffer() implementation for types with both a trivial copy constructor and trivial destructor.
