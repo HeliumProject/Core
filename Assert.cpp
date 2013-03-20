@@ -96,7 +96,8 @@ AssertResult Assert::Trigger(
 	}
 
 	HELIUM_TRACE( TraceLevels::Error, TXT( "%s\n" ), messageText );
-    
+
+#if HELIUM_OS_WIN   
 #if !HELIUM_RELEASE && !HELIUM_PROFILE
     if (Helium::GetSymbolsInitialized())
     {
@@ -116,6 +117,7 @@ AssertResult Assert::Trigger(
 #else
     tstring str = TXT("Stack trace unavailable - symbols not loaded\n");
     HELIUM_TRACE( TraceLevels::Error, str.c_str() );
+#endif
 #endif
 
 	// Present the assert message and get how we should proceed.

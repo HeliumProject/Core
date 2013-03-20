@@ -30,8 +30,8 @@
 /// @param[in] ALIGNMENT  Byte alignment (must be a power of two).
 #define HELIUM_ALIGN_POST( ALIGNMENT ) __attribute__( ( aligned( ALIGNMENT ) ) )
 
-#if defined(__GXX_EXPERIMENTAL_CXX0X__)
-// pull in type_traits to the global namespace for backward compatibility with -std=gnu++0x
+#if __cplusplus <= 199711L
+// pull in type_traits to the global namespace for backward compatibility 
 #include <tr1/type_traits>
 namespace std
 {
@@ -39,5 +39,14 @@ namespace std
 	using tr1::has_trivial_assign;
 	using tr1::has_trivial_constructor;
 	using tr1::has_trivial_copy;
+	using tr1::true_type;
+	using tr1::false_type;
+	using tr1::has_trivial_destructor;
+	using tr1::integral_constant;
+	using tr1::is_pointer;
+	using tr1::integral_constant;
+	using tr1::remove_cv;
+	using tr1::alignment_of;
+
 }
 #endif

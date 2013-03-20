@@ -8,20 +8,20 @@ static void SetSchedParam(struct sched_param * params, ThreadPriority priority)
 {
     switch (priority)
     {
-    case ThreadPriority::Highest:
+    case ThreadPriorities::Highest:
         params->sched_priority = 99;
         break;
-    case ThreadPriority::High:
+    case ThreadPriorities::High:
         params->sched_priority = 75;
         break;
-    case ThreadPriority::Normal:
+    case ThreadPriorities::Normal:
     default:
         params->sched_priority = 50;
         break;
-    case ThreadPriority::Low:
+    case ThreadPriorities::Low:
         params->sched_priority = 25;
         break;
-    case ThreadPriority::Lowest:
+    case ThreadPriorities::Lowest:
         params->sched_priority = 1;
         break;
     }
