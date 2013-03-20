@@ -5,7 +5,7 @@
 #include "Foundation/FileStream.h"
 
 #include "Reflect/Object.h"
-#include "Reflect/Structure.h"
+#include "Reflect/Composite.h"
 #include "Reflect/Registry.h"
 #include "Reflect/DataDeduction.h"
 
