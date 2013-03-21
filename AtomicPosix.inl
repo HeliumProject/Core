@@ -14,9 +14,9 @@ _GENERATE_ATOMIC_WORKER(
     ( int32_t volatile & rAtomic, int32_t value ),
     {
 #if !((__GNUC__ >= 4) && (__GNUC_MINOR__ >= 7))
-        return __sync_val_compare_and_swap( reinterpret_cast< volatile int32_t* >( &rAtomic ), reinterpret_cast< volatile int32_t* >( &rAtomic ), value );
+        return __sync_val_compare_and_swap( static_cast< volatile int32_t* >( &rAtomic ), static_cast< volatile int32_t* >( &rAtomic ), value );
 #else
-        return __atomic_exchange_n( reinterpret_cast< volatile int32_t* >( &rAtomic ), value, __ATOMIC_SEQ_CST );
+        return __atomic_exchange_n( static_cast< volatile int32_t* >( &rAtomic ), value, __ATOMIC_SEQ_CST );
 #endif
     } )
 
@@ -26,9 +26,9 @@ _GENERATE_ATOMIC_WORKER(
     ( int32_t volatile & rAtomic, int32_t value, int32_t compare ),
     {
 #if !((__GNUC__ >= 4) && (__GNUC_MINOR__ >= 7))
-        return __sync_val_compare_and_swap( reinterpret_cast< volatile int32_t* >( &rAtomic ), compare, value );
+        return __sync_val_compare_and_swap( static_cast< volatile int32_t* >( &rAtomic ), compare, value );
 #else
-        return __atomic_compare_exchange_n( reinterpret_cast< volatile int32_t* >( &rAtomic ), &compare, value, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST );
+        return __atomic_compare_exchange_n( static_cast< volatile int32_t* >( &rAtomic ), &compare, value, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST );
 #endif
     } )
 
@@ -38,9 +38,9 @@ _GENERATE_ATOMIC_WORKER(
     ( int32_t volatile & rAtomic ),
     {
 #if !((__GNUC__ >= 4) && (__GNUC_MINOR__ >= 7))
-        return __sync_add_and_fetch( reinterpret_cast< volatile int32_t* >( &rAtomic ), 1 );
+        return __sync_add_and_fetch( static_cast< volatile int32_t* >( &rAtomic ), 1 );
 #else
-        return __atomic_add_fetch( reinterpret_cast< volatile int32_t* >( &rAtomic ), 1, __ATOMIC_SEQ_CST );
+        return __atomic_add_fetch( static_cast< volatile int32_t* >( &rAtomic ), 1, __ATOMIC_SEQ_CST );
 #endif
     } )
 
@@ -50,9 +50,9 @@ _GENERATE_ATOMIC_WORKER(
     ( int32_t volatile & rAtomic ),
     {
 #if !((__GNUC__ >= 4) && (__GNUC_MINOR__ >= 7))
-        return __sync_sub_and_fetch( reinterpret_cast< volatile int32_t* >( &rAtomic ), 1 );
+        return __sync_sub_and_fetch( static_cast< volatile int32_t* >( &rAtomic ), 1 );
 #else
-        return __atomic_sub_fetch( reinterpret_cast< volatile int32_t* >( &rAtomic ), 1, __ATOMIC_SEQ_CST );
+        return __atomic_sub_fetch( static_cast< volatile int32_t* >( &rAtomic ), 1, __ATOMIC_SEQ_CST );
 #endif
     } )
 
@@ -62,9 +62,9 @@ _GENERATE_ATOMIC_WORKER(
     ( int32_t volatile & rAtomic, int32_t value ),
     {
 #if !((__GNUC__ >= 4) && (__GNUC_MINOR__ >= 7))
-        return __sync_fetch_and_add( reinterpret_cast< volatile int32_t* >( &rAtomic ), value );
+        return __sync_fetch_and_add( static_cast< volatile int32_t* >( &rAtomic ), value );
 #else
-        return __atomic_fetch_add( reinterpret_cast< volatile int32_t* >( &rAtomic ), value, __ATOMIC_SEQ_CST );
+        return __atomic_fetch_add( static_cast< volatile int32_t* >( &rAtomic ), value, __ATOMIC_SEQ_CST );
 #endif
     } )
 
@@ -74,9 +74,9 @@ _GENERATE_ATOMIC_WORKER(
     ( int32_t volatile & rAtomic, int32_t value ),
     {
 #if !((__GNUC__ >= 4) && (__GNUC_MINOR__ >= 7))
-        return __sync_fetch_and_sub( reinterpret_cast< volatile long* >( &rAtomic ), value );
+        return __sync_fetch_and_sub( static_cast< volatile int32_t* >( &rAtomic ), value );
 #else
-        return __atomic_fetch_sub( reinterpret_cast< volatile long* >( &rAtomic ), value, __ATOMIC_SEQ_CST );
+        return __atomic_fetch_sub( static_cast< volatile int32_t* >( &rAtomic ), value, __ATOMIC_SEQ_CST );
 #endif
     } )
 
@@ -86,9 +86,9 @@ _GENERATE_ATOMIC_WORKER(
     ( int32_t volatile & rAtomic, int32_t value ),
     {
 #if !((__GNUC__ >= 4) && (__GNUC_MINOR__ >= 7))
-        return __sync_fetch_and_and( reinterpret_cast< volatile int32_t* >( &rAtomic ), value );
+        return __sync_fetch_and_and( static_cast< volatile int32_t* >( &rAtomic ), value );
 #else
-        return __atomic_fetch_and( reinterpret_cast< volatile int32_t* >( &rAtomic ), value, __ATOMIC_SEQ_CST );
+        return __atomic_fetch_and( static_cast< volatile int32_t* >( &rAtomic ), value, __ATOMIC_SEQ_CST );
 #endif
     } )
 
@@ -98,9 +98,9 @@ _GENERATE_ATOMIC_WORKER(
     ( int32_t volatile & rAtomic, int32_t value ),
     {
 #if !((__GNUC__ >= 4) && (__GNUC_MINOR__ >= 7))
-        return __sync_fetch_and_or( reinterpret_cast< volatile int32_t* >( &rAtomic ), value );
+        return __sync_fetch_and_or( static_cast< volatile int32_t* >( &rAtomic ), value );
 #else
-        return __atomic_fetch_or( reinterpret_cast< volatile int32_t* >( &rAtomic ), value, __ATOMIC_SEQ_CST );
+        return __atomic_fetch_or( static_cast< volatile int32_t* >( &rAtomic ), value, __ATOMIC_SEQ_CST );
 #endif
     } )
 
@@ -110,9 +110,9 @@ _GENERATE_ATOMIC_WORKER(
     ( int32_t volatile & rAtomic, int32_t value ),
     {
 #if !((__GNUC__ >= 4) && (__GNUC_MINOR__ >= 7))
-        return __sync_fetch_and_xor( reinterpret_cast< volatile int32_t* >( &rAtomic ), value );
+        return __sync_fetch_and_xor( static_cast< volatile int32_t* >( &rAtomic ), value );
 #else
-        return __atomic_fetch_xor( reinterpret_cast< volatile int32_t* >( &rAtomic ), value, __ATOMIC_SEQ_CST );
+        return __atomic_fetch_xor( static_cast< volatile int32_t* >( &rAtomic ), value, __ATOMIC_SEQ_CST );
 #endif
     } )
 
@@ -122,9 +122,9 @@ _GENERATE_ATOMIC_WORKER(
     ( T* volatile & rAtomic, T* value ),
     {
 #if !((__GNUC__ >= 4) && (__GNUC_MINOR__ >= 7))
-        return reinterpret_cast<T*>( __sync_val_compare_and_swap( *reinterpret_cast<intptr_t* volatile*>( &rAtomic ), rAtomic, value ) );
+        return static_cast<T*>( __sync_val_compare_and_swap( *static_cast< intptr_t* volatile* >( &rAtomic ), rAtomic, value ) );
 #else
-        return __atomic_exchange_n( reinterpret_cast< volatile T* >( &rAtomic ), value, __ATOMIC_SEQ_CST );
+        return static_cast<T*>( __atomic_exchange_n( *static_cast< intptr_t* volatile* >( &rAtomic ), value, __ATOMIC_SEQ_CST ) );
 #endif
     } )
 
@@ -134,9 +134,9 @@ _GENERATE_ATOMIC_WORKER(
     ( T* volatile & rAtomic, T* value, T* compare ),
     {
 #if !((__GNUC__ >= 4) && (__GNUC_MINOR__ >= 7))
-        return reinterpret_cast<T*>( __sync_val_compare_and_swap( *reinterpret_cast<intptr_t* volatile*>( &rAtomic ), compare, value ) );
+        return static_cast<T*>( __sync_val_compare_and_swap( *static_cast< intptr_t* volatile* >( &rAtomic ), compare, value ) );
 #else
-        return __atomic_compare_exchange_n( rAtomic, &compare, value, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST );
+        return static_cast<T*>( __atomic_compare_exchange_n( *static_cast< intptr_t* volatile* >( &rAtomic ), &compare, value, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST ) );
 #endif
     } )
 
