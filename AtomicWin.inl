@@ -7,6 +7,8 @@
     PREFIX Helium::Atomic##OPERATION##Release PARAM_LIST ACTION \
     PREFIX Helium::Atomic##OPERATION##Unsafe PARAM_LIST ACTION
 
+HELIUM_COMPILE_ASSERT( sizeof(LONG) == sizeof(int32_t) );
+
 _GENERATE_ATOMIC_WORKER(
     int32_t,
     Exchange,
