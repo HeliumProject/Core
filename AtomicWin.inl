@@ -12,7 +12,7 @@ _GENERATE_ATOMIC_WORKER(
     Exchange,
     ( int32_t volatile & rAtomic, int32_t value ),
     {
-        return _InterlockedExchange( reinterpret_cast< volatile int32_t* >( &rAtomic ), value );
+        return _InterlockedExchange( reinterpret_cast< volatile LONG* >( &rAtomic ), value );
     } )
 
 _GENERATE_ATOMIC_WORKER(
@@ -20,7 +20,7 @@ _GENERATE_ATOMIC_WORKER(
     CompareExchange,
     ( int32_t volatile & rAtomic, int32_t value, int32_t compare ),
     {
-        return _InterlockedCompareExchange( reinterpret_cast< volatile int32_t* >( &rAtomic ), value, compare );
+        return _InterlockedCompareExchange( reinterpret_cast< volatile LONG* >( &rAtomic ), value, compare );
     } )
 
 _GENERATE_ATOMIC_WORKER(
@@ -28,7 +28,7 @@ _GENERATE_ATOMIC_WORKER(
     Increment,
     ( int32_t volatile & rAtomic ),
     {
-        return _InterlockedIncrement( reinterpret_cast< volatile int32_t* >( &rAtomic ) );
+        return _InterlockedIncrement( reinterpret_cast< volatile LONG* >( &rAtomic ) );
     } )
 
 _GENERATE_ATOMIC_WORKER(
@@ -36,7 +36,7 @@ _GENERATE_ATOMIC_WORKER(
     Decrement,
     ( int32_t volatile & rAtomic ),
     {
-        return _InterlockedDecrement( reinterpret_cast< volatile int32_t* >( &rAtomic ) );
+        return _InterlockedDecrement( reinterpret_cast< volatile LONG* >( &rAtomic ) );
     } )
 
 _GENERATE_ATOMIC_WORKER(
@@ -44,7 +44,7 @@ _GENERATE_ATOMIC_WORKER(
     Add,
     ( int32_t volatile & rAtomic, int32_t value ),
     {
-        return _InterlockedExchangeAdd( reinterpret_cast< volatile int32_t* >( &rAtomic ), value );
+        return _InterlockedExchangeAdd( reinterpret_cast< volatile LONG* >( &rAtomic ), value );
     } )
 
 _GENERATE_ATOMIC_WORKER(
@@ -52,7 +52,7 @@ _GENERATE_ATOMIC_WORKER(
     Subtract,
     ( int32_t volatile & rAtomic, int32_t value ),
     {
-        return _InterlockedExchangeAdd( reinterpret_cast< volatile int32_t* >( &rAtomic ), -value );
+        return _InterlockedExchangeAdd( reinterpret_cast< volatile LONG* >( &rAtomic ), -value );
     } )
 
 _GENERATE_ATOMIC_WORKER(
@@ -66,7 +66,7 @@ _GENERATE_ATOMIC_WORKER(
         {
             originalValueOld = originalValueNew;
             originalValueNew = _InterlockedCompareExchange(
-                reinterpret_cast< volatile int32_t* >( &rAtomic ),
+                reinterpret_cast< volatile LONG* >( &rAtomic ),
                 originalValueOld & value,
                 originalValueOld );
         } while( originalValueNew != originalValueOld );
@@ -85,7 +85,7 @@ _GENERATE_ATOMIC_WORKER(
         {
             originalValueOld = originalValueNew;
             originalValueNew = _InterlockedCompareExchange(
-                reinterpret_cast< volatile int32_t* >( &rAtomic ),
+                reinterpret_cast< volatile LONG* >( &rAtomic ),
                 originalValueOld | value,
                 originalValueOld );
         } while( originalValueNew != originalValueOld );
@@ -104,7 +104,7 @@ _GENERATE_ATOMIC_WORKER(
         {
             originalValueOld = originalValueNew;
             originalValueNew = _InterlockedCompareExchange(
-                reinterpret_cast< volatile int32_t* >( &rAtomic ),
+                reinterpret_cast< volatile LONG* >( &rAtomic ),
                 originalValueOld ^ value,
                 originalValueOld );
         } while( originalValueNew != originalValueOld );
