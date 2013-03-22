@@ -122,29 +122,7 @@ namespace Helium
 	{
 	public:
 #if HELIUM_OS_WIN
-		struct Handle
-		{
-			struct DebugInfoStruct
-			{
-				uint16_t Type;
-				uint16_t CreatorBackTraceIndex;
-				struct Handle *CriticalSection;
-				struct ListEntryStruct
-				{
-					struct ListEntryStruct *Flink;
-					struct ListEntryStruct *Blink;
-				} ProcessLocksList;
-				uint32_t EntryCount;
-				uint32_t ContentionCount;
-				uint32_t Spare[ 2 ];
-			} *DebugInfo;
-
-			int32_t LockCount;
-			int32_t RecursionCount;
-			void* OwningThread;
-			void* LockSemaphore;
-			uint32_t* SpinCount;
-		};
+        typedef CRITICAL_SECTION Handle;
 #else
 		typedef pthread_mutex_t Handle;
 #endif

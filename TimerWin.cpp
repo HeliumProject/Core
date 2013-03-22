@@ -63,4 +63,27 @@ float64_t Helium::Timer::GetSeconds()
     return ( static_cast< float64_t >( perfCounter.QuadPart - sm_startTickCount ) * sm_secondsPerTick );
 }
 
+IntervalTimer::IntervalTimer( bool manualReset )
+{
+    m_Handle = ::CreateWaitableTimer(NULL, manualReset ? TRUE : FALSE, NULL);
+}
+
+IntervalTimer::~IntervalTimer()
+{
+    ::CloseHandle( m_Handle );
+}
+
+void IntervalTimer::Set( int32_t timeoutInMs )
+{
+    LARGE_INTEGER dueTime;
+    MemorySet( &dueTime, 0, sizeof( dueTime ) );
+    dueTime.QuadPart = -(LONGLONG)( timeoutInMs * 10000.00 );
+    ::SetWaitableTimer( m_Handle, &dueTime, 0, NULL, NULL, FALSE );
+}
+
+void IntervalTimer::Wait()
+{
+    ::WaitForSingleObject( m_Handle, INFINITE );
+}
+
 #endif  // HELIUM_OS_WIN

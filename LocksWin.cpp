@@ -6,20 +6,16 @@
 
 using namespace Helium;
 
-HELIUM_COMPILE_ASSERT( sizeof(Mutex::Handle::DebugInfoStruct::ListEntryStruct) == sizeof(LIST_ENTRY) );
-HELIUM_COMPILE_ASSERT( sizeof(Mutex::Handle::DebugInfoStruct) == sizeof(RTL_CRITICAL_SECTION_DEBUG) );
-HELIUM_COMPILE_ASSERT( sizeof(Mutex::Handle) == sizeof(CRITICAL_SECTION) );
-
 /// Constructor.
 Mutex::Mutex()
 {
-    ::InitializeCriticalSection((CRITICAL_SECTION*)&m_Handle);
+    ::InitializeCriticalSection( &m_Handle );
 }
 
 /// Destructor.
 Mutex::~Mutex()
 {
-    ::DeleteCriticalSection((CRITICAL_SECTION*)&m_Handle);
+    ::DeleteCriticalSection( &m_Handle );
 }
 
 /// Lock this mutex.
@@ -27,7 +23,7 @@ Mutex::~Mutex()
 /// @see Unlock(), TryLock()
 void Mutex::Lock()
 {
-    ::EnterCriticalSection((CRITICAL_SECTION*)&m_Handle);
+    ::EnterCriticalSection( &m_Handle );
 }
 
 /// Unlock this mutex.
@@ -35,7 +31,7 @@ void Mutex::Lock()
 /// @see Lock(), TryLock()
 void Mutex::Unlock()
 {
-    ::LeaveCriticalSection((CRITICAL_SECTION*)&m_Handle);
+    ::LeaveCriticalSection( &m_Handle );
 }
 
 /// Try to lock this mutex without blocking.
@@ -46,5 +42,5 @@ void Mutex::Unlock()
 /// @see Lock(), Unlock()
 bool Mutex::TryLock()
 {
-    return ( TryEnterCriticalSection( reinterpret_cast< CRITICAL_SECTION* >( &m_Handle ) ) != FALSE );
+    return TryEnterCriticalSection( &m_Handle ) != FALSE;
 }
