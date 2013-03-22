@@ -1,7 +1,7 @@
 #pragma once
 
-#include <intrin.h>
-#
+#include <xmmintrin.h>
+
 /// Defined as 1 for little-endian platforms.
 #define HELIUM_ENDIAN_LITTLE 1
 
