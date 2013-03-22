@@ -114,6 +114,31 @@ _GENERATE_ATOMIC_WORKER(
         return originalValueNew;
     } )
 
+#if _MSC_VER < 1600 && defined( HELIUM_CPU_X86 ) // vs2008 compatibility
+
+_GENERATE_ATOMIC_WORKER(
+    template< typename T > T*,
+    Exchange,
+    ( T* volatile & rAtomic, T* value ),
+    {
+        return reinterpret_cast< T* >( _InterlockedExchange(
+            reinterpret_cast< volatile long* >( &rAtomic ),
+            reinterpret_cast< long >( value ) ) );
+    } )
+
+_GENERATE_ATOMIC_WORKER(
+    template< typename T > T*,
+    CompareExchange,
+    ( T* volatile & rAtomic, T* value, T* compare ),
+    {
+        return reinterpret_cast< T* >( _InterlockedCompareExchange(
+            reinterpret_cast< volatile long* >( &rAtomic ),
+            reinterpret_cast< long >( value ),
+            reinterpret_cast< long >( compare ) ) );
+    } )
+
+#else
+
 _GENERATE_ATOMIC_WORKER(
     template< typename T > T*,
     Exchange,
@@ -134,5 +159,7 @@ _GENERATE_ATOMIC_WORKER(
             value,
             compare ) );
     } )
+
+#endif
 
 #undef _GENERATE_ATOMIC_WORKER
