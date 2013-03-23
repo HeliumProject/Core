@@ -56,7 +56,3 @@ namespace Helium
         Handle m_Handle;
     };
 }
-
-#if HELIUM_OS_WIN
-# include "Platform/TimerWin.inl"
-#endif

@@ -10,9 +10,9 @@
 using namespace Helium;
 
 static bool s_IsInitialized = false;
-uint64_t TimerPlatformData::sm_ticksPerSecond = 0;
-uint64_t TimerPlatformData::sm_startTickCount = 0;
-float64_t TimerPlatformData::sm_secondsPerTick = 0.0;
+uint64_t Timer::sm_ticksPerSecond = 0;
+uint64_t Timer::sm_startTickCount = 0;
+float64_t Timer::sm_secondsPerTick = 0.0;
 
 /// Perform static initialization necessary to enable timing support.
 void Timer::StaticInitialize()
