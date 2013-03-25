@@ -14,7 +14,7 @@
 #if __GNUC__ < 4
 #define HELIUM_FORCEINLINE inline  // GCC 3 support for "always_inline" is somewhat bugged, so fall back to just "inline".
 #else
-#define HELIUM_FORCEINLINE __attribute__( ( always_inline ) )
+#define HELIUM_FORCEINLINE inline __attribute__( ( always_inline ) )
 #endif
 
 /// Attribute for explicitly defining a pointer or reference as not being externally aliased.

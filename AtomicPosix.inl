@@ -122,9 +122,9 @@ _GENERATE_ATOMIC_WORKER(
     ( T* volatile & rAtomic, T* value ),
     {
 #if !((__GNUC__ >= 4) && (__GNUC_MINOR__ >= 7))
-        return static_cast<T*>( __sync_val_compare_and_swap( *static_cast< intptr_t* volatile* >( &rAtomic ), rAtomic, value ) );
+        return static_cast<T*>( __sync_val_compare_and_swap( static_cast< T* volatile* >( &rAtomic ), rAtomic, value ) );
 #else
-        return static_cast<T*>( __atomic_exchange_n( *static_cast< intptr_t* volatile* >( &rAtomic ), value, __ATOMIC_SEQ_CST ) );
+        return static_cast<T*>( __atomic_exchange_n( static_cast< T* volatile* >( &rAtomic ), value, __ATOMIC_SEQ_CST ) );
 #endif
     } )
 
@@ -134,9 +134,10 @@ _GENERATE_ATOMIC_WORKER(
     ( T* volatile & rAtomic, T* value, T* compare ),
     {
 #if !((__GNUC__ >= 4) && (__GNUC_MINOR__ >= 7))
-        return static_cast<T*>( __sync_val_compare_and_swap( *static_cast< intptr_t* volatile* >( &rAtomic ), compare, value ) );
+        return static_cast<T*>( __sync_val_compare_and_swap( static_cast< T* volatile* >( &rAtomic ), compare, value ) );
 #else
-        return static_cast<T*>( __atomic_compare_exchange_n( *static_cast< intptr_t* volatile* >( &rAtomic ), &compare, value, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST ) );
+        HELIUM_ASSERT( __atomic_compare_exchange_n( static_cast< T* volatile* >( &rAtomic ), &compare, value, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST ) );
+        return compare;
 #endif
     } )
 
