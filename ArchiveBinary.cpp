@@ -94,7 +94,7 @@ void ArchiveWriterBinary::SerializeArray( const DynamicArray< ObjectPtr >& objec
 	{
 		Object* object = objects.GetElement( index );
 
-		SerializeInstance( object, object->GetClass(), &Object::PreSerialize, &Object::PostSerialize );
+		SerializeInstance( object, object->GetClass(), object );
 
 		if ( flags & ArchiveFlags::Status )
 		{
@@ -115,7 +115,7 @@ void ArchiveWriterBinary::SerializeArray( const DynamicArray< ObjectPtr >& objec
 	m_Stream->Write(&terminator); 
 }
 
-void ArchiveWriterBinary::SerializeInstance( void* instance, const Composite* composite, ObjectNotify pre, ObjectNotify post )
+void ArchiveWriterBinary::SerializeInstance( void* instance, const Composite* composite, Object* object )
 {
 	// write the crc of the class of structure (used to factory allocate an instance when reading)
 	uint32_t typeCrc = Crc32( composite->m_Name );
@@ -131,11 +131,7 @@ void ArchiveWriterBinary::SerializeInstance( void* instance, const Composite* co
 
 	if ( instance )
 	{
-		if ( pre )
-		{
-			Object* object = static_cast< Object* >( instance );
-			(object->*pre)( NULL );
-		}
+		object->PreSerialize( NULL );
 
 		// push a new struct on the stack
 		WriteFields data;
@@ -147,7 +143,7 @@ void ArchiveWriterBinary::SerializeInstance( void* instance, const Composite* co
 			m_Stream->Write(&m_FieldStack.GetLast().m_Count);
 
 			// serialize each field of the composite instance
-			SerializeFields(instance, composite, pre, post);
+			SerializeFields(instance, composite, object);
 
 			// seek back and write our count
 			m_Stream->Seek(m_FieldStack.GetLast().m_CountOffset, SeekOrigins::Begin);
@@ -155,11 +151,7 @@ void ArchiveWriterBinary::SerializeInstance( void* instance, const Composite* co
 		}
 		m_FieldStack.Pop();
 
-		if ( post )
-		{
-			Object* object = static_cast< Object* >( instance );
-			(object->*post)( NULL );
-		}
+		object->PreSerialize( NULL );
 	}
 
 	// compute amound written
@@ -174,7 +166,7 @@ void ArchiveWriterBinary::SerializeInstance( void* instance, const Composite* co
 	m_Stream->Seek(0, SeekOrigins::End);
 }
 
-void ArchiveWriterBinary::SerializeFields( void* instance, const Reflect::Composite* composite, ObjectNotify pre, ObjectNotify post )
+void ArchiveWriterBinary::SerializeFields( void* instance, const Reflect::Composite* composite, Object* object )
 {
 	DynamicArray< const Composite* > bases;
 	for ( const Composite* current = composite; current != NULL; current = current->m_Base )
@@ -192,21 +184,13 @@ void ArchiveWriterBinary::SerializeFields( void* instance, const Reflect::Compos
 		{
 			const Field* field = &*itr;
 
-			if ( field->ShouldSerialize( instance ) )
+			if ( field->ShouldSerialize( instance, object ) )
 			{
-				if ( pre )
-				{
-					Object* object = static_cast< Object* >( instance );
-					(object->*pre)( NULL );
-				}
+				object->PreSerialize( field );
 
-				SerializeField( instance, field );
+				SerializeField( instance, field, object );
 
-				if ( post )
-				{
-					Object* object = static_cast< Object* >( instance );
-					(object->*post)( NULL );
-				}
+				object->PostSerialize( field );
 			}
 		}
 	}
@@ -215,7 +199,7 @@ void ArchiveWriterBinary::SerializeFields( void* instance, const Reflect::Compos
 	m_Stream->Write(&terminator);
 }
 
-void ArchiveWriterBinary::SerializeField( void* instance, const Reflect::Field* field )
+void ArchiveWriterBinary::SerializeField( void* instance, const Reflect::Field* field, Object* object )
 {
 	// write the crc of the field name (used to associate a field when reading)
 	uint32_t fieldNameCrc = Crc32( field->m_Name );
@@ -233,11 +217,9 @@ void ArchiveWriterBinary::SerializeField( void* instance, const Reflect::Field* 
 	{
 	case ReflectionTypes::ScalarData:
 		{
-			ScalarData* data = static_cast< ScalarData* >( field->m_Data );
-			data->Serialize( DataInstance( instance, field ), *m_Stream, *this );
 			break;
 		}
-#pragma TODO("Containers")
+
 	case ReflectionTypes::SetData:
 		{
 			break;
@@ -429,7 +411,7 @@ void ArchiveReaderBinary::DeserializeArray( DynamicArray< ObjectPtr >& objects, 
 
 			if ( object.ReferencesObject() )
 			{
-				DeserializeInstance( object, object->GetClass(), &Object::PreDeserialize, &Object::PostDeserialize );
+				DeserializeInstance( object, object->GetClass(), object );
 
 				if (object.ReferencesObject())
 				{
@@ -468,28 +450,20 @@ void ArchiveReaderBinary::DeserializeArray( DynamicArray< ObjectPtr >& objects, 
 	}
 }
 
-void ArchiveReaderBinary::DeserializeInstance( void* instance, const Composite* composite, ObjectNotify pre, ObjectNotify post )
+void ArchiveReaderBinary::DeserializeInstance( void* instance, const Composite* composite, Reflect::Object* object )
 {
 #ifdef PERSIST_ARCHIVE_VERBOSE
 	Log::Print(TXT("Deserializing %s\n"), composite->m_Name);
 #endif
 
-	if ( pre )
-	{
-		Object* object = static_cast< Object* >( instance );
-		(object->*pre)( NULL );
-	}
+	object->PreDeserialize( NULL );
 
-	DeserializeFields( instance, composite, pre, post );
+	DeserializeFields( instance, composite, object );
 
-	if ( post )
-	{
-		Object* object = static_cast< Object* >( instance );
-		(object->*post)( NULL );
-	}
+	object->PostDeserialize( NULL );
 }
 
-void ArchiveReaderBinary::DeserializeFields( void* instance, const Composite* composite, ObjectNotify pre, ObjectNotify post )
+void ArchiveReaderBinary::DeserializeFields( void* instance, const Composite* composite, Reflect::Object* object )
 {
 	int32_t fieldCount = -1;
 	m_Stream->Read(fieldCount);    
@@ -510,19 +484,11 @@ void ArchiveReaderBinary::DeserializeFields( void* instance, const Composite* co
 		const Field* field = composite->FindFieldByName(fieldNameCrc);
 		if ( field )
 		{
-			if ( pre )
-			{
-				Object* object = static_cast< Object* >( instance );
-				(object->*pre)( field );
-			}
+			object->PreDeserialize( field );
 
-			DeserializeField( instance, field );
+			DeserializeField( instance, field, object );
 
-			if ( post )
-			{
-				Object* object = static_cast< Object* >( instance );
-				(object->*post)( field );
-			}
+			object->PostDeserialize( field );
 		}
 
 		// regardless of what happened, set the stream state to the next field
@@ -537,7 +503,7 @@ void ArchiveReaderBinary::DeserializeFields( void* instance, const Composite* co
 	}
 }
 
-void ArchiveReaderBinary::DeserializeField( void* instance, const Field* field )
+void ArchiveReaderBinary::DeserializeField( void* instance, const Field* field, Object* object )
 {
 #ifdef PERSIST_ARCHIVE_VERBOSE
 	Log::Print(TXT("Deserializing field %s\n"), field->m_Name);
@@ -547,11 +513,9 @@ void ArchiveReaderBinary::DeserializeField( void* instance, const Field* field )
 	{
 	case ReflectionTypes::ScalarData:
 		{
-			ScalarData* data = static_cast< ScalarData* >( field->m_Data );
-			data->Deserialize( DataInstance( instance, field ), *m_Stream, *this, /* raiseChanged = */ false );
 			break;
 		}
-#pragma TODO("Containers")
+
 	case ReflectionTypes::SetData:
 		{
 			break;

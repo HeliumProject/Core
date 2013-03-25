@@ -70,9 +70,9 @@ namespace Helium
 
 		private:
 			void SerializeArray( const DynamicArray< Reflect::ObjectPtr >& objects, uint32_t flags = 0 );
-			void SerializeInstance( void* instance, const Reflect::Composite* type, ObjectNotify pre, ObjectNotify post );
-			void SerializeFields( void* instance, const Reflect::Composite* type, ObjectNotify pre, ObjectNotify post );
-			void SerializeField( void* instance, const Reflect::Field* field );
+			void SerializeInstance( void* instance, const Reflect::Composite* type, Reflect::Object* object );
+			void SerializeFields( void* instance, const Reflect::Composite* type, Reflect::Object* object );
+			void SerializeField( void* instance, const Reflect::Field* field, Reflect::Object* object );
 
 		public:
 			static void ToStream( Reflect::Object* object, Stream& stream, Reflect::ObjectIdentifier* identifier = NULL );
@@ -104,9 +104,9 @@ namespace Helium
 
 		private:
 			void DeserializeArray( DynamicArray< Reflect::ObjectPtr >& objects, uint32_t flags = 0 );
-			void DeserializeInstance( void* instance, const Reflect::Composite* composite, ObjectNotify pre, ObjectNotify post );
-			void DeserializeFields( void* instance, const Reflect::Composite* composite, ObjectNotify pre, ObjectNotify post );
-			void DeserializeField( void* instance, const Reflect::Field* field );
+			void DeserializeInstance( void* instance, const Reflect::Composite* composite, Reflect::Object* object );
+			void DeserializeFields( void* instance, const Reflect::Composite* composite, Reflect::Object* object );
+			void DeserializeField( void* instance, const Reflect::Field* field, Reflect::Object* object );
 
 		public:
 			static Reflect::ObjectPtr FromStream( Stream& stream, Reflect::ObjectResolver* resolver = NULL );
