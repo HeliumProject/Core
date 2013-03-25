@@ -134,7 +134,7 @@ _GENERATE_ATOMIC_WORKER(
     ( T* volatile & rAtomic, T* value, T* compare ),
     {
 #if !((__GNUC__ >= 4) && (__GNUC_MINOR__ >= 7))
-        return static_cast<T*>( __sync_val_compare_and_swap( static_cast< T* volatile* >( &rAtomic ), compare, value ) );
+        return static_cast<T*>( __sync_val_compare_and_swap( reinterpret_cast< T* volatile* >( &rAtomic ), compare, value ) );
 #else
         HELIUM_ASSERT( __atomic_compare_exchange_n( static_cast< T* volatile* >( &rAtomic ), &compare, value, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST ) );
         return compare;
