@@ -148,9 +148,8 @@ void Condition::Reset()
     event_reset(&m_Handle);
 }
 
-bool Condition::Wait(uint32_t timeout)
+bool Condition::Wait()
 {
-    HELIUM_ASSERT( timeout == 0xffffffff ); // not supported
     event_wait(&m_Handle);
     return true;
 }
