@@ -220,9 +220,7 @@ namespace Helium
 // #pragma TODO("Do something!")
 //
 
-#if HELIUM_CC_CL
 #define TODO_STRING2(x) #x
 #define TODO_STRING(x) TODO_STRING2(x)
 #define TODO(msg) message (__FILE__ "(" TODO_STRING(__LINE__) ") : TODO: " msg)
 #define NYI(msg) TODO(__FUNCTION__ " is not yet implemented... " msg)
-#endif

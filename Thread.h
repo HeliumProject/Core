@@ -69,7 +69,7 @@ namespace Helium
 #if HELIUM_OS_WIN
 		static unsigned int __stdcall ThreadCallback( void* pData );
 #elif HELIUM_OS_LINUX
-		static void * ThreadCallback( void* pData );
+		static void* ThreadCallback( void* pData );
 #endif
 		//@}
 
