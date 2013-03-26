@@ -2,6 +2,8 @@
 
 #include "Platform/Assert.h"
 
+#include <pthread.h>
+
 using namespace Helium;
 
 Mutex::Mutex()
@@ -24,4 +26,10 @@ void Mutex::Unlock()
 {
     int result = pthread_mutex_unlock(&m_Handle);
     HELIUM_ASSERT( result == 0 );
+}
+
+bool Mutex::TryLock()
+{
+	int result = pthread_mutex_trylock(&m_Handle);
+    return result == 0;
 }
