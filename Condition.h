@@ -49,9 +49,7 @@ namespace Helium
 		void Signal();
 		void Reset();
 		bool Wait();
-#if HELIUM_OS_WIN
 		bool Wait( uint32_t timeoutMs );
-#endif
 		//@}
 
 		/// @name Data Access
