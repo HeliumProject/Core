@@ -1,6 +1,12 @@
 #include "Platform/Thread.h"
 
 #include "Platform/Assert.h"
+#include "Platform/MemoryHeap.h"
+
+#include <unistd.h>
+#include <sched.h>
+#include <sys/types.h>
+#include <sys/prctl.h>
 
 using namespace Helium;
 
@@ -27,48 +33,100 @@ static void SetSchedParam(struct sched_param * params, ThreadPriority priority)
     }
 }
 
-Thread::Thread( const tchar_t* pName )
-: m_Handle( 0 )
-, m_Name( NULL )
+Thread::Thread()
+    : m_Handle( 0 )
 {
-    SetName( pName );
+    m_Name[0] = tchar_t('\0');
 }
 
 Thread::~Thread()
 {
-    if ( this->Valid() )
-    {
-        this->Join();
-    }
+    HELIUM_VERIFY( this->Join() );
 }
 
-bool Thread::Start( ThreadPriority pri )
+bool Thread::Start( const tchar_t* pName, ThreadPriority priority )
 {
-    HELIUM_ASSERT( pri >= ThreadPriorities::Lowest && pri <= ThreadPriorities::Highest );
+    HELIUM_ASSERT( priority >= ThreadPriorities::Lowest && priority <= ThreadPriorities::Highest );
+
+    // Cache the name
+    MemoryCopy( m_Name, pName, sizeof( m_Name ) / sizeof( tchar_t ) );
+
     pthread_attr_t attr;
     struct sched_param sched;
-    SetSchedParam(&sched, pri);
+    SetSchedParam(&sched, priority);
 
-    HELIUM_ASSERT( pthread_attr_init(&attr) == 0);
-    HELIUM_ASSERT( pthread_attr_setinheritsched(&attr, PTHREAD_EXPLICIT_SCHED) == 0 );
-    HELIUM_ASSERT( pthread_attr_setschedparam(&attr, &sched) == 0 );
+    HELIUM_VERIFY( pthread_attr_init(&attr) == 0);
+    HELIUM_VERIFY( pthread_attr_setinheritsched(&attr, PTHREAD_EXPLICIT_SCHED) == 0 );
+    HELIUM_VERIFY( pthread_attr_setschedparam(&attr, &sched) == 0 );
 
-    int result = pthread_create( &(this->m_Handle), &attr, ThreadCallback, this);
-
-    HELIUM_ASSERT( pthread_attr_destroy(&attr) == 0);
-    bool ok = (result == VALID_ID);
-
-    if (!ok)
+    if ( pthread_create( &(this->m_Handle), &attr, ThreadCallback, this) != 0 )
     {
         this->m_Handle = 0;
     }
 
-    return ok;
+    prctl( PR_SET_NAME, reinterpret_cast< unsigned long >( pName ) );
+
+    HELIUM_VERIFY( pthread_attr_destroy(&attr) == 0);
+
+    return this->m_Handle != 0;
 }
 
-bool Thread::Valid()
+bool Thread::Join( uint32_t timeOutMilliseconds )
 {
-    return m_Handle != 0;
+    if ( timeOutMilliseconds )
+    {
+        struct timespec spec;
+        spec.tv_sec = timeOutMilliseconds / 1000;
+        spec.tv_nsec = ( timeOutMilliseconds % 1000 ) * 1000000;
+        HELIUM_VERIFY( pthread_timedjoin_np( m_Handle, NULL, &spec ) == 0 );
+    }
+    else
+    {
+        HELIUM_VERIFY( pthread_join( m_Handle, NULL ) == 0 );
+    }
+}
+
+bool Thread::TryJoin()
+{
+    HELIUM_VERIFY( pthread_tryjoin_np( m_Handle, NULL ) == 0 )
+}
+
+bool Thread::IsRunning() const
+{
+    return m_Handle != INVALID_ID;
+}
+
+void Thread::Sleep( uint32_t milliseconds )
+{
+    usleep( milliseconds * 1000000 );
+}
+
+void Thread::Yield()
+{
+    sched_yield();
+}
+
+/// Get the ID of the thread in which this function is called.
+///
+/// @return  Current thread ID.
+Thread::id_t Thread::GetCurrentId()
+{
+    return pthread_self();
+}
+
+void* Thread::ThreadCallback( void* pData )
+{
+    HELIUM_ASSERT( pData );
+
+    Thread* pThread = static_cast< Thread* >( pData );
+
+    prctl( PR_SET_NAME, reinterpret_cast< unsigned long >( pThread->m_Name ) );
+
+    pThread->Run();
+
+    ThreadLocalStackAllocator::ReleaseMemoryHeap();
+    DynamicMemoryHeap::UnregisterCurrentThreadCache();
+    return 0;
 }
 
 ThreadLocalPointer::ThreadLocalPointer()
@@ -93,14 +151,14 @@ void ThreadLocalPointer::SetPointer(void* pointer)
     pthread_setspecific(m_Key, pointer);
 }
 
+static Thread::id_t g_MainThread = pthread_self();
+
 uint32_t Helium::GetMainThreadID()
 {
-    HELIUM_BREAK();
-    return 0;
+    return g_MainThread;
 }
 
 uint32_t Helium::GetCurrentThreadID()
 {
-    HELIUM_BREAK();
-    return 0;
+    return pthread_self();
 }

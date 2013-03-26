@@ -1,3 +1,13 @@
+/// Get the name assigned to this thread.
+///
+/// @return  Thread name.
+///
+/// @see SetName()
+const tchar_t* Helium::Thread::GetName() const
+{
+    return m_Name;
+}
+
 /// Get the platform-specific thread handle.
 ///
 /// @return  Reference to the thread handle.

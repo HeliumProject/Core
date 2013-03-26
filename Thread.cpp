@@ -12,9 +12,8 @@ Runnable::~Runnable()
 ///
 /// @param[in] pRunnable  Runnable instance to execute.
 /// @param[in] rName      Optional name to assign to the thread (for debugging purposes).
-RunnableThread::RunnableThread( Runnable* pRunnable, const tchar_t* pName )
-    : Thread( pName )
-    , m_pRunnable( pRunnable )
+RunnableThread::RunnableThread( Runnable* pRunnable )
+    : m_pRunnable( pRunnable )
 {
 }
 
@@ -66,9 +65,7 @@ bool CallbackThread::Create(Entry entry, void* obj, const tchar_t* name, ThreadP
     m_Entry = entry;
     m_Object = obj;
 
-    SetName( name );
-
-    bool bResult = Start( priority );
+    bool bResult = Start( name, priority );
 
     return bResult;
 }

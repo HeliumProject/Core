@@ -37,51 +37,16 @@ struct ThreadNameInfo
 /// Constructor.
 ///
 /// @param[in] rName  Optional name to assign to the thread (for debugging purposes).
-Thread::Thread( const tchar_t* pName )
+Thread::Thread()
 	: m_Handle( 0 )
-	, m_Name( NULL )
 {
-	SetName( pName );
+    m_Name[0] = tchar_t('\0');
 }
 
 /// Destructor.
 Thread::~Thread()
 {
 	HELIUM_VERIFY( Join() );
-
-	delete [] m_Name;
-}
-
-/// Set the thread name (for debugging purposes).
-///
-/// Note that the thread name can only be set while the thread is not running.
-///
-/// @param[in] pName  Name to set.
-///
-/// @see GetName()
-void Thread::SetName( const tchar_t* pName )
-{
-	HELIUM_ASSERT( m_Handle == 0 );
-
-	delete [] m_Name;
-	m_Name = NULL;
-
-	if( pName && pName[ 0 ] != TXT( '\0' ) )
-	{
-		size_t nameArraySize = StringLength( pName ) + 1;
-		m_Name = new tchar_t [ nameArraySize ];
-		MemoryCopy( m_Name, pName, nameArraySize * sizeof( tchar_t ) );
-	}
-}
-
-/// Get the name assigned to this thread.
-///
-/// @return  Thread name.
-///
-/// @see SetName()
-const tchar_t* Thread::GetName() const
-{
-	return m_Name;
 }
 
 /// Begin execution of this thread.
@@ -93,9 +58,12 @@ const tchar_t* Thread::GetName() const
 /// @return  True if the thread was started successfully, false if not.
 ///
 /// @see Join(), TryJoin()
-bool Thread::Start( ThreadPriority priority )
+bool Thread::Start( const tchar_t* pName, ThreadPriority priority )
 {
 	HELIUM_ASSERT( priority >= ThreadPriorities::Lowest && priority <= ThreadPriorities::Highest );
+
+	// Cache the name
+	MemoryCopy( m_Name, pName, sizeof( m_Name ) / sizeof( tchar_t ) );
 
 	// Make sure a thread hasn't already been started.
 	HELIUM_ASSERT( m_Handle == 0 );

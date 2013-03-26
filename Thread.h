@@ -13,25 +13,6 @@
 
 namespace Helium
 {
-	/// Interface for thread execution.
-	///
-	/// This class should be implemented to provide the code to be executed by a thread.  When a Thread instance starts,
-	/// it will call the Run() method within the context of the running thread.  The Thread instance can be checked to
-	/// determine whether or not a thread is still running.
-	class HELIUM_PLATFORM_API Runnable
-	{
-	public:
-		/// @name Construction/Destruction
-		//@{
-		virtual ~Runnable() = 0;
-		//@}
-
-		/// @name Runnable Interface
-		//@{
-		virtual void Run() = 0;
-		//@}
-	};
-
 	namespace ThreadPriorities
 	{
 		/// Thread priority constants.
@@ -62,16 +43,17 @@ namespace Helium
 		/// Thread ID type.
 		typedef unsigned long id_t;
 
-		/// Invalid thread ID value.  Note that this can vary between platforms, so it should not be assumed to be any
-		/// value in particular.
+		/// Invalid thread ID value.
 		static const id_t INVALID_ID = 0;
 #elif HELIUM_OS_LINUX
-		// Posix threads handle
+		/// Posix threads handle
 		typedef pthread_t Handle;
-		// posix threads are identified as process IDs
+
+		/// Posix threads are identified as process IDs
 		typedef pid_t id_t;
-		// pthread_create returns 0 on success, otherwise errno on failure
-		static const int VALID_ID = 0;
+		
+		/// Invalid thread ID value.
+		static const int INVALID_ID = -1;
 #else
 # error Implement Thread for this platform.
 #endif
@@ -80,7 +62,7 @@ namespace Helium
 		/// Platform-specific thread handle.
 		Handle m_Handle;
 		/// Thread name.
-		tchar_t* m_Name;
+		tchar_t m_Name[ 128 ];
 
 		/// @name Thread Callback
 		//@{
@@ -88,30 +70,25 @@ namespace Helium
 		static unsigned int __stdcall ThreadCallback( void* pData );
 #elif HELIUM_OS_LINUX
 		static void * ThreadCallback( void* pData );
-		// is the thread valid (created by pthread_create)
-		bool Valid(void);
 #endif
 		//@}
 
 	public:
 		/// @name Construction/Destruction
 		//@{
-		//explicit Thread( const String& rName = String() );
-		explicit Thread( const tchar_t* pName = NULL );
-		virtual ~Thread();
+		explicit Thread();
+		~Thread();
 		//@}
 
 		/// @name Data Access
 		//@{
 		inline const Handle& GetHandle() const;
+		inline const tchar_t* GetName() const;
 		//@}
 
 		/// @name Caller Interface
 		//@{
-		void SetName( const tchar_t* pName );
-		inline const tchar_t* GetName() const;
-
-		bool Start( ThreadPriority priority = ThreadPriorities::Normal );
+		bool Start( const tchar_t* pName, ThreadPriority priority = ThreadPriorities::Normal );
 		bool Join( uint32_t timeOutMilliseconds = 0 );
 		bool TryJoin();
 		bool IsRunning() const;
@@ -131,6 +108,25 @@ namespace Helium
 		//@}
 	};
 
+	/// Interface for thread execution.
+	///
+	/// This class should be implemented to provide the code to be executed by a thread.  When a Thread instance starts,
+	/// it will call the Run() method within the context of the running thread.  The Thread instance can be checked to
+	/// determine whether or not a thread is still running.
+	class HELIUM_PLATFORM_API Runnable
+	{
+	public:
+		/// @name Construction/Destruction
+		//@{
+		virtual ~Runnable() = 0;
+		//@}
+
+		/// @name Runnable Interface
+		//@{
+		virtual void Run() = 0;
+		//@}
+	};
+
 	/// Thread interface for creating threads that execute a Runnable object.
 	class HELIUM_PLATFORM_API RunnableThread : public Thread
 	{
@@ -138,7 +134,7 @@ namespace Helium
 		/// @name Construction/Destruction
 		//@{
 		//explicit Thread( Runnable* pRunnable = NULL, const String& rName = String() );
-		explicit RunnableThread( Runnable* pRunnable = NULL, const tchar_t* pName = NULL );
+		explicit RunnableThread( Runnable* pRunnable = NULL );
 		virtual ~RunnableThread();
 		//@}
 
