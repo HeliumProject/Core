@@ -231,8 +231,8 @@ void TCPConnection::ClientThread()
 
             socketsCreated = true;
 
-            bool connectWrite = m_WriteSocket.Connect( ip.c_str(), m_WritePort );
-            bool connectRead = m_ReadSocket.Connect( ip.c_str(), m_ReadPort );
+            bool connectWrite = m_WriteSocket.Connect( m_WritePort, ip.length() ? ip.c_str() : NULL );
+            bool connectRead = m_ReadSocket.Connect( m_ReadPort, ip.length() ? ip.c_str() : NULL );
             if (connectWrite && connectRead)
             {
                 break;
