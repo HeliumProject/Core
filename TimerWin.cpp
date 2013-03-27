@@ -60,27 +60,8 @@ float64_t Timer::GetSeconds()
     return ( static_cast< float64_t >( perfCounter.QuadPart - sm_startTickCount ) * sm_secondsPerTick );
 }
 
-/// Get the number of timer ticks per second.
-///
-/// @return  Timer tick frequency, in ticks per second.
-///
-/// @see GetTickCount(), GetSecondsPerTick(), GetSeconds()
-uint64_t Timer::GetTicksPerSecond()
-{
-    return sm_ticksPerSecond;
-}
-
-/// Get the number of seconds per tick.
-///
-/// @return  Seconds per tick.
-///
-/// @see GetSeconds(), GetTickCount(), GetTicksPerSecond()
-float64_t Timer::GetSecondsPerTick()
-{
-    return sm_secondsPerTick;
-}
-
 IntervalTimer::IntervalTimer()
+    : m_Thread( GetCurrentThreadID() )
 {
     m_Handle = ::CreateWaitableTimer(NULL, FALSE, NULL);
 }

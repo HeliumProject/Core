@@ -55,10 +55,10 @@ namespace Helium
 #else
         typedef timer_t Handle;
 #endif
-        Handle m_Handle;
+        Handle       m_Handle;
+        Thread::id_t m_Thread;
 
 #if !HELIUM_OS_WIN
-        Thread::id_t m_Thread;
         sigset_t     m_AlarmSet;
         int          m_Signal;
         int          m_WakeupsMissed;

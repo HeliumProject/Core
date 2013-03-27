@@ -114,7 +114,7 @@ _GENERATE_ATOMIC_WORKER(
         return originalValueNew;
     } )
 
-#if _MSC_VER < 1600 && defined( HELIUM_CPU_X86 ) // vs2008 compatibility
+#if defined( HELIUM_CPU_X86 )
 
 _GENERATE_ATOMIC_WORKER(
     template< typename T > T*,
