@@ -138,9 +138,15 @@ bool Socket::Listen()
     return true;
 }
 
-bool Socket::Connect(sockaddr_in* service)
+bool Socket::Connect( const tchar_t* ip, uint16_t port )
 {
-    return ::connect(m_Handle, (struct sockaddr *)service, sizeof(sockaddr_in)) >= 0;
+    HELIUM_ASSERT( m_Protocol == Helium::SocketProtocols::Tcp );
+
+    struct sockaddr_in addr;
+    addr.sin_family = AF_INET;
+    addr.sin_addr.s_addr = inet_addr(ip);
+    addr.sin_port = htons(port);
+    return ::connect(m_Handle, addr, sizeof(addr)) >= 0;
 }
 
 bool Socket::Accept(Socket& server_socket, sockaddr_in* client_info)
@@ -152,15 +158,17 @@ bool Socket::Accept(Socket& server_socket, sockaddr_in* client_info)
     return m_Handle > 0;
 }
 
-bool Socket::Read(void* buffer, uint32_t bytes, uint32_t& read, Condition& terminate, sockaddr_in *_peer)
+bool Socket::Read(void* buffer, uint32_t bytes, uint32_t& read, Condition& terminate, sockaddr_in* peer)
 {
     int proto = 0;
     socklen_t optlen = sizeof(int);
     HELIUM_ASSERT( ::getsockopt(m_Handle, SOL_SOCKET, SO_PROTOCOL, &proto, &optlen) );
     HELIUM_ASSERT( proto != IPPROTO_UDP );
 
-    int32_t local_read = ::recv( m_Handle, (tchar_t*)buffer, bytes, 0 );
-
+    sockaddr_in addr;
+    bool udp = m_Protocol == SocketProtocols::Udp;
+    int32_t local_read = udp ? ::recvfrom( m_Handle, (tchar_t*)buffer, bytes, 0, peer ? peer : addr ) :
+                               ::recv    ( m_Handle, (tchar_t*)buffer, bytes, 0 );
     if (local_read < 0)
     {
         return false;
@@ -171,15 +179,27 @@ bool Socket::Read(void* buffer, uint32_t bytes, uint32_t& read, Condition& termi
     return true;
 }
 
-bool Socket::Write(void* buffer, uint32_t bytes, uint32_t& wrote, Condition& terminate, sockaddr_in *_peer)
+bool Socket::Write(void* buffer, uint32_t bytes, uint32_t& wrote, Condition& terminate, const tchar_t* ip, uint16_t port)
 {
     int proto = 0;
     socklen_t optlen = sizeof(int);
     HELIUM_ASSERT( ::getsockopt( m_Handle, SOL_SOCKET, SO_PROTOCOL, &proto, &optlen ) );
     HELIUM_ASSERT( proto != IPPROTO_UDP );
 
-    int32_t local_wrote = ::send( m_Handle, (tchar_t*)buffer, bytes, 0 );
+    sockaddr_in addr;
+    addr.sin_family = AF_INET;
+    addr.sin_port = htons(port);
+    addr.sin_addr.s_addr = ip ? inet_addr(ip) : htonl(INADDR_BROADCAST);
 
+    bool udp = m_Protocol == SocketProtocols::Udp;
+    if (udp)
+    {
+        bool opt = !ip;
+        ::setsockopt( m_Handle, SOL_SOCKET, SO_BROADCAST, (char*)&opt, sizeof(opt) );
+    }
+
+    int32_t local_wrote = udp ? ::sendto( m_Handle, (tchar_t*)buffer, bytes, 0, &addr, sizeof( addr ) ) :
+                                ::send  ( m_Handle, (tchar_t*)buffer, bytes, 0 );
     if (local_wrote < 0)
     {
         return false;

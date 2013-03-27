@@ -148,10 +148,15 @@ bool Socket::Listen()
     return true;
 }
 
-bool Socket::Connect( sockaddr_in* service )
+bool Socket::Connect( const tchar_t* ip, uint16_t port )
 {
     HELIUM_ASSERT( m_Protocol == Helium::SocketProtocols::Tcp );
-    return ::connect( m_Handle, (SOCKADDR*)service, sizeof(sockaddr_in)) != SOCKET_ERROR;
+
+    struct sockaddr_in addr;
+    addr.sin_family = AF_INET;
+    addr.sin_addr.s_addr = inet_addr(ip);
+    addr.sin_port = htons(port);
+    return ::connect( m_Handle, (SOCKADDR*)&addr, sizeof(sockaddr_in)) != SOCKET_ERROR;
 }
 
 bool Socket::Accept( Socket& server_socket, sockaddr_in* client_info )
@@ -168,7 +173,7 @@ bool Socket::Accept( Socket& server_socket, sockaddr_in* client_info )
     return m_Handle != SOCKET_ERROR;
 }
 
-bool Socket::Read( void* buffer, uint32_t bytes, uint32_t& read, Condition& terminate, sockaddr_in *peer )
+bool Socket::Read( void* buffer, uint32_t bytes, uint32_t& read, Condition& terminate, sockaddr_in* peer )
 {
 #if HELIUM_ASSERT_ENABLED
     if ( m_Protocol == Helium::SocketProtocols::Tcp )
@@ -192,11 +197,11 @@ bool Socket::Read( void* buffer, uint32_t bytes, uint32_t& read, Condition& term
 
     DWORD flags = 0;
     DWORD read_local = 0;
-    INT sockaddr_size = sizeof(sockaddr_in);
-
-    int wsa_result = peer ? ::WSARecvFrom(m_Handle, &buf, 1, &read_local, &flags, (SOCKADDR*)peer, &sockaddr_size, &m_Overlapped, NULL) :
-                            ::WSARecv    (m_Handle, &buf, 1, &read_local, &flags, &m_Overlapped, NULL);
-
+    sockaddr_in addr;
+    INT addrSize = sizeof(addr);
+    bool udp = m_Protocol == SocketProtocols::Udp;
+    int wsa_result = udp ? ::WSARecvFrom(m_Handle, &buf, 1, &read_local, &flags, (SOCKADDR*)(peer ? peer : &addr), &addrSize, &m_Overlapped, NULL) :
+                           ::WSARecv    (m_Handle, &buf, 1, &read_local, &flags, &m_Overlapped, NULL);
     if ( wsa_result != 0 )
     {
         if ( WSAGetLastError() != WSA_IO_PENDING )
@@ -241,19 +246,8 @@ bool Socket::Read( void* buffer, uint32_t bytes, uint32_t& read, Condition& term
     return true;
 }
 
-bool Socket::Write( void* buffer, uint32_t bytes, uint32_t& wrote, Condition& terminate, sockaddr_in *peer )
+bool Socket::Write( void* buffer, uint32_t bytes, uint32_t& wrote, Condition& terminate, const tchar_t* ip, uint16_t port )
 {
-#if HELIUM_ASSERT_ENABLED
-    if ( m_Protocol == Helium::SocketProtocols::Tcp )
-    {
-        HELIUM_ASSERT(!peer);
-    }
-    else
-    {
-        HELIUM_ASSERT(peer);
-    }
-#endif
-
     if (bytes == 0)
     {
         return true;
@@ -266,9 +260,20 @@ bool Socket::Write( void* buffer, uint32_t bytes, uint32_t& wrote, Condition& te
     DWORD flags = 0;
     DWORD wrote_local = 0;
 
-    int wsa_result = peer ? ::WSASendTo(m_Handle, &buf, 1, &wrote_local, 0, (SOCKADDR *)peer, sizeof(sockaddr_in), &m_Overlapped, NULL) :
-                            ::WSASend  (m_Handle, &buf, 1, &wrote_local, 0, &m_Overlapped, NULL);
+    sockaddr_in addr;
+    addr.sin_family = AF_INET;
+    addr.sin_port = htons(port);
+    addr.sin_addr.s_addr = ip ? inet_addr(ip) : htonl(INADDR_BROADCAST);
 
+    bool udp = m_Protocol == SocketProtocols::Udp;
+    if (udp)
+    {
+        bool opt = !ip;
+        ::setsockopt( m_Handle, SOL_SOCKET, SO_BROADCAST, (char*)&opt, sizeof(opt) );
+    }
+
+    int wsa_result = udp ? ::WSASendTo(m_Handle, &buf, 1, &wrote_local, 0, (SOCKADDR *)&addr, sizeof(sockaddr_in), &m_Overlapped, NULL) :
+                           ::WSASend  (m_Handle, &buf, 1, &wrote_local, 0, &m_Overlapped, NULL);
     if ( wsa_result != 0 )
     {
         int last_error = WSAGetLastError();
