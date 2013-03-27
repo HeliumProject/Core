@@ -209,10 +209,6 @@ void TCPConnection::ClientThread()
         Helium::Print( TXT( "%s: IP is '%s'\n" ), m_Name, ip.c_str());
     }
 
-    sockaddr_in client_service;
-    client_service.sin_family = AF_INET;
-    client_service.sin_addr.s_addr = inet_addr(ip.c_str());
-
     while (!m_Terminating)
     {
         Helium::Print( TXT( "%s: Ready for server\n" ), m_Name);
@@ -235,12 +231,8 @@ void TCPConnection::ClientThread()
 
             socketsCreated = true;
 
-            client_service.sin_port = htons(m_WritePort);
-            bool connectWrite = m_WriteSocket.Connect(&client_service);
-
-            client_service.sin_port = htons(m_ReadPort);
-            bool connectRead = m_ReadSocket.Connect(&client_service);
-
+            bool connectWrite = m_WriteSocket.Connect( ip.c_str(), m_WritePort );
+            bool connectRead = m_ReadSocket.Connect( ip.c_str(), m_ReadPort );
             if (connectWrite && connectRead)
             {
                 break;
