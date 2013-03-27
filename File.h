@@ -58,8 +58,7 @@ namespace Helium
 
 	private:
 #ifdef HELIUM_OS_WIN
-		// windows.h: HANDLE
-		typedef void* Handle;
+		typedef HANDLE Handle;
 #elif HELIUM_OS_LINUX
 		typedef FILE* Handle;
 #else
