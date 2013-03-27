@@ -66,7 +66,7 @@ bool Socket::Create(SocketProtocol protocol)
     }
     else
     {
-        m_Handle = ::socket(AF_INET, SOCK_STREAM, IPPROTO_UDP);
+        m_Handle = ::socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     }
 
     if (m_Handle < 0)
