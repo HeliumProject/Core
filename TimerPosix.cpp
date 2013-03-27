@@ -4,6 +4,7 @@
 #include "Platform/System.h"
 #include "Platform/Assert.h"
 #include "Platform/Thread.h"
+#include "Platform/Locks.h"
 
 #include <unistd.h>
 #include <sys/times.h>
@@ -67,16 +68,24 @@ IntervalTimer::IntervalTimer()
 , m_Signal( 0 )
 , m_WakeupsMissed( 0 )
 {
-    static int next_sig;
-    if (next_sig == 0)
+    int sig;
+
+    static Mutex signalMutex;
     {
-        next_sig = SIGRTMIN;
+        ScopeLock< Mutex > lock ( signalMutex );
+        static int next_sig;
+        if (next_sig == 0)
+        {
+            next_sig = SIGRTMIN;
+        }
+
+        // Check that we have not run out of signals
+        HELIUM_ASSERT(next_sig <= SIGRTMAX);
+        sig = next_sig;
+        next_sig++;
     }
 
-    // Check that we have not run out of signals
-    HELIUM_ASSERT(next_sig <= SIGRTMAX);
-    m_Signal = next_sig;
-    next_sig++;
+    m_Signal = sig;
 
     // Create the signal mask that will be used in wait_period
     sigemptyset( &m_AlarmSet );
