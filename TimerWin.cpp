@@ -1,9 +1,6 @@
 #include "PlatformPch.h"
 
 #include "Platform/System.h"
-
-#if HELIUM_OS_WIN
-
 #include "Platform/Timer.h"
 #include "Platform/Assert.h"
 
@@ -83,9 +80,9 @@ float64_t Timer::GetSecondsPerTick()
     return sm_secondsPerTick;
 }
 
-IntervalTimer::IntervalTimer( bool manualReset )
+IntervalTimer::IntervalTimer()
 {
-    m_Handle = ::CreateWaitableTimer(NULL, manualReset ? TRUE : FALSE, NULL);
+    m_Handle = ::CreateWaitableTimer(NULL, FALSE, NULL);
 }
 
 IntervalTimer::~IntervalTimer()
@@ -103,7 +100,8 @@ void IntervalTimer::Set( int32_t timeoutInMs )
 
 void IntervalTimer::Wait()
 {
+    // this limitation is to maintain POSIX signal timer-based functionality
+    HELIUM_ASSERT( GetCurrentThreadID() == m_Thread );
+
     ::WaitForSingleObject( m_Handle, INFINITE );
 }
-
-#endif  // HELIUM_OS_WIN
