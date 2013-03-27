@@ -19,11 +19,11 @@ namespace Helium
         private:
             tchar_t             m_IP[64];                       // ip of the server
 
-            uint16_t               m_ReadPort;                     // port number for read operations
-            Helium::Socket  m_ReadSocket;                   // socket used for read operations
+            uint16_t            m_ReadPort;                     // port number for read operations
+            Helium::Socket      m_ReadSocket;                   // socket used for read operations
 
-            uint16_t               m_WritePort;                    // port number for write operations
-            Helium::Socket  m_WriteSocket;                  // socket used for write operations
+            uint16_t            m_WritePort;                    // port number for write operations
+            Helium::Socket      m_WriteSocket;                  // socket used for write operations
 
         public:
             TCPConnection();
