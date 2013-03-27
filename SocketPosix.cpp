@@ -152,11 +152,6 @@ bool Socket::Accept(Socket& server_socket, sockaddr_in* client_info)
     return m_Handle > 0;
 }
 
-int Socket::Select(int range, fd_set* read_set, fd_set* write_set, struct timeval* timeout)
-{
-    return ::select(range, read_set, write_set, 0, timeout);
-}
-
 bool Socket::Read(void* buffer, uint32_t bytes, uint32_t& read, Condition& terminate, sockaddr_in *_peer)
 {
     int proto = 0;
@@ -193,4 +188,9 @@ bool Socket::Write(void* buffer, uint32_t bytes, uint32_t& wrote, Condition& ter
     wrote = local_wrote;
 
     return true;
+}
+
+int Socket::Select(Handle range, fd_set* read_set, fd_set* write_set, struct timeval* timeout)
+{
+    return ::select(range, read_set, write_set, 0, timeout);
 }

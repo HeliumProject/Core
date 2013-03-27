@@ -45,8 +45,18 @@ namespace Helium
     class HELIUM_PLATFORM_API Socket
     {
     public:
+#if HELIUM_OS_WIN
+        typedef SOCKET Handle;
+#else
+        typedef int Handle;
+#endif
         Socket();
         ~Socket();
+
+        operator Handle()
+        {
+            return m_Handle;
+        }
 
         // Create/close sockets
         bool Create(SocketProtocol protocol);
@@ -65,14 +75,9 @@ namespace Helium
         bool Write(void* buffer, uint32_t bytes, uint32_t& wrote, Condition& terminate, sockaddr_in *peer = 0);
 
         // Poll the state of a socket
-        static int Select(int range, fd_set* read_set, fd_set* write_set, struct timeval* timeout);
+        static int Select( Handle range, fd_set* read_set, fd_set* write_set, struct timeval* timeout);
 
     private:
-#if HELIUM_OS_WIN
-        typedef HANDLE Handle;
-#else
-        typedef int Handle;
-#endif
         Handle     m_Handle;
 
 #if HELIUM_OS_WIN

@@ -7,9 +7,6 @@
 
 using namespace Helium;
 
-HELIUM_COMPILE_ASSERT( sizeof( uint32_t* ) == sizeof( SOCKET ) );
-HELIUM_COMPILE_ASSERT( sizeof( Socket::Overlapped ) == sizeof( OVERLAPPED ) );
-
 // in milliseconds
 #define KEEPALIVE_TIMEOUT 10000
 #define KEEPALIVE_INTERVAL 1000
@@ -17,18 +14,6 @@ HELIUM_COMPILE_ASSERT( sizeof( Socket::Overlapped ) == sizeof( OVERLAPPED ) );
 // globals
 int32_t g_Count = 0;
 WSADATA g_WSAData;
-
-Socket::Socket(int)
-: m_Handle (0)
-{
-    memset(&m_Overlapped, 0, sizeof(m_Overlapped));
-    m_Overlapped.hEvent = ::CreateEvent(0, true, false, 0);
-}
-
-Socket::~Socket()
-{
-    ::CloseHandle( m_Overlapped.hEvent );
-}
 
 bool Helium::InitializeSockets()
 {
@@ -57,6 +42,11 @@ void Helium::CleanupSockets()
     }
 }
 
+void Helium::InitializeSocketThread()
+{
+
+}
+
 void Helium::CleanupSocketThread()
 {
 
@@ -67,19 +57,37 @@ int Helium::GetSocketError()
     return WSAGetLastError();
 }
 
-bool Helium::CreateSocket(Socket& socket, SocketProtocol protocol)
+Socket::Socket()
+: m_Handle( INVALID_SOCKET )
+{
+    memset(&m_Overlapped, 0, sizeof(m_Overlapped));
+    m_Overlapped.hEvent = ::CreateEvent(0, true, false, 0);
+}
+
+Socket::~Socket()
+{
+    if ( m_Handle != INVALID_SOCKET )
+    {
+        Close();
+    }
+
+    ::CloseHandle( m_Overlapped.hEvent );
+}
+
+bool Socket::Create( SocketProtocol protocol )
 {
     if (protocol == SocketProtocols::Tcp)
     {
-        socket.m_Handle = ::WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED);
+        m_Handle = ::WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED);
     }
     else
     {
-        socket.m_Handle = ::WSASocket(AF_INET, SOCK_DGRAM, IPPROTO_UDP, NULL, 0, WSA_FLAG_OVERLAPPED);
+        m_Handle = ::WSASocket(AF_INET, SOCK_DGRAM, IPPROTO_UDP, NULL, 0, WSA_FLAG_OVERLAPPED);
     }
-    socket.m_Protocol = protocol;
+    
+    m_Protocol = protocol;
 
-    if (socket == INVALID_SOCKET)
+    if (m_Handle == INVALID_SOCKET)
     {
         return false;
     }
@@ -96,7 +104,7 @@ bool Helium::CreateSocket(Socket& socket, SocketProtocol protocol)
         keepalive.keepaliveinterval = KEEPALIVE_INTERVAL;
 
         DWORD returned;
-        int result = ::WSAIoctl( socket, SIO_KEEPALIVE_VALS, &keepalive, sizeof( keepalive ), NULL, 0, &returned, NULL, NULL );
+        int result = ::WSAIoctl( m_Handle, SIO_KEEPALIVE_VALS, &keepalive, sizeof( keepalive ), NULL, 0, &returned, NULL, NULL );
         if ( result == SOCKET_ERROR )
         {
             Helium::Print( TXT("TCP Support: Error setting keep alive on socket (%d)\n"), WSAGetLastError() );
@@ -106,70 +114,64 @@ bool Helium::CreateSocket(Socket& socket, SocketProtocol protocol)
     return true;
 }
 
-bool Helium::CloseSocket(Socket& socket)
+bool Socket::Close()
 {
-    return ::closesocket(socket) != SOCKET_ERROR;
+    return ::closesocket( m_Handle ) != SOCKET_ERROR;
 }
 
-bool Helium::BindSocket(Socket& socket, uint16_t port)
+bool Socket::Bind( uint16_t port )
 {
     sockaddr_in service;
     service.sin_family = AF_INET;
     service.sin_addr.s_addr = INADDR_ANY;
     service.sin_port = htons(port);
-    if ( ::bind(socket, (sockaddr*)&service, sizeof(sockaddr_in) ) == SOCKET_ERROR )
+    if ( ::bind( m_Handle, (sockaddr*)&service, sizeof(sockaddr_in) ) == SOCKET_ERROR )
     {
-        Helium::Print(TXT("Socket Support: Failed to bind socket (%d)\n"), WSAGetLastError());
-        closesocket(socket);
+        Helium::Print( TXT("Socket Support: Failed to bind socket (%d)\n"), WSAGetLastError() );
+        ::closesocket( m_Handle );
         return false;
     }
 
     return true;
 }
 
-bool Helium::ListenSocket(Socket& socket)
+bool Socket::Listen()
 {
-    HELIUM_ASSERT(socket.m_Protocol == Helium::SocketProtocols::Tcp);
-    if ( ::listen(socket, SOMAXCONN) == SOCKET_ERROR)
+    HELIUM_ASSERT( m_Protocol == Helium::SocketProtocols::Tcp );
+    if ( ::listen( m_Handle, SOMAXCONN) == SOCKET_ERROR )
     {
-        Helium::Print(TXT("TCP Support: Failed to listen socket (%d)\n"), WSAGetLastError());
-        closesocket(socket);
+        Helium::Print( TXT("TCP Support: Failed to listen socket (%d)\n"), WSAGetLastError() );
+        ::closesocket( m_Handle );
         return false;
     }
 
     return true;
 }
 
-bool Helium::ConnectSocket(Socket& socket, sockaddr_in* service)
+bool Socket::Connect( sockaddr_in* service )
 {
-    HELIUM_ASSERT(socket.m_Protocol == Helium::SocketProtocols::Tcp);
-    return ::connect(socket, (SOCKADDR*)service, sizeof(sockaddr_in)) != SOCKET_ERROR;
+    HELIUM_ASSERT( m_Protocol == Helium::SocketProtocols::Tcp );
+    return ::connect( m_Handle, (SOCKADDR*)service, sizeof(sockaddr_in)) != SOCKET_ERROR;
 }
 
-bool Helium::AcceptSocket(Socket& socket, Socket& server_socket, sockaddr_in* client_info)
+bool Socket::Accept( Socket& server_socket, sockaddr_in* client_info )
 {
-    HELIUM_ASSERT(socket.m_Protocol == Helium::SocketProtocols::Tcp);
+    HELIUM_ASSERT( m_Protocol == Helium::SocketProtocols::Tcp );
 
     int lengthname = sizeof(sockaddr_in);
 
-    socket.m_Protocol = Helium::SocketProtocols::Tcp;
-    socket.m_Handle = ::accept( server_socket, (struct sockaddr *)client_info, &lengthname);
+    m_Protocol = Helium::SocketProtocols::Tcp;
+    m_Handle = ::accept( server_socket.m_Handle, (struct sockaddr *)client_info, &lengthname);
 
     int error = WSAGetLastError();
 
-    return socket != SOCKET_ERROR;
+    return m_Handle != SOCKET_ERROR;
 }
 
-int Helium::SelectSocket(int range, fd_set* read_set, fd_set* write_set,struct timeval* timeout)
+bool Socket::Read( void* buffer, uint32_t bytes, uint32_t& read, Condition& terminate, sockaddr_in *peer )
 {
-    return ::select(range, read_set, write_set, 0, timeout);
-}
-
-// Utility function.. if an assert trips here, check your usage of the peer param in send/receive
-// function calls
-void CheckPeerParamCompatibleWithProtocol(Helium::SocketProtocol protocol, sockaddr_in *peer)
-{
-    if (protocol == Helium::SocketProtocols::Tcp)
+#if HELIUM_ASSERT_ENABLED
+    if ( m_Protocol == Helium::SocketProtocols::Tcp )
     {
         HELIUM_ASSERT(!peer);
     }
@@ -177,11 +179,7 @@ void CheckPeerParamCompatibleWithProtocol(Helium::SocketProtocol protocol, socka
     {
         HELIUM_ASSERT(peer);
     }
-}
-
-bool Helium::ReadSocket(Socket& socket, void* buffer, uint32_t bytes, uint32_t& read, Condition& terminate, sockaddr_in *peer)
-{
-    CheckPeerParamCompatibleWithProtocol(static_cast<Helium::SocketProtocol>(socket.m_Protocol), peer);
+#endif
 
     if (bytes == 0)
     {
@@ -196,8 +194,8 @@ bool Helium::ReadSocket(Socket& socket, void* buffer, uint32_t bytes, uint32_t& 
     DWORD read_local = 0;
     INT sockaddr_size = sizeof(sockaddr_in);
 
-    int wsa_result = peer ? ::WSARecvFrom(socket.m_Handle, &buf, 1, &read_local, &flags, (SOCKADDR *)peer, &sockaddr_size, (OVERLAPPED*)&socket.m_Overlapped, NULL) :
-                            ::WSARecv    (socket.m_Handle, &buf, 1, &read_local, &flags, (OVERLAPPED*)&socket.m_Overlapped, NULL);
+    int wsa_result = peer ? ::WSARecvFrom(m_Handle, &buf, 1, &read_local, &flags, (SOCKADDR*)peer, &sockaddr_size, &m_Overlapped, NULL) :
+                            ::WSARecv    (m_Handle, &buf, 1, &read_local, &flags, &m_Overlapped, NULL);
 
     if ( wsa_result != 0 )
     {
@@ -210,7 +208,7 @@ bool Helium::ReadSocket(Socket& socket, void* buffer, uint32_t bytes, uint32_t& 
         }
         else
         {
-            HANDLE events[] = { terminate.GetHandle(), socket.m_Overlapped.hEvent };
+            HANDLE events[] = { terminate.GetHandle(), m_Overlapped.hEvent };
             DWORD result = ::WSAWaitForMultipleEvents(2, events, FALSE, INFINITE, FALSE);
 
             HELIUM_ASSERT( result != WAIT_FAILED );
@@ -223,7 +221,7 @@ bool Helium::ReadSocket(Socket& socket, void* buffer, uint32_t bytes, uint32_t& 
                 return false;
             }
 
-            if ( !::WSAGetOverlappedResult(socket.m_Handle, (OVERLAPPED*)&socket.m_Overlapped, &read_local, false, &flags) )
+            if ( !::WSAGetOverlappedResult(m_Handle, &m_Overlapped, &read_local, false, &flags) )
             {
 #ifdef IPC_DEBUG_SOCKETS
                 Helium::Print("Socket Support: Failed read (%s)\n", Helium::GetErrorString().c_str());
@@ -243,9 +241,18 @@ bool Helium::ReadSocket(Socket& socket, void* buffer, uint32_t bytes, uint32_t& 
     return true;
 }
 
-bool Helium::WriteSocket(Socket& socket, void* buffer, uint32_t bytes, uint32_t& wrote, Condition& terminate, sockaddr_in *peer)
+bool Socket::Write( void* buffer, uint32_t bytes, uint32_t& wrote, Condition& terminate, sockaddr_in *peer )
 {
-    CheckPeerParamCompatibleWithProtocol(static_cast<Helium::SocketProtocol>(socket.m_Protocol), peer);
+#if HELIUM_ASSERT_ENABLED
+    if ( m_Protocol == Helium::SocketProtocols::Tcp )
+    {
+        HELIUM_ASSERT(!peer);
+    }
+    else
+    {
+        HELIUM_ASSERT(peer);
+    }
+#endif
 
     if (bytes == 0)
     {
@@ -259,8 +266,8 @@ bool Helium::WriteSocket(Socket& socket, void* buffer, uint32_t bytes, uint32_t&
     DWORD flags = 0;
     DWORD wrote_local = 0;
 
-    int wsa_result = peer ? ::WSASendTo(socket.m_Handle, &buf, 1, &wrote_local, 0, (SOCKADDR *)peer, sizeof(sockaddr_in), (OVERLAPPED*)&socket.m_Overlapped, NULL) :
-                            ::WSASend  (socket.m_Handle, &buf, 1, &wrote_local, 0, (OVERLAPPED*)&socket.m_Overlapped, NULL);
+    int wsa_result = peer ? ::WSASendTo(m_Handle, &buf, 1, &wrote_local, 0, (SOCKADDR *)peer, sizeof(sockaddr_in), &m_Overlapped, NULL) :
+                            ::WSASend  (m_Handle, &buf, 1, &wrote_local, 0, &m_Overlapped, NULL);
 
     if ( wsa_result != 0 )
     {
@@ -274,7 +281,7 @@ bool Helium::WriteSocket(Socket& socket, void* buffer, uint32_t bytes, uint32_t&
         }
         else
         {
-            HANDLE events[] = { terminate.GetHandle(), socket.m_Overlapped.hEvent };
+            HANDLE events[] = { terminate.GetHandle(), m_Overlapped.hEvent };
             DWORD result = ::WSAWaitForMultipleEvents(2, events, FALSE, INFINITE, FALSE);
 
             HELIUM_ASSERT( result != WAIT_FAILED );
@@ -287,7 +294,7 @@ bool Helium::WriteSocket(Socket& socket, void* buffer, uint32_t bytes, uint32_t&
                 return false;
             }
 
-            if ( !::WSAGetOverlappedResult(socket.m_Handle, (OVERLAPPED*)&socket.m_Overlapped, &wrote_local, false, &flags) )
+            if ( !::WSAGetOverlappedResult(m_Handle, &m_Overlapped, &wrote_local, false, &flags) )
             {
 #ifdef IPC_DEBUG_SOCKETS
                 Helium::Print("Socket Support: Failed write (%s)\n", Helium::GetErrorString().c_str());
@@ -305,4 +312,9 @@ bool Helium::WriteSocket(Socket& socket, void* buffer, uint32_t bytes, uint32_t&
     wrote = (uint32_t)wrote_local;
 
     return true;
+}
+
+int Socket::Select( Handle range, fd_set* read_set, fd_set* write_set,struct timeval* timeout )
+{
+    return ::select( 0, read_set, write_set, 0, timeout);
 }
