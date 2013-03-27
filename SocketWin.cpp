@@ -121,6 +121,9 @@ bool Socket::Close()
 
 bool Socket::Bind( uint16_t port )
 {
+    bool reuse = true;
+    ::setsockopt( m_Handle, SOL_SOCKET, SO_REUSEADDR, (char *)&reuse, sizeof(reuse) );
+
     sockaddr_in service;
     service.sin_family = AF_INET;
     service.sin_addr.s_addr = INADDR_ANY;
@@ -148,13 +151,13 @@ bool Socket::Listen()
     return true;
 }
 
-bool Socket::Connect( const tchar_t* ip, uint16_t port )
+bool Socket::Connect( uint16_t port, const tchar_t* ip )
 {
     HELIUM_ASSERT( m_Protocol == Helium::SocketProtocols::Tcp );
 
     struct sockaddr_in addr;
     addr.sin_family = AF_INET;
-    addr.sin_addr.s_addr = inet_addr(ip);
+    addr.sin_addr.s_addr = ip ? inet_addr(ip) : htonl(INADDR_BROADCAST);
     addr.sin_port = htons(port);
     return ::connect( m_Handle, (SOCKADDR*)&addr, sizeof(sockaddr_in)) != SOCKET_ERROR;
 }

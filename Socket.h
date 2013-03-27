@@ -67,7 +67,7 @@ namespace Helium
 
         // These functions are invalid for connectionless protocols such as UDP
         bool Listen();
-        bool Connect(const tchar_t* ip, uint16_t port);
+        bool Connect(uint16_t port, const tchar_t* ip = NULL);
         bool Accept(Socket& server_socket, sockaddr_in* client_info);
 
         // Use the socket to communicate on a connection based protocol
