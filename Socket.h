@@ -1,15 +1,37 @@
 #pragma once
 
-#ifdef HELIUM_OS_WIN
-# include "Platform/SocketWin.h"
-#else
-# include "Platform/SocketPosix.h"
-#endif
-
+#include "Platform/Types.h"
 #include "Platform/Condition.h"
+
+#if HELIUM_OS_WIN
+typedef int socklen_t;
+#else
+# include <sys/types.h>
+# include <sys/socket.h>
+# include <sys/select.h>
+# include <sys/time.h>
+# include <sys/poll.h>
+# include <netdb.h>
+# include <netinet/in.h>
+# include <netinet/tcp.h>
+# include <arpa/inet.h>
+# include <errno.h>
+# include <unistd.h>
+#endif
 
 namespace Helium
 {
+    // Call to initiate/shutdown the subsystem, reference counted
+    HELIUM_PLATFORM_API bool InitializeSockets();
+    HELIUM_PLATFORM_API void CleanupSockets();
+
+    // Call to initiate/shutdown a thread that will call into the api
+    HELIUM_PLATFORM_API void InitializeSocketThread();
+    HELIUM_PLATFORM_API void CleanupSocketThread();
+
+    // Get the most recent socket error
+    HELIUM_PLATFORM_API int GetSocketError();
+
     namespace SocketProtocols
     {
         enum SocketProtocol
@@ -20,30 +42,42 @@ namespace Helium
     }
     typedef SocketProtocols::SocketProtocol SocketProtocol;
 
-    // Call to initiate/shutdown the subsystem
-    HELIUM_PLATFORM_API bool InitializeSockets();
-    HELIUM_PLATFORM_API void CleanupSockets();
-    HELIUM_PLATFORM_API void CleanupSocketThread();
+    class HELIUM_PLATFORM_API Socket
+    {
+    public:
+        Socket();
+        ~Socket();
 
-    // Get the most recent socket error
-    HELIUM_PLATFORM_API int GetSocketError();
+        // Create/close sockets
+        bool Create(SocketProtocol protocol);
+        bool Close();
 
-    // Create/close sockets
-    HELIUM_PLATFORM_API bool CreateSocket(Socket& socket, SocketProtocol protocol = SocketProtocols::Tcp);
-    HELIUM_PLATFORM_API bool CloseSocket(Socket& socket);
+        // Associate the socket with a particular port
+        bool Bind(uint16_t port);
 
-    // Associate the socket with a particular port
-    HELIUM_PLATFORM_API bool BindSocket(Socket& socket, uint16_t port);
+        // These functions are invalid for connectionless protocols such as UDP
+        bool Listen();
+        bool Connect(sockaddr_in* service);
+        bool Accept(Socket& server_socket, sockaddr_in* client_info);
 
-    // These functions are invalid for connectionless protocols such as UDP
-    HELIUM_PLATFORM_API bool ListenSocket(Socket& socket);
-    HELIUM_PLATFORM_API bool ConnectSocket(Socket& socket, sockaddr_in* service);
-    HELIUM_PLATFORM_API bool AcceptSocket(Socket& socket, Socket& server_socket, sockaddr_in* client_info);
+        // Use the socket to communicate on a connection based protocol
+        bool Read(void* buffer, uint32_t bytes, uint32_t& read, Condition& terminate, sockaddr_in *peer = 0);
+        bool Write(void* buffer, uint32_t bytes, uint32_t& wrote, Condition& terminate, sockaddr_in *peer = 0);
 
-    // Poll the state of a socket
-    HELIUM_PLATFORM_API int SelectSocket(int range, fd_set* read_set, fd_set* write_set, struct timeval* timeout);
+        // Poll the state of a socket
+        static int Select(int range, fd_set* read_set, fd_set* write_set, struct timeval* timeout);
 
-    // Use the socket to communicate on a connection based protocol
-    HELIUM_PLATFORM_API bool ReadSocket(Socket& socket, void* buffer, uint32_t bytes, uint32_t& read, Condition& terminate, sockaddr_in *peer = 0);
-    HELIUM_PLATFORM_API bool WriteSocket(Socket& socket, void* buffer, uint32_t bytes, uint32_t& wrote, Condition& terminate, sockaddr_in *peer = 0);
+    private:
+#if HELIUM_OS_WIN
+        typedef HANDLE Handle;
+#else
+        typedef int Handle;
+#endif
+        Handle     m_Handle;
+
+#if HELIUM_OS_WIN
+        int        m_Protocol;
+        OVERLAPPED m_Overlapped;
+#endif
+    };   
 }

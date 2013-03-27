@@ -18,12 +18,6 @@ HELIUM_COMPILE_ASSERT( sizeof( Socket::Overlapped ) == sizeof( OVERLAPPED ) );
 int32_t g_Count = 0;
 WSADATA g_WSAData;
 
-// Utility function for runtime checking
-bool IsProtocolConnectionless(Helium::SocketProtocol protocol)
-{
-    return protocol == Helium::SocketProtocols::Tcp;
-}
-
 Socket::Socket(int)
 : m_Handle (0)
 {

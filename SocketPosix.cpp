@@ -21,6 +21,11 @@ void Helium::CleanupSockets()
 
 }
 
+void Helium::InitializeSocketThread()
+{
+
+}
+
 void Helium::CleanupSocketThread()
 {
 #ifdef PS3_POSIX
@@ -39,75 +44,69 @@ int Helium::GetSocketError()
     return errno;
 }
 
-bool Helium::CreateSocket(Socket& socket, SocketProtocol protocol)
+Socket::Socket()
+: m_Handle( -1 )
+{
+
+}
+
+Socket::~Socket()
+{
+    if ( m_Handle >= 0 )
+    {
+        Close();
+    }
+}
+
+bool Socket::Create(SocketProtocol protocol)
 {
     if (protocol == SocketProtocols::Tcp)
     {
-        socket = ::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+        m_Handle = ::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     }
     else
     {
-        socket = ::socket(AF_INET, SOCK_STREAM, IPPROTO_UDP);
+        m_Handle = ::socket(AF_INET, SOCK_STREAM, IPPROTO_UDP);
     }
 
-    if (socket < 0)
+    if (m_Handle < 0)
     {
-        Helium::Print("TCP Support: Failed to create socket %d (%d)\n", socket, Helium::GetSocketError());
+        Helium::Print("TCP Support: Failed to create socket %d (%d)\n", m_Handle, Helium::GetSocketError());
         return false;
     }
 
     return true;
 }
 
-bool Helium::CloseSocket(Socket& socket)
+bool Socket::Close()
 {
     // don't bother to check for errors here, as this socket may not have been communicated through yet
-    ::shutdown(socket, SHUT_RDWR);
+    ::shutdown(m_Handle, SHUT_RDWR);
 
-    if ( ::close(socket) < 0 )
+    if ( ::close(m_Handle) < 0 )
     {
-        Helium::Print("TCP Support: Failed to close socket %d (%d)\n", socket, Helium::GetSocketError());
+        Helium::Print("TCP Support: Failed to close socket %d (%d)\n", m_Handle, Helium::GetSocketError());
         return false;
     }
 
     return true;
 }
 
-bool Helium::BindSocket(Socket& socket, uint16_t port)
+bool Socket::Bind(uint16_t port)
 {
     sockaddr_in service;
     service.sin_family = AF_INET;
     service.sin_addr.s_addr = INADDR_ANY;
     service.sin_port = htons(port);
-    if ( ::bind(socket, (sockaddr*)&service, sizeof(sockaddr_in) ) < 0 )
+    if ( ::bind(m_Handle, (sockaddr*)&service, sizeof(sockaddr_in) ) < 0 )
     {
-        Helium::Print("TCP Support: Failed to bind socket %d (%d)\n", socket, Helium::GetSocketError());
+        Helium::Print("TCP Support: Failed to bind socket %d (%d)\n", m_Handle, Helium::GetSocketError());
 
-        if (shutdown(socket, SHUT_RDWR) < 0)
+        if ( ::shutdown(m_Handle, SHUT_RDWR) < 0 )
         {
             HELIUM_BREAK();
         }
-        if (close(socket) < 0) {
-            HELIUM_BREAK();
-        }
-
-        return false;
-    }
-
-    return true;
-}
-
-bool Helium::ListenSocket(Socket& socket)
-{
-    if ( ::listen(socket, 5) < 0 )
-    {
-        Helium::Print("TCP Support: Failed to listen socket %d (%d)\n", socket, Helium::GetSocketError());
-
-        if (shutdown(socket, SHUT_RDWR) < 0)
-        {
-            HELIUM_BREAK();
-        }
-        if (close(socket) < 0)
+        if ( ::close(m_Handle) < 0 )
         {
             HELIUM_BREAK();
         }
@@ -118,33 +117,54 @@ bool Helium::ListenSocket(Socket& socket)
     return true;
 }
 
-bool Helium::ConnectSocket(Socket& socket, sockaddr_in* service)
+bool Socket::Listen()
 {
-    return ::connect(socket, (struct sockaddr *)service, sizeof(sockaddr_in)) >= 0;
+    if ( ::listen(m_Handle, 5) < 0 )
+    {
+        Helium::Print("TCP Support: Failed to listen socket %d (%d)\n", m_Handle, Helium::GetSocketError());
+
+        if ( ::shutdown(m_Handle, SHUT_RDWR) < 0 )
+        {
+            HELIUM_BREAK();
+        }
+        if ( ::close(m_Handle) < 0 )
+        {
+            HELIUM_BREAK();
+        }
+
+        return false;
+    }
+
+    return true;
 }
 
-bool Helium::AcceptSocket(Socket& socket, Socket& server_socket, sockaddr_in* client_info)
+bool Socket::Connect(sockaddr_in* service)
+{
+    return ::connect(m_Handle, (struct sockaddr *)service, sizeof(sockaddr_in)) >= 0;
+}
+
+bool Socket::Accept(Socket& server_socket, sockaddr_in* client_info)
 {
     socklen_t lengthname = sizeof(sockaddr_in);
 
-    socket = ::accept( server_socket, (struct sockaddr *)client_info, &lengthname );
+    m_Handle = ::accept( server_socket.m_Handle, (struct sockaddr *)client_info, &lengthname );
 
-    return socket > 0;
+    return m_Handle > 0;
 }
 
-int Helium::SelectSocket(int range, fd_set* read_set, fd_set* write_set, struct timeval* timeout)
+int Socket::Select(int range, fd_set* read_set, fd_set* write_set, struct timeval* timeout)
 {
     return ::select(range, read_set, write_set, 0, timeout);
 }
 
-bool Helium::ReadSocket(Socket& socket, void* buffer, uint32_t bytes, uint32_t& read, Condition& terminate, sockaddr_in *_peer)
+bool Socket::Read(void* buffer, uint32_t bytes, uint32_t& read, Condition& terminate, sockaddr_in *_peer)
 {
     int proto = 0;
     socklen_t optlen = sizeof(int);
-    HELIUM_ASSERT( ::getsockopt(socket, SOL_SOCKET, SO_PROTOCOL, &proto, &optlen) );
+    HELIUM_ASSERT( ::getsockopt(m_Handle, SOL_SOCKET, SO_PROTOCOL, &proto, &optlen) );
     HELIUM_ASSERT( proto != IPPROTO_UDP );
 
-    int32_t local_read = ::recv( socket, (tchar_t*)buffer, bytes, 0 );
+    int32_t local_read = ::recv( m_Handle, (tchar_t*)buffer, bytes, 0 );
 
     if (local_read < 0)
     {
@@ -156,14 +176,14 @@ bool Helium::ReadSocket(Socket& socket, void* buffer, uint32_t bytes, uint32_t& 
     return true;
 }
 
-bool Helium::WriteSocket(Socket& socket, void* buffer, uint32_t bytes, uint32_t& wrote, Condition& terminate, sockaddr_in *_peer)
+bool Socket::Write(void* buffer, uint32_t bytes, uint32_t& wrote, Condition& terminate, sockaddr_in *_peer)
 {
     int proto = 0;
     socklen_t optlen = sizeof(int);
-    HELIUM_ASSERT( ::getsockopt(socket, SOL_SOCKET, SO_PROTOCOL, &proto, &optlen) );
+    HELIUM_ASSERT( ::getsockopt( m_Handle, SOL_SOCKET, SO_PROTOCOL, &proto, &optlen ) );
     HELIUM_ASSERT( proto != IPPROTO_UDP );
 
-    int32_t local_wrote = ::send( socket, (tchar_t*)buffer, bytes, 0 );
+    int32_t local_wrote = ::send( m_Handle, (tchar_t*)buffer, bytes, 0 );
 
     if (local_wrote < 0)
     {
