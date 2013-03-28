@@ -4,6 +4,7 @@
 #include "Platform/Assert.h"
 
 #include <pthread.h>
+#include <errno.h>
 
 using namespace Helium;
 
@@ -26,8 +27,10 @@ void event_destroy(Condition::Handle* evt)
     pthread_cond_destroy (&evt->condition);
 }
 
-void event_wait(Condition::Handle* evt)
+bool event_wait(Condition::Handle* evt, const timespec* timeout)
 {
+    bool result = true;
+
     // grab the lock first
     pthread_mutex_lock (&evt->lock);
 
@@ -44,13 +47,25 @@ void event_wait(Condition::Handle* evt)
     {
         evt->waiting_threads++;
 
-        pthread_cond_wait (&evt->condition, &evt->lock);
+        if ( timeout )
+        {
+            if ( pthread_cond_timedwait (&evt->condition, &evt->lock, timeout) == ETIMEDOUT )
+            {
+                result = false;
+            }
+        }
+        else
+        {
+            pthread_cond_wait (&evt->condition, &evt->lock);
+        }
 
         evt->waiting_threads--;
     }
 
     // Now we can let go of the lock
     pthread_mutex_unlock (&evt->lock);
+
+    return result;
 }
 
 void event_signal(Condition::Handle* evt)
@@ -150,6 +165,13 @@ void Condition::Reset()
 
 bool Condition::Wait()
 {
-    event_wait(&m_Handle);
-    return true;
+    return event_wait(&m_Handle, NULL);
+}
+
+bool Condition::Wait( uint32_t timeoutMs )
+{
+    struct timespec spec;
+    spec.tv_sec = timeoutMs / 1000;
+    spec.tv_nsec = ( timeoutMs % 1000 ) * 1000000;
+    return event_wait(&m_Handle, &spec);
 }

@@ -46,6 +46,7 @@ int Helium::GetSocketError()
 
 Socket::Socket()
 : m_Handle( -1 )
+, m_Protocol( SocketProtocols::Tcp )
 {
 
 }
@@ -68,6 +69,8 @@ bool Socket::Create(SocketProtocol protocol)
     {
         m_Handle = ::socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     }
+
+    m_Protocol = protocol;
 
     if (m_Handle < 0)
     {
@@ -149,7 +152,7 @@ bool Socket::Connect( uint16_t port, const tchar_t* ip )
     addr.sin_family = AF_INET;
     addr.sin_addr.s_addr = ip ? inet_addr(ip) : htonl(INADDR_BROADCAST);
     addr.sin_port = htons(port);
-    return ::connect(m_Handle, addr, sizeof(addr)) >= 0;
+    return ::connect(m_Handle, (sockaddr*)&addr, sizeof(addr)) >= 0;
 }
 
 bool Socket::Accept(Socket& server_socket, sockaddr_in* client_info)
@@ -170,7 +173,8 @@ bool Socket::Read(void* buffer, uint32_t bytes, uint32_t& read, Condition& termi
 
     sockaddr_in addr;
     bool udp = m_Protocol == SocketProtocols::Udp;
-    int32_t local_read = udp ? ::recvfrom( m_Handle, (tchar_t*)buffer, bytes, 0, peer ? peer : addr ) :
+    socklen_t addrLen = sizeof( addr );
+    int32_t local_read = udp ? ::recvfrom( m_Handle, (tchar_t*)buffer, bytes, 0, (sockaddr*)(peer ? peer : &addr), &addrLen ) :
                                ::recv    ( m_Handle, (tchar_t*)buffer, bytes, 0 );
     if (local_read < 0)
     {
@@ -201,7 +205,8 @@ bool Socket::Write(void* buffer, uint32_t bytes, uint32_t& wrote, Condition& ter
         ::setsockopt( m_Handle, SOL_SOCKET, SO_BROADCAST, (char*)&opt, sizeof(opt) );
     }
 
-    int32_t local_wrote = udp ? ::sendto( m_Handle, (tchar_t*)buffer, bytes, 0, &addr, sizeof( addr ) ) :
+    uint32_t addrLen = sizeof( addr );
+    int32_t local_wrote = udp ? ::sendto( m_Handle, (tchar_t*)buffer, bytes, 0, (sockaddr*)&addr, addrLen ) :
                                 ::send  ( m_Handle, (tchar_t*)buffer, bytes, 0 );
     if (local_wrote < 0)
     {

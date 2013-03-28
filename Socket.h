@@ -78,11 +78,11 @@ namespace Helium
         static int Select( Handle range, fd_set* read_set, fd_set* write_set, struct timeval* timeout);
 
     private:
-        Handle     m_Handle;
+        Handle         m_Handle;
+        SocketProtocol m_Protocol;
 
 #if HELIUM_OS_WIN
-        int        m_Protocol;
-        OVERLAPPED m_Overlapped;
+        OVERLAPPED     m_Overlapped;
 #endif
     };   
 }
