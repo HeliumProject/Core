@@ -57,6 +57,7 @@ bool Thread::Start( const tchar_t* pName, ThreadPriority priority )
 
     HELIUM_VERIFY( pthread_attr_init(&attr) == 0);
     HELIUM_VERIFY( pthread_attr_setinheritsched(&attr, PTHREAD_EXPLICIT_SCHED) == 0 );
+    HELIUM_VERIFY( pthread_attr_setschedpolicy(&attr, SCHED_RR) == 0 );
     HELIUM_VERIFY( pthread_attr_setschedparam(&attr, &sched) == 0 );
 
     if ( pthread_create( &(this->m_Handle), &attr, ThreadCallback, this) != 0 )
