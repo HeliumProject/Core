@@ -173,7 +173,7 @@ bool Thread::TryJoin()
 	return true;
 }
 
-/// Get whether this thread is active.
+/// Get whether this thread is valid (created).
 ///
 /// A thread is active if it has been successfully started using Start() but has not yet been joined using Join() or
 /// TryJoin().
@@ -183,7 +183,7 @@ bool Thread::TryJoin()
 /// indicate active execution.
 ///
 /// @return  True if this thread is active (started at some point but not yet joined), false if not.
-bool Thread::IsRunning() const
+bool Thread::IsValid() const
 {
 	return ( m_Handle != 0 );
 }

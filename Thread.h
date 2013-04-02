@@ -55,8 +55,10 @@ namespace Helium
 	private:
 		/// Platform-specific thread handle.
 		Handle m_Handle;
+#if HELIUM_OS_LINUX
 		/// Validity of the handle
 		bool m_Valid;
+#endif
 		/// Thread name.
 		tchar_t m_Name[ 128 ];
 
