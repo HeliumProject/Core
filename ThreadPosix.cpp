@@ -35,13 +35,17 @@ static void SetSchedParam(struct sched_param * params, ThreadPriority priority)
 
 Thread::Thread()
     : m_Handle( 0 )
+    , m_Valid( false )
 {
     m_Name[0] = tchar_t('\0');
 }
 
 Thread::~Thread()
 {
-    HELIUM_VERIFY( this->Join() );
+    if ( IsValid() )
+    {
+        HELIUM_VERIFY( this->Join() );
+    }
 }
 
 bool Thread::Start( const tchar_t* pName, ThreadPriority priority )
@@ -60,41 +64,56 @@ bool Thread::Start( const tchar_t* pName, ThreadPriority priority )
     HELIUM_VERIFY( pthread_attr_setschedpolicy(&attr, SCHED_RR) == 0 );
     HELIUM_VERIFY( pthread_attr_setschedparam(&attr, &sched) == 0 );
 
-    if ( pthread_create( &(this->m_Handle), &attr, ThreadCallback, this) != 0 )
+    if ( pthread_create( &(this->m_Handle), &attr, ThreadCallback, this) == 0 )
     {
-        this->m_Handle = 0;
+        m_Valid = true;
+        prctl( PR_SET_NAME, reinterpret_cast< unsigned long >( pName ) );
     }
-
-    prctl( PR_SET_NAME, reinterpret_cast< unsigned long >( pName ) );
 
     HELIUM_VERIFY( pthread_attr_destroy(&attr) == 0);
 
-    return this->m_Handle != 0;
+    return IsValid();
 }
 
 bool Thread::Join( uint32_t timeOutMilliseconds )
 {
-    if ( timeOutMilliseconds )
+    HELIUM_ASSERT( IsValid() );
+    if ( IsValid() )
     {
-        struct timespec spec;
-        spec.tv_sec = timeOutMilliseconds / 1000;
-        spec.tv_nsec = ( timeOutMilliseconds % 1000 ) * 1000000;
-        HELIUM_VERIFY( pthread_timedjoin_np( m_Handle, NULL, &spec ) == 0 );
+        if ( timeOutMilliseconds )
+        {
+            struct timespec spec;
+            spec.tv_sec = timeOutMilliseconds / 1000;
+            spec.tv_nsec = ( timeOutMilliseconds % 1000 ) * 1000000;
+            return pthread_timedjoin_np( m_Handle, NULL, &spec ) == 0;
+        }
+        else
+        {
+            return pthread_join( m_Handle, NULL ) == 0;
+        }
     }
     else
     {
-        HELIUM_VERIFY( pthread_join( m_Handle, NULL ) == 0 );
+        return false;
     }
 }
 
 bool Thread::TryJoin()
 {
-    HELIUM_VERIFY( pthread_tryjoin_np( m_Handle, NULL ) == 0 )
+    HELIUM_ASSERT( IsValid() );
+    if ( IsValid() )
+    {
+        return pthread_tryjoin_np( m_Handle, NULL ) == 0;
+    }
+    else
+    {
+        return false;
+    }
 }
 
-bool Thread::IsRunning() const
+bool Thread::IsValid() const
 {
-    return m_Handle != INVALID_ID;
+    return m_Valid;
 }
 
 void Thread::Sleep( uint32_t milliseconds )

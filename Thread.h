@@ -42,18 +42,12 @@ namespace Helium
 
 		/// Thread ID type.
 		typedef unsigned long id_t;
-
-		/// Invalid thread ID value.
-		static const id_t INVALID_ID = 0;
 #elif HELIUM_OS_LINUX
 		/// Posix threads handle
 		typedef pthread_t Handle;
 
 		/// Posix threads are identified as process IDs
 		typedef pid_t id_t;
-		
-		/// Invalid thread ID value.
-		static const int INVALID_ID = -1;
 #else
 # error Implement Thread for this platform.
 #endif
@@ -61,6 +55,8 @@ namespace Helium
 	private:
 		/// Platform-specific thread handle.
 		Handle m_Handle;
+		/// Validity of the handle
+		bool m_Valid;
 		/// Thread name.
 		tchar_t m_Name[ 128 ];
 
@@ -91,7 +87,7 @@ namespace Helium
 		bool Start( const tchar_t* pName, ThreadPriority priority = ThreadPriorities::Normal );
 		bool Join( uint32_t timeOutMilliseconds = 0 );
 		bool TryJoin();
-		bool IsRunning() const;
+		bool IsValid() const;
 		//@}
 
 		/// @name Thread-side Interface
