@@ -8,7 +8,10 @@ using namespace Helium;
 
 Mutex::Mutex()
 {
-    pthread_mutex_init(&m_Handle, NULL);
+    pthread_mutexattr_t mta;
+    pthread_mutexattr_init(&mta);
+    pthread_mutexattr_settype(&mta, PTHREAD_MUTEX_RECURSIVE);
+    pthread_mutex_init(&m_Handle, &mta);
 }
 
 Mutex::~Mutex()
