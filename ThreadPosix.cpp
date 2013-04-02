@@ -55,15 +55,14 @@ bool Thread::Start( const tchar_t* pName, ThreadPriority priority )
     // Cache the name
     MemoryCopy( m_Name, pName, sizeof( m_Name ) / sizeof( tchar_t ) );
 
-    pthread_attr_t attr;
     struct sched_param sched;
     SetSchedParam(&sched, priority);
 
-    HELIUM_VERIFY( pthread_attr_init(&attr) == 0);
+    pthread_attr_t attr;
+    HELIUM_VERIFY( pthread_attr_init(&attr) == 0 );
     HELIUM_VERIFY( pthread_attr_setinheritsched(&attr, PTHREAD_EXPLICIT_SCHED) == 0 );
     HELIUM_VERIFY( pthread_attr_setschedpolicy(&attr, SCHED_RR) == 0 );
     HELIUM_VERIFY( pthread_attr_setschedparam(&attr, &sched) == 0 );
-
     if ( pthread_create( &(this->m_Handle), &attr, ThreadCallback, this) == 0 )
     {
         m_Valid = true;
