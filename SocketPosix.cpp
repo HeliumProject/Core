@@ -166,10 +166,12 @@ bool Socket::Accept(Socket& server_socket, sockaddr_in* client_info)
 
 bool Socket::Read(void* buffer, uint32_t bytes, uint32_t& read, Condition& terminate, sockaddr_in* peer)
 {
+/*
     int proto = 0;
     socklen_t optlen = sizeof(int);
     HELIUM_ASSERT( ::getsockopt(m_Handle, SOL_SOCKET, SO_PROTOCOL, &proto, &optlen) );
     HELIUM_ASSERT( proto != IPPROTO_UDP );
+*/
 
     sockaddr_in addr;
     bool udp = m_Protocol == SocketProtocols::Udp;
@@ -188,10 +190,12 @@ bool Socket::Read(void* buffer, uint32_t bytes, uint32_t& read, Condition& termi
 
 bool Socket::Write(void* buffer, uint32_t bytes, uint32_t& wrote, Condition& terminate, const tchar_t* ip, uint16_t port)
 {
+/*
     int proto = 0;
     socklen_t optlen = sizeof(int);
     HELIUM_ASSERT( ::getsockopt( m_Handle, SOL_SOCKET, SO_PROTOCOL, &proto, &optlen ) );
     HELIUM_ASSERT( proto != IPPROTO_UDP );
+*/
 
     sockaddr_in addr;
     addr.sin_family = AF_INET;
