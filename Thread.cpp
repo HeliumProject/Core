@@ -30,7 +30,7 @@ RunnableThread::~RunnableThread()
 /// @param[in] pRunnable  Runnable instance to execute.
 void RunnableThread::SetRunnable( Runnable* pRunnable )
 {
-    HELIUM_ASSERT( !IsRunning() );
+    HELIUM_ASSERT( !IsValid() );
     m_pRunnable = pRunnable;
 }
 
