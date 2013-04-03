@@ -106,8 +106,12 @@ void Helium::Trace::OutputVa( TraceLevel level, const tchar_t* pFormat, va_list 
 
 	size_t bufferSize = static_cast< size_t >( result ) + 1;
 
+#if HELIUM_HEAP
 	DefaultAllocator allocator;
 	tchar_t* pBuffer = static_cast< tchar_t* >( allocator.Allocate( sizeof( tchar_t ) * bufferSize ) );
+#else
+	tchar_t* pBuffer = static_cast< tchar_t* >( ::malloc( sizeof( tchar_t ) * bufferSize ) );
+#endif
 	HELIUM_ASSERT( pBuffer );
 	if( pBuffer )
 	{
@@ -122,7 +126,11 @@ void Helium::Trace::OutputVa( TraceLevel level, const tchar_t* pFormat, va_list 
 		OutputImplementation( pBuffer );
 		m_bNewLine = ( pBuffer[ result - 1 ] == TXT( '\n' ) );
 
+#if HELIUM_HEAP
 		allocator.Free( pBuffer );
+#else
+		::free( pBuffer );
+#endif
 	}
 }
 

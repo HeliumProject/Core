@@ -1,6 +1,8 @@
 #include "PlatformPch.h"
 #include "Platform/MemoryHeap.h"
 
+#if HELIUM_HEAP
+
 #include "Platform/Atomic.h"
 
 #include <unistd.h>
@@ -30,7 +32,7 @@ void* VirtualMemory::Allocate( size_t size )
 #endif
 
     void* pMemory = mmap( NULL, size, PROT_READ | PROT_WRITE, flags, 0, 0 );
-    HELIUM_ASSERT( pMemory != reinterpret_cast<void*>( -1 ) )
+    HELIUM_ASSERT( pMemory != reinterpret_cast< void* >( ~static_cast< uintptr_t >( 0 ) ) ) );
 
 #if HELIUM_ENABLE_MEMORY_TRACKING
 # pragma TODO("This is a rough shot at computing the appropriate bytes in the number of pages allocated, it needs testing -geoff")
@@ -90,3 +92,5 @@ size_t VirtualMemory::GetPageSize()
 {
     return sysconf(_SC_PAGE_SIZE);
 }
+
+#endif // HELIUM_HEAP

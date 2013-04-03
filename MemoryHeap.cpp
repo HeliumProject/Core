@@ -1,6 +1,8 @@
 #include "PlatformPch.h"
 #include "Platform/MemoryHeap.h"
 
+#if HELIUM_HEAP
+
 #include "Platform/Atomic.h"
 #include "Platform/Exception.h"
 #include "Platform/Locks.h"
@@ -414,3 +416,5 @@ DynamicMemoryHeap& Helium::GetExternalHeap()
     return *pExternalHeap;
 }
 #endif
+
+#endif // HELIUM_HEAP

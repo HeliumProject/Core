@@ -143,8 +143,11 @@ void* Thread::ThreadCallback( void* pData )
 
     pThread->Run();
 
+#if HELIUM_HEAP
     ThreadLocalStackAllocator::ReleaseMemoryHeap();
     DynamicMemoryHeap::UnregisterCurrentThreadCache();
+#endif
+    
     return 0;
 }
 

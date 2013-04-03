@@ -1,6 +1,8 @@
 #include "PlatformPch.h"
 #include "Platform/MemoryHeap.h"
 
+#if HELIUM_HEAP
+
 using namespace Helium;
 
 /// Allocate memory pages of at least the specified size.
@@ -117,3 +119,5 @@ size_t VirtualMemory::GetPageSize()
 
     return systemInfo.dwPageSize;
 }
+
+#endif // HELIUM_HEAP

@@ -7,6 +7,13 @@
 /// @defgroup defaultheapmacro Default Module Memory Heap Declaration
 //@{
 
+#ifndef HELIUM_HEAP
+/// Take control of heap allocations, as invasively as possible.
+#define HELIUM_HEAP 1
+#endif
+
+#if HELIUM_HEAP
+
 #ifndef HELIUM_USE_MODULE_HEAPS
 /// Non-zero if module-specific heaps should be enabled.
 #define HELIUM_USE_MODULE_HEAPS 1
@@ -522,18 +529,12 @@ namespace Helium
     template< typename T, typename Allocator > void DeleteHelper( Allocator& rAllocator, T* pObject );
 
     template< typename T, typename Allocator > T* NewArrayHelper( Allocator& rAllocator, size_t count );
-    template< typename T, typename Allocator > T* NewArrayHelper(
-        Allocator& rAllocator, size_t count, const std::true_type& rHasTrivialDestructor );
-    template< typename T, typename Allocator > T* NewArrayHelper(
-        Allocator& rAllocator,
-        size_t count,
-        const std::false_type& rHasTrivialDestructor );
+    template< typename T, typename Allocator > T* NewArrayHelper( Allocator& rAllocator, size_t count, const std::true_type& rHasTrivialDestructor );
+    template< typename T, typename Allocator > T* NewArrayHelper( Allocator& rAllocator, size_t count, const std::false_type& rHasTrivialDestructor );
 
     template< typename T, typename Allocator > void DeleteArrayHelper( Allocator& rAllocator, T* pArray );
-    template< typename T, typename Allocator > void DeleteArrayHelper(
-        Allocator& rAllocator, T* pArray, const std::true_type& rHasTrivialDestructor );
-    template< typename T, typename Allocator > void DeleteArrayHelper(
-        Allocator& rAllocator, T* pArray, const std::false_type& rHasTrivialDestructor );
+    template< typename T, typename Allocator > void DeleteArrayHelper( Allocator& rAllocator, T* pArray, const std::true_type& rHasTrivialDestructor );
+    template< typename T, typename Allocator > void DeleteArrayHelper( Allocator& rAllocator, T* pArray, const std::false_type& rHasTrivialDestructor );
 
     template< typename Allocator > void* AllocateAlignmentHelper( Allocator& rAllocator, size_t size );
     //@}
@@ -545,3 +546,5 @@ inline void* operator new( size_t size, Helium::MemoryHeap& rHeap );
 //@}
 
 #include "Platform/MemoryHeap.inl"
+
+#endif // HELIUM_HEAP

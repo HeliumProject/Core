@@ -236,8 +236,10 @@ unsigned int __stdcall Thread::ThreadCallback( void* pData )
 	Thread* pThread = static_cast< Thread* >( pData );
 	pThread->Run();
 
+#if HELIUM_HEAP
 	ThreadLocalStackAllocator::ReleaseMemoryHeap();
 	DynamicMemoryHeap::UnregisterCurrentThreadCache();
+#endif
 
 	_endthreadex( 0 );
 
