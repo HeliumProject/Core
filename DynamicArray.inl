@@ -545,7 +545,7 @@ template< typename T, typename Allocator >
 void Helium::DynamicArray< T, Allocator >::Clear()
 {
 	ArrayInPlaceDestroy( m_pBuffer, m_size );
-	Allocator().Free( m_pBuffer );
+	Free( m_pBuffer );
 	m_pBuffer = NULL;
 	m_size = 0;
 	m_capacity = 0;
@@ -693,7 +693,7 @@ void Helium::DynamicArray< T, Allocator >::Insert( size_t index, const T& rValue
 		ArrayUninitializedFill( pNewBuffer + index, rValue, count );
 		ArrayUninitializedCopy( pNewBuffer + index + count, m_pBuffer + index, m_size - index );
 
-		Allocator().Free( m_pBuffer );
+		Free( m_pBuffer );
 
 		m_pBuffer = pNewBuffer;
 		m_capacity = newCapacity;
@@ -741,7 +741,7 @@ void Helium::DynamicArray< T, Allocator >::InsertArray( size_t index, const T* p
 		ArrayUninitializedCopy( pNewBuffer + index, pValues, count );
 		ArrayUninitializedCopy( pNewBuffer + index + count, m_pBuffer + index, m_size - index );
 
-		Allocator().Free( m_pBuffer );
+		Free( m_pBuffer );
 
 		m_pBuffer = pNewBuffer;
 		m_capacity = newCapacity;
@@ -1168,7 +1168,7 @@ template< typename T, typename Allocator >
 void Helium::DynamicArray< T, Allocator >::Finalize()
 {
 	ArrayInPlaceDestroy( m_pBuffer, m_size );
-	Allocator().Free( m_pBuffer );
+	Free( m_pBuffer );
 }
 
 /// Assignment operator implementation.
@@ -1275,10 +1275,7 @@ T* Helium::DynamicArray< T, Allocator >::Allocate( size_t count, const std::fals
 template< typename T, typename Allocator >
 T* Helium::DynamicArray< T, Allocator >::Reallocate( T* pMemory, size_t count )
 {
-	return Reallocate(
-		pMemory,
-		count,
-		std::integral_constant< bool, ( std::alignment_of< T >::value > 8 ) >() );
+	return Reallocate( pMemory, count, std::integral_constant< bool, ( std::alignment_of< T >::value > 8 ) >() );
 }
 
 /// Reallocate() implementation for types requiring a specific alignment.
@@ -1293,22 +1290,7 @@ T* Helium::DynamicArray< T, Allocator >::Reallocate( T* pMemory, size_t count )
 template< typename T, typename Allocator >
 T* Helium::DynamicArray< T, Allocator >::Reallocate( T* pMemory, size_t count, const std::true_type& /*rNeedsAlignment*/ )
 {
-	Allocator allocator;
-
-	size_t existingSize = allocator.GetMemorySize( pMemory );
-	size_t newSize = sizeof( T ) * count;
-	if( existingSize != newSize )
-	{
-		T* pNewMemory = static_cast< T* >( allocator.AllocateAligned(
-			std::alignment_of< T >::value,
-			newSize ) );
-		HELIUM_ASSERT( pNewMemory || newSize == 0 );
-		MemoryCopy( pNewMemory, pMemory, Min( existingSize, newSize ) );
-		allocator.Free( pMemory );
-		pMemory = pNewMemory;
-	}
-
-	return pMemory;
+	return static_cast< T* >( Allocator().ReallocateAligned( pMemory, std::alignment_of< T >::value, sizeof( T ) * count ) );
 }
 
 /// Reallocate() implementation for types that can use the default alignment.
@@ -1321,12 +1303,42 @@ T* Helium::DynamicArray< T, Allocator >::Reallocate( T* pMemory, size_t count, c
 ///
 /// @see Reallocate()
 template< typename T, typename Allocator >
-T* Helium::DynamicArray< T, Allocator >::Reallocate(
-	T* pMemory,
-	size_t count,
-	const std::false_type& /*rNeedsAlignment*/ )
+T* Helium::DynamicArray< T, Allocator >::Reallocate( T* pMemory, size_t count, const std::false_type& /*rNeedsAlignment*/ )
 {
 	return static_cast< T* >( Allocator().Reallocate( pMemory, sizeof( T ) * count ) );
+}
+
+/// Free memory, accounting for non-standard alignment requirements.
+///
+/// @param[in] pMemory Memory to free.
+///
+/// @see Reallocate()
+template< typename T, typename Allocator >
+void Helium::DynamicArray< T, Allocator >::Free( T* pMemory )
+{
+	return Free( pMemory, std::integral_constant< bool, ( std::alignment_of< T >::value > 8 ) >() );
+}
+
+/// Free() implementation for types requiring a specific alignment.
+///
+/// @param[in] pMemory Memory to free.
+///
+/// @see Reallocate()
+template< typename T, typename Allocator >
+void Helium::DynamicArray< T, Allocator >::Free( T* pMemory, const std::true_type& /*rNeedsAlignment*/ )
+{
+	return Allocator().FreeAligned( pMemory );
+}
+
+/// Free() implementation for types that can use the default alignment.
+///
+/// @param[in] pMemory Memory to free.
+///
+/// @see Reallocate()
+template< typename T, typename Allocator >
+void Helium::DynamicArray< T, Allocator >::Free( T* pMemory, const std::false_type& /*rNeedsAlignment*/ )
+{
+	return Allocator().Free( pMemory );
 }
 
 /// Resize an array of elements.
@@ -1344,12 +1356,7 @@ T* Helium::DynamicArray< T, Allocator >::ResizeBuffer(
 	size_t oldCapacity,
 	size_t newCapacity )
 {
-    return ResizeBuffer(
-        pMemory,
-        elementCount,
-        oldCapacity,
-        newCapacity,
-        std::integral_constant< bool, std::has_trivial_copy< T >::value && std::has_trivial_destructor< T >::value >() );
+    return ResizeBuffer( pMemory, elementCount, oldCapacity, newCapacity, std::integral_constant< bool, std::has_trivial_copy< T >::value && std::has_trivial_destructor< T >::value >() );
 }
 
 /// ResizeBuffer() implementation for types with both a trivial copy constructor and trivial destructor.
@@ -1382,12 +1389,7 @@ T* Helium::DynamicArray< T, Allocator >::ResizeBuffer(
 ///
 /// @return  Pointer to the resized array.
 template< typename T, typename Allocator >
-T* Helium::DynamicArray< T, Allocator >::ResizeBuffer(
-	T* pMemory,
-	size_t elementCount,
-	size_t oldCapacity,
-	size_t newCapacity,
-	const std::false_type& /*rHasTrivialCopyAndDestructor*/ )
+T* Helium::DynamicArray< T, Allocator >::ResizeBuffer( T* pMemory, size_t elementCount, size_t oldCapacity, size_t newCapacity, const std::false_type& /*rHasTrivialCopyAndDestructor*/ )
 {
 	HELIUM_ASSERT( elementCount <= oldCapacity );
 	HELIUM_ASSERT( elementCount <= newCapacity );
@@ -1405,7 +1407,7 @@ T* Helium::DynamicArray< T, Allocator >::ResizeBuffer(
 		}
 
 		ArrayInPlaceDestroy( pMemory, elementCount );
-		Allocator().Free( pMemory );
+		Free( pMemory );
 	}
 
 	return pNewMemory;

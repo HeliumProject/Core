@@ -235,28 +235,21 @@ namespace Helium
         T* Reallocate( T* pMemory, size_t count, const std::true_type& rNeedsAlignment );
         T* Reallocate( T* pMemory, size_t count, const std::false_type& rNeedsAlignment );
 
-        T* ResizeBuffer(
-            T* pMemory, size_t elementRange, const uint32_t* pUsedElements, size_t oldCapacity, size_t newCapacity );
-        T* ResizeBuffer(
-            T* pMemory, size_t elementRange, const uint32_t* pUsedElements, size_t oldCapacity, size_t newCapacity,
-            const std::true_type& rHasTrivialCopyAndDestructor );
-        T* ResizeBuffer(
-            T* pMemory, size_t elementRange, const uint32_t* pUsedElements, size_t oldCapacity, size_t newCapacity,
-            const std::false_type& rHasTrivialCopyAndDestructor );
+		void Free( T* pMemory );
+		void Free( T* pMemory, const std::true_type& rNeedsAlignment );
+		void Free( T* pMemory, const std::false_type& rNeedsAlignment );
+
+        T* ResizeBuffer( T* pMemory, size_t elementRange, const uint32_t* pUsedElements, size_t oldCapacity, size_t newCapacity );
+        T* ResizeBuffer( T* pMemory, size_t elementRange, const uint32_t* pUsedElements, size_t oldCapacity, size_t newCapacity, const std::true_type& rHasTrivialCopyAndDestructor );
+        T* ResizeBuffer( T* pMemory, size_t elementRange, const uint32_t* pUsedElements, size_t oldCapacity, size_t newCapacity, const std::false_type& rHasTrivialCopyAndDestructor );
 
         void InPlaceDestroy( T* pMemory, size_t range, const uint32_t* pUsedElements );
-        void InPlaceDestroy(
-            T* pMemory, size_t range, const uint32_t* pUsedElements, const std::true_type& rHasTrivialDestructor );
-        void InPlaceDestroy(
-            T* pMemory, size_t range, const uint32_t* pUsedElements, const std::false_type& rHasTrivialDestructor );
+        void InPlaceDestroy( T* pMemory, size_t range, const uint32_t* pUsedElements, const std::true_type& rHasTrivialDestructor );
+        void InPlaceDestroy( T* pMemory, size_t range, const uint32_t* pUsedElements, const std::false_type& rHasTrivialDestructor );
 
         void UninitializedCopy( T* pDest, const T* pSource, size_t range, const uint32_t* pUsedElements );
-        void UninitializedCopy(
-            T* pDest, const T* pSource, size_t range, const uint32_t* pUsedElements,
-            const std::true_type& rHasTrivialCopy );
-        void UninitializedCopy(
-            T* pDest, const T* pSource, size_t range, const uint32_t* pUsedElements,
-            const std::false_type& rHasTrivialCopy );
+        void UninitializedCopy( T* pDest, const T* pSource, size_t range, const uint32_t* pUsedElements, const std::true_type& rHasTrivialCopy );
+        void UninitializedCopy( T* pDest, const T* pSource, size_t range, const uint32_t* pUsedElements, const std::false_type& rHasTrivialCopy );
         //@}
     };
 }

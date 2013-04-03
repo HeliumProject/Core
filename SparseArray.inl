@@ -528,7 +528,7 @@ template< typename T, typename Allocator >
 Helium::SparseArray< T, Allocator >::~SparseArray()
 {
     InPlaceDestroy( m_pBuffer, m_size, m_pUsedElements );
-    m_allocator.Free( m_pBuffer );
+    Free( m_pBuffer );
     m_allocator.Free( m_pUsedElements );
 }
 
@@ -642,7 +642,7 @@ template< typename T, typename Allocator >
 void Helium::SparseArray< T, Allocator >::Clear()
 {
     InPlaceDestroy( m_pBuffer, m_size, m_pUsedElements );
-    m_allocator.Free( m_pBuffer );
+    Free( m_pBuffer );
     m_pBuffer = NULL;
 
     m_allocator.Free( m_pUsedElements );
@@ -1231,10 +1231,7 @@ T* Helium::SparseArray< T, Allocator >::Allocate( size_t count, const std::false
 template< typename T, typename Allocator >
 T* Helium::SparseArray< T, Allocator >::Reallocate( T* pMemory, size_t count )
 {
-    return Reallocate(
-        pMemory,
-        count,
-        std::integral_constant< bool, ( std::alignment_of< T >::value > 8 ) >() );
+    return Reallocate( pMemory, count, std::integral_constant< bool, ( std::alignment_of< T >::value > 8 ) >() );
 }
 
 /// Reallocate() implementation for types requiring a specific alignment.
@@ -1247,25 +1244,9 @@ T* Helium::SparseArray< T, Allocator >::Reallocate( T* pMemory, size_t count )
 ///
 /// @see Reallocate()
 template< typename T, typename Allocator >
-T* Helium::SparseArray< T, Allocator >::Reallocate(
-    T* pMemory,
-    size_t count,
-    const std::true_type& /*rNeedsAlignment*/ )
+T* Helium::SparseArray< T, Allocator >::Reallocate( T* pMemory, size_t count, const std::true_type& /*rNeedsAlignment*/ )
 {
-    size_t existingSize = m_allocator.GetMemorySize( pMemory );
-    size_t newSize = sizeof( T ) * count;
-    if( existingSize != newSize )
-    {
-        T* pNewMemory = static_cast< T* >( m_allocator.AllocateAligned(
-            std::alignment_of< T >::value,
-            newSize ) );
-        HELIUM_ASSERT( pNewMemory || newSize == 0 );
-        MemoryCopy( pNewMemory, pMemory, Min( existingSize, newSize ) );
-        m_allocator.Free( pMemory );
-        pMemory = pNewMemory;
-    }
-
-    return pMemory;
+    return static_cast< T* >( m_allocator.ReallocateAligned( pMemory, std::alignment_of< T >::value, sizeof( T ) * count ) );
 }
 
 /// Reallocate() implementation for types that can use the default alignment.
@@ -1278,12 +1259,42 @@ T* Helium::SparseArray< T, Allocator >::Reallocate(
 ///
 /// @see Reallocate()
 template< typename T, typename Allocator >
-T* Helium::SparseArray< T, Allocator >::Reallocate(
-    T* pMemory,
-    size_t count,
-    const std::false_type& /*rNeedsAlignment*/ )
+T* Helium::SparseArray< T, Allocator >::Reallocate( T* pMemory, size_t count, const std::false_type& /*rNeedsAlignment*/ )
 {
     return static_cast< T* >( m_allocator.Reallocate( pMemory, sizeof( T ) * count ) );
+}
+
+/// Free memory, accounting for non-standard alignment requirements.
+///
+/// @param[in] pMemory Memory to free.
+///
+/// @see Reallocate()
+template< typename T, typename Allocator >
+void Helium::SparseArray< T, Allocator >::Free( T* pMemory )
+{
+	return Free( pMemory, std::integral_constant< bool, ( std::alignment_of< T >::value > 8 ) >() );
+}
+
+/// Free() implementation for types requiring a specific alignment.
+///
+/// @param[in] pMemory Memory to free.
+///
+/// @see Reallocate()
+template< typename T, typename Allocator >
+void Helium::SparseArray< T, Allocator >::Free( T* pMemory, const std::true_type& /*rNeedsAlignment*/ )
+{
+	return Allocator().FreeAligned( pMemory );
+}
+
+/// Free() implementation for types that can use the default alignment.
+///
+/// @param[in] pMemory Memory to free.
+///
+/// @see Reallocate()
+template< typename T, typename Allocator >
+void Helium::SparseArray< T, Allocator >::Free( T* pMemory, const std::false_type& /*rNeedsAlignment*/ )
+{
+	return Allocator().Free( pMemory );
 }
 
 /// Resize an array of elements.
@@ -1303,14 +1314,7 @@ T* Helium::SparseArray< T, Allocator >::ResizeBuffer(
     size_t oldCapacity,
     size_t newCapacity )
 {
-    return ResizeBuffer(
-        pMemory,
-        elementRange,
-        pUsedElements,
-        oldCapacity,
-        newCapacity,
-        std::integral_constant<
-            bool, std::has_trivial_copy< T >::value && std::has_trivial_destructor< T >::value >() );
+    return ResizeBuffer( pMemory, elementRange, pUsedElements, oldCapacity, newCapacity, std::integral_constant< bool, std::has_trivial_copy< T >::value && std::has_trivial_destructor< T >::value >() );
 }
 
 /// ResizeBuffer() implementation for types with both a trivial copy constructor and trivial destructor.
@@ -1324,13 +1328,7 @@ T* Helium::SparseArray< T, Allocator >::ResizeBuffer(
 ///
 /// @return  Pointer to the resized array.
 template< typename T, typename Allocator >
-T* Helium::SparseArray< T, Allocator >::ResizeBuffer(
-    T* pMemory,
-    size_t /*elementRange*/,
-    const uint32_t* /*pUsedElements*/,
-    size_t /*oldCapacity*/,
-    size_t newCapacity,
-    const std::true_type& /*rHasTrivialCopyAndDestructor*/ )
+T* Helium::SparseArray< T, Allocator >::ResizeBuffer( T* pMemory, size_t /*elementRange*/, const uint32_t* /*pUsedElements*/, size_t /*oldCapacity*/, size_t newCapacity, const std::true_type& /*rHasTrivialCopyAndDestructor*/ )
 {
     return Reallocate( pMemory, newCapacity );
 }
@@ -1346,13 +1344,7 @@ T* Helium::SparseArray< T, Allocator >::ResizeBuffer(
 ///
 /// @return  Pointer to the resized array.
 template< typename T, typename Allocator >
-T* Helium::SparseArray< T, Allocator >::ResizeBuffer(
-    T* pMemory,
-    size_t elementRange,
-    const uint32_t* pUsedElements,
-    size_t oldCapacity,
-    size_t newCapacity,
-    const std::false_type& /*rHasTrivialCopyAndDestructor*/ )
+T* Helium::SparseArray< T, Allocator >::ResizeBuffer( T* pMemory, size_t elementRange, const uint32_t* pUsedElements, size_t oldCapacity, size_t newCapacity, const std::false_type& /*rHasTrivialCopyAndDestructor*/ )
 {
     HELIUM_ASSERT( elementRange <= oldCapacity );
     HELIUM_ASSERT( elementRange <= newCapacity );
@@ -1370,7 +1362,7 @@ T* Helium::SparseArray< T, Allocator >::ResizeBuffer(
         }
 
         InPlaceDestroy( pMemory, elementRange, pUsedElements );
-        m_allocator.Free( pMemory );
+        Free( pMemory );
     }
 
     return pNewMemory;
