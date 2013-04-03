@@ -1,14 +1,16 @@
 #include "PlatformPch.h"
 #include "Platform/MemoryHeap.h"
 
-#if HELIUM_HEAP
-
 #include "Platform/Atomic.h"
 #include "Platform/Exception.h"
 #include "Platform/Locks.h"
 #include "Platform/Thread.h"
 #include "Platform/Trace.h"
 #include "Platform/Types.h"
+
+using namespace Helium;
+
+#if HELIUM_HEAP
 
 #ifdef _MSC_VER
 #pragma warning( push )
@@ -20,8 +22,6 @@
 #ifdef _MSC_VER
 #pragma warning( pop )
 #endif
-
-using namespace Helium;
 
 #if HELIUM_ENABLE_MEMORY_TRACKING
 volatile size_t VirtualMemory::sm_bytesAllocated = 0;
@@ -286,6 +286,8 @@ ReadWriteLock& DynamicMemoryHeap::GetGlobalHeapListLock()
     return globalHeapListLock;
 }
 
+#endif // HELIUM_HEAP
+
 /// Constructor.
 ThreadLocalStackAllocator::ThreadLocalStackAllocator()
 {
@@ -382,6 +384,8 @@ ThreadLocalPointer& ThreadLocalStackAllocator::GetMemoryHeapTls()
 
     return memoryHeapTls;
 }
+
+#if HELIUM_HEAP
 
 #if !HELIUM_USE_MODULE_HEAPS
 /// Get the default heap used for dynamic allocations within the engine.

@@ -138,11 +138,7 @@ namespace Helium
     /// @param[in] count            Number of elements to copy.
     /// @param[in] rHasTrivialCopy  std::true_type.
     template< typename T >
-    void _ArrayUninitializedCopy(
-        T* pDest,
-        const T* pSource,
-        size_t count,
-        const std::true_type& /*rHasTrivialCopy*/ )
+    void _ArrayUninitializedCopy( T* pDest, const T* pSource, size_t count, const std::true_type& /*rHasTrivialCopy*/ )
     {
         MemoryCopy( pDest, pSource, sizeof( T ) * count );
     }
@@ -154,11 +150,7 @@ namespace Helium
     /// @param[in] count            Number of elements to copy.
     /// @param[in] rHasTrivialCopy  std::false_type.
     template< typename T >
-    void _ArrayUninitializedCopy(
-        T* pDest,
-        const T* pSource,
-        size_t count,
-        const std::false_type& /*rHasTrivialCopy*/ )
+    void _ArrayUninitializedCopy( T* pDest, const T* pSource, size_t count, const std::false_type& /*rHasTrivialCopy*/ )
     {
         for( size_t elementIndex = 0; elementIndex < count; ++elementIndex )
         {
@@ -173,11 +165,7 @@ namespace Helium
     /// @param[in] count              Number of copies to fill.
     /// @param[in] rCopyTrivialBytes  std::true_type.
     template< typename T >
-    void _ArrayUninitializedFill(
-        T* pDest,
-        const T& rValue,
-        size_t count,
-        const std::true_type& /*rCopyTrivialBytes*/ )
+    void _ArrayUninitializedFill( T* pDest, const T& rValue, size_t count, const std::true_type& /*rCopyTrivialBytes*/ )
     {
         MemorySet( pDest, rValue, count );
     }
@@ -189,11 +177,7 @@ namespace Helium
     /// @param[in] count              Number of copies to fill.
     /// @param[in] rCopyTrivialBytes  std::false_type.
     template< typename T >
-    void _ArrayUninitializedFill(
-        T* pDest,
-        const T& rValue,
-        size_t count,
-        const std::false_type& /*rCopyTrivialBytes*/ )
+    void _ArrayUninitializedFill( T* pDest, const T& rValue, size_t count, const std::false_type& /*rCopyTrivialBytes*/ )
     {
         for( size_t elementIndex = 0; elementIndex < count; ++elementIndex )
         {
@@ -449,11 +433,7 @@ void Helium::ArrayUninitializedCopy( T* pDest, const T* pSource, size_t count )
 template< typename T >
 void Helium::ArrayUninitializedFill( T* pDest, const T& rValue, size_t count )
 {
-    _ArrayUninitializedFill(
-        pDest,
-        rValue,
-        count,
-        std::integral_constant< bool, std::has_trivial_copy< T >::value && sizeof( T ) == 1 >() );
+    _ArrayUninitializedFill( pDest, rValue, count, std::integral_constant< bool, std::has_trivial_copy< T >::value && sizeof( T ) == 1 >() );
 }
 
 /// Align a value (size or memory address) up to a given byte alignment.
