@@ -28,6 +28,8 @@ namespace Helium
 			High,
 			/// Highest thread priority.
 			Highest,
+			/// Do not set a priority (inherit).
+			Inherit,
 		};
 	}
 	typedef ThreadPriorities::Type ThreadPriority;
@@ -86,7 +88,7 @@ namespace Helium
 
 		/// @name Caller Interface
 		//@{
-		bool Start( const tchar_t* pName, ThreadPriority priority = ThreadPriorities::Normal );
+		bool Start( const tchar_t* pName, ThreadPriority priority = ThreadPriorities::Inherit );
 		bool Join( uint32_t timeOutMilliseconds = 0 );
 		bool TryJoin();
 		bool IsValid() const;

@@ -60,7 +60,7 @@ Thread::~Thread()
 /// @see Join(), TryJoin()
 bool Thread::Start( const tchar_t* pName, ThreadPriority priority )
 {
-	HELIUM_ASSERT( priority >= ThreadPriorities::Lowest && priority <= ThreadPriorities::Highest );
+	HELIUM_ASSERT( priority >= ThreadPriorities::Lowest && priority <= ThreadPriorities::Inherit );
 
 	// Cache the name
 	MemoryCopy( m_Name, pName, sizeof( m_Name ) / sizeof( tchar_t ) );
@@ -110,11 +110,14 @@ bool Thread::Start( const tchar_t* pName, ThreadPriority priority )
 			}
 		}
 
-		// Set the thread priority.
-		int win32Priority = WIN32_THREAD_PRIORITY_MAP[ priority ];
-		BOOL priorityResult = SetThreadPriority( reinterpret_cast< HANDLE >( m_Handle ), win32Priority );
-		HELIUM_ASSERT( priorityResult );
-		HELIUM_UNREF( priorityResult );
+		if ( priority != ThreadPriorities::Inherit )
+		{
+			// Set the thread priority.
+			int win32Priority = WIN32_THREAD_PRIORITY_MAP[ priority ];
+			BOOL priorityResult = SetThreadPriority( reinterpret_cast< HANDLE >( m_Handle ), win32Priority );
+			HELIUM_ASSERT( priorityResult );
+			HELIUM_UNREF( priorityResult );
+		}
 
 		// Start the thread.
 		DWORD resumeResult = ResumeThread( reinterpret_cast< HANDLE >( m_Handle ) );

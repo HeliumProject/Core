@@ -1,6 +1,7 @@
 #include "Platform/Thread.h"
 
 #include "Platform/Assert.h"
+#include "Platform/Exception.h"
 #include "Platform/MemoryHeap.h"
 
 #include <unistd.h>
@@ -12,6 +13,7 @@ using namespace Helium;
 
 static void SetSchedParam(struct sched_param * params, ThreadPriority priority)
 {
+    HELIUM_ASSERT( priority != ThreadPriorities::Inherit );
     switch (priority)
     {
     case ThreadPriorities::Highest:
@@ -50,19 +52,26 @@ Thread::~Thread()
 
 bool Thread::Start( const tchar_t* pName, ThreadPriority priority )
 {
-    HELIUM_ASSERT( priority >= ThreadPriorities::Lowest && priority <= ThreadPriorities::Highest );
+    HELIUM_ASSERT( priority >= ThreadPriorities::Lowest && priority <= ThreadPriorities::Inherit );
 
     // Cache the name
     MemoryCopy( m_Name, pName, sizeof( m_Name ) / sizeof( tchar_t ) );
 
-    struct sched_param sched;
-    SetSchedParam(&sched, priority);
-
     pthread_attr_t attr;
     HELIUM_VERIFY( pthread_attr_init(&attr) == 0 );
-    HELIUM_VERIFY( pthread_attr_setinheritsched(&attr, PTHREAD_EXPLICIT_SCHED) == 0 );
-    HELIUM_VERIFY( pthread_attr_setschedpolicy(&attr, SCHED_RR) == 0 );
-    HELIUM_VERIFY( pthread_attr_setschedparam(&attr, &sched) == 0 );
+    HELIUM_VERIFY( pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE) == 0 );
+    if ( priority != ThreadPriorities::Inherit )
+    {
+        HELIUM_ASSERT( !Helium::IsDebuggerPresent() ); // following lines break gdb 7.5, see http://sourceware.org/bugzilla/show_bug.cgi?id=12203
+        HELIUM_VERIFY( pthread_attr_setinheritsched(&attr, PTHREAD_EXPLICIT_SCHED) == 0 );
+        HELIUM_VERIFY( pthread_attr_setschedpolicy(&attr, SCHED_RR) == 0 );
+
+        struct sched_param sched;
+        MemorySet( &sched, 0, sizeof( sched ) );
+        SetSchedParam(&sched, priority);
+        HELIUM_VERIFY( pthread_attr_setschedparam(&attr, &sched) == 0 );
+    }
+
     if ( pthread_create( &(this->m_Handle), &attr, ThreadCallback, this) == 0 )
     {
         m_Valid = true;
