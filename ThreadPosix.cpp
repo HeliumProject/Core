@@ -126,7 +126,7 @@ bool Thread::IsValid() const
 
 void Thread::Sleep( uint32_t milliseconds )
 {
-    usleep( milliseconds * 1000000 );
+    usleep( milliseconds * 1000 );
 }
 
 void Thread::Yield()
