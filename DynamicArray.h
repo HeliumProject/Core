@@ -240,13 +240,13 @@ namespace Helium
 		T* Reallocate( T* pMemory, size_t count, const std::true_type& rNeedsAlignment );
 		T* Reallocate( T* pMemory, size_t count, const std::false_type& rNeedsAlignment );
 
+		void Free( T* pMemory );
+		void Free( T* pMemory, const std::true_type& rNeedsAlignment );
+		void Free( T* pMemory, const std::false_type& rNeedsAlignment );
+
 		T* ResizeBuffer( T* pMemory, size_t elementCount, size_t oldCapacity, size_t newCapacity );
-		T* ResizeBuffer(
-			T* pMemory, size_t elementCount, size_t oldCapacity, size_t newCapacity,
-			const std::true_type& rHasTrivialCopyAndDestructor );
-		T* ResizeBuffer(
-			T* pMemory, size_t elementCount, size_t oldCapacity, size_t newCapacity,
-			const std::false_type& rHasTrivialCopyAndDestructor );
+		T* ResizeBuffer( T* pMemory, size_t elementCount, size_t oldCapacity, size_t newCapacity, const std::true_type& rHasTrivialCopyAndDestructor );
+		T* ResizeBuffer( T* pMemory, size_t elementCount, size_t oldCapacity, size_t newCapacity, const std::false_type& rHasTrivialCopyAndDestructor );
 		//@}
 	};
 }
