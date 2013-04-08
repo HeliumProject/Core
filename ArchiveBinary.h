@@ -5,6 +5,7 @@
 #include "Foundation/Stream.h"
 
 #include "Persist/Archive.h"
+#include "Persist/MessagePack.h"
 
 //  
 //    Reflect Binary Format:
