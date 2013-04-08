@@ -2,8 +2,10 @@
 
 #include "Foundation/DynamicArray.h"
 #include "Foundation/Stream.h"
+#include "Foundation/Endian.h"
 
 #include "Persist/API.h"
+#include "Persist/Exceptions.h"
 
 namespace Helium
 {
@@ -22,11 +24,11 @@ namespace Helium
 				// Single byte objects
 				FixNumPositive          = 0x00, // 0XXXXXXX
 				FixNumNegative          = 0xe0, // 111XXXXX
-
-				// Fixed size objects
 				Nil                     = 0xc0,
 				False                   = 0xc2,
 				True                    = 0xc3,
+
+				// Fixed size objects
 				Float32                 = 0xca,
 				Float64                 = 0xcb,
 				UInt8                   = 0xcc,
@@ -74,8 +76,12 @@ namespace Helium
 		{
 			enum Type
 			{
-				Array,
-				Map,
+				FixArray,
+				Array16,
+				Array32,
+				FixMap,
+				Map16,
+				Map32,
 			};
 		};
 		typedef MessagePackContainers::Type MessagePackContainer;
@@ -87,8 +93,15 @@ namespace Helium
 
 			inline void WriteNil();
 			inline void Write( bool value );
+			inline void Write( float32_t value );
 			inline void Write( float64_t value );
+			inline void Write( uint8_t value );
+			inline void Write( uint16_t value );
+			inline void Write( uint32_t value );
 			inline void Write( uint64_t value );
+			inline void Write( int8_t value );
+			inline void Write( int16_t value );
+			inline void Write( int32_t value );
 			inline void Write( int64_t value );
 
 			inline void WriteRaw( void* bytes, size_t length );
@@ -97,11 +110,12 @@ namespace Helium
 			inline void EndArray();
 			
 			inline void BeginMap( size_t length );
-			inline void EndMap( size_t length );
+			inline void EndMap();
 
 		private:
 			Stream&                              stream;
 			DynamicArray< MessagePackContainer > container; // for bookeeping container termination
+			DynamicArray< uint32_t >             size;      // for bookeeping container size
 		};
 
 		class HELIUM_PERSIST_API MessagePackReader
@@ -136,7 +150,7 @@ namespace Helium
 			Stream&                              stream;
 			MessagePackType                      type;
 			DynamicArray< MessagePackContainer > container; // for bookeeping container termination
-			DynamicArray< uint32_t >             remaining; // for bookeeping container size
+			DynamicArray< uint32_t >             size;      // for bookeeping container size
 		};
 	}
 }
