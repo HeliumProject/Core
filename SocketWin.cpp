@@ -221,7 +221,7 @@ bool Socket::Read( void* buffer, uint32_t bytes, uint32_t& read, Condition& term
 
             HELIUM_ASSERT( result != WAIT_FAILED );
 
-            if ( (result - WAIT_OBJECT_0) == 0 )
+            if ( (result - WSA_WAIT_EVENT_0) == 0 )
             {
 #ifdef IPC_DEBUG_SOCKETS
                 Helium::Print("Socket Support: Terminating read\n");
@@ -294,7 +294,7 @@ bool Socket::Write( void* buffer, uint32_t bytes, uint32_t& wrote, Condition& te
 
             HELIUM_ASSERT( result != WAIT_FAILED );
 
-            if ( (result - WAIT_OBJECT_0) == 0 )
+            if ( (result - WSA_WAIT_EVENT_0) == 0 )
             {
 #ifdef IPC_DEBUG_SOCKETS
                 Helium::Print("Socket Support: Terminating write\n");

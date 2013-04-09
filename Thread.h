@@ -77,7 +77,7 @@ namespace Helium
 		/// @name Construction/Destruction
 		//@{
 		explicit Thread();
-		~Thread();
+		virtual ~Thread();
 		//@}
 
 		/// @name Data Access
