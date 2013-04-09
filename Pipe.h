@@ -25,22 +25,7 @@ namespace Helium
 	private:
 #ifdef HELIUM_OS_WIN
 		typedef void* Handle;
-		struct Overlapped
-		{
-			uint32_t* Internal;
-			uint32_t* InternalHigh;
-			union
-			{
-				struct
-				{
-					uint32_t Offset;
-					uint32_t OffsetHigh;
-				};
-
-				void* Pointer;
-			};
-			void* hEvent;
-		} m_Overlapped;
+		OVERLAPPED m_Overlapped;
 #else
 #error Implement Pipe for this platform.
 #endif

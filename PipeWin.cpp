@@ -21,7 +21,6 @@ void Helium::CleanupPipes()
 Pipe::Pipe()
 : m_Handle( INVALID_HANDLE_VALUE )
 {
-	HELIUM_COMPILE_ASSERT( sizeof( Pipe::Overlapped ) == sizeof( OVERLAPPED ) );
 	memset(&m_Overlapped, 0, sizeof(m_Overlapped));
 	m_Overlapped.hEvent = ::CreateEvent(0, true, false, 0);
 }

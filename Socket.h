@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Platform/Types.h"
 #include "Platform/Condition.h"
+#include "Platform/Types.h"
 
 #if HELIUM_OS_WIN
 typedef int socklen_t;
