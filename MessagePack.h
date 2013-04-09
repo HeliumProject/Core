@@ -104,12 +104,12 @@ namespace Helium
 			inline void Write( int32_t value );
 			inline void Write( int64_t value );
 
-			inline void WriteRaw( void* bytes, size_t length );
+			inline void WriteRaw( void* bytes, uint32_t length );
 
-			inline void BeginArray( size_t length );
+			inline void BeginArray( uint32_t length );
 			inline void EndArray();
 			
-			inline void BeginMap( size_t length );
+			inline void BeginMap( uint32_t length );
 			inline void EndMap();
 
 		private:
@@ -138,7 +138,7 @@ namespace Helium
 			inline void Read( int32_t& value );
 			inline void Read( int64_t& value );
 
-			inline void ReadRaw( void* bytes, size_t length );
+			inline void ReadRaw( void* bytes, uint32_t length );
 
 			inline void BeginArray();
 			inline void EndArray();

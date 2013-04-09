@@ -8,14 +8,22 @@ void Helium::Persist::MessagePackWriter::WriteNil()
 {
 	uint8_t type = MessagePackTypes::Nil;
 	stream.Write( type );
-	size.GetLast()++;
+
+	if ( !size.IsEmpty() )
+	{
+		size.GetLast()--;
+	}
 }
 
 void Helium::Persist::MessagePackWriter::Write( bool value )
 {
 	uint8_t type = value ? MessagePackTypes::True : MessagePackTypes::False;
 	stream.Write( type );
-	size.GetLast()++;
+
+	if ( !size.IsEmpty() )
+	{
+		size.GetLast()--;
+	}
 }
 
 void Helium::Persist::MessagePackWriter::Write( float32_t value )
@@ -29,7 +37,11 @@ void Helium::Persist::MessagePackWriter::Write( float32_t value )
 
 	stream.Write( type );
 	stream.Write( *singleInt );
-	size.GetLast()++;
+
+	if ( !size.IsEmpty() )
+	{
+		size.GetLast()--;
+	}
 }
 
 void Helium::Persist::MessagePackWriter::Write( float64_t value )
@@ -43,7 +55,11 @@ void Helium::Persist::MessagePackWriter::Write( float64_t value )
 
 	stream.Write( type );
 	stream.Write( *doubleInt );
-	size.GetLast()++;
+
+	if ( !size.IsEmpty() )
+	{
+		size.GetLast()--;
+	}
 }
 
 void Helium::Persist::MessagePackWriter::Write( uint8_t value )
@@ -59,7 +75,11 @@ void Helium::Persist::MessagePackWriter::Write( uint8_t value )
 		stream.Write( type );
 		stream.Write( value );
 	}
-	size.GetLast()++;
+
+	if ( !size.IsEmpty() )
+	{
+		size.GetLast()--;
+	}
 }
 
 void Helium::Persist::MessagePackWriter::Write( uint16_t value )
@@ -72,7 +92,11 @@ void Helium::Persist::MessagePackWriter::Write( uint16_t value )
 
 	stream.Write( type );
 	stream.Write( value );
-	size.GetLast()++;
+
+	if ( !size.IsEmpty() )
+	{
+		size.GetLast()--;
+	}
 }
 
 void Helium::Persist::MessagePackWriter::Write( uint32_t value )
@@ -85,7 +109,11 @@ void Helium::Persist::MessagePackWriter::Write( uint32_t value )
 
 	stream.Write( type );
 	stream.Write( value );
-	size.GetLast()++;
+
+	if ( !size.IsEmpty() )
+	{
+		size.GetLast()--;
+	}
 }
 
 void Helium::Persist::MessagePackWriter::Write( uint64_t value )
@@ -98,7 +126,11 @@ void Helium::Persist::MessagePackWriter::Write( uint64_t value )
 
 	stream.Write( type );
 	stream.Write( value );
-	size.GetLast()++;
+
+	if ( !size.IsEmpty() )
+	{
+		size.GetLast()--;
+	}
 }
 
 void Helium::Persist::MessagePackWriter::Write( int8_t value )
@@ -110,7 +142,7 @@ void Helium::Persist::MessagePackWriter::Write( int8_t value )
 	}
 	else if ( value >= -32 && value <= -1 )
 	{
-		uint8_t type = MessagePackTypes::FixNumPositive | value;
+		uint8_t type = MessagePackTypes::FixNumNegative | value;
 		stream.Write( type );
 	}
 	else
@@ -119,20 +151,28 @@ void Helium::Persist::MessagePackWriter::Write( int8_t value )
 		stream.Write( type );
 		stream.Write( value );
 	}
-	size.GetLast()++;
+
+	if ( !size.IsEmpty() )
+	{
+		size.GetLast()--;
+	}
 }
 
 void Helium::Persist::MessagePackWriter::Write( int16_t value )
 {
 	uint8_t type = MessagePackTypes::Int16;
-	stream.Write( type );
 
 #if HELIUM_ENDIAN_LITTLE
 	ConvertEndian( value );
 #endif
 
+	stream.Write( type );
 	stream.Write( value );
-	size.GetLast()++;
+
+	if ( !size.IsEmpty() )
+	{
+		size.GetLast()--;
+	}
 }
 
 void Helium::Persist::MessagePackWriter::Write( int32_t value )
@@ -145,7 +185,11 @@ void Helium::Persist::MessagePackWriter::Write( int32_t value )
 
 	stream.Write( type );
 	stream.Write( value );
-	size.GetLast()++;
+
+	if ( !size.IsEmpty() )
+	{
+		size.GetLast()--;
+	}
 }
 
 void Helium::Persist::MessagePackWriter::Write( int64_t value )
@@ -158,10 +202,14 @@ void Helium::Persist::MessagePackWriter::Write( int64_t value )
 
 	stream.Write( type );
 	stream.Write( value );
-	size.GetLast()++;
+
+	if ( !size.IsEmpty() )
+	{
+		size.GetLast()--;
+	}
 }
 
-void Helium::Persist::MessagePackWriter::WriteRaw( void* bytes, size_t length )
+void Helium::Persist::MessagePackWriter::WriteRaw( void* bytes, uint32_t length )
 {
 	if ( length <= 31 )
 	{
@@ -196,17 +244,20 @@ void Helium::Persist::MessagePackWriter::WriteRaw( void* bytes, size_t length )
 		throw Helium::Exception( "Buffer too large: %d", length );
 	}
 
-	size.GetLast()++;
+	if ( !size.IsEmpty() )
+	{
+		size.GetLast()--;
+	}
 }
 
-void Helium::Persist::MessagePackWriter::BeginArray( size_t length )
+void Helium::Persist::MessagePackWriter::BeginArray( uint32_t length )
 {
 	if ( length <= 15 )
 	{
 		uint8_t type = MessagePackTypes::FixArray | static_cast< uint8_t >( length );
 		stream.Write( type );
 		container.Push( MessagePackContainers::FixArray );
-		size.Push( 0 );
+		size.Push( length );
 	}
 	else if ( length <= 65535 )
 	{
@@ -219,7 +270,7 @@ void Helium::Persist::MessagePackWriter::BeginArray( size_t length )
 		stream.Write( type );
 		stream.Write( static_cast< uint16_t >( length ) );
 		container.Push( MessagePackContainers::Array16 );
-		size.Push( 0 );
+		size.Push( length );
 	}
 	else if ( length <= 4294967295 )
 	{
@@ -232,7 +283,7 @@ void Helium::Persist::MessagePackWriter::BeginArray( size_t length )
 		stream.Write( type );
 		stream.Write( static_cast< uint32_t >( length ) );
 		container.Push( MessagePackContainers::Array32 );
-		size.Push( 0 );
+		size.Push( length );
 	}
 	else
 	{
@@ -246,42 +297,38 @@ void Helium::Persist::MessagePackWriter::EndArray()
 	switch ( container.GetLast() )
 	{
 	case MessagePackContainers::FixArray:
-		if ( length > 15 )
-		{
-			throw Helium::Exception( "Too much data for FixArray: %d", length );
-		}
-
 	case MessagePackContainers::Array16:
-		if ( length > 65535 )
-		{
-			throw Helium::Exception( "Too much data for Array16: %d", length );
-		}
-
 	case MessagePackContainers::Array32:
-		if ( length <= 4294967295 )
 		{
-			throw Helium::Exception( "Too much data for Array32: %d", length );
+			if ( length != 0 )
+			{
+				throw Helium::Exception( "Incorrent number of objects written into array, off by %d", length );
+			}
 		}
 
 	default:
 		{
-			throw Helium::Exception( "Mismatched container Begin/End for Array" );
+			throw Helium::Exception( "Mismatched container Begin/End for array" );
 		}
 	}
 
 	container.Pop();
 	size.Pop();
-	size.GetLast()++;
+
+	if ( !size.IsEmpty() )
+	{
+		size.GetLast()--;
+	}
 }
 
-void Helium::Persist::MessagePackWriter::BeginMap( size_t length )
+void Helium::Persist::MessagePackWriter::BeginMap( uint32_t length )
 {
 	if ( length <= 15 )
 	{
 		uint8_t type = MessagePackTypes::FixArray | static_cast< uint8_t >( length );
 		stream.Write( type );
 		container.Push( MessagePackContainers::FixMap );
-		size.Push( 0 );
+		size.Push( length );
 	}
 	else if ( length <= 65535 )
 	{
@@ -294,7 +341,7 @@ void Helium::Persist::MessagePackWriter::BeginMap( size_t length )
 		stream.Write( type );
 		stream.Write( static_cast< uint16_t >( length ) );
 		container.Push( MessagePackContainers::Map16 );
-		size.Push( 0 );
+		size.Push( length );
 	}
 	else if ( length <= 4294967295 )
 	{
@@ -307,7 +354,7 @@ void Helium::Persist::MessagePackWriter::BeginMap( size_t length )
 		stream.Write( type );
 		stream.Write( static_cast< uint32_t >( length ) );
 		container.Push( MessagePackContainers::Map32 );
-		size.Push( 0 );
+		size.Push( length );
 	}
 	else
 	{
@@ -321,32 +368,28 @@ void Helium::Persist::MessagePackWriter::EndMap()
 	switch ( container.GetLast() )
 	{
 	case MessagePackContainers::FixMap:
-		if ( length > 15 )
-		{
-			throw Helium::Exception( "Too much data for FixMap: %d", length );
-		}
-
 	case MessagePackContainers::Map16:
-		if ( length > 65535 )
-		{
-			throw Helium::Exception( "Too much data for Map16: %d", length );
-		}
-
 	case MessagePackContainers::Map32:
-		if ( length <= 4294967295 )
 		{
-			throw Helium::Exception( "Too much data for Map32: %d", length );
+			if ( length != 0 )
+			{
+				throw Helium::Exception( "Incorrent number of objects written into map, off by %d", length );
+			}
 		}
 
 	default:
 		{
-			throw Helium::Exception( "Mismatched container Begin/End for Map" );
+			throw Helium::Exception( "Mismatched container Begin/End for map" );
 		}
 	}
 
 	container.Pop();
 	size.Pop();
-	size.GetLast()++;
+
+	if ( !size.IsEmpty() )
+	{
+		size.GetLast()--;
+	}
 }
 
 Helium::Persist::MessagePackReader::MessagePackReader( Stream& stream )
@@ -412,7 +455,7 @@ void Helium::Persist::MessagePackReader::Read( int64_t& value )
 {
 }
 
-void Helium::Persist::MessagePackReader::ReadRaw( void* bytes, size_t length )
+void Helium::Persist::MessagePackReader::ReadRaw( void* bytes, uint32_t length )
 {
 }
 
