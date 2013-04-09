@@ -29,14 +29,14 @@ void Helium::Persist::MessagePackWriter::Write( bool value )
 void Helium::Persist::MessagePackWriter::Write( float32_t value )
 {
 	uint8_t type = MessagePackTypes::Float64;
-	uint32_t* singleInt = reinterpret_cast< uint32_t* >( &value );
+	uint32_t* temp = reinterpret_cast< uint32_t* >( &value );
 
 #if HELIUM_ENDIAN_LITTLE
-	ConvertEndian( *singleInt );
+	ConvertEndian( *temp );
 #endif
 
 	stream.Write( type );
-	stream.Write( *singleInt );
+	stream.Write( *temp );
 
 	if ( !size.IsEmpty() )
 	{
@@ -47,14 +47,14 @@ void Helium::Persist::MessagePackWriter::Write( float32_t value )
 void Helium::Persist::MessagePackWriter::Write( float64_t value )
 {
 	uint8_t type = MessagePackTypes::Float32;
-	uint64_t* doubleInt = reinterpret_cast< uint64_t* >( &value );
+	uint64_t* temp = reinterpret_cast< uint64_t* >( &value );
 
 #if HELIUM_ENDIAN_LITTLE
-	ConvertEndian( *doubleInt );
+	ConvertEndian( *temp );
 #endif
 
 	stream.Write( type );
-	stream.Write( *doubleInt );
+	stream.Write( *temp );
 
 	if ( !size.IsEmpty() )
 	{
@@ -407,52 +407,413 @@ Helium::Persist::MessagePackType Helium::Persist::MessagePackReader::ReadType()
 	return this->type;
 }
 
-void Helium::Persist::MessagePackReader::ReadNil()
-{
-}
-
 void Helium::Persist::MessagePackReader::Read( bool& value )
 {
+	switch ( type )
+	{
+	case MessagePackTypes::True:
+		{
+			value = true;
+			break;
+		}
+
+	case MessagePackTypes::False:
+		{
+			value = false;
+			break;
+		}
+
+	default:
+		{
+			throw Persist::Exception( "Object type is not a boolean" );
+		}
+	}
 }
 
-void Helium::Persist::MessagePackReader::Read( float32_t& value )
+template< class T >
+bool Helium::Persist::MessagePackReader::Read( T& value, bool clamp )
 {
+	if ( type & MessagePackMasks::FixNumPositiveType )
+	{
+		value = type & MessagePackMasks::FixNumPositiveValue;
+		return true;
+	}
+
+	if ( type & MessagePackMasks::FixNumNegativeType )
+	{
+		value = type & MessagePackMasks::FixNumNegativeValue;
+		return true;
+	}
+
+	switch ( switchType )
+	{
+	case MessagePackTypes::Float32:
+	case MessagePackTypes::Float64:
+		{
+			float64_t temp = 0.0;
+			ReadFloat( temp );
+			return RangeCast( temp, value, clamp );
+		}
+
+	case MessagePackTypes::UInt8:
+	case MessagePackTypes::UInt16:
+	case MessagePackTypes::UInt32:
+	case MessagePackTypes::UInt64:
+		{
+			uint64_t temp = 0;
+			ReadUnsigned( temp );
+			return RangeCast( temp, value, clamp );
+		}
+
+	case MessagePackTypes::Int8:
+	case MessagePackTypes::Int16:
+	case MessagePackTypes::Int32:
+	case MessagePackTypes::Int64:
+		{
+			int64_t temp = 0;
+			ReadSigned( temp );
+			return RangeCast( temp, value, clamp );
+		}
+
+	default:
+		{
+			return false;
+		}
+	}
 }
 
-void Helium::Persist::MessagePackReader::Read( float64_t& value )
+bool Helium::Persist::MessagePackReader::ReadExact( float32_t& value )
 {
+	if ( type == MessagePackTypes::Float32 )
+	{
+		uint32_t temp = 0x0;
+		stream.Read( temp );
+
+#if HELIUM_ENDIAN_LITTLE
+		ConvertEndian( temp );
+#endif
+
+		value = *reinterpret_cast< float32_t* >( &temp );
+		return true;
+	}
+
+	return false;
 }
 
-void Helium::Persist::MessagePackReader::Read( uint8_t& value )
+bool Helium::Persist::MessagePackReader::ReadExact( float64_t& value )
 {
+	if ( type == MessagePackTypes::Float64 )
+	{
+		uint64_t temp = 0x0;
+		stream.Read( temp );
+
+#if HELIUM_ENDIAN_LITTLE
+		ConvertEndian( temp );
+#endif
+
+		value = *reinterpret_cast< float64_t* >( &temp );
+		return true;
+	}
+
+	return false;
 }
 
-void Helium::Persist::MessagePackReader::Read( uint16_t& value )
+bool Helium::Persist::MessagePackReader::ReadExact( uint8_t& value )
 {
+	if ( type & MessagePackMasks::FixNumPositiveType )
+	{
+		value = type & MessagePackMasks::FixNumPositiveValue;
+		return true;
+	}
+
+	if ( type == MessagePackTypes::UInt8 )
+	{
+		stream.Read( value );
+		return true;
+	}
+
+	return false;
 }
 
-void Helium::Persist::MessagePackReader::Read( uint32_t& value )
+bool Helium::Persist::MessagePackReader::ReadExact( uint16_t& value )
 {
+	if ( type & MessagePackMasks::FixNumPositiveType )
+	{
+		value = type & MessagePackMasks::FixNumPositiveValue;
+		return true;
+	}
+
+	switch ( type )
+	{
+	case MessagePackTypes::UInt8:
+		{
+			uint8_t temp;
+			stream.Read( temp );
+			value = temp;
+			return true;
+		}
+
+	case MessagePackTypes::UInt16:
+		{
+			stream.Read( value );
+
+#if HELIUM_ENDIAN_LITTLE
+			ConvertEndian( value );
+#endif
+			return true;
+		}
+	}
+
+	return false;
 }
 
-void Helium::Persist::MessagePackReader::Read( uint64_t& value )
+bool Helium::Persist::MessagePackReader::ReadExact( uint32_t& value )
 {
+	if ( type & MessagePackMasks::FixNumPositiveType )
+	{
+		value = type & MessagePackMasks::FixNumPositiveValue;
+		return true;
+	}
+
+	switch ( type )
+	{
+	case MessagePackTypes::UInt8:
+		{
+			uint8_t temp;
+			stream.Read( temp );
+			value = temp;
+			return true;
+		}
+
+	case MessagePackTypes::UInt16:
+		{
+			uint16_t temp;
+			stream.Read( temp );
+
+#if HELIUM_ENDIAN_LITTLE
+			ConvertEndian( temp );
+#endif
+			value = temp;
+			return true;
+		}
+
+	case MessagePackTypes::UInt32:
+		{
+			stream.Read( value );
+
+#if HELIUM_ENDIAN_LITTLE
+			ConvertEndian( value );
+#endif
+			return true;
+		}
+	}
+
+	return false;
 }
 
-void Helium::Persist::MessagePackReader::Read( int8_t& value )
+bool Helium::Persist::MessagePackReader::ReadExact( uint64_t& value )
 {
+	if ( type & MessagePackMasks::FixNumPositiveType )
+	{
+		value = type & MessagePackMasks::FixNumPositiveValue;
+		return true;
+	}
+
+	switch ( type )
+	{
+	case MessagePackTypes::UInt8:
+		{
+			uint8_t temp;
+			stream.Read( temp );
+			value = temp;
+			return true;
+		}
+
+	case MessagePackTypes::UInt16:
+		{
+			uint16_t temp;
+			stream.Read( temp );
+
+#if HELIUM_ENDIAN_LITTLE
+			ConvertEndian( temp );
+#endif
+			value = temp;
+			return true;
+		}
+
+	case MessagePackTypes::UInt32:
+		{
+			uint32_t temp;
+			stream.Read( temp );
+
+#if HELIUM_ENDIAN_LITTLE
+			ConvertEndian( temp );
+#endif
+			value = temp;
+			return true;
+		}
+
+	case MessagePackTypes::UInt64:
+		{
+			stream.Read( value );
+
+#if HELIUM_ENDIAN_LITTLE
+			ConvertEndian( value );
+#endif
+			return true;
+		}
+	}
+
+	return false;
 }
 
-void Helium::Persist::MessagePackReader::Read( int16_t& value )
+bool Helium::Persist::MessagePackReader::ReadExact( int8_t& value )
 {
+	if ( type & MessagePackMasks::FixNumNegativeType )
+	{
+		value = type & MessagePackMasks::FixNumNegativeValue;
+		return true;
+	}
+
+	if ( type == MessagePackTypes::Int8 )
+	{
+		stream.Read( value );
+		return true;
+	}
+
+	return false;
 }
 
-void Helium::Persist::MessagePackReader::Read( int32_t& value )
+bool Helium::Persist::MessagePackReader::ReadExact( int16_t& value )
 {
+	if ( type & MessagePackMasks::FixNumNegativeType )
+	{
+		value = type & MessagePackMasks::FixNumNegativeValue;
+		return true;
+	}
+
+	switch ( type )
+	{
+	case MessagePackTypes::Int8:
+		{
+			int8_t temp;
+			stream.Read( temp );
+			value = temp;
+			return true;
+		}
+
+	case MessagePackTypes::Int16:
+		{
+			stream.Read( value );
+
+#if HELIUM_ENDIAN_LITTLE
+			ConvertEndian( value );
+#endif
+			return true;
+		}
+	}
+
+	return false;
 }
 
-void Helium::Persist::MessagePackReader::Read( int64_t& value )
+bool Helium::Persist::MessagePackReader::ReadExact( int32_t& value )
 {
+	if ( type & MessagePackMasks::FixNumNegativeType )
+	{
+		value = type & MessagePackMasks::FixNumNegativeValue;
+		return true;
+	}
+
+	switch ( type )
+	{
+	case MessagePackTypes::Int8:
+		{
+			int8_t temp;
+			stream.Read( temp );
+			value = temp;
+			return true;
+		}
+
+	case MessagePackTypes::Int16:
+		{
+			int16_t temp;
+			stream.Read( temp );
+
+#if HELIUM_ENDIAN_LITTLE
+			ConvertEndian( temp );
+#endif
+			value = temp;
+			return true;
+		}
+
+	case MessagePackTypes::Int32:
+		{
+			stream.Read( value );
+
+#if HELIUM_ENDIAN_LITTLE
+			ConvertEndian( value );
+#endif
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool Helium::Persist::MessagePackReader::ReadExact( int64_t& value )
+{
+	if ( type & MessagePackMasks::FixNumNegativeType )
+	{
+		value = type & MessagePackMasks::FixNumNegativeValue;
+		return true;
+	}
+
+	switch ( type )
+	{
+	case MessagePackTypes::Int8:
+		{
+			int8_t temp;
+			stream.Read( temp );
+			value = temp;
+			return true;
+		}
+
+	case MessagePackTypes::Int16:
+		{
+			int16_t temp;
+			stream.Read( temp );
+
+#if HELIUM_ENDIAN_LITTLE
+			ConvertEndian( temp );
+#endif
+			value = temp;
+			return true;
+		}
+
+	case MessagePackTypes::Int32:
+		{
+			int32_t temp;
+			stream.Read( temp );
+
+#if HELIUM_ENDIAN_LITTLE
+			ConvertEndian( temp );
+#endif
+			value = temp;
+			return true;
+		}
+
+	case MessagePackTypes::Int64:
+		{
+			stream.Read( value );
+
+#if HELIUM_ENDIAN_LITTLE
+			ConvertEndian( value );
+#endif
+			return true;
+		}
+	}
+
+	return false;
 }
 
 void Helium::Persist::MessagePackReader::ReadRaw( void* bytes, uint32_t length )
@@ -473,4 +834,151 @@ void Helium::Persist::MessagePackReader::BeginMap()
 
 void Helium::Persist::MessagePackReader::EndMap()
 {
+}
+
+void Helium::Persist::MessagePackReader::ReadFloat( float64_t& value )
+{
+	switch ( type )
+	{
+	case MessagePackTypes::Float32:
+		{
+			uint32_t temp = 0x0;
+			stream.Read( temp );
+
+#if HELIUM_ENDIAN_LITTLE
+			ConvertEndian( temp );
+#endif
+
+			value = *reinterpret_cast< float32_t* >( &temp );
+			break;
+		}
+
+	case MessagePackTypes::Float64:
+		{
+			uint64_t temp = 0x0;
+			stream.Read( temp );
+
+#if HELIUM_ENDIAN_LITTLE
+			ConvertEndian( temp );
+#endif
+
+			value = *reinterpret_cast< float64_t* >( &temp );
+			break;
+		}
+
+	default:
+		{
+			throw Persist::Exception( "Object type is not a float" );
+		}
+	}
+}
+
+void Helium::Persist::MessagePackReader::ReadUnsigned( uint64_t& value )
+{
+	switch ( type )
+	{
+	case MessagePackTypes::UInt8:
+		{
+			uint8_t temp = 0x0;
+			stream.Read( temp );
+			value = temp;
+			break;
+		}
+
+	case MessagePackTypes::UInt16:
+		{
+			uint16_t temp = 0x0;
+			stream.Read( temp );
+
+#if HELIUM_ENDIAN_LITTLE
+			ConvertEndian( temp );
+#endif
+
+			value = temp;
+			break;
+		}
+
+	case MessagePackTypes::UInt32:
+		{
+			uint32_t temp = 0x0;
+			stream.Read( temp );
+
+#if HELIUM_ENDIAN_LITTLE
+			ConvertEndian( temp );
+#endif
+
+			value = temp;
+			break;
+		}
+
+	case MessagePackTypes::UInt64:
+		{
+			stream.Read( value );
+
+#if HELIUM_ENDIAN_LITTLE
+			ConvertEndian( value );
+#endif
+			break;
+		}
+
+	default:
+		{
+			throw Persist::Exception( "Object type is not an unsigned integer" );
+		}
+	}
+}
+
+void Helium::Persist::MessagePackReader::ReadSigned( int64_t& value )
+{
+	switch ( type )
+	{
+	case MessagePackTypes::Int8:
+		{
+			int8_t temp = 0x0;
+			stream.Read( temp );
+			value = temp;
+			break;
+		}
+
+	case MessagePackTypes::Int16:
+		{
+			int16_t temp = 0x0;
+			stream.Read( temp );
+
+#if HELIUM_ENDIAN_LITTLE
+			ConvertEndian( temp );
+#endif
+
+			value = temp;
+			break;
+		}
+
+	case MessagePackTypes::Int32:
+		{
+			int32_t temp = 0x0;
+			stream.Read( temp );
+
+#if HELIUM_ENDIAN_LITTLE
+			ConvertEndian( temp );
+#endif
+
+			value = temp;
+			break;
+		}
+
+	case MessagePackTypes::Int64:
+		{
+			stream.Read( value );
+
+#if HELIUM_ENDIAN_LITTLE
+			ConvertEndian( value );
+#endif
+			break;
+		}
+
+	default:
+		{
+			throw Persist::Exception( "Object type is not a signed integer" );
+		}
+	}
 }

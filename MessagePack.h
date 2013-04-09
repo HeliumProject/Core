@@ -1,8 +1,9 @@
 #pragma once
 
 #include "Foundation/DynamicArray.h"
-#include "Foundation/Stream.h"
 #include "Foundation/Endian.h"
+#include "Foundation/Stream.h"
+#include "Foundation/Numeric.h"
 
 #include "Persist/API.h"
 #include "Persist/Exceptions.h"
@@ -125,18 +126,21 @@ namespace Helium
 
 			inline MessagePackType ReadType();
 
-			inline void ReadNil();
 			inline void Read( bool& value );
-			inline void Read( float32_t& value );
-			inline void Read( float64_t& value );
-			inline void Read( uint8_t& value );
-			inline void Read( uint16_t& value );
-			inline void Read( uint32_t& value );
-			inline void Read( uint64_t& value );
-			inline void Read( int8_t& value );
-			inline void Read( int16_t& value );
-			inline void Read( int32_t& value );
-			inline void Read( int64_t& value );
+
+			template< class T >
+			inline bool Read( T& value, bool clamp );
+
+			inline bool ReadExact( float32_t& value );
+			inline bool ReadExact( float64_t& value );
+			inline bool ReadExact( uint8_t& value );
+			inline bool ReadExact( uint16_t& value );
+			inline bool ReadExact( uint32_t& value );
+			inline bool ReadExact( uint64_t& value );
+			inline bool ReadExact( int8_t& value );
+			inline bool ReadExact( int16_t& value );
+			inline bool ReadExact( int32_t& value );
+			inline bool ReadExact( int64_t& value );
 
 			inline void ReadRaw( void* bytes, uint32_t length );
 
@@ -147,6 +151,10 @@ namespace Helium
 			inline void EndMap();
 
 		private:
+			inline void ReadFloat( float64_t& value );
+			inline void ReadUnsigned( uint64_t& value );
+			inline void ReadSigned( int64_t& value );
+
 			Stream&                              stream;
 			MessagePackType                      type;
 			DynamicArray< MessagePackContainer > container; // for bookeeping container termination
