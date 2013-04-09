@@ -6,8 +6,7 @@ Helium::Persist::MessagePackWriter::MessagePackWriter( Stream& stream )
 
 void Helium::Persist::MessagePackWriter::WriteNil()
 {
-	uint8_t type = MessagePackTypes::Nil;
-	stream.Write( type );
+	stream.Write< uint8_t >( MessagePackTypes::Nil );
 
 	if ( !size.IsEmpty() )
 	{
@@ -17,8 +16,7 @@ void Helium::Persist::MessagePackWriter::WriteNil()
 
 void Helium::Persist::MessagePackWriter::Write( bool value )
 {
-	uint8_t type = value ? MessagePackTypes::True : MessagePackTypes::False;
-	stream.Write( type );
+	stream.Write< uint8_t >( value ? MessagePackTypes::True : MessagePackTypes::False );
 
 	if ( !size.IsEmpty() )
 	{
@@ -28,15 +26,15 @@ void Helium::Persist::MessagePackWriter::Write( bool value )
 
 void Helium::Persist::MessagePackWriter::Write( float32_t value )
 {
-	uint8_t type = MessagePackTypes::Float64;
+	// endian swap in an integer register to avoid NaN conditions
 	uint32_t* temp = reinterpret_cast< uint32_t* >( &value );
 
 #if HELIUM_ENDIAN_LITTLE
 	ConvertEndian( *temp );
 #endif
 
-	stream.Write( type );
-	stream.Write( *temp );
+	stream.Write< uint8_t >( MessagePackTypes::Float32 );
+	stream.Write< uint32_t >( *temp );
 
 	if ( !size.IsEmpty() )
 	{
@@ -46,15 +44,15 @@ void Helium::Persist::MessagePackWriter::Write( float32_t value )
 
 void Helium::Persist::MessagePackWriter::Write( float64_t value )
 {
-	uint8_t type = MessagePackTypes::Float32;
+	// endian swap in an integer register to avoid NaN conditions
 	uint64_t* temp = reinterpret_cast< uint64_t* >( &value );
 
 #if HELIUM_ENDIAN_LITTLE
 	ConvertEndian( *temp );
 #endif
 
-	stream.Write( type );
-	stream.Write( *temp );
+	stream.Write< uint8_t >( MessagePackTypes::Float64 );
+	stream.Write< uint64_t >( *temp );
 
 	if ( !size.IsEmpty() )
 	{
@@ -64,16 +62,14 @@ void Helium::Persist::MessagePackWriter::Write( float64_t value )
 
 void Helium::Persist::MessagePackWriter::Write( uint8_t value )
 {
-	if ( value <= 127 )
+	if ( value <= MessagePackMasks::FixNumPositiveValue )
 	{
-		uint8_t type = MessagePackTypes::FixNumPositive | value;
-		stream.Write( type );
+		stream.Write< uint8_t >( value );
 	}
 	else
 	{
-		uint8_t type = MessagePackTypes::UInt8;
-		stream.Write( type );
-		stream.Write( value );
+		stream.Write< uint8_t >( MessagePackTypes::UInt8 );
+		stream.Write< uint8_t >( value );
 	}
 
 	if ( !size.IsEmpty() )
@@ -84,14 +80,24 @@ void Helium::Persist::MessagePackWriter::Write( uint8_t value )
 
 void Helium::Persist::MessagePackWriter::Write( uint16_t value )
 {
-	uint8_t type = MessagePackTypes::UInt16;
-
+	if ( value <= MessagePackMasks::FixNumPositiveValue )
+	{
+		stream.Write< uint8_t >( static_cast< uint8_t >( value ) );
+	}
+	else if ( value <= NumericLimits< uint8_t >::Maximum )
+	{
+		stream.Write< uint8_t >( MessagePackTypes::UInt8 );
+		stream.Write< uint8_t >( static_cast< uint8_t >( value ) );
+	}
+	else
+	{
 #if HELIUM_ENDIAN_LITTLE
-	ConvertEndian( value );
+		ConvertEndian( value );
 #endif
 
-	stream.Write( type );
-	stream.Write( value );
+		stream.Write< uint8_t >( MessagePackTypes::UInt16 );
+		stream.Write< uint16_t >( value );
+	}
 
 	if ( !size.IsEmpty() )
 	{
@@ -101,14 +107,35 @@ void Helium::Persist::MessagePackWriter::Write( uint16_t value )
 
 void Helium::Persist::MessagePackWriter::Write( uint32_t value )
 {
-	uint8_t type = MessagePackTypes::UInt32;
+	if ( value <= MessagePackMasks::FixNumPositiveValue )
+	{
+		stream.Write< uint8_t >( static_cast< uint8_t >( value ) );
+	}
+	else if ( value <= NumericLimits< uint8_t >::Maximum )
+	{
+		stream.Write< uint8_t >( MessagePackTypes::UInt8 );
+		stream.Write< uint8_t >( static_cast< uint8_t >( value ) );
+	}
+	else if ( value <= NumericLimits< uint16_t >::Maximum )
+	{
+		uint16_t temp = static_cast< uint16_t >( value );
 
 #if HELIUM_ENDIAN_LITTLE
-	ConvertEndian( value );
+		ConvertEndian( temp );
 #endif
 
-	stream.Write( type );
-	stream.Write( value );
+		stream.Write< uint8_t >( MessagePackTypes::UInt16 );
+		stream.Write< uint16_t >( temp );
+	}
+	else
+	{
+#if HELIUM_ENDIAN_LITTLE
+		ConvertEndian( value );
+#endif
+
+		stream.Write< uint8_t >( MessagePackTypes::UInt32 );
+		stream.Write< uint32_t >( value );
+	}
 
 	if ( !size.IsEmpty() )
 	{
@@ -118,14 +145,46 @@ void Helium::Persist::MessagePackWriter::Write( uint32_t value )
 
 void Helium::Persist::MessagePackWriter::Write( uint64_t value )
 {
-	uint8_t type = MessagePackTypes::UInt64;
+	if ( value <= MessagePackMasks::FixNumPositiveValue )
+	{
+		stream.Write< uint8_t >( static_cast< uint8_t >( value ) );
+	}
+	else if ( value <= NumericLimits< uint8_t >::Maximum )
+	{
+		stream.Write< uint8_t >( MessagePackTypes::UInt8 );
+		stream.Write< uint8_t >( static_cast< uint8_t >( value ) );
+	}
+	else if ( value <= NumericLimits< uint16_t >::Maximum )
+	{
+		uint16_t temp = static_cast< uint16_t >( value );
 
 #if HELIUM_ENDIAN_LITTLE
-	ConvertEndian( value );
+		ConvertEndian( temp );
 #endif
 
-	stream.Write( type );
-	stream.Write( value );
+		stream.Write< uint8_t >( MessagePackTypes::UInt16 );
+		stream.Write< uint16_t >( temp );
+	}
+	else if ( value <= NumericLimits< uint32_t >::Maximum )
+	{
+		uint32_t temp = static_cast< uint32_t >( value );
+
+#if HELIUM_ENDIAN_LITTLE
+		ConvertEndian( temp );
+#endif
+
+		stream.Write< uint8_t >( MessagePackTypes::UInt32 );
+		stream.Write< uint32_t >( temp );
+	}
+	else
+	{
+#if HELIUM_ENDIAN_LITTLE
+		ConvertEndian( value );
+#endif
+
+		stream.Write< uint8_t >( MessagePackTypes::UInt64 );
+		stream.Write< uint64_t >( value );
+	}
 
 	if ( !size.IsEmpty() )
 	{
@@ -135,21 +194,18 @@ void Helium::Persist::MessagePackWriter::Write( uint64_t value )
 
 void Helium::Persist::MessagePackWriter::Write( int8_t value )
 {
-	if ( value >= 0 && value <= 127 )
+	if ( value >= 0 && value <= MessagePackMasks::FixNumPositiveValue )
 	{
-		uint8_t type = MessagePackTypes::FixNumPositive | value;
-		stream.Write( type );
+		stream.Write< int8_t >( value );
 	}
-	else if ( value >= -32 && value <= -1 )
+	else if ( value < 0 && value >= -32 )
 	{
-		uint8_t type = MessagePackTypes::FixNumNegative | value;
-		stream.Write( type );
+		stream.Write< int8_t >( value );
 	}
 	else
 	{
-		uint8_t type = MessagePackTypes::Int8;
-		stream.Write( type );
-		stream.Write( value );
+		stream.Write< uint8_t >( MessagePackTypes::Int8 );
+		stream.Write< int8_t >( value );
 	}
 
 	if ( !size.IsEmpty() )
@@ -160,14 +216,28 @@ void Helium::Persist::MessagePackWriter::Write( int8_t value )
 
 void Helium::Persist::MessagePackWriter::Write( int16_t value )
 {
-	uint8_t type = MessagePackTypes::Int16;
-
+	if ( value >= 0 && value <= MessagePackMasks::FixNumPositiveValue )
+	{
+		stream.Write< int8_t >( static_cast< int8_t >( value ) );
+	}
+	else if ( value < 0 && value >= -32 )
+	{
+		stream.Write< int8_t >( static_cast< int8_t >( value ) );
+	}
+	else if ( value >= NumericLimits< int8_t >::Minimum && value <= NumericLimits< int8_t >::Maximum )
+	{
+		stream.Write< uint8_t >( MessagePackTypes::Int8 );
+		stream.Write< int8_t >( static_cast< int8_t >( value ) );
+	}
+	else
+	{
 #if HELIUM_ENDIAN_LITTLE
-	ConvertEndian( value );
+		ConvertEndian( value );
 #endif
 
-	stream.Write( type );
-	stream.Write( value );
+		stream.Write< uint8_t >( MessagePackTypes::Int16 );
+		stream.Write< int16_t >( value );
+	}
 
 	if ( !size.IsEmpty() )
 	{
@@ -177,14 +247,39 @@ void Helium::Persist::MessagePackWriter::Write( int16_t value )
 
 void Helium::Persist::MessagePackWriter::Write( int32_t value )
 {
-	uint8_t type = MessagePackTypes::Int32;
+	if ( value >= 0 && value <= MessagePackMasks::FixNumPositiveValue )
+	{
+		stream.Write< int8_t >( static_cast< int8_t >( value ) );
+	}
+	else if ( value < 0 && value >= -32 )
+	{
+		stream.Write< int8_t >( static_cast< int8_t >( value ) );
+	}
+	else if ( value >= NumericLimits< int8_t >::Minimum && value <= NumericLimits< int8_t >::Maximum )
+	{
+		stream.Write< uint8_t >( MessagePackTypes::Int8 );
+		stream.Write< int8_t >( static_cast< int8_t >( value ) );
+	}
+	else if ( value >= NumericLimits< int16_t >::Minimum && value <= NumericLimits< int16_t >::Maximum )
+	{
+		int16_t temp = static_cast< int16_t >( value );
 
 #if HELIUM_ENDIAN_LITTLE
-	ConvertEndian( value );
+		ConvertEndian( temp );
 #endif
 
-	stream.Write( type );
-	stream.Write( value );
+		stream.Write< uint8_t >( MessagePackTypes::Int16 );
+		stream.Write< int16_t >( temp );
+	}
+	else
+	{
+#if HELIUM_ENDIAN_LITTLE
+		ConvertEndian( value );
+#endif
+
+		stream.Write< uint8_t >( MessagePackTypes::Int32 );
+		stream.Write< int32_t >( value );
+	}
 
 	if ( !size.IsEmpty() )
 	{
@@ -194,14 +289,50 @@ void Helium::Persist::MessagePackWriter::Write( int32_t value )
 
 void Helium::Persist::MessagePackWriter::Write( int64_t value )
 {
-	uint8_t type = MessagePackTypes::Int64;
+	if ( value >= 0 && value <= MessagePackMasks::FixNumPositiveValue )
+	{
+		stream.Write< int8_t >( static_cast< int8_t >( value ) );
+	}
+	else if ( value < 0 && value >= -32 )
+	{
+		stream.Write< int8_t >( static_cast< int8_t >( value ) );
+	}
+	else if ( value >= NumericLimits< int8_t >::Minimum && value <= NumericLimits< int8_t >::Maximum )
+	{
+		stream.Write< uint8_t >( MessagePackTypes::Int8 );
+		stream.Write< int8_t >( static_cast< int8_t >( value ) );
+	}
+	else if ( value >= NumericLimits< int16_t >::Minimum && value <= NumericLimits< int16_t >::Maximum )
+	{
+		int16_t temp = static_cast< int16_t >( value );
 
 #if HELIUM_ENDIAN_LITTLE
-	ConvertEndian( value );
+		ConvertEndian( temp );
 #endif
 
-	stream.Write( type );
-	stream.Write( value );
+		stream.Write< uint8_t >( MessagePackTypes::Int16 );
+		stream.Write< int16_t >( temp );
+	}
+	else if ( value >= NumericLimits< int32_t >::Minimum && value <= NumericLimits< int32_t >::Maximum )
+	{
+		int32_t temp = static_cast< int32_t >( value );
+
+#if HELIUM_ENDIAN_LITTLE
+		ConvertEndian( temp );
+#endif
+
+		stream.Write< uint8_t >( MessagePackTypes::Int32 );
+		stream.Write< int32_t >( temp );
+	}
+	else
+	{
+#if HELIUM_ENDIAN_LITTLE
+		ConvertEndian( value );
+#endif
+
+		stream.Write< uint8_t >( MessagePackTypes::Int64 );
+		stream.Write< int64_t >( value );
+	}
 
 	if ( !size.IsEmpty() )
 	{
@@ -213,30 +344,27 @@ void Helium::Persist::MessagePackWriter::WriteRaw( void* bytes, uint32_t length 
 {
 	if ( length <= 31 )
 	{
-		uint8_t type = MessagePackTypes::FixRaw | static_cast< uint8_t >( length );
-		stream.Write( type );
+		stream.Write< uint8_t >( MessagePackTypes::FixRaw | static_cast< uint8_t >( length ) );
 		stream.Write( bytes, length, 1 );
 	}
 	else if ( length <= 65535 )
 	{
-		uint8_t type = MessagePackTypes::Raw16;
-
 #if HELIUM_ENDIAN_LITTLE
 		ConvertEndian( length );
 #endif
 
-		stream.Write( static_cast< uint16_t >( length ) );
+		stream.Write< uint8_t >( MessagePackTypes::Raw16 );
+		stream.Write< uint16_t >( static_cast< uint16_t >( length ) );
 		stream.Write( bytes, length, 1 );
 	}
 	else if ( length <= 4294967295 )
 	{
-		uint8_t type = MessagePackTypes::Raw32;
-
 #if HELIUM_ENDIAN_LITTLE
 		ConvertEndian( length );
 #endif
 
-		stream.Write( static_cast< uint32_t >( length ) );
+		stream.Write< uint8_t >( MessagePackTypes::Raw32 );
+		stream.Write< uint32_t >( length );
 		stream.Write( bytes, length, 1 );
 	}
 	else
@@ -254,34 +382,29 @@ void Helium::Persist::MessagePackWriter::BeginArray( uint32_t length )
 {
 	if ( length <= 15 )
 	{
-		uint8_t type = MessagePackTypes::FixArray | static_cast< uint8_t >( length );
-		stream.Write( type );
+		stream.Write< uint8_t >( MessagePackTypes::FixArray | static_cast< uint8_t >( length ) );
 		container.Push( MessagePackContainers::FixArray );
 		size.Push( length );
 	}
 	else if ( length <= 65535 )
 	{
-		uint8_t type = MessagePackTypes::Array16;
-
 #if HELIUM_ENDIAN_LITTLE
 		ConvertEndian( length );
 #endif
 
-		stream.Write( type );
-		stream.Write( static_cast< uint16_t >( length ) );
+		stream.Write< uint8_t >( MessagePackTypes::Array16 );
+		stream.Write< uint16_t >( static_cast< uint16_t >( length ) );
 		container.Push( MessagePackContainers::Array16 );
 		size.Push( length );
 	}
 	else if ( length <= 4294967295 )
 	{
-		uint8_t type = MessagePackTypes::Array32;
-
 #if HELIUM_ENDIAN_LITTLE
 		ConvertEndian( length );
 #endif
 
-		stream.Write( type );
-		stream.Write( static_cast< uint32_t >( length ) );
+		stream.Write< uint8_t >( MessagePackTypes::Array32 );
+		stream.Write< uint32_t >( length );
 		container.Push( MessagePackContainers::Array32 );
 		size.Push( length );
 	}
@@ -325,34 +448,29 @@ void Helium::Persist::MessagePackWriter::BeginMap( uint32_t length )
 {
 	if ( length <= 15 )
 	{
-		uint8_t type = MessagePackTypes::FixArray | static_cast< uint8_t >( length );
-		stream.Write( type );
+		stream.Write< uint8_t >( MessagePackTypes::FixArray | static_cast< uint8_t >( length ) );
 		container.Push( MessagePackContainers::FixMap );
 		size.Push( length );
 	}
 	else if ( length <= 65535 )
 	{
-		uint8_t type = MessagePackTypes::Array16;
-
 #if HELIUM_ENDIAN_LITTLE
 		ConvertEndian( length );
 #endif
 
-		stream.Write( type );
-		stream.Write( static_cast< uint16_t >( length ) );
+		stream.Write< uint8_t >( MessagePackTypes::Array16 );
+		stream.Write< uint16_t >( static_cast< uint16_t >( length ) );
 		container.Push( MessagePackContainers::Map16 );
 		size.Push( length );
 	}
 	else if ( length <= 4294967295 )
 	{
-		uint8_t type = MessagePackTypes::Array32;
-
 #if HELIUM_ENDIAN_LITTLE
 		ConvertEndian( length );
 #endif
 
-		stream.Write( type );
-		stream.Write( static_cast< uint32_t >( length ) );
+		stream.Write< uint8_t >( MessagePackTypes::Array32 );
+		stream.Write< uint32_t >( length );
 		container.Push( MessagePackContainers::Map32 );
 		size.Push( length );
 	}
