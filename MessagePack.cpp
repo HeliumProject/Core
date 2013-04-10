@@ -1220,12 +1220,12 @@ uint32_t MessagePackReader::ReadArrayLength()
 
 void MessagePackReader::BeginArray()
 {
-
+#pragma TODO( __FUNCTION__ )
 }
 
 void MessagePackReader::EndArray()
 {
-
+#pragma TODO( __FUNCTION__ )
 }
 
 uint32_t MessagePackReader::ReadMapLength()
@@ -1276,12 +1276,12 @@ uint32_t MessagePackReader::ReadMapLength()
 
 void MessagePackReader::BeginMap()
 {
-
+#pragma TODO( __FUNCTION__ )
 }
 
 void MessagePackReader::EndMap()
 {
-
+#pragma TODO( __FUNCTION__ )
 }
 
 void MessagePackReader::ReadFloat( float64_t& value )
