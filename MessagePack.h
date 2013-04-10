@@ -92,26 +92,26 @@ namespace Helium
 		public:
 			inline MessagePackWriter( Stream& stream );
 
-			inline void WriteNil();
-			inline void Write( bool value );
-			inline void Write( float32_t value );
-			inline void Write( float64_t value );
-			inline void Write( uint8_t value );
-			inline void Write( uint16_t value );
-			inline void Write( uint32_t value );
-			inline void Write( uint64_t value );
-			inline void Write( int8_t value );
-			inline void Write( int16_t value );
-			inline void Write( int32_t value );
-			inline void Write( int64_t value );
+			void WriteNil();
+			void Write( bool value );
+			void Write( float32_t value );
+			void Write( float64_t value );
+			void Write( uint8_t value );
+			void Write( uint16_t value );
+			void Write( uint32_t value );
+			void Write( uint64_t value );
+			void Write( int8_t value );
+			void Write( int16_t value );
+			void Write( int32_t value );
+			void Write( int64_t value );
 
-			inline void WriteRaw( void* bytes, uint32_t length );
+			void WriteRaw( void* bytes, uint32_t length );
 
-			inline void BeginArray( uint32_t length );
-			inline void EndArray();
+			void BeginArray( uint32_t length );
+			void EndArray();
 			
-			inline void BeginMap( uint32_t length );
-			inline void EndMap();
+			void BeginMap( uint32_t length );
+			void EndMap();
 
 		private:
 			Stream&                              stream;
@@ -124,39 +124,44 @@ namespace Helium
 		public:
 			inline MessagePackReader( Stream& stream );
 
-			inline MessagePackType ReadType();
+			inline uint8_t Advance();
+			inline void Skip();
 
-			inline void Read( bool& value );
+			bool Read( bool& value );
+			bool Read( float32_t& value );
+			bool Read( float64_t& value );
+			bool Read( uint8_t& value );
+			bool Read( uint16_t& value );
+			bool Read( uint32_t& value );
+			bool Read( uint64_t& value );
+			bool Read( int8_t& value );
+			bool Read( int16_t& value );
+			bool Read( int32_t& value );
+			bool Read( int64_t& value );
 
 			template< class T >
-			inline bool Read( T& value, bool clamp );
+			bool ReadNumber( T& value, bool clamp );
 
-			inline bool ReadExact( float32_t& value );
-			inline bool ReadExact( float64_t& value );
-			inline bool ReadExact( uint8_t& value );
-			inline bool ReadExact( uint16_t& value );
-			inline bool ReadExact( uint32_t& value );
-			inline bool ReadExact( uint64_t& value );
-			inline bool ReadExact( int8_t& value );
-			inline bool ReadExact( int16_t& value );
-			inline bool ReadExact( int32_t& value );
-			inline bool ReadExact( int64_t& value );
+			inline uint32_t ReadRawLength();
+			void ReadRaw( void* bytes, uint32_t length );
 
-			inline void ReadRaw( void* bytes, uint32_t length );
-
-			inline void BeginArray();
-			inline void EndArray();
+			inline uint32_t ReadArrayLength();
+			void SkipArray();
+			void BeginArray();
+			void EndArray();
 			
-			inline void BeginMap();
-			inline void EndMap();
+			inline uint32_t ReadMapLength();
+			void SkipMap();
+			void BeginMap();
+			void EndMap();
 
 		private:
-			inline void ReadFloat( float64_t& value );
-			inline void ReadUnsigned( uint64_t& value );
-			inline void ReadSigned( int64_t& value );
+			void ReadFloat( float64_t& value );
+			void ReadUnsigned( uint64_t& value );
+			void ReadSigned( int64_t& value );
 
 			Stream&                              stream;
-			MessagePackType                      type;
+			uint8_t                              type;
 			DynamicArray< MessagePackContainer > container; // for bookeeping container termination
 			DynamicArray< uint32_t >             size;      // for bookeeping container size
 		};
