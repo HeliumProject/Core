@@ -30,15 +30,13 @@ void MessagePackWriter::Write( bool value )
 
 void MessagePackWriter::Write( float32_t value )
 {
-	// endian swap in an integer register to avoid NaN conditions
-	uint32_t* temp = reinterpret_cast< uint32_t* >( &value );
+	stream.Write< uint8_t >( MessagePackTypes::Float32 );
 
 #if HELIUM_ENDIAN_LITTLE
-	ConvertEndian( *temp );
+	stream.Write< uint32_t >( ConvertEndianFloatToU32( value ) );
+#else
+	stream.Write< float32_t >( value );
 #endif
-
-	stream.Write< uint8_t >( MessagePackTypes::Float32 );
-	stream.Write< uint32_t >( *temp );
 
 	if ( !size.IsEmpty() )
 	{
@@ -48,15 +46,13 @@ void MessagePackWriter::Write( float32_t value )
 
 void MessagePackWriter::Write( float64_t value )
 {
-	// endian swap in an integer register to avoid NaN conditions
-	uint64_t* temp = reinterpret_cast< uint64_t* >( &value );
+	stream.Write< uint8_t >( MessagePackTypes::Float64 );
 
 #if HELIUM_ENDIAN_LITTLE
-	ConvertEndian( *temp );
+	stream.Write< uint64_t >( ConvertEndianDoubleToU64( value ) );
+#else
+	stream.Write< float64_t >( value );
 #endif
-
-	stream.Write< uint8_t >( MessagePackTypes::Float64 );
-	stream.Write< uint64_t >( *temp );
 
 	if ( !size.IsEmpty() )
 	{
@@ -98,7 +94,6 @@ void MessagePackWriter::Write( uint16_t value )
 #if HELIUM_ENDIAN_LITTLE
 		ConvertEndian( value );
 #endif
-
 		stream.Write< uint8_t >( MessagePackTypes::UInt16 );
 		stream.Write< uint16_t >( value );
 	}
@@ -127,7 +122,6 @@ void MessagePackWriter::Write( uint32_t value )
 #if HELIUM_ENDIAN_LITTLE
 		ConvertEndian( temp );
 #endif
-
 		stream.Write< uint8_t >( MessagePackTypes::UInt16 );
 		stream.Write< uint16_t >( temp );
 	}
@@ -136,7 +130,6 @@ void MessagePackWriter::Write( uint32_t value )
 #if HELIUM_ENDIAN_LITTLE
 		ConvertEndian( value );
 #endif
-
 		stream.Write< uint8_t >( MessagePackTypes::UInt32 );
 		stream.Write< uint32_t >( value );
 	}
@@ -165,7 +158,6 @@ void MessagePackWriter::Write( uint64_t value )
 #if HELIUM_ENDIAN_LITTLE
 		ConvertEndian( temp );
 #endif
-
 		stream.Write< uint8_t >( MessagePackTypes::UInt16 );
 		stream.Write< uint16_t >( temp );
 	}
@@ -176,7 +168,6 @@ void MessagePackWriter::Write( uint64_t value )
 #if HELIUM_ENDIAN_LITTLE
 		ConvertEndian( temp );
 #endif
-
 		stream.Write< uint8_t >( MessagePackTypes::UInt32 );
 		stream.Write< uint32_t >( temp );
 	}
@@ -185,7 +176,6 @@ void MessagePackWriter::Write( uint64_t value )
 #if HELIUM_ENDIAN_LITTLE
 		ConvertEndian( value );
 #endif
-
 		stream.Write< uint8_t >( MessagePackTypes::UInt64 );
 		stream.Write< uint64_t >( value );
 	}
@@ -238,7 +228,6 @@ void MessagePackWriter::Write( int16_t value )
 #if HELIUM_ENDIAN_LITTLE
 		ConvertEndian( value );
 #endif
-
 		stream.Write< uint8_t >( MessagePackTypes::Int16 );
 		stream.Write< int16_t >( value );
 	}
@@ -271,7 +260,6 @@ void MessagePackWriter::Write( int32_t value )
 #if HELIUM_ENDIAN_LITTLE
 		ConvertEndian( temp );
 #endif
-
 		stream.Write< uint8_t >( MessagePackTypes::Int16 );
 		stream.Write< int16_t >( temp );
 	}
@@ -280,7 +268,6 @@ void MessagePackWriter::Write( int32_t value )
 #if HELIUM_ENDIAN_LITTLE
 		ConvertEndian( value );
 #endif
-
 		stream.Write< uint8_t >( MessagePackTypes::Int32 );
 		stream.Write< int32_t >( value );
 	}
@@ -313,7 +300,6 @@ void MessagePackWriter::Write( int64_t value )
 #if HELIUM_ENDIAN_LITTLE
 		ConvertEndian( temp );
 #endif
-
 		stream.Write< uint8_t >( MessagePackTypes::Int16 );
 		stream.Write< int16_t >( temp );
 	}
@@ -324,7 +310,6 @@ void MessagePackWriter::Write( int64_t value )
 #if HELIUM_ENDIAN_LITTLE
 		ConvertEndian( temp );
 #endif
-
 		stream.Write< uint8_t >( MessagePackTypes::Int32 );
 		stream.Write< int32_t >( temp );
 	}
@@ -333,7 +318,6 @@ void MessagePackWriter::Write( int64_t value )
 #if HELIUM_ENDIAN_LITTLE
 		ConvertEndian( value );
 #endif
-
 		stream.Write< uint8_t >( MessagePackTypes::Int64 );
 		stream.Write< int64_t >( value );
 	}
@@ -353,12 +337,13 @@ void MessagePackWriter::WriteRaw( void* bytes, uint32_t length )
 	}
 	else if ( length <= 65535 )
 	{
-#if HELIUM_ENDIAN_LITTLE
-		ConvertEndian( length );
-#endif
+		uint16_t temp = length;
 
+#if HELIUM_ENDIAN_LITTLE
+		ConvertEndian( temp );
+#endif
 		stream.Write< uint8_t >( MessagePackTypes::Raw16 );
-		stream.Write< uint16_t >( static_cast< uint16_t >( length ) );
+		stream.Write< uint16_t >( temp );
 		stream.Write( bytes, length, 1 );
 	}
 	else if ( length <= 4294967295 )
@@ -366,7 +351,6 @@ void MessagePackWriter::WriteRaw( void* bytes, uint32_t length )
 #if HELIUM_ENDIAN_LITTLE
 		ConvertEndian( length );
 #endif
-
 		stream.Write< uint8_t >( MessagePackTypes::Raw32 );
 		stream.Write< uint32_t >( length );
 		stream.Write( bytes, length, 1 );
@@ -392,12 +376,13 @@ void MessagePackWriter::BeginArray( uint32_t length )
 	}
 	else if ( length <= 65535 )
 	{
-#if HELIUM_ENDIAN_LITTLE
-		ConvertEndian( length );
-#endif
+		uint16_t temp = length;
 
+#if HELIUM_ENDIAN_LITTLE
+		ConvertEndian( temp );
+#endif
 		stream.Write< uint8_t >( MessagePackTypes::Array16 );
-		stream.Write< uint16_t >( static_cast< uint16_t >( length ) );
+		stream.Write< uint16_t >( temp );
 		container.Push( MessagePackContainers::Array );
 		size.Push( length );
 	}
@@ -406,7 +391,6 @@ void MessagePackWriter::BeginArray( uint32_t length )
 #if HELIUM_ENDIAN_LITTLE
 		ConvertEndian( length );
 #endif
-
 		stream.Write< uint8_t >( MessagePackTypes::Array32 );
 		stream.Write< uint32_t >( length );
 		container.Push( MessagePackContainers::Array );
@@ -452,12 +436,13 @@ void MessagePackWriter::BeginMap( uint32_t length )
 	}
 	else if ( length <= 65535 )
 	{
-#if HELIUM_ENDIAN_LITTLE
-		ConvertEndian( length );
-#endif
+		uint16_t temp = length;
 
+#if HELIUM_ENDIAN_LITTLE
+		ConvertEndian( temp );
+#endif
 		stream.Write< uint8_t >( MessagePackTypes::Array16 );
-		stream.Write< uint16_t >( static_cast< uint16_t >( length ) );
+		stream.Write< uint16_t >( temp );
 		container.Push( MessagePackContainers::Map );
 		size.Push( length );
 	}
@@ -466,7 +451,6 @@ void MessagePackWriter::BeginMap( uint32_t length )
 #if HELIUM_ENDIAN_LITTLE
 		ConvertEndian( length );
 #endif
-
 		stream.Write< uint8_t >( MessagePackTypes::Array32 );
 		stream.Write< uint32_t >( length );
 		container.Push( MessagePackContainers::Map );
@@ -645,14 +629,14 @@ bool MessagePackReader::Read( float32_t& value )
 
 	if ( type == MessagePackTypes::Float32 )
 	{
-		uint32_t temp = 0x0;
-		stream.Read( temp );
-
 #if HELIUM_ENDIAN_LITTLE
-		ConvertEndian( temp );
+		uint32_t temp = 0x0;
+		stream.Read< uint32_t >( temp );
+		value = ConvertEndianU32ToFloat( temp );
+#else
+		stream.Read< float32_t >( value );
 #endif
 
-		value = *reinterpret_cast< float32_t* >( &temp );
 		result = true;
 	}
 
@@ -668,17 +652,33 @@ bool MessagePackReader::Read( float64_t& value )
 {
 	bool result = false;
 
-	if ( type == MessagePackTypes::Float64 )
+	switch ( type )
 	{
-		uint64_t temp = 0x0;
-		stream.Read( temp );
-
+	case MessagePackTypes::Float32:
+		{
 #if HELIUM_ENDIAN_LITTLE
-		ConvertEndian( temp );
+			uint32_t temp = 0x0;
+			stream.Read< uint32_t >( temp );
+			value = ConvertEndianU32ToFloat( temp );
+#else
+			stream.Read< float32_t >( value );
 #endif
+			result = true;
+			break;
+		}
 
-		value = *reinterpret_cast< float64_t* >( &temp );
-		result = true;
+	case MessagePackTypes::Float64:
+		{
+#if HELIUM_ENDIAN_LITTLE
+			uint64_t temp = 0x0;
+			stream.Read< uint64_t >( temp );
+			value = ConvertEndianU64ToDouble( temp );
+#else
+			stream.Read< float64_t >( value );
+#endif
+			result = true;
+			break;
+		}
 	}
 
 	if ( result && !size.IsEmpty() )
@@ -702,7 +702,7 @@ bool MessagePackReader::Read( uint8_t& value )
 	{
 		if ( type == MessagePackTypes::UInt8 )
 		{
-			stream.Read( value );
+			stream.Read< uint8_t >( value );
 			result = true;
 		}
 	}
@@ -731,7 +731,7 @@ bool MessagePackReader::Read( uint16_t& value )
 		case MessagePackTypes::UInt8:
 			{
 				uint8_t temp;
-				stream.Read( temp );
+				stream.Read< uint8_t >( temp );
 				value = temp;
 				result = true;
 				break;
@@ -739,7 +739,7 @@ bool MessagePackReader::Read( uint16_t& value )
 
 		case MessagePackTypes::UInt16:
 			{
-				stream.Read( value );
+				stream.Read< uint16_t >( value );
 
 #if HELIUM_ENDIAN_LITTLE
 				ConvertEndian( value );
@@ -774,7 +774,7 @@ bool MessagePackReader::Read( uint32_t& value )
 		case MessagePackTypes::UInt8:
 			{
 				uint8_t temp;
-				stream.Read( temp );
+				stream.Read< uint8_t >( temp );
 				value = temp;
 				result = true;
 				break;
@@ -783,7 +783,7 @@ bool MessagePackReader::Read( uint32_t& value )
 		case MessagePackTypes::UInt16:
 			{
 				uint16_t temp;
-				stream.Read( temp );
+				stream.Read< uint16_t >( temp );
 
 #if HELIUM_ENDIAN_LITTLE
 				ConvertEndian( temp );
@@ -795,7 +795,7 @@ bool MessagePackReader::Read( uint32_t& value )
 
 		case MessagePackTypes::UInt32:
 			{
-				stream.Read( value );
+				stream.Read< uint32_t >( value );
 
 #if HELIUM_ENDIAN_LITTLE
 				ConvertEndian( value );
@@ -830,7 +830,7 @@ bool MessagePackReader::Read( uint64_t& value )
 		case MessagePackTypes::UInt8:
 			{
 				uint8_t temp;
-				stream.Read( temp );
+				stream.Read< uint8_t >( temp );
 				value = temp;
 				result = true;
 				break;
@@ -839,7 +839,7 @@ bool MessagePackReader::Read( uint64_t& value )
 		case MessagePackTypes::UInt16:
 			{
 				uint16_t temp;
-				stream.Read( temp );
+				stream.Read< uint16_t >( temp );
 
 #if HELIUM_ENDIAN_LITTLE
 				ConvertEndian( temp );
@@ -852,7 +852,7 @@ bool MessagePackReader::Read( uint64_t& value )
 		case MessagePackTypes::UInt32:
 			{
 				uint32_t temp;
-				stream.Read( temp );
+				stream.Read< uint32_t >( temp );
 
 #if HELIUM_ENDIAN_LITTLE
 				ConvertEndian( temp );
@@ -864,7 +864,7 @@ bool MessagePackReader::Read( uint64_t& value )
 
 		case MessagePackTypes::UInt64:
 			{
-				stream.Read( value );
+				stream.Read< uint64_t >( value );
 
 #if HELIUM_ENDIAN_LITTLE
 				ConvertEndian( value );
@@ -903,7 +903,7 @@ bool MessagePackReader::Read( int8_t& value )
 		{
 			if ( type == MessagePackTypes::Int8 )
 			{
-				stream.Read( value );
+				stream.Read< int8_t >( value );
 				result = true;
 			}
 		}
@@ -940,7 +940,7 @@ bool MessagePackReader::Read( int16_t& value )
 			case MessagePackTypes::Int8:
 				{
 					int8_t temp;
-					stream.Read( temp );
+					stream.Read< int8_t >( temp );
 					value = temp;
 					result = true;
 					break;
@@ -948,7 +948,7 @@ bool MessagePackReader::Read( int16_t& value )
 
 			case MessagePackTypes::Int16:
 				{
-					stream.Read( value );
+					stream.Read< int16_t >( value );
 
 #if HELIUM_ENDIAN_LITTLE
 					ConvertEndian( value );
@@ -991,7 +991,7 @@ bool MessagePackReader::Read( int32_t& value )
 			case MessagePackTypes::Int8:
 				{
 					int8_t temp;
-					stream.Read( temp );
+					stream.Read< int8_t >( temp );
 					value = temp;
 					result = true;
 					break;
@@ -1000,7 +1000,7 @@ bool MessagePackReader::Read( int32_t& value )
 			case MessagePackTypes::Int16:
 				{
 					int16_t temp;
-					stream.Read( temp );
+					stream.Read< int16_t >( temp );
 
 #if HELIUM_ENDIAN_LITTLE
 					ConvertEndian( temp );
@@ -1012,7 +1012,7 @@ bool MessagePackReader::Read( int32_t& value )
 
 			case MessagePackTypes::Int32:
 				{
-					stream.Read( value );
+					stream.Read< int32_t >( value );
 
 #if HELIUM_ENDIAN_LITTLE
 					ConvertEndian( value );
@@ -1055,7 +1055,7 @@ bool MessagePackReader::Read( int64_t& value )
 			case MessagePackTypes::Int8:
 				{
 					int8_t temp;
-					stream.Read( temp );
+					stream.Read< int8_t >( temp );
 					value = temp;
 					result = true;
 					break;
@@ -1064,7 +1064,7 @@ bool MessagePackReader::Read( int64_t& value )
 			case MessagePackTypes::Int16:
 				{
 					int16_t temp;
-					stream.Read( temp );
+					stream.Read< int16_t >( temp );
 
 #if HELIUM_ENDIAN_LITTLE
 					ConvertEndian( temp );
@@ -1077,7 +1077,7 @@ bool MessagePackReader::Read( int64_t& value )
 			case MessagePackTypes::Int32:
 				{
 					int32_t temp;
-					stream.Read( temp );
+					stream.Read< int32_t >( temp );
 
 #if HELIUM_ENDIAN_LITTLE
 					ConvertEndian( temp );
@@ -1089,7 +1089,7 @@ bool MessagePackReader::Read( int64_t& value )
 
 			case MessagePackTypes::Int64:
 				{
-					stream.Read( value );
+					stream.Read< int64_t >( value );
 
 #if HELIUM_ENDIAN_LITTLE
 					ConvertEndian( value );
@@ -1135,13 +1135,11 @@ uint32_t MessagePackReader::ReadRawLength()
 
 		case MessagePackTypes::Raw32:
 			{
-				uint32_t temp;
-				stream.Read< uint32_t >( temp );
+				stream.Read< uint32_t >( length );
 
 #if HELIUM_ENDIAN_LITTLE
-				ConvertEndian( temp );
+				ConvertEndian( length );
 #endif
-				length = temp;
 				break;
 			}
 
@@ -1186,13 +1184,11 @@ uint32_t MessagePackReader::ReadArrayLength()
 
 		case MessagePackTypes::Array32:
 			{
-				uint32_t temp;
-				stream.Read< uint32_t >( temp );
+				stream.Read< uint32_t >( length );
 
 #if HELIUM_ENDIAN_LITTLE
-				ConvertEndian( temp );
+				ConvertEndian( length );
 #endif
-				length = temp;
 				break;
 			}
 
@@ -1262,13 +1258,11 @@ uint32_t MessagePackReader::ReadMapLength()
 
 		case MessagePackTypes::Map32:
 			{
-				uint32_t temp;
-				stream.Read< uint32_t >( temp );
+				stream.Read< uint32_t >( length );
 
 #if HELIUM_ENDIAN_LITTLE
-				ConvertEndian( temp );
+				ConvertEndian( length );
 #endif
-				length = temp;
 				break;
 			}
 
@@ -1318,27 +1312,25 @@ void MessagePackReader::ReadFloat( float64_t& value )
 	{
 	case MessagePackTypes::Float32:
 		{
-			uint32_t temp = 0x0;
-			stream.Read( temp );
-
 #if HELIUM_ENDIAN_LITTLE
-			ConvertEndian( temp );
+			uint32_t temp = 0x0;
+			stream.Read< uint32_t >( temp );
+			value = ConvertEndianU32ToFloat( temp );
+#else
+			stream.Read< float32_t >( value );
 #endif
-
-			value = *reinterpret_cast< float32_t* >( &temp );
 			break;
 		}
 
 	case MessagePackTypes::Float64:
 		{
-			uint64_t temp = 0x0;
-			stream.Read( temp );
-
 #if HELIUM_ENDIAN_LITTLE
-			ConvertEndian( temp );
+			uint64_t temp = 0x0;
+			stream.Read< uint64_t >( temp );
+			value = ConvertEndianU64ToDouble( temp );
+#else
+			stream.Read< float64_t >( value );
 #endif
-
-			value = *reinterpret_cast< float64_t* >( &temp );
 			break;
 		}
 
@@ -1356,7 +1348,7 @@ void MessagePackReader::ReadUnsigned( uint64_t& value )
 	case MessagePackTypes::UInt8:
 		{
 			uint8_t temp = 0x0;
-			stream.Read( temp );
+			stream.Read< uint8_t >( temp );
 			value = temp;
 			break;
 		}
@@ -1364,12 +1356,11 @@ void MessagePackReader::ReadUnsigned( uint64_t& value )
 	case MessagePackTypes::UInt16:
 		{
 			uint16_t temp = 0x0;
-			stream.Read( temp );
+			stream.Read< uint16_t >( temp );
 
 #if HELIUM_ENDIAN_LITTLE
 			ConvertEndian( temp );
 #endif
-
 			value = temp;
 			break;
 		}
@@ -1377,19 +1368,18 @@ void MessagePackReader::ReadUnsigned( uint64_t& value )
 	case MessagePackTypes::UInt32:
 		{
 			uint32_t temp = 0x0;
-			stream.Read( temp );
+			stream.Read< uint32_t >( temp );
 
 #if HELIUM_ENDIAN_LITTLE
 			ConvertEndian( temp );
 #endif
-
 			value = temp;
 			break;
 		}
 
 	case MessagePackTypes::UInt64:
 		{
-			stream.Read( value );
+			stream.Read< uint64_t >( value );
 
 #if HELIUM_ENDIAN_LITTLE
 			ConvertEndian( value );
@@ -1411,7 +1401,7 @@ void MessagePackReader::ReadSigned( int64_t& value )
 	case MessagePackTypes::Int8:
 		{
 			int8_t temp = 0x0;
-			stream.Read( temp );
+			stream.Read< int8_t >( temp );
 			value = temp;
 			break;
 		}
@@ -1419,12 +1409,11 @@ void MessagePackReader::ReadSigned( int64_t& value )
 	case MessagePackTypes::Int16:
 		{
 			int16_t temp = 0x0;
-			stream.Read( temp );
+			stream.Read< int16_t >( temp );
 
 #if HELIUM_ENDIAN_LITTLE
 			ConvertEndian( temp );
 #endif
-
 			value = temp;
 			break;
 		}
@@ -1432,19 +1421,18 @@ void MessagePackReader::ReadSigned( int64_t& value )
 	case MessagePackTypes::Int32:
 		{
 			int32_t temp = 0x0;
-			stream.Read( temp );
+			stream.Read< int32_t >( temp );
 
 #if HELIUM_ENDIAN_LITTLE
 			ConvertEndian( temp );
 #endif
-
 			value = temp;
 			break;
 		}
 
 	case MessagePackTypes::Int64:
 		{
-			stream.Read( value );
+			stream.Read< int64_t >( value );
 
 #if HELIUM_ENDIAN_LITTLE
 			ConvertEndian( value );
