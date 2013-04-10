@@ -12,6 +12,10 @@
 # define HELIUM_FOUNDATION_API
 #endif
 
+#ifndef HELIUM_BOOST
+#define HELIUM_BOOST 0
+#endif
+
 // profiling
 //#define FOUNDATION_PROFILE
 
