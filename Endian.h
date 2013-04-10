@@ -39,11 +39,13 @@ namespace Helium
     inline int64_t ConvertEndian(int64_t val, bool endian = true);
     inline float64_t ConvertEndian(float64_t val, bool endian = true);
     inline uint64_t ConvertEndianDoubleToU64(float64_t val, bool endian = true);
+    inline float64_t ConvertEndianU64ToDouble(uint64_t val, bool endian = true);
 
     inline uint32_t ConvertEndian(uint32_t val, bool endian = true);
     inline int32_t ConvertEndian(int32_t val, bool endian = true);
     inline float32_t ConvertEndian(float32_t val, bool endian = true);
     inline uint32_t ConvertEndianFloatToU32(float32_t val, bool endian = true);
+    inline float32_t ConvertEndianU32ToFloat(uint32_t val, bool endian = true);
     
 	inline uint16_t ConvertEndian(uint16_t val, bool endian = true);
     inline int16_t ConvertEndian(int16_t val, bool endian = true);

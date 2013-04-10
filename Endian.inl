@@ -48,6 +48,19 @@ uint64_t Helium::ConvertEndianDoubleToU64(float64_t val, bool endian)
     return types_union.m_u64;
 }
 
+float64_t Helium::ConvertEndianU64ToDouble(uint64_t val, bool endian)
+{
+    U64F64  types_union;
+    types_union.m_u64 = val;  
+
+    if (endian)
+    {
+        types_union.m_u64 = ConvertEndian(types_union.m_u64, endian);
+    }
+
+    return types_union.m_f64;
+}
+
 uint32_t Helium::ConvertEndian(uint32_t val, bool endian)
 {
     if (endian)
@@ -93,6 +106,19 @@ uint32_t Helium::ConvertEndianFloatToU32(float32_t val, bool endian)
     }
 
     return types_union.m_u32;
+}
+
+float32_t Helium::ConvertEndianU32ToFloat(uint32_t val, bool endian)
+{
+    U32F32 types_union;
+    types_union.m_u32 = val;
+
+    if (endian)
+    {
+        types_union.m_u32 = ConvertEndian(types_union.m_u32, endian);
+    }
+
+    return types_union.m_f32;
 }
 
 uint16_t Helium::ConvertEndian(uint16_t val, bool endian)
