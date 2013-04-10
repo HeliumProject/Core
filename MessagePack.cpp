@@ -387,7 +387,7 @@ void MessagePackWriter::BeginArray( uint32_t length )
 	if ( length <= 15 )
 	{
 		stream.Write< uint8_t >( MessagePackTypes::FixArray | static_cast< uint8_t >( length ) );
-		container.Push( MessagePackContainers::FixArray );
+		container.Push( MessagePackContainers::Array );
 		size.Push( length );
 	}
 	else if ( length <= 65535 )
@@ -398,7 +398,7 @@ void MessagePackWriter::BeginArray( uint32_t length )
 
 		stream.Write< uint8_t >( MessagePackTypes::Array16 );
 		stream.Write< uint16_t >( static_cast< uint16_t >( length ) );
-		container.Push( MessagePackContainers::Array16 );
+		container.Push( MessagePackContainers::Array );
 		size.Push( length );
 	}
 	else if ( length <= 4294967295 )
@@ -409,7 +409,7 @@ void MessagePackWriter::BeginArray( uint32_t length )
 
 		stream.Write< uint8_t >( MessagePackTypes::Array32 );
 		stream.Write< uint32_t >( length );
-		container.Push( MessagePackContainers::Array32 );
+		container.Push( MessagePackContainers::Array );
 		size.Push( length );
 	}
 	else
@@ -421,22 +421,16 @@ void MessagePackWriter::BeginArray( uint32_t length )
 void MessagePackWriter::EndArray()
 {
 	uint32_t length = size.GetLast();
-	switch ( container.GetLast() )
+	if ( container.GetLast() == MessagePackContainers::Array )
 	{
-	case MessagePackContainers::FixArray:
-	case MessagePackContainers::Array16:
-	case MessagePackContainers::Array32:
+		if ( length != 0 )
 		{
-			if ( length != 0 )
-			{
-				throw Helium::Exception( "Incorrent number of objects written into array, off by %d", length );
-			}
+			throw Helium::Exception( "Incorrent number of objects written into array, off by %d", length );
 		}
-
-	default:
-		{
-			throw Helium::Exception( "Mismatched container Begin/End for array" );
-		}
+	}
+	else
+	{
+		throw Helium::Exception( "Mismatched container Begin/End for array" );
 	}
 
 	container.Pop();
@@ -453,7 +447,7 @@ void MessagePackWriter::BeginMap( uint32_t length )
 	if ( length <= 15 )
 	{
 		stream.Write< uint8_t >( MessagePackTypes::FixArray | static_cast< uint8_t >( length ) );
-		container.Push( MessagePackContainers::FixMap );
+		container.Push( MessagePackContainers::Map );
 		size.Push( length );
 	}
 	else if ( length <= 65535 )
@@ -464,7 +458,7 @@ void MessagePackWriter::BeginMap( uint32_t length )
 
 		stream.Write< uint8_t >( MessagePackTypes::Array16 );
 		stream.Write< uint16_t >( static_cast< uint16_t >( length ) );
-		container.Push( MessagePackContainers::Map16 );
+		container.Push( MessagePackContainers::Map );
 		size.Push( length );
 	}
 	else if ( length <= 4294967295 )
@@ -475,7 +469,7 @@ void MessagePackWriter::BeginMap( uint32_t length )
 
 		stream.Write< uint8_t >( MessagePackTypes::Array32 );
 		stream.Write< uint32_t >( length );
-		container.Push( MessagePackContainers::Map32 );
+		container.Push( MessagePackContainers::Map );
 		size.Push( length );
 	}
 	else
@@ -487,22 +481,16 @@ void MessagePackWriter::BeginMap( uint32_t length )
 void MessagePackWriter::EndMap()
 {
 	uint32_t length = size.GetLast();
-	switch ( container.GetLast() )
+	if ( container.GetLast() == MessagePackContainers::Map )
 	{
-	case MessagePackContainers::FixMap:
-	case MessagePackContainers::Map16:
-	case MessagePackContainers::Map32:
+		if ( length != 0 )
 		{
-			if ( length != 0 )
-			{
-				throw Helium::Exception( "Incorrent number of objects written into map, off by %d", length );
-			}
+			throw Helium::Exception( "Incorrent number of objects written into map, off by %d", length );
 		}
-
-	default:
-		{
-			throw Helium::Exception( "Mismatched container Begin/End for map" );
-		}
+	}
+	else
+	{
+		throw Helium::Exception( "Mismatched container Begin/End for map" );
 	}
 
 	container.Pop();
@@ -643,7 +631,7 @@ bool MessagePackReader::Read( bool& value )
 		}
 	}
 
-	if ( !size.IsEmpty() )
+	if ( result && !size.IsEmpty() )
 	{
 		size.GetLast()--;
 	}
@@ -668,7 +656,7 @@ bool MessagePackReader::Read( float32_t& value )
 		result = true;
 	}
 
-	if ( !size.IsEmpty() )
+	if ( result && !size.IsEmpty() )
 	{
 		size.GetLast()--;
 	}
@@ -693,7 +681,7 @@ bool MessagePackReader::Read( float64_t& value )
 		result = true;
 	}
 
-	if ( !size.IsEmpty() )
+	if ( result && !size.IsEmpty() )
 	{
 		size.GetLast()--;
 	}
@@ -719,7 +707,7 @@ bool MessagePackReader::Read( uint8_t& value )
 		}
 	}
 
-	if ( !size.IsEmpty() )
+	if ( result && !size.IsEmpty() )
 	{
 		size.GetLast()--;
 	}
@@ -762,7 +750,7 @@ bool MessagePackReader::Read( uint16_t& value )
 		}
 	}
 
-	if ( !size.IsEmpty() )
+	if ( result && !size.IsEmpty() )
 	{
 		size.GetLast()--;
 	}
@@ -818,7 +806,7 @@ bool MessagePackReader::Read( uint32_t& value )
 		}
 	}
 
-	if ( !size.IsEmpty() )
+	if ( result && !size.IsEmpty() )
 	{
 		size.GetLast()--;
 	}
@@ -887,7 +875,7 @@ bool MessagePackReader::Read( uint64_t& value )
 		}
 	}
 
-	if ( !size.IsEmpty() )
+	if ( result && !size.IsEmpty() )
 	{
 		size.GetLast()--;
 	}
@@ -921,7 +909,7 @@ bool MessagePackReader::Read( int8_t& value )
 		}
 	}
 
-	if ( !size.IsEmpty() )
+	if ( result && !size.IsEmpty() )
 	{
 		size.GetLast()--;
 	}
@@ -972,7 +960,7 @@ bool MessagePackReader::Read( int16_t& value )
 		}
 	}
 
-	if ( !size.IsEmpty() )
+	if ( result && !size.IsEmpty() )
 	{
 		size.GetLast()--;
 	}
@@ -1036,7 +1024,7 @@ bool MessagePackReader::Read( int32_t& value )
 		}
 	}
 
-	if ( !size.IsEmpty() )
+	if ( result && !size.IsEmpty() )
 	{
 		size.GetLast()--;
 	}
@@ -1113,7 +1101,7 @@ bool MessagePackReader::Read( int64_t& value )
 		}
 	}
 
-	if ( !size.IsEmpty() )
+	if ( result && !size.IsEmpty() )
 	{
 		size.GetLast()--;
 	}
@@ -1218,14 +1206,34 @@ uint32_t MessagePackReader::ReadArrayLength()
 	return length;
 }
 
-void MessagePackReader::BeginArray()
+void MessagePackReader::BeginArray( uint32_t length )
 {
-#pragma TODO( __FUNCTION__ )
+	container.Push( MessagePackContainers::Array );
+	size.Push( length );
 }
 
 void MessagePackReader::EndArray()
 {
-#pragma TODO( __FUNCTION__ )
+	uint32_t length = size.GetLast();
+	if ( container.GetLast() == MessagePackContainers::Array )
+	{
+		if ( length != 0 )
+		{
+			throw Helium::Exception( "Incorrent number of objects read from array, off by %d", length );
+		}
+	}
+	else
+	{
+		throw Helium::Exception( "Mismatched container Begin/End for array" );
+	}
+
+	container.Pop();
+	size.Pop();
+
+	if ( !size.IsEmpty() )
+	{
+		size.GetLast()--;
+	}
 }
 
 uint32_t MessagePackReader::ReadMapLength()
@@ -1274,14 +1282,34 @@ uint32_t MessagePackReader::ReadMapLength()
 	return length;
 }
 
-void MessagePackReader::BeginMap()
+void MessagePackReader::BeginMap( uint32_t length )
 {
-#pragma TODO( __FUNCTION__ )
+	container.Push( MessagePackContainers::Map );
+	size.Push( length );
 }
 
 void MessagePackReader::EndMap()
 {
-#pragma TODO( __FUNCTION__ )
+	uint32_t length = size.GetLast();
+	if ( container.GetLast() == MessagePackContainers::Map )
+	{
+		if ( length != 0 )
+		{
+			throw Helium::Exception( "Incorrent number of objects read from map, off by %d", length );
+		}
+	}
+	else
+	{
+		throw Helium::Exception( "Mismatched container Begin/End for map" );
+	}
+
+	container.Pop();
+	size.Pop();
+
+	if ( !size.IsEmpty() )
+	{
+		size.GetLast()--;
+	}
 }
 
 void MessagePackReader::ReadFloat( float64_t& value )

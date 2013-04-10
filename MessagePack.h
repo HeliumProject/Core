@@ -77,12 +77,8 @@ namespace Helium
 		{
 			enum Type
 			{
-				FixArray,
-				Array16,
-				Array32,
-				FixMap,
-				Map16,
-				Map32,
+				Array,
+				Map,
 			};
 		};
 		typedef MessagePackContainers::Type MessagePackContainer;
@@ -146,11 +142,11 @@ namespace Helium
 			void ReadRaw( void* bytes, uint32_t length );
 
 			uint32_t ReadArrayLength();
-			void BeginArray();
+			void BeginArray( uint32_t length );
 			void EndArray();
 			
 			uint32_t ReadMapLength();
-			void BeginMap();
+			void BeginMap( uint32_t length );
 			void EndMap();
 
 		private:
