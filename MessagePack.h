@@ -125,7 +125,7 @@ namespace Helium
 			inline MessagePackReader( Stream& stream );
 
 			inline uint8_t Advance();
-			inline void Skip();
+			void Skip();
 
 			bool Read( bool& value );
 			bool Read( float32_t& value );
@@ -142,16 +142,14 @@ namespace Helium
 			template< class T >
 			bool ReadNumber( T& value, bool clamp );
 
-			inline uint32_t ReadRawLength();
+			uint32_t ReadRawLength();
 			void ReadRaw( void* bytes, uint32_t length );
 
-			inline uint32_t ReadArrayLength();
-			void SkipArray();
+			uint32_t ReadArrayLength();
 			void BeginArray();
 			void EndArray();
 			
-			inline uint32_t ReadMapLength();
-			void SkipMap();
+			uint32_t ReadMapLength();
 			void BeginMap();
 			void EndMap();
 
