@@ -23,11 +23,18 @@ Pipe::Pipe()
 {
 	memset(&m_Overlapped, 0, sizeof(m_Overlapped));
 	m_Overlapped.hEvent = ::CreateEvent(0, true, false, 0);
+    m_TerminateIo = ::CreateEvent(0, true, false, 0);
 }
 
 Pipe::~Pipe()
 {
+    if ( m_Handle != INVALID_HANDLE_VALUE )
+    {
+        Close();
+    }
+
 	::CloseHandle( m_Overlapped.hEvent );
+    ::CloseHandle( m_TerminateIo );
 }
 
 bool Pipe::Create(const tchar_t* name)
@@ -120,10 +127,11 @@ bool Pipe::Open(const tchar_t* name)
 
 void Pipe::Close()
 {
+    ::SetEvent(m_TerminateIo);
 	::CloseHandle(m_Handle);
 }
 
-bool Pipe::Connect(Condition& terminate)
+bool Pipe::Connect()
 {
 	OVERLAPPED connect;
 	memset(&connect, 0, sizeof(connect));
@@ -149,7 +157,7 @@ bool Pipe::Connect(Condition& terminate)
 		}
 		else
 		{
-			HANDLE events[] = { terminate.GetHandle(), connect.hEvent };
+			HANDLE events[] = { m_TerminateIo, connect.hEvent };
 			DWORD result = ::WaitForMultipleObjects(2, events, FALSE, INFINITE);
 
 			HELIUM_ASSERT( result != WAIT_FAILED );
@@ -161,7 +169,6 @@ bool Pipe::Connect(Condition& terminate)
 					Helium::Print("Pipe Support: Terminating connect\n");
 #endif
 					::CloseHandle( connect.hEvent );
-					::CancelIo( m_Handle );
 					return false;
 				}
 			}
@@ -195,7 +202,7 @@ void Pipe::Disconnect()
 	}
 }
 
-bool Pipe::Read(void* buffer, uint32_t bytes, uint32_t& read, Condition& terminate)
+bool Pipe::Read(void* buffer, uint32_t bytes, uint32_t& read)
 {
 	if (bytes == 0)
 	{
@@ -214,7 +221,9 @@ bool Pipe::Read(void* buffer, uint32_t bytes, uint32_t& read, Condition& termina
 		}
 		else
 		{
-			HANDLE events[] = { terminate.GetHandle(), m_Overlapped.hEvent };
+            ::ResetEvent( m_TerminateIo );
+            ::ResetEvent( m_Overlapped.hEvent );
+			HANDLE events[] = { m_TerminateIo, m_Overlapped.hEvent };
 			DWORD result = ::WaitForMultipleObjects(2, events, FALSE, INFINITE);
 
 			HELIUM_ASSERT( result != WAIT_FAILED );
@@ -225,7 +234,6 @@ bool Pipe::Read(void* buffer, uint32_t bytes, uint32_t& read, Condition& termina
 #ifdef IPC_PIPE_DEBUG_PIPES
 					Helium::Print("Pipe Support: Terminating read\n");
 #endif
-					::CancelIo( m_Handle );
 					return false;
 				}
 			}
@@ -245,7 +253,7 @@ bool Pipe::Read(void* buffer, uint32_t bytes, uint32_t& read, Condition& termina
 	return true;
 }
 
-bool Pipe::Write(void* buffer, uint32_t bytes, uint32_t& wrote, Condition& terminate)
+bool Pipe::Write(void* buffer, uint32_t bytes, uint32_t& wrote)
 {
 	if (bytes == 0)
 	{
@@ -264,7 +272,9 @@ bool Pipe::Write(void* buffer, uint32_t bytes, uint32_t& wrote, Condition& termi
 		}
 		else
 		{
-			HANDLE events[] = { terminate.GetHandle(), m_Overlapped.hEvent };
+            ::ResetEvent( m_TerminateIo );
+            ::ResetEvent( m_Overlapped.hEvent );
+			HANDLE events[] = { m_TerminateIo, m_Overlapped.hEvent };
 			DWORD result = ::WaitForMultipleObjects(2, events, FALSE, INFINITE);
 
 			HELIUM_ASSERT( result != WAIT_FAILED );
@@ -275,7 +285,6 @@ bool Pipe::Write(void* buffer, uint32_t bytes, uint32_t& wrote, Condition& termi
 #ifdef IPC_PIPE_DEBUG_PIPES
 					Helium::Print("Pipe Support: Terminating write\n");
 #endif
-					::CancelIo( m_Handle );
 					return false;
 				}
 			}

@@ -71,8 +71,8 @@ namespace Helium
         bool Accept(Socket& server_socket, sockaddr_in* client_info);
 
         // Use the socket to communicate on a connection based protocol
-        bool Read(void* buffer, uint32_t bytes, uint32_t& read, Condition& terminate, sockaddr_in* peer = NULL);
-        bool Write(void* buffer, uint32_t bytes, uint32_t& wrote, Condition& terminate, const tchar_t *ip = NULL, uint16_t port = 0);
+        bool Read(void* buffer, uint32_t bytes, uint32_t& read, sockaddr_in* peer = NULL);
+        bool Write(void* buffer, uint32_t bytes, uint32_t& wrote, const tchar_t *ip = NULL, uint16_t port = 0);
 
         // Poll the state of a socket
         static int Select( Handle range, fd_set* read_set, fd_set* write_set, struct timeval* timeout);
@@ -83,6 +83,7 @@ namespace Helium
 
 #if HELIUM_OS_WIN
         OVERLAPPED     m_Overlapped;
+        HANDLE         m_TerminateIo;
 #endif
     };   
 }
