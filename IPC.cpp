@@ -194,7 +194,6 @@ HELIUM_COMPILE_ASSERT( ConnectionStates::Count == (sizeof(ConnectionStateNames) 
 Connection::Connection()
 : m_Server (false)
 , m_Terminating (false)
-, m_Terminate (true, false)
 , m_State (ConnectionStates::Closed)
 , m_ConnectCount (0)
 , m_RemotePlatform ((Helium::Platform::Type)-1)
@@ -229,7 +228,9 @@ void Connection::Cleanup()
     if (!m_Terminating)
     {
         m_Terminating = true;
-        m_Terminate.Signal();
+
+        // close the connection, this should wake up all blocked threads waiting on I/O
+        Close();
 
         m_ConnectThread.Join();
 
@@ -239,7 +240,6 @@ void Connection::Cleanup()
         SetState(ConnectionStates::Closed);
 
         m_Terminating = false;
-        m_Terminate.Reset();
     }
 }
 

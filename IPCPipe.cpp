@@ -82,6 +82,12 @@ bool PipeConnection::Initialize(bool server, const tchar_t* name, const tchar_t*
     return true;
 }
 
+void PipeConnection::Close()
+{
+    m_ReadPipe.Close();
+    m_WritePipe.Close();
+}
+
 void PipeConnection::ServerThread()
 {
     Helium::Print( TXT( "%s: Starting pipe server '%s'\n" ), m_Name, m_PipeName);
@@ -106,8 +112,8 @@ void PipeConnection::ServerThread()
         // wait for the connection
         while (!m_Terminating)
         {
-            bool readConnect = m_ReadPipe.Connect( m_Terminate );
-            bool writeConnect = m_WritePipe.Connect( m_Terminate );
+            bool readConnect = m_ReadPipe.Connect();
+            bool writeConnect = m_WritePipe.Connect();
 
             if (readConnect && writeConnect)
             {
@@ -304,7 +310,7 @@ bool PipeConnection::Read(void* buffer, uint32_t bytes)
         Helium::Print(" %s: Receiving %d bytes...\n", m_Name, count);
 #endif
 
-        if (!m_ReadPipe.Read(buffer, count, bytes_got, m_Terminate))
+        if (!m_ReadPipe.Read(buffer, count, bytes_got))
         {
             return false;
         }
@@ -346,7 +352,7 @@ bool PipeConnection::Write(void* buffer, uint32_t bytes)
         Helium::Print(" %s: Sending %d bytes...\n", m_Name, count);
 #endif
 
-        if (!m_WritePipe.Write(buffer, count, bytes_put, m_Terminate))
+        if (!m_WritePipe.Write(buffer, count, bytes_put))
         {
             return false;
         }

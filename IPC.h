@@ -156,7 +156,6 @@ namespace Helium
 			tchar_t					m_Name[256];          // friendly name for this connection
 			bool					m_Server;             // are we the server side or the client side
 			bool                    m_Terminating;        // used by the closedown code to signal it wants the threads to terminate
-			Helium::Condition       m_Terminate;          // used to wake up sleeping threads for when we want to terminate
 
 			ConnectionState         m_State;              // current status, do not change outside of m_Mutex 
 			uint32_t                m_ConnectCount;       // track the number of connection that have occured
@@ -180,6 +179,7 @@ namespace Helium
 
 		protected:
 			bool Initialize(bool server, const tchar_t* name);
+            virtual void Close() = 0;
 
 		public:
 			void Cleanup();
