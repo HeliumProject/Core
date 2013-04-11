@@ -38,7 +38,7 @@ namespace Helium
 			{
 				Auto,
 				Binary,
-				Json,
+				Text,
 			};
 		}
 		typedef ArchiveTypes::ArchiveType ArchiveType;

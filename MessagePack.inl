@@ -1,20 +1,41 @@
-Helium::Persist::MessagePackWriter::MessagePackWriter( Stream& stream )
+Helium::Persist::MessagePackWriter::MessagePackWriter( Stream* stream )
 : stream( stream )
 {
 
 }
 
-Helium::Persist::MessagePackReader::MessagePackReader( Stream& stream )
+void Helium::Persist::MessagePackWriter::SetStream( Stream* stream )
+{
+	if ( this->stream != stream )
+	{
+		this->stream = stream;
+		this->container.Clear();
+		this->size.Clear();
+	}
+}
+
+Helium::Persist::MessagePackReader::MessagePackReader( Stream* stream )
 : stream( stream )
 , type( MessagePackTypes::Nil )
 {
 
 }
 
+void Helium::Persist::MessagePackReader::SetStream( Stream* stream )
+{
+	if ( this->stream != stream )
+	{
+		this->stream = stream;
+		this->type = MessagePackTypes::Nil;
+		this->container.Clear();
+		this->size.Clear();
+	}
+}
+
 uint8_t Helium::Persist::MessagePackReader::Advance()
 {
 	uint8_t type = 0x0;
-	stream.Read( &type, sizeof( type ), 1 );
+	stream->Read( &type, sizeof( type ), 1 );
 	this->type = type;
 	return this->type;
 }

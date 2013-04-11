@@ -25,32 +25,32 @@ namespace Helium
 				// Single byte objects
 				FixNumPositive          = 0x00, // 0XXXXXXX
 				FixNumNegative          = 0xe0, // 111XXXXX
-				Nil                     = 0xc0,
-				False                   = 0xc2,
-				True                    = 0xc3,
+				Nil                     = 0xc0, // 11000000
+				False                   = 0xc2, // 11000001
+				True                    = 0xc3, // 11000010
 
 				// Fixed size objects
-				Float32                 = 0xca,
-				Float64                 = 0xcb,
-				UInt8                   = 0xcc,
-				UInt16                  = 0xcd,
-				UInt32                  = 0xce,
-				UInt64                  = 0xcf,
-				Int8                    = 0xd0,
-				Int16                   = 0xd1,
-				Int32                   = 0xd2,
-				Int64                   = 0xd3,
+				Float32                 = 0xca, // 11001010
+				Float64                 = 0xcb, // 11001011
+				UInt8                   = 0xcc, // 11001100
+				UInt16                  = 0xcd, // 11001101
+				UInt32                  = 0xce, // 11001110
+				UInt64                  = 0xcf, // 11001111
+				Int8                    = 0xd0, // 11010000
+				Int16                   = 0xd1, // 11010001
+				Int32                   = 0xd2, // 11010010
+				Int64                   = 0xd3, // 11010011
 
 				// Variable size objects
 				FixRaw                  = 0xa0, // 101XXXXX
-				Raw16                   = 0xda,
-				Raw32                   = 0xdb,
 				FixArray                = 0x90, // 1001XXXX
-				Array16                 = 0xdc,
-				Array32                 = 0xdd,
 				FixMap                  = 0x80, // 1000XXXX
-				Map16                   = 0xde,
-				Map32                   = 0xdf,
+				Raw16                   = 0xda, // 11011010
+				Raw32                   = 0xdb, // 11011011
+				Array16                 = 0xdc, // 11011100
+				Array32                 = 0xdd, // 11011101
+				Map16                   = 0xde, // 11011110
+				Map32                   = 0xdf, // 11011111
 			};
 		};
 		typedef MessagePackTypes::Type MessagePackType;
@@ -86,7 +86,8 @@ namespace Helium
 		class HELIUM_PERSIST_API MessagePackWriter
 		{
 		public:
-			inline MessagePackWriter( Stream& stream );
+			inline MessagePackWriter( Stream* stream = NULL );
+			inline void SetStream( Stream* stream );
 
 			void WriteNil();
 			void Write( bool value );
@@ -110,7 +111,7 @@ namespace Helium
 			void EndMap();
 
 		private:
-			Stream&                              stream;
+			Stream*                              stream;
 			DynamicArray< MessagePackContainer > container; // for bookeeping container termination
 			DynamicArray< uint32_t >             size;      // for bookeeping container size
 		};
@@ -118,7 +119,8 @@ namespace Helium
 		class HELIUM_PERSIST_API MessagePackReader
 		{
 		public:
-			inline MessagePackReader( Stream& stream );
+			inline MessagePackReader( Stream* stream = NULL );
+			inline void SetStream( Stream* stream );
 
 			inline uint8_t Advance();
 			void Skip();
@@ -154,7 +156,7 @@ namespace Helium
 			void ReadUnsigned( uint64_t& value );
 			void ReadSigned( int64_t& value );
 
-			Stream&                              stream;
+			Stream*                              stream;
 			uint8_t                              type;
 			DynamicArray< MessagePackContainer > container; // for bookeeping container termination
 			DynamicArray< uint32_t >             size;      // for bookeeping container size

@@ -13,8 +13,6 @@ using namespace Helium;
 using namespace Helium::Reflect;
 using namespace Helium::Persist;
 
-const uint32_t Persist::BINARY_CURRENT_VERSION = 8;
-
 ArchiveWriterBinary::ArchiveWriterBinary( const FilePath& path, Reflect::ObjectIdentifier* identifier )
 	: ArchiveWriter( path, identifier )
 {
@@ -23,7 +21,9 @@ ArchiveWriterBinary::ArchiveWriterBinary( const FilePath& path, Reflect::ObjectI
 ArchiveWriterBinary::ArchiveWriterBinary( Stream *stream, Reflect::ObjectIdentifier* identifier )
 	: ArchiveWriter( identifier )
 {
-	OpenStream( stream, false );
+	m_Stream.Reset( stream );
+	m_Stream.Orphan( true );
+	m_Writer.SetStream( stream );
 }
 
 ArchiveType ArchiveWriterBinary::GetType() const
@@ -39,12 +39,8 @@ void ArchiveWriterBinary::Open()
 
 	FileStream* stream = new FileStream();
 	stream->Open( m_Path, FileStream::MODE_WRITE );
-	OpenStream( stream, true );
-}
-
-void ArchiveWriterBinary::OpenStream( Stream* stream, bool cleanup )
-{
-	m_Stream.Reset( stream, !cleanup );
+	m_Stream.Reset( stream );
+	m_Writer.SetStream( stream );
 }
 
 void ArchiveWriterBinary::Close()
@@ -60,9 +56,6 @@ void ArchiveWriterBinary::Write()
 
 	ArchiveStatus info( *this, ArchiveStates::Starting );
 	e_Status.Raise( info );
-
-	// write version
-	m_Stream->Write( BINARY_CURRENT_VERSION ); 
 
 	// the master object
 	m_Objects.Push( m_Object );
@@ -82,8 +75,8 @@ void ArchiveWriterBinary::Write()
 
 void ArchiveWriterBinary::SerializeArray( const DynamicArray< ObjectPtr >& objects, uint32_t flags )
 {
+	// write size
 	int32_t size = (int32_t)( objects.GetSize() );
-	m_Stream->Write(&size); 
 
 #ifdef PERSIST_ARCHIVE_VERBOSE
 	Log::Print(TXT("Serializing %d objects\n"), size);
@@ -110,60 +103,26 @@ void ArchiveWriterBinary::SerializeArray( const DynamicArray< ObjectPtr >& objec
 		info.m_Progress = 100;
 		e_Status.Raise( info );
 	}
-
-	const int32_t terminator = -1;
-	m_Stream->Write(&terminator); 
 }
 
 void ArchiveWriterBinary::SerializeInstance( void* instance, const Composite* composite, Object* object )
 {
-	// write the crc of the class of structure (used to factory allocate an instance when reading)
-	uint32_t typeCrc = Crc32( composite->m_Name );
-	m_Stream->Write(&typeCrc); 
-
-	// stub out the length we are about to write
-	uint32_t startOffset = (uint32_t)m_Stream->Tell();
-	m_Stream->Write(&startOffset); 
-
 #ifdef PERSIST_ARCHIVE_VERBOSE
 	Log::Print( TXT( "Serializing %s\n" ), composite->m_Name );
 #endif
+
+	// write the crc of the class of structure (used to factory allocate an instance when reading)
+	uint32_t typeCrc = Crc32( composite->m_Name );
 
 	if ( instance )
 	{
 		object->PreSerialize( NULL );
 
-		// push a new struct on the stack
-		WriteFields data;
-		data.m_Count = 0;
-		data.m_CountOffset = m_Stream->Tell();
-		m_FieldStack.Push(data);
-		{
-			// stub out the number of fields we are about to write
-			m_Stream->Write(&m_FieldStack.GetLast().m_Count);
-
-			// serialize each field of the composite instance
-			SerializeFields(instance, composite, object);
-
-			// seek back and write our count
-			m_Stream->Seek(m_FieldStack.GetLast().m_CountOffset, SeekOrigins::Begin);
-			m_Stream->Write(&m_FieldStack.GetLast().m_Count); 
-		}
-		m_FieldStack.Pop();
+		// serialize each field of the composite instance
+		SerializeFields(instance, composite, object);
 
 		object->PreSerialize( NULL );
 	}
-
-	// compute amound written
-	uint32_t endOffset = (uint32_t)m_Stream->Tell();
-	uint32_t length = endOffset - startOffset;
-
-	// seek back and write written amount at start offset
-	m_Stream->Seek(startOffset, SeekOrigins::Begin);
-	m_Stream->Write(&length); 
-
-	// seek back to the end of the stream
-	m_Stream->Seek(0, SeekOrigins::End);
 }
 
 void ArchiveWriterBinary::SerializeFields( void* instance, const Reflect::Composite* composite, Object* object )
@@ -194,24 +153,16 @@ void ArchiveWriterBinary::SerializeFields( void* instance, const Reflect::Compos
 			}
 		}
 	}
-
-	const int32_t terminator = -1;
-	m_Stream->Write(&terminator);
 }
 
 void ArchiveWriterBinary::SerializeField( void* instance, const Reflect::Field* field, Object* object )
 {
-	// write the crc of the field name (used to associate a field when reading)
-	uint32_t fieldNameCrc = Crc32( field->m_Name );
-	m_Stream->Write( &fieldNameCrc );
-
-	// stub out the length we are about to write
-	uint32_t startOffset = (uint32_t)m_Stream->Tell();
-	m_Stream->Write(&startOffset); 
-
 #ifdef PERSIST_ARCHIVE_VERBOSE
 	Log::Print(TXT("Serializing field %s\n"), field->m_Name);
 #endif
+
+	// write the crc of the field name (used to associate a field when reading)
+	uint32_t fieldNameCrc = Crc32( field->m_Name );
 
 	switch ( field->m_Data->GetReflectionType() )
 	{
@@ -235,21 +186,6 @@ void ArchiveWriterBinary::SerializeField( void* instance, const Reflect::Field* 
 			break;
 		}
 	}
-
-	// compute amound written
-	uint32_t endOffset = (uint32_t)m_Stream->Tell();
-	uint32_t length = endOffset - startOffset;
-
-	// seek back and write written amount at start offset
-	m_Stream->Seek(startOffset, SeekOrigins::Begin);
-	m_Stream->Write(&length); 
-
-	// seek back to the end of the stream
-	m_Stream->Seek(0, SeekOrigins::End);
-
-	// we wrote a field, so increment our count
-	HELIUM_ASSERT(m_FieldStack.GetSize() > 0);
-	m_FieldStack.GetLast().m_Count++;
 }
 
 void ArchiveWriterBinary::ToStream( Object* object, Stream& stream, ObjectIdentifier* identifier )
@@ -263,7 +199,6 @@ void ArchiveWriterBinary::ToStream( Object* object, Stream& stream, ObjectIdenti
 ArchiveReaderBinary::ArchiveReaderBinary( const FilePath& path, ObjectResolver* resolver )
 	: ArchiveReader( path, resolver )
 	, m_Stream( NULL )
-	, m_Version( 0 )
 	, m_Size( 0 )
 {
 }
@@ -271,10 +206,11 @@ ArchiveReaderBinary::ArchiveReaderBinary( const FilePath& path, ObjectResolver* 
 ArchiveReaderBinary::ArchiveReaderBinary( Stream *stream, ObjectResolver* resolver )
 	: ArchiveReader( resolver )
 	, m_Stream( NULL )
-	, m_Version( 0 )
 	, m_Size( 0 )
 {
-	OpenStream( stream, false );
+	m_Stream.Reset( stream );
+	m_Stream.Orphan( true );
+	m_Reader.SetStream( stream );
 }
 
 ArchiveType ArchiveReaderBinary::GetType() const
@@ -290,12 +226,8 @@ void ArchiveReaderBinary::Open()
 
 	FileStream* stream = new FileStream();
 	stream->Open( m_Path, FileStream::MODE_READ );
-	OpenStream( stream, true );
-}
-
-void ArchiveReaderBinary::OpenStream( Stream* stream, bool cleanup )
-{
-	m_Stream.Reset( stream, !cleanup );
+	m_Stream.Reset( stream );
+	m_Reader.SetStream( stream );
 }
 
 void ArchiveReaderBinary::Close()
@@ -325,13 +257,6 @@ void ArchiveReaderBinary::Read()
 		throw Persist::StreamException( TXT( "Input stream is empty (%s)" ), m_Path.c_str() );
 	}
 
-	// read version
-	m_Stream->Read( m_Version );
-	if (m_Version != BINARY_CURRENT_VERSION)
-	{
-		throw Persist::StreamException( TXT( "Input stream version for '%s' is not what is currently supported (input: %d, current: %d)\n" ), m_Path.c_str(), m_Version, BINARY_CURRENT_VERSION); 
-	}
-
 	// deserialize main file objects
 	{
 		PERSIST_SCOPE_TIMER( ("Read Objects") );
@@ -353,10 +278,9 @@ void ArchiveReaderBinary::Read()
 
 void ArchiveReaderBinary::DeserializeArray( DynamicArray< ObjectPtr >& objects, uint32_t flags )
 {
-	uint32_t startOffset = (uint32_t)m_Stream->Tell();
+	const uint32_t startOffset = (uint32_t)m_Stream->Tell();
 
 	int32_t element_count = -1;
-	m_Stream->Read(element_count); 
 
 #ifdef PERSIST_ARCHIVE_VERBOSE
 	Log::Debug(TXT("Deserializing %d objects\n"), element_count);
@@ -370,7 +294,6 @@ void ArchiveReaderBinary::DeserializeArray( DynamicArray< ObjectPtr >& objects, 
 
 			// read type string
 			uint32_t typeCrc = Helium::BeginCrc32();
-			m_Stream->Read(typeCrc);
 
 			// A null type name CRC indicates that a null reference was serialized, so no type lookup needs to be performed.
 			const Class* type = NULL;
@@ -381,12 +304,10 @@ void ArchiveReaderBinary::DeserializeArray( DynamicArray< ObjectPtr >& objects, 
 
 			// read length info
 			uint32_t length = 0;
-			m_Stream->Read(length);
 
 			if ( typeCrc == 0 )
 			{
 				// skip it, but account for already reading the length from the stream
-				m_Stream->Seek(length - sizeof(uint32_t), SeekOrigins::Current);
 			}
 			else
 			{
@@ -400,7 +321,6 @@ void ArchiveReaderBinary::DeserializeArray( DynamicArray< ObjectPtr >& objects, 
 				if (!object.ReferencesObject())
 				{
 					// skip it, but account for already reading the length from the stream
-					m_Stream->Seek(length - sizeof(uint32_t), SeekOrigins::Current);
 
 					// if you see this, then data is being lost because:
 					//  1 - a type was completely removed from the codebase
@@ -432,16 +352,6 @@ void ArchiveReaderBinary::DeserializeArray( DynamicArray< ObjectPtr >& objects, 
 		}
 	}
 
-	if (!m_Abort)
-	{
-		int32_t terminator = -1;
-		m_Stream->Read(terminator);
-		if (terminator != -1)
-		{
-			throw Persist::Exception( TXT( "Unterminated object array block (%s)" ), m_Path.c_str() );
-		}
-	}
-
 	if ( flags & ArchiveFlags::Status )
 	{
 		ArchiveStatus info( *this, ArchiveStates::ObjectProcessed );
@@ -465,21 +375,13 @@ void ArchiveReaderBinary::DeserializeInstance( void* instance, const Composite* 
 
 void ArchiveReaderBinary::DeserializeFields( void* instance, const Composite* composite, Reflect::Object* object )
 {
+	// read field count
 	int32_t fieldCount = -1;
-	m_Stream->Read(fieldCount);    
 
 	for (int i=0; i<fieldCount; i++)
 	{
 		// read field name crc
 		uint32_t fieldNameCrc = BeginCrc32();
-		m_Stream->Read( fieldNameCrc );
-
-		// get current stream position
-		uint32_t startOffset = (uint32_t)m_Stream->Tell();
-
-		// read length info
-		uint32_t length = 0;
-		m_Stream->Read(length);
 
 		const Field* field = composite->FindFieldByName(fieldNameCrc);
 		if ( field )
@@ -490,16 +392,6 @@ void ArchiveReaderBinary::DeserializeFields( void* instance, const Composite* co
 
 			object->PostDeserialize( field );
 		}
-
-		// regardless of what happened, set the stream state to the next field
-		m_Stream->Seek(startOffset + length - sizeof(uint32_t), SeekOrigins::Begin);
-	}
-
-	int32_t terminator = -1;
-	m_Stream->Read(terminator); 
-	if (terminator != -1)
-	{
-		throw Persist::Exception( TXT( "Unterminated field array block (%s)" ), m_Path.c_str() );
 	}
 }
 
