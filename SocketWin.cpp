@@ -178,17 +178,6 @@ bool Socket::Accept( Socket& server_socket, sockaddr_in* client_info )
 
 bool Socket::Read( void* buffer, uint32_t bytes, uint32_t& read, Condition& terminate, sockaddr_in* peer )
 {
-#if HELIUM_ASSERT_ENABLED
-    if ( m_Protocol == Helium::SocketProtocols::Tcp )
-    {
-        HELIUM_ASSERT(!peer);
-    }
-    else
-    {
-        HELIUM_ASSERT(peer);
-    }
-#endif
-
     if (bytes == 0)
     {
         return true;
