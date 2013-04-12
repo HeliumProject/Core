@@ -27,8 +27,8 @@ namespace Helium
 		{
 			enum ArchiveFlag
 			{
-				Status  = 1 << 0, // Display status reporting
-				Sparse  = 1 << 1, // Allow sparse array populations for failed objects
+				StringCrc   = 1 << 0, // Using strings where sensible for portability (instead of CRC-32)
+				SparseArray = 1 << 1, // Allow sparse array populations for failed objects
 			};
 		}
 
@@ -112,6 +112,7 @@ namespace Helium
 		protected:
 			uint32_t           m_Progress; // in bytes
 			bool               m_Abort;
+			uint8_t            m_Flags;
 			FilePath           m_Path;
 			Reflect::ObjectPtr m_Object;
 		};

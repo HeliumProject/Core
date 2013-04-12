@@ -13,8 +13,6 @@ namespace Helium
 {
 	namespace Persist
 	{
-		typedef void (Reflect::Object::*ObjectNotify)( const Reflect::Field* );
-
 		class HELIUM_PERSIST_API ArchiveWriterBinary : public ArchiveWriter
 		{
 		public:
@@ -27,13 +25,11 @@ namespace Helium
 			virtual void Write() HELIUM_OVERRIDE;
 
 		private:
-			void SerializeArray( const DynamicArray< Reflect::ObjectPtr >& objects, uint32_t flags = 0 );
 			void SerializeInstance( void* instance, const Reflect::Composite* type, Reflect::Object* object );
-			void SerializeFields( void* instance, const Reflect::Composite* type, Reflect::Object* object );
 			void SerializeField( void* instance, const Reflect::Field* field, Reflect::Object* object );
 
 		public:
-			static void ToStream( Reflect::Object* object, Stream& stream, Reflect::ObjectIdentifier* identifier = NULL );
+			static void ToStream( Reflect::Object* object, Stream& stream, Reflect::ObjectIdentifier* identifier = NULL, uint32_t flags = 0 );
 
 		private:
 			AutoPtr< Stream > m_Stream;
@@ -52,13 +48,13 @@ namespace Helium
 			virtual void Read() HELIUM_OVERRIDE;
 
 		private:
-			void DeserializeArray( DynamicArray< Reflect::ObjectPtr >& objects, uint32_t flags = 0 );
+			void DeserializeArray( DynamicArray< Reflect::ObjectPtr >& objects );
 			void DeserializeInstance( void* instance, const Reflect::Composite* composite, Reflect::Object* object );
 			void DeserializeFields( void* instance, const Reflect::Composite* composite, Reflect::Object* object );
 			void DeserializeField( void* instance, const Reflect::Field* field, Reflect::Object* object );
 
 		public:
-			static Reflect::ObjectPtr FromStream( Stream& stream, Reflect::ObjectResolver* resolver = NULL );
+			static Reflect::ObjectPtr FromStream( Stream& stream, Reflect::ObjectResolver* resolver = NULL, uint32_t flags = 0 );
 
 		private:
 			AutoPtr< Stream > m_Stream;

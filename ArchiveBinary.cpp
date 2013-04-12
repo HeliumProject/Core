@@ -63,7 +63,21 @@ void ArchiveWriterBinary::Write()
 	// serialize main file objects
 	{
 		PERSIST_SCOPE_TIMER( ("Write Objects") );
-		SerializeArray(m_Objects, ArchiveFlags::Status);
+
+		// objects can get changed during this iteration (in Identify), so use indices
+		for ( int index = 0; index < m_Objects.GetSize(); ++index )
+		{
+			Object* object = m_Objects.GetElement( index );
+			SerializeInstance( object, object->GetClass(), object );
+
+			ArchiveStatus info( *this, ArchiveStates::ObjectProcessed );
+			info.m_Progress = (int)(((float)(index) / (float)m_Objects.GetSize()) * 100.0f);
+			e_Status.Raise( info );
+		}
+
+		ArchiveStatus info( *this, ArchiveStates::ObjectProcessed );
+		info.m_Progress = 100;
+		e_Status.Raise( info );
 	}
 
 	// do cleanup
@@ -73,85 +87,69 @@ void ArchiveWriterBinary::Write()
 	e_Status.Raise( info );
 }
 
-void ArchiveWriterBinary::SerializeArray( const DynamicArray< ObjectPtr >& objects, uint32_t flags )
-{
-	// write size
-	int32_t size = (int32_t)( objects.GetSize() );
-
-#ifdef PERSIST_ARCHIVE_VERBOSE
-	Log::Print(TXT("Serializing %d objects\n"), size);
-#endif
-
-	// objects can get changed during this iteration (in Identify), so use indices
-	for ( int index = 0; index < objects.GetSize(); ++index )
-	{
-		Object* object = objects.GetElement( index );
-
-		SerializeInstance( object, object->GetClass(), object );
-
-		if ( flags & ArchiveFlags::Status )
-		{
-			ArchiveStatus info( *this, ArchiveStates::ObjectProcessed );
-			info.m_Progress = (int)(((float)(index) / (float)size) * 100.0f);
-			e_Status.Raise( info );
-		}
-	}
-
-	if ( flags & ArchiveFlags::Status )
-	{
-		ArchiveStatus info( *this, ArchiveStates::ObjectProcessed );
-		info.m_Progress = 100;
-		e_Status.Raise( info );
-	}
-}
-
 void ArchiveWriterBinary::SerializeInstance( void* instance, const Composite* composite, Object* object )
 {
 #ifdef PERSIST_ARCHIVE_VERBOSE
 	Log::Print( TXT( "Serializing %s\n" ), composite->m_Name );
 #endif
 
-	// write the crc of the class of structure (used to factory allocate an instance when reading)
-	uint32_t typeCrc = Crc32( composite->m_Name );
+	if ( m_Flags & ArchiveFlags::StringCrc )
+	{
+		// write the crc of the class of structure (used to factory allocate an instance when reading)
+		uint32_t typeCrc = Crc32( composite->m_Name );
+		m_Writer.Write( typeCrc );
+	}
+	else
+	{
+		// write the actual string
+		m_Writer.Write( composite->m_Name );
+	}
 
 	if ( instance )
 	{
-		object->PreSerialize( NULL );
-
-		// serialize each field of the composite instance
-		SerializeFields(instance, composite, object);
-
-		object->PreSerialize( NULL );
-	}
-}
-
-void ArchiveWriterBinary::SerializeFields( void* instance, const Reflect::Composite* composite, Object* object )
-{
-	DynamicArray< const Composite* > bases;
-	for ( const Composite* current = composite; current != NULL; current = current->m_Base )
-	{
-		bases.Push( current );
-	}
-
-	while ( !bases.IsEmpty() )
-	{
-		const Composite* current = bases.Pop();
-
-		DynamicArray< Field >::ConstIterator itr = current->m_Fields.Begin();
-		DynamicArray< Field >::ConstIterator end = current->m_Fields.End();
-		for ( ; itr != end; ++itr )
+#pragma TODO("Declare a max depth for inheritance to save heap allocs -geoff")
+		DynamicArray< const Composite* > bases;
+		for ( const Composite* current = composite; current != NULL; current = current->m_Base )
 		{
-			const Field* field = &*itr;
+			bases.Push( current );
+		}
 
-			if ( field->ShouldSerialize( instance, object ) )
+#pragma TODO("Declare a max count for fields to save heap allocs -geoff")
+		DynamicArray< const Field* > fields;
+		while ( !bases.IsEmpty() )
+		{
+			const Composite* current = bases.Pop();
+			DynamicArray< Field >::ConstIterator itr = current->m_Fields.Begin();
+			DynamicArray< Field >::ConstIterator end = current->m_Fields.End();
+			for ( ; itr != end; ++itr )
 			{
-				object->PreSerialize( field );
-
-				SerializeField( instance, field, object );
-
-				object->PostSerialize( field );
+				const Field* field = &*itr;
+				if ( field->ShouldSerialize( instance, object ) )
+				{
+					fields.Push( field );
+				}
 			}
 		}
+
+		m_Writer.BeginMap( static_cast< uint32_t >( fields.GetSize() ) );
+		object->PreSerialize( NULL );
+
+		DynamicArray< const Field* >::ConstIterator itr = fields.Begin();
+		DynamicArray< const Field* >::ConstIterator end = fields.End();
+		for ( ; itr != end; ++itr )
+		{
+			const Field* field = *itr;
+			object->PreSerialize( field );
+			SerializeField( instance, field, object );
+			object->PostSerialize( field );
+		}
+
+		object->PostSerialize( NULL );
+		m_Writer.EndMap();
+	}
+	else
+	{
+		m_Writer.WriteNil();
 	}
 }
 
@@ -161,8 +159,16 @@ void ArchiveWriterBinary::SerializeField( void* instance, const Reflect::Field* 
 	Log::Print(TXT("Serializing field %s\n"), field->m_Name);
 #endif
 
-	// write the crc of the field name (used to associate a field when reading)
-	uint32_t fieldNameCrc = Crc32( field->m_Name );
+	if ( m_Flags & ArchiveFlags::StringCrc )
+	{
+		// write the crc of the field name (used to associate a field when reading)
+		uint32_t fieldNameCrc = Crc32( field->m_Name );
+		m_Writer.Write( fieldNameCrc );
+	}
+	else
+	{
+		m_Writer.Write( field->m_Name );
+	}
 
 	switch ( field->m_Data->GetReflectionType() )
 	{
@@ -188,10 +194,11 @@ void ArchiveWriterBinary::SerializeField( void* instance, const Reflect::Field* 
 	}
 }
 
-void ArchiveWriterBinary::ToStream( Object* object, Stream& stream, ObjectIdentifier* identifier )
+void ArchiveWriterBinary::ToStream( Object* object, Stream& stream, ObjectIdentifier* identifier, uint32_t flags )
 {
 	ArchiveWriterBinary archive ( &stream, identifier );
 	archive.m_Object = object;
+	archive.m_Flags = flags;
 	archive.Write();   
 	archive.Close(); 
 }
@@ -260,7 +267,7 @@ void ArchiveReaderBinary::Read()
 	// deserialize main file objects
 	{
 		PERSIST_SCOPE_TIMER( ("Read Objects") );
-		DeserializeArray(m_Objects, ArchiveFlags::Status);
+		DeserializeArray( m_Objects );
 	}
 
 	// finish linking objects (unless we have a custom handler
@@ -276,7 +283,7 @@ void ArchiveReaderBinary::Read()
 	e_Status.Raise( info );
 }
 
-void ArchiveReaderBinary::DeserializeArray( DynamicArray< ObjectPtr >& objects, uint32_t flags )
+void ArchiveReaderBinary::DeserializeArray( DynamicArray< ObjectPtr >& objects )
 {
 	const uint32_t startOffset = (uint32_t)m_Stream->Tell();
 
@@ -335,16 +342,13 @@ void ArchiveReaderBinary::DeserializeArray( DynamicArray< ObjectPtr >& objects, 
 
 				if (object.ReferencesObject())
 				{
-					if ( flags & ArchiveFlags::Status )
-					{
-						uint32_t current = (uint32_t)m_Stream->Tell();
+					uint32_t current = (uint32_t)m_Stream->Tell();
 
-						ArchiveStatus info( *this, ArchiveStates::ObjectProcessed );
-						info.m_Progress = (int)(((float)(current - startOffset) / (float)m_Size) * 100.0f);
-						e_Status.Raise( info );
+					ArchiveStatus info( *this, ArchiveStates::ObjectProcessed );
+					info.m_Progress = (int)(((float)(current - startOffset) / (float)m_Size) * 100.0f);
+					e_Status.Raise( info );
 
-						m_Abort |= info.m_Abort;
-					}
+					m_Abort |= info.m_Abort;
 				}
 			}
 
@@ -352,12 +356,9 @@ void ArchiveReaderBinary::DeserializeArray( DynamicArray< ObjectPtr >& objects, 
 		}
 	}
 
-	if ( flags & ArchiveFlags::Status )
-	{
-		ArchiveStatus info( *this, ArchiveStates::ObjectProcessed );
-		info.m_Progress = 100;
-		e_Status.Raise( info );
-	}
+	ArchiveStatus info( *this, ArchiveStates::ObjectProcessed );
+	info.m_Progress = 100;
+	e_Status.Raise( info );
 }
 
 void ArchiveReaderBinary::DeserializeInstance( void* instance, const Composite* composite, Reflect::Object* object )
@@ -425,9 +426,10 @@ void ArchiveReaderBinary::DeserializeField( void* instance, const Field* field, 
 	}
 }
 
-ObjectPtr ArchiveReaderBinary::FromStream( Stream& stream, ObjectResolver* resolver )
+ObjectPtr ArchiveReaderBinary::FromStream( Stream& stream, ObjectResolver* resolver, uint32_t flags )
 {
 	ArchiveReaderBinary archive( &stream, resolver );
+	archive.m_Flags = flags;
 	archive.Read();
 	archive.Close(); 
 	return archive.m_Object;

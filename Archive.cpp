@@ -25,6 +25,7 @@ using namespace Helium::Persist;
 Archive::Archive()
 	: m_Progress( 0 )
 	, m_Abort( false )
+	, m_Flags( 0x0 )
 {
 }
 
@@ -32,6 +33,7 @@ Archive::Archive( const FilePath& path )
 	: m_Path( path )
 	, m_Progress( 0 )
 	, m_Abort( false )
+	, m_Flags( 0x0 )
 {
 	HELIUM_ASSERT( !m_Path.empty() );
 }

@@ -101,8 +101,9 @@ namespace Helium
 			void Write( int16_t value );
 			void Write( int32_t value );
 			void Write( int64_t value );
+			void Write( const tchar_t* str );
 
-			void WriteRaw( void* bytes, uint32_t length );
+			void WriteRaw( const void* bytes, uint32_t length );
 
 			void BeginArray( uint32_t length );
 			void EndArray();
