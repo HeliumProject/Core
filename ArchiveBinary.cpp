@@ -167,6 +167,7 @@ void ArchiveWriterBinary::SerializeField( void* instance, const Reflect::Field* 
 	}
 	else
 	{
+		// write the actual string
 		m_Writer.Write( field->m_Name );
 	}
 
