@@ -9,27 +9,32 @@ namespace Helium
 	class HELIUM_PLATFORM_API Pipe
 	{
 	public:
-		Pipe();
+#ifdef HELIUM_OS_WIN
+		typedef void* Handle;
+#else
+        typedef int Handle;
+#endif
+
+        Pipe();
 		~Pipe();
 
 		bool Create(const tchar_t* name);
 		bool Open(const tchar_t* name);
 		void Close();
 
-		bool Connect(Condition& terminate);
+		bool Connect();
 		void Disconnect();
 
-		bool Read(void* buffer, uint32_t bytes, uint32_t& read, Condition& terminate);
-		bool Write(void* buffer, uint32_t bytes, uint32_t& wrote, Condition& terminate);
+		bool Read(void* buffer, uint32_t bytes, uint32_t& read);
+		bool Write(void* buffer, uint32_t bytes, uint32_t& wrote);
 
 	private:
-#ifdef HELIUM_OS_WIN
-		typedef void* Handle;
+        Handle m_Handle;
+
+#if HELIUM_OS_WIN
 		OVERLAPPED m_Overlapped;
-#else
-#error Implement Pipe for this platform.
+        HANDLE     m_TerminateIo;
 #endif
-		Handle m_Handle;
 	};
 
 	HELIUM_PLATFORM_API bool InitializePipes();

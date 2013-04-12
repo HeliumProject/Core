@@ -62,6 +62,7 @@ Socket::Socket()
 {
     memset(&m_Overlapped, 0, sizeof(m_Overlapped));
     m_Overlapped.hEvent = ::CreateEvent(0, true, false, 0);
+    m_TerminateIo = ::CreateEvent(0, true, false, 0);
 }
 
 Socket::~Socket()
@@ -72,6 +73,7 @@ Socket::~Socket()
     }
 
     ::CloseHandle( m_Overlapped.hEvent );
+    ::CloseHandle( m_TerminateIo );
 }
 
 bool Socket::Create( SocketProtocol protocol )
@@ -116,6 +118,8 @@ bool Socket::Create( SocketProtocol protocol )
 
 bool Socket::Close()
 {
+    ::SetEvent( m_TerminateIo );
+    ::shutdown( m_Handle, SD_BOTH );
     return ::closesocket( m_Handle ) != SOCKET_ERROR;
 }
 
@@ -176,7 +180,7 @@ bool Socket::Accept( Socket& server_socket, sockaddr_in* client_info )
     return m_Handle != SOCKET_ERROR;
 }
 
-bool Socket::Read( void* buffer, uint32_t bytes, uint32_t& read, Condition& terminate, sockaddr_in* peer )
+bool Socket::Read( void* buffer, uint32_t bytes, uint32_t& read, sockaddr_in* peer )
 {
     if (bytes == 0)
     {
@@ -205,7 +209,9 @@ bool Socket::Read( void* buffer, uint32_t bytes, uint32_t& read, Condition& term
         }
         else
         {
-            HANDLE events[] = { terminate.GetHandle(), m_Overlapped.hEvent };
+            ::ResetEvent( m_TerminateIo );
+            ::ResetEvent( m_Overlapped.hEvent );
+            HANDLE events[] = { m_TerminateIo, m_Overlapped.hEvent };
             DWORD result = ::WSAWaitForMultipleEvents(2, events, FALSE, INFINITE, FALSE);
 
             HELIUM_ASSERT( result != WAIT_FAILED );
@@ -238,7 +244,7 @@ bool Socket::Read( void* buffer, uint32_t bytes, uint32_t& read, Condition& term
     return true;
 }
 
-bool Socket::Write( void* buffer, uint32_t bytes, uint32_t& wrote, Condition& terminate, const tchar_t* ip, uint16_t port )
+bool Socket::Write( void* buffer, uint32_t bytes, uint32_t& wrote, const tchar_t* ip, uint16_t port )
 {
     if (bytes == 0)
     {
@@ -278,7 +284,9 @@ bool Socket::Write( void* buffer, uint32_t bytes, uint32_t& wrote, Condition& te
         }
         else
         {
-            HANDLE events[] = { terminate.GetHandle(), m_Overlapped.hEvent };
+            ::ResetEvent( m_TerminateIo );
+            ::ResetEvent( m_Overlapped.hEvent );
+            HANDLE events[] = { m_TerminateIo, m_Overlapped.hEvent };
             DWORD result = ::WSAWaitForMultipleEvents(2, events, FALSE, INFINITE, FALSE);
 
             HELIUM_ASSERT( result != WAIT_FAILED );
