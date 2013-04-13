@@ -114,13 +114,13 @@ bool Thread::Start( const tchar_t* pName, ThreadPriority priority )
 		{
 			// Set the thread priority.
 			int win32Priority = WIN32_THREAD_PRIORITY_MAP[ priority ];
-			BOOL priorityResult = SetThreadPriority( reinterpret_cast< HANDLE >( m_Handle ), win32Priority );
+			BOOL priorityResult = SetThreadPriority( m_Handle, win32Priority );
 			HELIUM_ASSERT( priorityResult );
 			HELIUM_UNREF( priorityResult );
 		}
 
 		// Start the thread.
-		DWORD resumeResult = ResumeThread( reinterpret_cast< HANDLE >( m_Handle ) );
+		DWORD resumeResult = ResumeThread( m_Handle );
 		HELIUM_ASSERT( resumeResult != static_cast< DWORD >( -1 ) );
 		HELIUM_UNREF( resumeResult );
 	}
@@ -135,22 +135,29 @@ bool Thread::Start( const tchar_t* pName, ThreadPriority priority )
 /// @return  True if the thread finished or was not running to begin with, false if it is still running.
 bool Thread::Join( uint32_t timeOutMilliseconds )
 {
+	bool result = false;
+
 	if( m_Handle != 0 )
 	{
-		DWORD waitResult = WaitForSingleObject(
-			reinterpret_cast< HANDLE >( m_Handle ),
-			( timeOutMilliseconds != 0 ? timeOutMilliseconds : INFINITE ) );
+		DWORD waitResult = ::WaitForSingleObject( m_Handle, ( timeOutMilliseconds != 0 ? timeOutMilliseconds : INFINITE ) );
 		HELIUM_ASSERT( waitResult == WAIT_OBJECT_0 || waitResult == WAIT_TIMEOUT );
-		if( waitResult != WAIT_OBJECT_0 )
+		if( waitResult == WAIT_OBJECT_0 )
 		{
-			return false;
+			HELIUM_VERIFY( CloseHandle( m_Handle ) );
+			m_Handle = 0;
 		}
+		else
+		{
+			result = false;
+		}
+	}
 
-		HELIUM_VERIFY( CloseHandle( reinterpret_cast< HANDLE >( m_Handle ) ) );
+	if ( result )
+	{
 		m_Handle = 0;
 	}
 
-	return true;
+	return result;
 }
 
 /// Check if this thread has finished execution without blocking the calling thread.
@@ -160,20 +167,28 @@ bool Thread::Join( uint32_t timeOutMilliseconds )
 /// @return  True if the thread finished or was not running to begin with, false if it is still running.
 bool Thread::TryJoin()
 {
-	if( m_Handle != 0 )
-	{
-		DWORD waitResult = WaitForSingleObject( reinterpret_cast< HANDLE >( m_Handle ), 0 );
-		HELIUM_ASSERT( waitResult == WAIT_OBJECT_0 || waitResult == WAIT_TIMEOUT );
-		if( waitResult != WAIT_OBJECT_0 )
-		{
-			return false;
-		}
+	bool result = false;
 
-		HELIUM_VERIFY( CloseHandle( reinterpret_cast< HANDLE >( m_Handle ) ) );
+	if ( IsValid() )
+	{
+		DWORD waitResult = ::WaitForSingleObject( m_Handle, 0 );
+		HELIUM_ASSERT( waitResult == WAIT_OBJECT_0 || waitResult == WAIT_TIMEOUT );
+		if( waitResult == WAIT_OBJECT_0 )
+		{
+			HELIUM_VERIFY( ::CloseHandle( m_Handle ) );
+		}
+		else
+		{
+			result = false;
+		}
+	}
+
+	if ( result )
+	{
 		m_Handle = 0;
 	}
 
-	return true;
+	return false;
 }
 
 /// Get whether this thread is valid (created).

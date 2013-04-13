@@ -40,7 +40,7 @@ namespace Helium
 	public:
 #if HELIUM_OS_WIN
 		/// Platform-specific thread handle type.
-		typedef uintptr_t Handle;
+		typedef HANDLE Handle;
 
 		/// Thread ID type.
 		typedef unsigned long id_t;

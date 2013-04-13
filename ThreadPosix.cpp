@@ -44,10 +44,7 @@ Thread::Thread()
 
 Thread::~Thread()
 {
-    if ( IsValid() )
-    {
-        HELIUM_VERIFY( this->Join() );
-    }
+    Join();
 }
 
 bool Thread::Start( const tchar_t* pName, ThreadPriority priority )
@@ -85,7 +82,8 @@ bool Thread::Start( const tchar_t* pName, ThreadPriority priority )
 
 bool Thread::Join( uint32_t timeOutMilliseconds )
 {
-    HELIUM_ASSERT( IsValid() );
+    bool result = false;
+
     if ( IsValid() )
     {
         if ( timeOutMilliseconds )
@@ -93,30 +91,37 @@ bool Thread::Join( uint32_t timeOutMilliseconds )
             struct timespec spec;
             spec.tv_sec = timeOutMilliseconds / 1000;
             spec.tv_nsec = ( timeOutMilliseconds % 1000 ) * 1000000;
-            return pthread_timedjoin_np( m_Handle, NULL, &spec ) == 0;
+            result = pthread_timedjoin_np( m_Handle, NULL, &spec ) == 0;
         }
         else
         {
-            return pthread_join( m_Handle, NULL ) == 0;
+            result = pthread_join( m_Handle, NULL ) == 0;
         }
     }
-    else
+
+    if ( result )
     {
-        return false;
+        m_Valid = false;
     }
+
+    return result;
 }
 
 bool Thread::TryJoin()
 {
-    HELIUM_ASSERT( IsValid() );
+    bool result = false;
+
     if ( IsValid() )
     {
-        return pthread_tryjoin_np( m_Handle, NULL ) == 0;
+        result = pthread_tryjoin_np( m_Handle, NULL ) == 0;
     }
-    else
+
+    if ( result )
     {
-        return false;
+        m_Valid = false;
     }
+
+    return result;
 }
 
 bool Thread::IsValid() const
