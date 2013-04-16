@@ -1115,6 +1115,13 @@ bool MessagePackReader::Read( int64_t& value )
 	return result;
 }
 
+void MessagePackReader::Read( String& value )
+{
+	uint32_t length = ReadRawLength();
+	value.Resize( length );
+	ReadRaw( &value.GetFirst(), length );
+}
+
 uint32_t MessagePackReader::ReadRawLength()
 {
 	uint32_t length = 0;

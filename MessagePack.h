@@ -3,6 +3,7 @@
 #include "Foundation/DynamicArray.h"
 #include "Foundation/Endian.h"
 #include "Foundation/Stream.h"
+#include "Foundation/String.h"
 #include "Foundation/Numeric.h"
 
 #include "Persist/API.h"
@@ -101,8 +102,8 @@ namespace Helium
 			void Write( int16_t value );
 			void Write( int32_t value );
 			void Write( int64_t value );
-			void Write( const tchar_t* str );
 
+			void Write( const tchar_t* str );
 			void WriteRaw( const void* bytes, uint32_t length );
 
 			void BeginArray( uint32_t length );
@@ -124,6 +125,11 @@ namespace Helium
 			inline void SetStream( Stream* stream );
 
 			inline uint8_t Advance();
+			inline bool IsBoolean();
+			inline bool IsNumber();
+			inline bool IsRaw();
+			inline bool IsArray();
+			inline bool IsMap();
 			void Skip();
 
 			bool Read( bool& value );
@@ -141,6 +147,7 @@ namespace Helium
 			template< class T >
 			bool ReadNumber( T& value, bool clamp );
 
+			void Read( String& value );
 			uint32_t ReadRawLength();
 			void ReadRaw( void* bytes, uint32_t length );
 

@@ -27,8 +27,9 @@ namespace Helium
 		{
 			enum ArchiveFlag
 			{
-				StringCrc   = 1 << 0, // Using strings where sensible for portability (instead of CRC-32)
-				SparseArray = 1 << 1, // Allow sparse array populations for failed objects
+				Notify      = 1 << 0, // Notify objects of changes
+				StringCrc   = 1 << 1, // Using strings where sensible for portability (instead of CRC-32)
+				SparseArray = 1 << 2, // Allow sparse array populations for failed objects
 			};
 		}
 

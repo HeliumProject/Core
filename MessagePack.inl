@@ -40,6 +40,101 @@ uint8_t Helium::Persist::MessagePackReader::Advance()
 	return this->type;
 }
 
+bool Helium::Persist::MessagePackReader::IsBoolean()
+{
+	return type == MessagePackTypes::False || type == MessagePackTypes::True;
+}
+
+bool Helium::Persist::MessagePackReader::IsNumber()
+{
+	if ( type & MessagePackMasks::FixNumPositiveType )
+	{
+		return true;
+	}
+
+	if ( type & MessagePackMasks::FixNumNegativeType )
+	{
+		return true;
+	}
+
+	switch ( type )
+	{
+	case MessagePackTypes::Float32:
+	case MessagePackTypes::Float64:
+	case MessagePackTypes::UInt8:
+	case MessagePackTypes::UInt16:
+	case MessagePackTypes::UInt32:
+	case MessagePackTypes::UInt64:
+	case MessagePackTypes::Int8:
+	case MessagePackTypes::Int16:
+	case MessagePackTypes::Int32:
+	case MessagePackTypes::Int64:
+		return true;
+
+	default:
+		break;
+	}
+
+	return false;
+}
+
+bool Helium::Persist::MessagePackReader::IsRaw()
+{
+	if ( type & MessagePackMasks::FixRawType )
+	{
+		return true;
+	}
+
+	switch ( type )
+	{
+	case MessagePackTypes::Raw16:
+	case MessagePackTypes::Raw32:
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool Helium::Persist::MessagePackReader::IsArray()
+{
+	if ( type & MessagePackMasks::FixArrayType )
+	{
+		return true;
+	}
+
+	switch ( type )
+	{
+	case MessagePackTypes::Array16:
+	case MessagePackTypes::Array32:
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool Helium::Persist::MessagePackReader::IsMap()
+{
+	if ( type & MessagePackMasks::FixMapType )
+	{
+		return true;
+	}
+
+	switch ( type )
+	{
+	case MessagePackTypes::Map16:
+	case MessagePackTypes::Map32:
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
 template< class T >
 bool Helium::Persist::MessagePackReader::ReadNumber( T& value, bool clamp )
 {
@@ -51,11 +146,11 @@ bool Helium::Persist::MessagePackReader::ReadNumber( T& value, bool clamp )
 
 	if ( type & MessagePackMasks::FixNumNegativeType )
 	{
-		value = reinterpret_cast< int8_t >( type );
+		value = static_cast< int8_t >( type );
 		return true;
 	}
 
-	switch ( switchType )
+	switch ( type )
 	{
 	case MessagePackTypes::Float32:
 	case MessagePackTypes::Float64:

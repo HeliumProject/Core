@@ -175,6 +175,60 @@ void ArchiveWriterBinary::SerializeField( void* instance, const Reflect::Field* 
 	{
 	case ReflectionTypes::ScalarData:
 		{
+			DataInstance i ( field, object );
+			ScalarData* scalar = static_cast< ScalarData* >( field->m_Data );
+			switch ( scalar->m_Type )
+			{
+			case ScalarTypes::Boolean:
+				m_Writer.Write( i.As<bool>() );
+				break;
+
+			case ScalarTypes::Unsigned8:
+				m_Writer.Write( i.As<uint8_t>() );
+				break;
+
+			case ScalarTypes::Unsigned16:
+				m_Writer.Write( i.As<uint16_t>() );
+				break;
+
+			case ScalarTypes::Unsigned32:
+				m_Writer.Write( i.As<uint32_t>() );
+				break;
+
+			case ScalarTypes::Unsigned64:
+				m_Writer.Write( i.As<uint64_t>() );
+				break;
+
+			case ScalarTypes::Signed8:
+				m_Writer.Write( i.As<int8_t>() );
+				break;
+
+			case ScalarTypes::Signed16:
+				m_Writer.Write( i.As<int16_t>() );
+				break;
+
+			case ScalarTypes::Signed32:
+				m_Writer.Write( i.As<int32_t>() );
+				break;
+
+			case ScalarTypes::Signed64:
+				m_Writer.Write( i.As<int64_t>() );
+				break;
+
+			case ScalarTypes::Float32:
+				m_Writer.Write( i.As<float32_t>() );
+				break;
+
+			case ScalarTypes::Float64:
+				m_Writer.Write( i.As<float64_t>() );
+				break;
+
+			case ScalarTypes::String:
+				String str;
+				scalar->Print( i, str, *this );
+				m_Writer.Write( str.GetData() );
+				break;
+			}
 			break;
 		}
 
@@ -407,6 +461,77 @@ void ArchiveReaderBinary::DeserializeField( void* instance, const Field* field, 
 	{
 	case ReflectionTypes::ScalarData:
 		{
+			bool clamp = true;
+			DataInstance i ( field, object );
+			ScalarData* scalar = static_cast< ScalarData* >( field->m_Data );
+
+			if ( m_Reader.IsBoolean() )
+			{
+				if ( scalar->m_Type == ScalarTypes::Boolean )
+				{
+					m_Reader.Read( i.As<bool>() );
+				}
+			}
+			else if ( m_Reader.IsNumber() )
+			{
+				switch ( scalar->m_Type )
+				{
+				case ScalarTypes::Unsigned8:
+					m_Reader.ReadNumber( i.As<uint8_t>(), clamp );
+					break;
+
+				case ScalarTypes::Unsigned16:
+					m_Reader.ReadNumber( i.As<uint16_t>(), clamp );
+					break;
+
+				case ScalarTypes::Unsigned32:
+					m_Reader.ReadNumber( i.As<uint32_t>(), clamp );
+					break;
+
+				case ScalarTypes::Unsigned64:
+					m_Reader.ReadNumber( i.As<uint64_t>(), clamp );
+					break;
+
+				case ScalarTypes::Signed8:
+					m_Reader.ReadNumber( i.As<int8_t>(), clamp );
+					break;
+
+				case ScalarTypes::Signed16:
+					m_Reader.ReadNumber( i.As<int16_t>(), clamp );
+					break;
+
+				case ScalarTypes::Signed32:
+					m_Reader.ReadNumber( i.As<int32_t>(), clamp );
+					break;
+
+				case ScalarTypes::Signed64:
+					m_Reader.ReadNumber( i.As<int64_t>(), clamp );
+					break;
+
+				case ScalarTypes::Float32:
+					m_Reader.ReadNumber( i.As<float32_t>(), clamp );
+					break;
+
+				case ScalarTypes::Float64:
+					m_Reader.ReadNumber( i.As<float64_t>(), clamp );
+					break;
+				}
+			}
+			else if ( m_Reader.IsRaw() )
+			{
+				if ( scalar->m_Type == ScalarTypes::String )
+				{
+					String str;
+					m_Reader.Read( str );
+					scalar->Parse( str, i, *this, m_Flags | ArchiveFlags::Notify ? true : false );
+					break;
+				}
+			}
+			else
+			{
+				m_Reader.Skip(); // no implicit conversion, discard data
+			}
+
 			break;
 		}
 
