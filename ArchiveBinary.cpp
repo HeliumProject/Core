@@ -171,12 +171,17 @@ void ArchiveWriterBinary::SerializeField( void* instance, const Reflect::Field* 
 		m_Writer.Write( field->m_Name );
 	}
 
-	switch ( field->m_Data->GetReflectionType() )
+	DataInstance i ( field, object );
+	SerializeData( i, field->m_Data, field, object );
+}
+
+void ArchiveWriterBinary::SerializeData( DataInstance i, Data* data, const Reflect::Field* field, Reflect::Object* object )
+{
+	switch ( data->GetReflectionType() )
 	{
 	case ReflectionTypes::ScalarData:
 		{
-			DataInstance i ( field, object );
-			ScalarData* scalar = static_cast< ScalarData* >( field->m_Data );
+			ScalarData* scalar = static_cast< ScalarData* >( data );
 			switch ( scalar->m_Type )
 			{
 			case ScalarTypes::Boolean:
@@ -234,19 +239,66 @@ void ArchiveWriterBinary::SerializeField( void* instance, const Reflect::Field* 
 
 	case ReflectionTypes::SetData:
 		{
+			SetData* set = static_cast< SetData* >( field->m_Data );
+
+			Data* itemData = set->GetItemData();
+			DynamicArray< DataInstance > items;
+			set->GetItems( items );
+
+			uint32_t length = static_cast< uint32_t >( items.GetSize() );
+			m_Writer.BeginArray( length );
+
+			for ( DynamicArray< DataInstance >::Iterator itr = items.Begin(), end = items.End(); itr != end; ++itr )
+			{
+				SerializeData( *itr, itemData, field, object );
+			}
+
 			break;
 		}
 
 	case ReflectionTypes::SequenceData:
 		{
+			SequenceData* sequence = static_cast< SequenceData* >( field->m_Data );
+
+			Data* itemData = sequence->GetItemData();
+			DynamicArray< DataInstance > items;
+			sequence->GetItems( items );
+
+			uint32_t length = static_cast< uint32_t >( items.GetSize() );
+			m_Writer.BeginArray( length );
+
+			for ( DynamicArray< DataInstance >::Iterator itr = items.Begin(), end = items.End(); itr != end; ++itr )
+			{
+				SerializeData( *itr, itemData, field, object );
+			}
+
 			break;
 		}
 
 	case ReflectionTypes::AssociationData:
 		{
+			AssociationData* association = static_cast< AssociationData* >( field->m_Data );
+
+			Data* keyData = association->GetKeyData();
+			Data* valueData = association->GetValueData();
+			DynamicArray< DataInstance > keys, values;
+			association->GetItems( keys, values );
+
+			uint32_t length = static_cast< uint32_t >( keys.GetSize() );
+			m_Writer.BeginMap( length );
+
+			for ( DynamicArray< DataInstance >::Iterator keyItr = keys.Begin(), valueItr = values.Begin(), keyEnd = keys.End(), valueEnd = values.End();
+				keyItr != keyEnd && valueItr != valueEnd;
+				++keyItr, ++valueItr )
+			{
+				SerializeData( *keyItr, keyData, field, object );
+				SerializeData( *valueItr, valueData, field, object );
+			}
+
 			break;
 		}
 	}
+
 }
 
 void ArchiveWriterBinary::ToStream( Object* object, Stream& stream, ObjectIdentifier* identifier, uint32_t flags )
@@ -457,98 +509,135 @@ void ArchiveReaderBinary::DeserializeField( void* instance, const Field* field, 
 	Log::Print(TXT("Deserializing field %s\n"), field->m_Name);
 #endif
 
-	switch ( field->m_Data->GetReflectionType() )
+	DataInstance i ( field, object );
+	DeserializeData( i, field->m_Data, field, object );
+}
+
+void ArchiveReaderBinary::DeserializeData( Reflect::DataInstance i, Reflect::Data* data, const Reflect::Field* field, Reflect::Object* object )
+{
+	if ( m_Reader.IsBoolean() )
 	{
-	case ReflectionTypes::ScalarData:
+		if ( data->GetReflectionType() == ReflectionTypes::ScalarData )
 		{
-			bool clamp = true;
-			DataInstance i ( field, object );
 			ScalarData* scalar = static_cast< ScalarData* >( field->m_Data );
-
-			if ( m_Reader.IsBoolean() )
+			if ( scalar->m_Type == ScalarTypes::Boolean )
 			{
-				if ( scalar->m_Type == ScalarTypes::Boolean )
-				{
-					m_Reader.Read( i.As<bool>() );
-				}
-			}
-			else if ( m_Reader.IsNumber() )
-			{
-				switch ( scalar->m_Type )
-				{
-				case ScalarTypes::Unsigned8:
-					m_Reader.ReadNumber( i.As<uint8_t>(), clamp );
-					break;
-
-				case ScalarTypes::Unsigned16:
-					m_Reader.ReadNumber( i.As<uint16_t>(), clamp );
-					break;
-
-				case ScalarTypes::Unsigned32:
-					m_Reader.ReadNumber( i.As<uint32_t>(), clamp );
-					break;
-
-				case ScalarTypes::Unsigned64:
-					m_Reader.ReadNumber( i.As<uint64_t>(), clamp );
-					break;
-
-				case ScalarTypes::Signed8:
-					m_Reader.ReadNumber( i.As<int8_t>(), clamp );
-					break;
-
-				case ScalarTypes::Signed16:
-					m_Reader.ReadNumber( i.As<int16_t>(), clamp );
-					break;
-
-				case ScalarTypes::Signed32:
-					m_Reader.ReadNumber( i.As<int32_t>(), clamp );
-					break;
-
-				case ScalarTypes::Signed64:
-					m_Reader.ReadNumber( i.As<int64_t>(), clamp );
-					break;
-
-				case ScalarTypes::Float32:
-					m_Reader.ReadNumber( i.As<float32_t>(), clamp );
-					break;
-
-				case ScalarTypes::Float64:
-					m_Reader.ReadNumber( i.As<float64_t>(), clamp );
-					break;
-				}
-			}
-			else if ( m_Reader.IsRaw() )
-			{
-				if ( scalar->m_Type == ScalarTypes::String )
-				{
-					String str;
-					m_Reader.Read( str );
-					scalar->Parse( str, i, *this, m_Flags | ArchiveFlags::Notify ? true : false );
-					break;
-				}
+				m_Reader.Read( i.As<bool>() );
 			}
 			else
 			{
 				m_Reader.Skip(); // no implicit conversion, discard data
 			}
-
-			break;
 		}
-
-	case ReflectionTypes::SetData:
+		else
 		{
-			break;
+			m_Reader.Skip(); // no implicit conversion, discard data
 		}
-
-	case ReflectionTypes::SequenceData:
+	}
+	else if ( m_Reader.IsNumber() )
+	{
+		if ( data->GetReflectionType() == ReflectionTypes::ScalarData )
 		{
-			break;
-		}
+			ScalarData* scalar = static_cast< ScalarData* >( field->m_Data );
+			bool clamp = true;
+			switch ( scalar->m_Type )
+			{
+			case ScalarTypes::Unsigned8:
+				m_Reader.ReadNumber( i.As<uint8_t>(), clamp );
+				break;
 
-	case ReflectionTypes::AssociationData:
-		{
-			break;
+			case ScalarTypes::Unsigned16:
+				m_Reader.ReadNumber( i.As<uint16_t>(), clamp );
+				break;
+
+			case ScalarTypes::Unsigned32:
+				m_Reader.ReadNumber( i.As<uint32_t>(), clamp );
+				break;
+
+			case ScalarTypes::Unsigned64:
+				m_Reader.ReadNumber( i.As<uint64_t>(), clamp );
+				break;
+
+			case ScalarTypes::Signed8:
+				m_Reader.ReadNumber( i.As<int8_t>(), clamp );
+				break;
+
+			case ScalarTypes::Signed16:
+				m_Reader.ReadNumber( i.As<int16_t>(), clamp );
+				break;
+
+			case ScalarTypes::Signed32:
+				m_Reader.ReadNumber( i.As<int32_t>(), clamp );
+				break;
+
+			case ScalarTypes::Signed64:
+				m_Reader.ReadNumber( i.As<int64_t>(), clamp );
+				break;
+
+			case ScalarTypes::Float32:
+				m_Reader.ReadNumber( i.As<float32_t>(), clamp );
+				break;
+
+			case ScalarTypes::Float64:
+				m_Reader.ReadNumber( i.As<float64_t>(), clamp );
+				break;
+
+			default:
+				m_Reader.Skip(); // no implicit conversion, discard data
+				break;
+			}
 		}
+		else
+		{
+			m_Reader.Skip(); // no implicit conversion, discard data
+		}
+	}
+	else if ( m_Reader.IsRaw() )
+	{
+		if ( data->GetReflectionType() == ReflectionTypes::ScalarData )
+		{
+			ScalarData* scalar = static_cast< ScalarData* >( field->m_Data );
+			if ( scalar->m_Type == ScalarTypes::String )
+			{
+				String str;
+				m_Reader.Read( str );
+				scalar->Parse( str, i, *this, m_Flags | ArchiveFlags::Notify ? true : false );
+			}
+		}
+		else
+		{
+			m_Reader.Skip(); // no implicit conversion, discard data
+		}
+	}
+	else if ( m_Reader.IsArray() )
+	{
+		if ( data->GetReflectionType() == ReflectionTypes::SetData )
+		{
+#pragma TODO("Set support")
+		}
+		else if ( data->GetReflectionType() == ReflectionTypes::SequenceData )
+		{
+#pragma TODO("Sequence support")
+		}
+		else
+		{
+			m_Reader.Skip(); // no implicit conversion, discard data
+		}
+	}
+	else if ( m_Reader.IsMap() )
+	{
+		if ( data->GetReflectionType() == ReflectionTypes::AssociationData )
+		{
+#pragma TODO("Association support")
+		}
+		else
+		{
+			m_Reader.Skip(); // no implicit conversion, discard data
+		}
+	}
+	else
+	{
+		m_Reader.Skip(); // no implicit conversion, discard data
 	}
 }
 
