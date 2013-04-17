@@ -171,7 +171,31 @@ void ArchiveWriterBinary::SerializeField( void* instance, const Field* field, Ob
 		m_Writer.Write( field->m_Name );
 	}
 
-	SerializeData( DataPointer ( field, object ), field->m_Data, field, object );
+	if ( field->m_Count > 1 )
+	{
+		DynamicArray< uint32_t > indices;
+		for ( uint32_t i=0; i<field->m_Count; ++i )
+		{
+			if ( field->ShouldSerialize( instance, object, i ) )
+			{
+				indices.Push( i );
+			}
+		}
+
+		m_Writer.BeginMap( field->m_Count );
+
+		for ( DynamicArray< uint32_t >::ConstIterator itr = indices.Begin(), end = indices.End(); itr != end; ++itr )
+		{
+			m_Writer.Write( *itr );
+			SerializeData( DataPointer ( field, object, *itr ), field->m_Data, field, object );
+		}
+
+		m_Writer.EndMap();
+	}
+	else
+	{
+		SerializeData( DataPointer ( field, object ), field->m_Data, field, object );
+	}
 }
 
 void ArchiveWriterBinary::SerializeData( DataPointer pointer, Data* data, const Field* field, Object* object )
@@ -297,7 +321,6 @@ void ArchiveWriterBinary::SerializeData( DataPointer pointer, Data* data, const 
 			break;
 		}
 	}
-
 }
 
 void ArchiveWriterBinary::ToStream( Object* object, Stream& stream, ObjectIdentifier* identifier, uint32_t flags )
@@ -507,6 +530,8 @@ void ArchiveReaderBinary::DeserializeField( void* instance, const Field* field, 
 #ifdef PERSIST_ARCHIVE_VERBOSE
 	Log::Print(TXT("Deserializing field %s\n"), field->m_Name);
 #endif
+
+#pragma TODO("Handle static arrays")
 
 	DeserializeData( DataPointer ( field, object ), field->m_Data, field, object );
 }
