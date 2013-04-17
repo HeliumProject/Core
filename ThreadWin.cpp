@@ -75,7 +75,7 @@ bool Thread::Start( const tchar_t* pName, ThreadPriority priority )
 	// Create the thread, but don't launch it yet (we want to set the thread name prior to the thread actually
 	// starting).
 	uint32_t threadId;
-	m_Handle = _beginthreadex( NULL, 0, ThreadCallback, this, CREATE_SUSPENDED, &threadId );
+	m_Handle = (HANDLE)_beginthreadex( NULL, 0, ThreadCallback, this, CREATE_SUSPENDED, &threadId );
 	HELIUM_ASSERT( m_Handle != 0 );
 	if( m_Handle != 0 )
 	{
