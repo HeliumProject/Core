@@ -13,12 +13,12 @@ using namespace Helium;
 using namespace Helium::Reflect;
 using namespace Helium::Persist;
 
-ArchiveWriterBinary::ArchiveWriterBinary( const FilePath& path, Reflect::ObjectIdentifier* identifier )
+ArchiveWriterBinary::ArchiveWriterBinary( const FilePath& path, ObjectIdentifier* identifier )
 	: ArchiveWriter( path, identifier )
 {
 }
 
-ArchiveWriterBinary::ArchiveWriterBinary( Stream *stream, Reflect::ObjectIdentifier* identifier )
+ArchiveWriterBinary::ArchiveWriterBinary( Stream *stream, ObjectIdentifier* identifier )
 	: ArchiveWriter( identifier )
 {
 	m_Stream.Reset( stream );
@@ -153,7 +153,7 @@ void ArchiveWriterBinary::SerializeInstance( void* instance, const Composite* co
 	}
 }
 
-void ArchiveWriterBinary::SerializeField( void* instance, const Reflect::Field* field, Object* object )
+void ArchiveWriterBinary::SerializeField( void* instance, const Field* field, Object* object )
 {
 #ifdef PERSIST_ARCHIVE_VERBOSE
 	Log::Print(TXT("Serializing field %s\n"), field->m_Name);
@@ -171,11 +171,10 @@ void ArchiveWriterBinary::SerializeField( void* instance, const Reflect::Field* 
 		m_Writer.Write( field->m_Name );
 	}
 
-	DataInstance i ( field, object );
-	SerializeData( i, field->m_Data, field, object );
+	SerializeData( DataPointer ( field, object ), field->m_Data, field, object );
 }
 
-void ArchiveWriterBinary::SerializeData( DataInstance i, Data* data, const Reflect::Field* field, Reflect::Object* object )
+void ArchiveWriterBinary::SerializeData( DataPointer pointer, Data* data, const Field* field, Object* object )
 {
 	switch ( data->GetReflectionType() )
 	{
@@ -185,52 +184,52 @@ void ArchiveWriterBinary::SerializeData( DataInstance i, Data* data, const Refle
 			switch ( scalar->m_Type )
 			{
 			case ScalarTypes::Boolean:
-				m_Writer.Write( i.As<bool>() );
+				m_Writer.Write( pointer.As<bool>() );
 				break;
 
 			case ScalarTypes::Unsigned8:
-				m_Writer.Write( i.As<uint8_t>() );
+				m_Writer.Write( pointer.As<uint8_t>() );
 				break;
 
 			case ScalarTypes::Unsigned16:
-				m_Writer.Write( i.As<uint16_t>() );
+				m_Writer.Write( pointer.As<uint16_t>() );
 				break;
 
 			case ScalarTypes::Unsigned32:
-				m_Writer.Write( i.As<uint32_t>() );
+				m_Writer.Write( pointer.As<uint32_t>() );
 				break;
 
 			case ScalarTypes::Unsigned64:
-				m_Writer.Write( i.As<uint64_t>() );
+				m_Writer.Write( pointer.As<uint64_t>() );
 				break;
 
 			case ScalarTypes::Signed8:
-				m_Writer.Write( i.As<int8_t>() );
+				m_Writer.Write( pointer.As<int8_t>() );
 				break;
 
 			case ScalarTypes::Signed16:
-				m_Writer.Write( i.As<int16_t>() );
+				m_Writer.Write( pointer.As<int16_t>() );
 				break;
 
 			case ScalarTypes::Signed32:
-				m_Writer.Write( i.As<int32_t>() );
+				m_Writer.Write( pointer.As<int32_t>() );
 				break;
 
 			case ScalarTypes::Signed64:
-				m_Writer.Write( i.As<int64_t>() );
+				m_Writer.Write( pointer.As<int64_t>() );
 				break;
 
 			case ScalarTypes::Float32:
-				m_Writer.Write( i.As<float32_t>() );
+				m_Writer.Write( pointer.As<float32_t>() );
 				break;
 
 			case ScalarTypes::Float64:
-				m_Writer.Write( i.As<float64_t>() );
+				m_Writer.Write( pointer.As<float64_t>() );
 				break;
 
 			case ScalarTypes::String:
 				String str;
-				scalar->Print( i, str, *this );
+				scalar->Print( pointer, str, *this );
 				m_Writer.Write( str.GetData() );
 				break;
 			}
@@ -242,13 +241,13 @@ void ArchiveWriterBinary::SerializeData( DataInstance i, Data* data, const Refle
 			SetData* set = static_cast< SetData* >( field->m_Data );
 
 			Data* itemData = set->GetItemData();
-			DynamicArray< DataInstance > items;
-			set->GetItems( items );
+			DynamicArray< DataPointer > items;
+			set->GetItems( pointer, items );
 
 			uint32_t length = static_cast< uint32_t >( items.GetSize() );
 			m_Writer.BeginArray( length );
 
-			for ( DynamicArray< DataInstance >::Iterator itr = items.Begin(), end = items.End(); itr != end; ++itr )
+			for ( DynamicArray< DataPointer >::Iterator itr = items.Begin(), end = items.End(); itr != end; ++itr )
 			{
 				SerializeData( *itr, itemData, field, object );
 			}
@@ -261,13 +260,13 @@ void ArchiveWriterBinary::SerializeData( DataInstance i, Data* data, const Refle
 			SequenceData* sequence = static_cast< SequenceData* >( field->m_Data );
 
 			Data* itemData = sequence->GetItemData();
-			DynamicArray< DataInstance > items;
-			sequence->GetItems( items );
+			DynamicArray< DataPointer > items;
+			sequence->GetItems( pointer, items );
 
 			uint32_t length = static_cast< uint32_t >( items.GetSize() );
 			m_Writer.BeginArray( length );
 
-			for ( DynamicArray< DataInstance >::Iterator itr = items.Begin(), end = items.End(); itr != end; ++itr )
+			for ( DynamicArray< DataPointer >::Iterator itr = items.Begin(), end = items.End(); itr != end; ++itr )
 			{
 				SerializeData( *itr, itemData, field, object );
 			}
@@ -281,13 +280,13 @@ void ArchiveWriterBinary::SerializeData( DataInstance i, Data* data, const Refle
 
 			Data* keyData = association->GetKeyData();
 			Data* valueData = association->GetValueData();
-			DynamicArray< DataInstance > keys, values;
-			association->GetItems( keys, values );
+			DynamicArray< DataPointer > keys, values;
+			association->GetItems( pointer, keys, values );
 
 			uint32_t length = static_cast< uint32_t >( keys.GetSize() );
 			m_Writer.BeginMap( length );
 
-			for ( DynamicArray< DataInstance >::Iterator keyItr = keys.Begin(), valueItr = values.Begin(), keyEnd = keys.End(), valueEnd = values.End();
+			for ( DynamicArray< DataPointer >::Iterator keyItr = keys.Begin(), valueItr = values.Begin(), keyEnd = keys.End(), valueEnd = values.End();
 				keyItr != keyEnd && valueItr != valueEnd;
 				++keyItr, ++valueItr )
 			{
@@ -413,7 +412,7 @@ void ArchiveReaderBinary::DeserializeArray( DynamicArray< ObjectPtr >& objects )
 			const Class* type = NULL;
 			if ( typeCrc != 0 )
 			{
-				type = Reflect::Registry::GetInstance()->GetClass( typeCrc );
+				type = Registry::GetInstance()->GetClass( typeCrc );
 			}
 
 			// read length info
@@ -468,7 +467,7 @@ void ArchiveReaderBinary::DeserializeArray( DynamicArray< ObjectPtr >& objects )
 	e_Status.Raise( info );
 }
 
-void ArchiveReaderBinary::DeserializeInstance( void* instance, const Composite* composite, Reflect::Object* object )
+void ArchiveReaderBinary::DeserializeInstance( void* instance, const Composite* composite, Object* object )
 {
 #ifdef PERSIST_ARCHIVE_VERBOSE
 	Log::Print(TXT("Deserializing %s\n"), composite->m_Name);
@@ -481,7 +480,7 @@ void ArchiveReaderBinary::DeserializeInstance( void* instance, const Composite* 
 	object->PostDeserialize( NULL );
 }
 
-void ArchiveReaderBinary::DeserializeFields( void* instance, const Composite* composite, Reflect::Object* object )
+void ArchiveReaderBinary::DeserializeFields( void* instance, const Composite* composite, Object* object )
 {
 	// read field count
 	int32_t fieldCount = -1;
@@ -509,11 +508,10 @@ void ArchiveReaderBinary::DeserializeField( void* instance, const Field* field, 
 	Log::Print(TXT("Deserializing field %s\n"), field->m_Name);
 #endif
 
-	DataInstance i ( field, object );
-	DeserializeData( i, field->m_Data, field, object );
+	DeserializeData( DataPointer ( field, object ), field->m_Data, field, object );
 }
 
-void ArchiveReaderBinary::DeserializeData( Reflect::DataInstance i, Reflect::Data* data, const Reflect::Field* field, Reflect::Object* object )
+void ArchiveReaderBinary::DeserializeData( DataPointer pointer, Data* data, const Field* field, Object* object )
 {
 	if ( m_Reader.IsBoolean() )
 	{
@@ -522,7 +520,7 @@ void ArchiveReaderBinary::DeserializeData( Reflect::DataInstance i, Reflect::Dat
 			ScalarData* scalar = static_cast< ScalarData* >( field->m_Data );
 			if ( scalar->m_Type == ScalarTypes::Boolean )
 			{
-				m_Reader.Read( i.As<bool>() );
+				m_Reader.Read( pointer.As<bool>() );
 			}
 			else
 			{
@@ -543,43 +541,43 @@ void ArchiveReaderBinary::DeserializeData( Reflect::DataInstance i, Reflect::Dat
 			switch ( scalar->m_Type )
 			{
 			case ScalarTypes::Unsigned8:
-				m_Reader.ReadNumber( i.As<uint8_t>(), clamp );
+				m_Reader.ReadNumber( pointer.As<uint8_t>(), clamp );
 				break;
 
 			case ScalarTypes::Unsigned16:
-				m_Reader.ReadNumber( i.As<uint16_t>(), clamp );
+				m_Reader.ReadNumber( pointer.As<uint16_t>(), clamp );
 				break;
 
 			case ScalarTypes::Unsigned32:
-				m_Reader.ReadNumber( i.As<uint32_t>(), clamp );
+				m_Reader.ReadNumber( pointer.As<uint32_t>(), clamp );
 				break;
 
 			case ScalarTypes::Unsigned64:
-				m_Reader.ReadNumber( i.As<uint64_t>(), clamp );
+				m_Reader.ReadNumber( pointer.As<uint64_t>(), clamp );
 				break;
 
 			case ScalarTypes::Signed8:
-				m_Reader.ReadNumber( i.As<int8_t>(), clamp );
+				m_Reader.ReadNumber( pointer.As<int8_t>(), clamp );
 				break;
 
 			case ScalarTypes::Signed16:
-				m_Reader.ReadNumber( i.As<int16_t>(), clamp );
+				m_Reader.ReadNumber( pointer.As<int16_t>(), clamp );
 				break;
 
 			case ScalarTypes::Signed32:
-				m_Reader.ReadNumber( i.As<int32_t>(), clamp );
+				m_Reader.ReadNumber( pointer.As<int32_t>(), clamp );
 				break;
 
 			case ScalarTypes::Signed64:
-				m_Reader.ReadNumber( i.As<int64_t>(), clamp );
+				m_Reader.ReadNumber( pointer.As<int64_t>(), clamp );
 				break;
 
 			case ScalarTypes::Float32:
-				m_Reader.ReadNumber( i.As<float32_t>(), clamp );
+				m_Reader.ReadNumber( pointer.As<float32_t>(), clamp );
 				break;
 
 			case ScalarTypes::Float64:
-				m_Reader.ReadNumber( i.As<float64_t>(), clamp );
+				m_Reader.ReadNumber( pointer.As<float64_t>(), clamp );
 				break;
 
 			default:
@@ -601,7 +599,7 @@ void ArchiveReaderBinary::DeserializeData( Reflect::DataInstance i, Reflect::Dat
 			{
 				String str;
 				m_Reader.Read( str );
-				scalar->Parse( str, i, *this, m_Flags | ArchiveFlags::Notify ? true : false );
+				scalar->Parse( str, pointer, *this, m_Flags | ArchiveFlags::Notify ? true : false );
 			}
 		}
 		else
@@ -611,13 +609,29 @@ void ArchiveReaderBinary::DeserializeData( Reflect::DataInstance i, Reflect::Dat
 	}
 	else if ( m_Reader.IsArray() )
 	{
+		uint32_t length = m_Reader.ReadArrayLength();
+
 		if ( data->GetReflectionType() == ReflectionTypes::SetData )
 		{
-#pragma TODO("Set support")
+			SetData* set = static_cast< SetData* >( field->m_Data );
+			Data* itemData = set->GetItemData();
+			for ( uint32_t i=0; i<length; ++i )
+			{
+				DataVariable item ( itemData );
+				DeserializeData( item, itemData, field, object );
+				set->InsertItem( pointer, item );
+			}
 		}
 		else if ( data->GetReflectionType() == ReflectionTypes::SequenceData )
 		{
-#pragma TODO("Sequence support")
+			SequenceData* sequence = static_cast< SequenceData* >( field->m_Data );
+			Data* itemData = sequence->GetItemData();
+			for ( uint32_t i=0; i<length; ++i )
+			{
+				DataVariable item ( itemData );
+				DeserializeData( item, itemData, field, object );
+				sequence->SetItem( pointer, i, item );
+			}
 		}
 		else
 		{
@@ -626,9 +640,21 @@ void ArchiveReaderBinary::DeserializeData( Reflect::DataInstance i, Reflect::Dat
 	}
 	else if ( m_Reader.IsMap() )
 	{
+		uint32_t length = m_Reader.ReadMapLength();
+
 		if ( data->GetReflectionType() == ReflectionTypes::AssociationData )
 		{
-#pragma TODO("Association support")
+			AssociationData* assocation = static_cast< AssociationData* >( field->m_Data );
+			Data* keyData = assocation->GetKeyData();
+			Data* valueData = assocation->GetValueData();
+			DataVariable key ( keyData );
+			DataVariable value ( valueData );
+			for ( uint32_t i=0; i<length; ++i )
+			{
+				DeserializeData( key, keyData, field, object );
+				DeserializeData( value, valueData, field, object );
+				assocation->SetItem( pointer, key, value );
+			}
 		}
 		else
 		{
