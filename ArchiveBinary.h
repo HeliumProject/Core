@@ -2,10 +2,10 @@
 
 #include "Foundation/DynamicArray.h"
 #include "Foundation/FilePath.h"
+#include "Foundation/MessagePack.h"
 #include "Foundation/Stream.h"
 
 #include "Persist/Archive.h"
-#include "Persist/MessagePack.h"
 
 #define PERSIST_ARCHIVE_VERBOSE
 
