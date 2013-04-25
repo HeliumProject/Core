@@ -30,6 +30,7 @@ namespace Helium
 
         public:
             bool Initialize(bool server, const tchar_t* name, const tchar_t* pipe_name, const tchar_t* server_name = 0);
+            void Close();
 
         protected:
             void ServerThread();

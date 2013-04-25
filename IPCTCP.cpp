@@ -68,6 +68,12 @@ bool TCPConnection::Initialize(bool server, const tchar_t* name, const tchar_t* 
     return true;
 }
 
+void TCPConnection::Close()
+{
+    m_ReadSocket.Close();
+    m_WriteSocket.Close();
+}
+
 void TCPConnection::ServerThread()
 {
     Helium::InitializeSockets();
@@ -419,7 +425,7 @@ bool TCPConnection::Read(void* buffer, uint32_t bytes)
         Helium::Print(" %s: Receiving %d bytes...\n", m_Name, count);
 #endif
 
-        if (!m_ReadSocket.Read( buffer, count, bytes_got, m_Terminate ))
+        if (!m_ReadSocket.Read( buffer, count, bytes_got ))
         {
 #ifdef IPC_TCP_DEBUG_SOCKETS
             Helium::Print( "%s: ReadSocket failed\n", m_Name );
@@ -467,7 +473,7 @@ bool TCPConnection::Write(void* buffer, uint32_t bytes)
         Helium::Print(" %s: Sending %d bytes...\n", m_Name, count);
 #endif
 
-        if (!m_WriteSocket.Write( buffer, count, bytes_put, m_Terminate ))
+        if (!m_WriteSocket.Write( buffer, count, bytes_put ))
         {
             return false;
         }

@@ -31,6 +31,7 @@ namespace Helium
 
         public:
             bool Initialize(bool server, const tchar_t* name, const tchar_t* server_ip, const uint16_t server_port_no);
+            void Close();
 
         protected:
             void ServerThread();
