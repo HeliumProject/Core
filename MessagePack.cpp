@@ -11,9 +11,9 @@ void MessagePackWriter::WriteNil()
 {
 	stream->Write< uint8_t >( MessagePackTypes::Nil );
 
-	if ( !size.IsEmpty() )
+	if ( !containerState.IsEmpty() )
 	{
-		size.GetLast()--;
+		containerState.GetLast().length--;
 	}
 }
 
@@ -21,9 +21,9 @@ void MessagePackWriter::Write( bool value )
 {
 	stream->Write< uint8_t >( value ? MessagePackTypes::True : MessagePackTypes::False );
 
-	if ( !size.IsEmpty() )
+	if ( !containerState.IsEmpty() )
 	{
-		size.GetLast()--;
+		containerState.GetLast().length--;
 	}
 }
 
@@ -37,9 +37,9 @@ void MessagePackWriter::Write( float32_t value )
 	stream->Write< float32_t >( value );
 #endif
 
-	if ( !size.IsEmpty() )
+	if ( !containerState.IsEmpty() )
 	{
-		size.GetLast()--;
+		containerState.GetLast().length--;
 	}
 }
 
@@ -53,9 +53,9 @@ void MessagePackWriter::Write( float64_t value )
 	stream->Write< float64_t >( value );
 #endif
 
-	if ( !size.IsEmpty() )
+	if ( !containerState.IsEmpty() )
 	{
-		size.GetLast()--;
+		containerState.GetLast().length--;
 	}
 }
 
@@ -71,9 +71,9 @@ void MessagePackWriter::Write( uint8_t value )
 		stream->Write< uint8_t >( value );
 	}
 
-	if ( !size.IsEmpty() )
+	if ( !containerState.IsEmpty() )
 	{
-		size.GetLast()--;
+		containerState.GetLast().length--;
 	}
 }
 
@@ -97,9 +97,9 @@ void MessagePackWriter::Write( uint16_t value )
 		stream->Write< uint16_t >( value );
 	}
 
-	if ( !size.IsEmpty() )
+	if ( !containerState.IsEmpty() )
 	{
-		size.GetLast()--;
+		containerState.GetLast().length--;
 	}
 }
 
@@ -133,9 +133,9 @@ void MessagePackWriter::Write( uint32_t value )
 		stream->Write< uint32_t >( value );
 	}
 
-	if ( !size.IsEmpty() )
+	if ( !containerState.IsEmpty() )
 	{
-		size.GetLast()--;
+		containerState.GetLast().length--;
 	}
 }
 
@@ -179,9 +179,9 @@ void MessagePackWriter::Write( uint64_t value )
 		stream->Write< uint64_t >( value );
 	}
 
-	if ( !size.IsEmpty() )
+	if ( !containerState.IsEmpty() )
 	{
-		size.GetLast()--;
+		containerState.GetLast().length--;
 	}
 }
 
@@ -201,9 +201,9 @@ void MessagePackWriter::Write( int8_t value )
 		stream->Write< int8_t >( value );
 	}
 
-	if ( !size.IsEmpty() )
+	if ( !containerState.IsEmpty() )
 	{
-		size.GetLast()--;
+		containerState.GetLast().length--;
 	}
 }
 
@@ -231,9 +231,9 @@ void MessagePackWriter::Write( int16_t value )
 		stream->Write< int16_t >( value );
 	}
 
-	if ( !size.IsEmpty() )
+	if ( !containerState.IsEmpty() )
 	{
-		size.GetLast()--;
+		containerState.GetLast().length--;
 	}
 }
 
@@ -271,9 +271,9 @@ void MessagePackWriter::Write( int32_t value )
 		stream->Write< int32_t >( value );
 	}
 
-	if ( !size.IsEmpty() )
+	if ( !containerState.IsEmpty() )
 	{
-		size.GetLast()--;
+		containerState.GetLast().length--;
 	}
 }
 
@@ -321,9 +321,9 @@ void MessagePackWriter::Write( int64_t value )
 		stream->Write< int64_t >( value );
 	}
 
-	if ( !size.IsEmpty() )
+	if ( !containerState.IsEmpty() )
 	{
-		size.GetLast()--;
+		containerState.GetLast().length--;
 	}
 }
 
@@ -365,56 +365,85 @@ void MessagePackWriter::WriteRaw( const void* bytes, uint32_t length )
 		throw Helium::Exception( "Buffer too large: %d", length );
 	}
 
-	if ( !size.IsEmpty() )
+	if ( !containerState.IsEmpty() )
 	{
-		size.GetLast()--;
+		containerState.GetLast().length--;
 	}
 }
 
 void MessagePackWriter::BeginArray( uint32_t length )
 {
-	if ( length <= 15 )
-	{
-		stream->Write< uint8_t >( MessagePackTypes::FixArray | static_cast< uint8_t >( length ) );
-		container.Push( MessagePackContainers::Array );
-		size.Push( length );
-	}
-	else if ( length <= 65535 )
-	{
-		uint16_t temp = length;
+	ContainerState state;
+	state.container = MessagePackContainers::Array;
+	state.length = length;
 
-#if HELIUM_ENDIAN_LITTLE
-		ConvertEndian( temp );
-#endif
-		stream->Write< uint8_t >( MessagePackTypes::Array16 );
-		stream->Write< uint16_t >( temp );
-		container.Push( MessagePackContainers::Array );
-		size.Push( length );
-	}
-	else if ( length <= 4294967295 )
+	if ( length == NumericLimits< uint32_t >::Maximum )
 	{
-#if HELIUM_ENDIAN_LITTLE
-		ConvertEndian( length );
-#endif
 		stream->Write< uint8_t >( MessagePackTypes::Array32 );
+		state.lengthOffset = stream->Tell();
 		stream->Write< uint32_t >( length );
-		container.Push( MessagePackContainers::Array );
-		size.Push( length );
 	}
 	else
 	{
-		throw Helium::Exception( "Array too large: %d", length );
+		state.lengthOffset = Invalid< int64_t >();
+
+		if ( length <= 15 )
+		{
+			stream->Write< uint8_t >( MessagePackTypes::FixArray | static_cast< uint8_t >( length ) );
+		}
+		else if ( length <= 65535 )
+		{
+			uint16_t temp = length;
+
+#if HELIUM_ENDIAN_LITTLE
+			ConvertEndian( temp );
+#endif
+			stream->Write< uint8_t >( MessagePackTypes::Array16 );
+			stream->Write< uint16_t >( temp );
+		}
+		else if ( length <= 4294967295 )
+		{
+			uint32_t temp = length;
+
+#if HELIUM_ENDIAN_LITTLE
+			ConvertEndian( temp );
+#endif
+			stream->Write< uint8_t >( MessagePackTypes::Array32 );
+			stream->Write< uint32_t >( length );
+		}
+		else
+		{
+			throw Helium::Exception( "Array too large: %d", length );
+		}
 	}
+
+	containerState.Push( state );
 }
 
 void MessagePackWriter::EndArray()
 {
-	uint32_t length = size.GetLast();
-	if ( container.GetLast() == MessagePackContainers::Array )
+	ContainerState state = containerState.Pop();
+
+	if ( state.container == MessagePackContainers::Array )
 	{
-		if ( length != 0 )
+		if ( state.lengthOffset == Invalid< int64_t >() )
 		{
-			throw Helium::Exception( "Incorrent number of objects written into array, off by %d", length );
+			stream->Seek( state.lengthOffset, SeekOrigins::Begin );
+
+			uint32_t temp = NumericLimits< uint32_t >::Maximum - state.length;
+#if HELIUM_ENDIAN_LITTLE
+			ConvertEndian( temp );
+#endif
+			stream->Write< uint32_t >( temp );
+
+			stream->Seek( 0, SeekOrigins::End );
+		}
+		else
+		{
+			if ( state.length != 0 )
+			{
+				throw Helium::Exception( "Incorrent number of objects written into array, off by %d", state.length );
+			}
 		}
 	}
 	else
@@ -422,59 +451,83 @@ void MessagePackWriter::EndArray()
 		throw Helium::Exception( "Mismatched container Begin/End for array" );
 	}
 
-	container.Pop();
-	size.Pop();
-
-	if ( !size.IsEmpty() )
+	if ( !containerState.IsEmpty() )
 	{
-		size.GetLast()--;
+		containerState.GetLast().length--;
 	}
 }
 
 void MessagePackWriter::BeginMap( uint32_t length )
 {
-	if ( length <= 15 )
-	{
-		stream->Write< uint8_t >( MessagePackTypes::FixArray | static_cast< uint8_t >( length ) );
-		container.Push( MessagePackContainers::Map );
-		size.Push( length );
-	}
-	else if ( length <= 65535 )
-	{
-		uint16_t temp = length;
+	ContainerState state;
+	state.container = MessagePackContainers::Map;
+	state.length = length;
 
-#if HELIUM_ENDIAN_LITTLE
-		ConvertEndian( temp );
-#endif
-		stream->Write< uint8_t >( MessagePackTypes::Array16 );
-		stream->Write< uint16_t >( temp );
-		container.Push( MessagePackContainers::Map );
-		size.Push( length );
-	}
-	else if ( length <= 4294967295 )
+	if ( length == NumericLimits< uint32_t >::Maximum )
 	{
-#if HELIUM_ENDIAN_LITTLE
-		ConvertEndian( length );
-#endif
-		stream->Write< uint8_t >( MessagePackTypes::Array32 );
+		stream->Write< uint8_t >( MessagePackTypes::Map32 );
+		state.lengthOffset = stream->Tell();
 		stream->Write< uint32_t >( length );
-		container.Push( MessagePackContainers::Map );
-		size.Push( length );
 	}
 	else
 	{
-		throw Helium::Exception( "Map too large: %d", length );
+		state.lengthOffset = Invalid< int64_t >();
+
+		if ( length <= 15 )
+		{
+			stream->Write< uint8_t >( MessagePackTypes::FixArray | static_cast< uint8_t >( length ) );
+		}
+		else if ( length <= 65535 )
+		{
+			uint16_t temp = length;
+
+#if HELIUM_ENDIAN_LITTLE
+			ConvertEndian( temp );
+#endif
+			stream->Write< uint8_t >( MessagePackTypes::Array16 );
+			stream->Write< uint16_t >( temp );
+		}
+		else if ( length <= 4294967295 )
+		{
+#if HELIUM_ENDIAN_LITTLE
+			ConvertEndian( length );
+#endif
+			stream->Write< uint8_t >( MessagePackTypes::Array32 );
+			stream->Write< uint32_t >( length );
+		}
+		else
+		{
+			throw Helium::Exception( "Map too large: %d", length );
+		}
 	}
+
+	containerState.Push( state );
 }
 
 void MessagePackWriter::EndMap()
 {
-	uint32_t length = size.GetLast();
-	if ( container.GetLast() == MessagePackContainers::Map )
+	ContainerState state = containerState.Pop();
+
+	if ( state.container == MessagePackContainers::Map )
 	{
-		if ( length != 0 )
+		if ( state.lengthOffset == Invalid< int64_t >() )
 		{
-			throw Helium::Exception( "Incorrent number of objects written into map, off by %d", length );
+			stream->Seek( state.lengthOffset, SeekOrigins::Begin );
+
+			uint32_t temp = NumericLimits< uint32_t >::Maximum - state.length;
+#if HELIUM_ENDIAN_LITTLE
+			ConvertEndian( temp );
+#endif
+			stream->Write< uint32_t >( temp );
+
+			stream->Seek( 0, SeekOrigins::End );
+		}
+		else
+		{
+			if ( state.length != 0 )
+			{
+				throw Helium::Exception( "Incorrent number of objects written into map, off by %d", state.length );
+			}
 		}
 	}
 	else
@@ -482,12 +535,9 @@ void MessagePackWriter::EndMap()
 		throw Helium::Exception( "Mismatched container Begin/End for map" );
 	}
 
-	container.Pop();
-	size.Pop();
-
-	if ( !size.IsEmpty() )
+	if ( !containerState.IsEmpty() )
 	{
-		size.GetLast()--;
+		containerState.GetLast().length--;
 	}
 }
 
@@ -620,9 +670,9 @@ bool MessagePackReader::Read( bool& value )
 		}
 	}
 
-	if ( result && !size.IsEmpty() )
+	if ( result && !containerState.IsEmpty() )
 	{
-		size.GetLast()--;
+		containerState.GetLast().length--;
 	}
 
 	return result;
@@ -645,9 +695,9 @@ bool MessagePackReader::Read( float32_t& value )
 		result = true;
 	}
 
-	if ( result && !size.IsEmpty() )
+	if ( result && !containerState.IsEmpty() )
 	{
-		size.GetLast()--;
+		containerState.GetLast().length--;
 	}
 
 	return result;
@@ -686,9 +736,9 @@ bool MessagePackReader::Read( float64_t& value )
 		}
 	}
 
-	if ( result && !size.IsEmpty() )
+	if ( result && !containerState.IsEmpty() )
 	{
-		size.GetLast()--;
+		containerState.GetLast().length--;
 	}
 
 	return result;
@@ -712,9 +762,9 @@ bool MessagePackReader::Read( uint8_t& value )
 		}
 	}
 
-	if ( result && !size.IsEmpty() )
+	if ( result && !containerState.IsEmpty() )
 	{
-		size.GetLast()--;
+		containerState.GetLast().length--;
 	}
 
 	return result;
@@ -755,9 +805,9 @@ bool MessagePackReader::Read( uint16_t& value )
 		}
 	}
 
-	if ( result && !size.IsEmpty() )
+	if ( result && !containerState.IsEmpty() )
 	{
-		size.GetLast()--;
+		containerState.GetLast().length--;
 	}
 
 	return result;
@@ -811,9 +861,9 @@ bool MessagePackReader::Read( uint32_t& value )
 		}
 	}
 
-	if ( result && !size.IsEmpty() )
+	if ( result && !containerState.IsEmpty() )
 	{
-		size.GetLast()--;
+		containerState.GetLast().length--;
 	}
 
 	return result;
@@ -880,9 +930,9 @@ bool MessagePackReader::Read( uint64_t& value )
 		}
 	}
 
-	if ( result && !size.IsEmpty() )
+	if ( result && !containerState.IsEmpty() )
 	{
-		size.GetLast()--;
+		containerState.GetLast().length--;
 	}
 
 	return result;
@@ -914,9 +964,9 @@ bool MessagePackReader::Read( int8_t& value )
 		}
 	}
 
-	if ( result && !size.IsEmpty() )
+	if ( result && !containerState.IsEmpty() )
 	{
-		size.GetLast()--;
+		containerState.GetLast().length--;
 	}
 
 	return result;
@@ -965,9 +1015,9 @@ bool MessagePackReader::Read( int16_t& value )
 		}
 	}
 
-	if ( result && !size.IsEmpty() )
+	if ( result && !containerState.IsEmpty() )
 	{
-		size.GetLast()--;
+		containerState.GetLast().length--;
 	}
 
 	return result;
@@ -1029,9 +1079,9 @@ bool MessagePackReader::Read( int32_t& value )
 		}
 	}
 
-	if ( result && !size.IsEmpty() )
+	if ( result && !containerState.IsEmpty() )
 	{
-		size.GetLast()--;
+		containerState.GetLast().length--;
 	}
 
 	return result;
@@ -1106,9 +1156,9 @@ bool MessagePackReader::Read( int64_t& value )
 		}
 	}
 
-	if ( result && !size.IsEmpty() )
+	if ( result && !containerState.IsEmpty() )
 	{
-		size.GetLast()--;
+		containerState.GetLast().length--;
 	}
 
 	return result;
@@ -1216,18 +1266,21 @@ uint32_t MessagePackReader::ReadArrayLength()
 
 void MessagePackReader::BeginArray( uint32_t length )
 {
-	container.Push( MessagePackContainers::Array );
-	size.Push( length );
+	ContainerState state;
+	state.container = MessagePackContainers::Array;
+	state.length = length;
+	containerState.Push( state );
 }
 
 void MessagePackReader::EndArray()
 {
-	uint32_t length = size.GetLast();
-	if ( container.GetLast() == MessagePackContainers::Array )
+	ContainerState state = containerState.Pop();
+
+	if ( state.container == MessagePackContainers::Array )
 	{
-		if ( length != 0 )
+		if ( state.length != 0 )
 		{
-			throw Helium::Exception( "Incorrent number of objects read from array, off by %d", length );
+			throw Helium::Exception( "Incorrent number of objects read from array, off by %d", state.length );
 		}
 	}
 	else
@@ -1235,12 +1288,9 @@ void MessagePackReader::EndArray()
 		throw Helium::Exception( "Mismatched container Begin/End for array" );
 	}
 
-	container.Pop();
-	size.Pop();
-
-	if ( !size.IsEmpty() )
+	if ( !containerState.IsEmpty() )
 	{
-		size.GetLast()--;
+		containerState.GetLast().length--;
 	}
 }
 
@@ -1290,18 +1340,21 @@ uint32_t MessagePackReader::ReadMapLength()
 
 void MessagePackReader::BeginMap( uint32_t length )
 {
-	container.Push( MessagePackContainers::Map );
-	size.Push( length );
+	ContainerState state;
+	state.container = MessagePackContainers::Map;
+	state.length = length;
+	containerState.Push( state );
 }
 
 void MessagePackReader::EndMap()
 {
-	uint32_t length = size.GetLast();
-	if ( container.GetLast() == MessagePackContainers::Map )
+	ContainerState state = containerState.Pop();
+
+	if ( state.container == MessagePackContainers::Map )
 	{
-		if ( length != 0 )
+		if ( state.length != 0 )
 		{
-			throw Helium::Exception( "Incorrent number of objects read from map, off by %d", length );
+			throw Helium::Exception( "Incorrent number of objects read from map, off by %d", state.length );
 		}
 	}
 	else
@@ -1309,12 +1362,9 @@ void MessagePackReader::EndMap()
 		throw Helium::Exception( "Mismatched container Begin/End for map" );
 	}
 
-	container.Pop();
-	size.Pop();
-
-	if ( !size.IsEmpty() )
+	if ( !containerState.IsEmpty() )
 	{
-		size.GetLast()--;
+		containerState.GetLast().length--;
 	}
 }
 

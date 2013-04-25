@@ -9,8 +9,7 @@ void Helium::MessagePackWriter::SetStream( Stream* stream )
 	if ( this->stream != stream )
 	{
 		this->stream = stream;
-		this->container.Clear();
-		this->size.Clear();
+		this->containerState.Clear();
 	}
 }
 
@@ -27,17 +26,18 @@ void Helium::MessagePackReader::SetStream( Stream* stream )
 	{
 		this->stream = stream;
 		this->type = MessagePackTypes::Nil;
-		this->container.Clear();
-		this->size.Clear();
+		this->containerState.Clear();
 	}
 }
 
-uint8_t Helium::MessagePackReader::Advance()
+void Helium::MessagePackReader::Advance()
 {
-	uint8_t type = 0x0;
 	stream->Read( &type, sizeof( type ), 1 );
-	this->type = type;
-	return this->type;
+}
+
+bool Helium::MessagePackReader::IsNil()
+{
+	return type == MessagePackTypes::Nil;
 }
 
 bool Helium::MessagePackReader::IsBoolean()

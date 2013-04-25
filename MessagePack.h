@@ -103,16 +103,21 @@ namespace Helium
 		void Write( const tchar_t* str );
 		void WriteRaw( const void* bytes, uint32_t length );
 
-		void BeginArray( uint32_t length );
+		void BeginArray( uint32_t length = NumericLimits< uint32_t >::Maximum );
 		void EndArray();
-			
-		void BeginMap( uint32_t length );
+
+		void BeginMap( uint32_t length = NumericLimits< uint32_t >::Maximum );
 		void EndMap();
 
 	private:
-		Stream*                              stream;
-		DynamicArray< MessagePackContainer > container; // for bookeeping container termination
-		DynamicArray< uint32_t >             size;      // for bookeeping container size
+		Stream*                        stream;
+		struct ContainerState
+		{
+			MessagePackContainer container;
+			uint32_t             length;
+			int64_t              lengthOffset;
+		};
+		DynamicArray< ContainerState > containerState;
 	};
 
 	class HELIUM_FOUNDATION_API MessagePackReader
@@ -121,7 +126,8 @@ namespace Helium
 		inline MessagePackReader( Stream* stream = NULL );
 		inline void SetStream( Stream* stream );
 
-		inline uint8_t Advance();
+		inline void Advance();
+		inline bool IsNil();
 		inline bool IsBoolean();
 		inline bool IsNumber();
 		inline bool IsRaw();
@@ -161,10 +167,14 @@ namespace Helium
 		void ReadUnsigned( uint64_t& value );
 		void ReadSigned( int64_t& value );
 
-		Stream*                              stream;
-		uint8_t                              type;
-		DynamicArray< MessagePackContainer > container; // for bookeeping container termination
-		DynamicArray< uint32_t >             size;      // for bookeeping container size
+		Stream*                        stream;
+		uint8_t                        type;
+		struct ContainerState
+		{
+			MessagePackContainer container;
+			uint32_t             length;
+		};
+		DynamicArray< ContainerState > containerState;
 	};
 }
 
