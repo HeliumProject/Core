@@ -15,7 +15,7 @@
 #include "Persist/Exceptions.h"
 
 // enable verbose archive printing
-//#define PERSIST_ARCHIVE_VERBOSE
+#define PERSIST_ARCHIVE_VERBOSE 1
 
 namespace Helium
 {
@@ -185,15 +185,8 @@ namespace Helium
 		HELIUM_PERSIST_API ArchiveWriterPtr GetWriter( const FilePath& path, Reflect::ObjectIdentifier* identifier, ArchiveType archiveType = ArchiveTypes::Auto );
 		HELIUM_PERSIST_API ArchiveReaderPtr GetReader( const FilePath& path, Reflect::ObjectResolver* resolver, ArchiveType archiveType = ArchiveTypes::Auto );
 
-		HELIUM_PERSIST_API bool
-			ToArchive( const FilePath& path, Reflect::ObjectPtr object, Reflect::ObjectIdentifier* identifier = NULL, ArchiveType archiveType = ArchiveTypes::Auto, tstring* error = NULL );
-
-		template <class T> Helium::StrongPtr<T>
-			FromArchive( const FilePath& path, Reflect::ObjectResolver* resolver = NULL, ArchiveType archiveType = ArchiveTypes::Auto );
-		
-		template <>
-		HELIUM_PERSIST_API Helium::StrongPtr< Reflect::Object >
-			FromArchive( const FilePath& path, Reflect::ObjectResolver* resolver, ArchiveType archiveType  );
+		HELIUM_PERSIST_API bool ToArchive( const FilePath& path, Reflect::ObjectPtr object, Reflect::ObjectIdentifier* identifier = NULL, ArchiveType archiveType = ArchiveTypes::Auto, tstring* error = NULL );
+		HELIUM_PERSIST_API bool FromArchive( const FilePath& path, Reflect::ObjectPtr& object, Reflect::ObjectResolver* resolver, ArchiveType archiveType, tstring* error = NULL );
 	}
 }
 

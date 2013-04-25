@@ -7,8 +7,6 @@
 
 #include "Persist/Archive.h"
 
-#define PERSIST_ARCHIVE_VERBOSE
-
 namespace Helium
 {
 	namespace Persist
@@ -49,9 +47,8 @@ namespace Helium
 			virtual void Read() HELIUM_OVERRIDE;
 
 		private:
-			void DeserializeArray( DynamicArray< Reflect::ObjectPtr >& objects );
+			void Deserialize( DynamicArray< Reflect::ObjectPtr >& objects );
 			void DeserializeInstance( void* instance, const Reflect::Composite* composite, Reflect::Object* object );
-			void DeserializeFields( void* instance, const Reflect::Composite* composite, Reflect::Object* object );
 			void DeserializeField( void* instance, const Reflect::Field* field, Reflect::Object* object );
 			void DeserializeData( Reflect::DataPointer pointer, Reflect::Data* data, const Reflect::Field* field, Reflect::Object* object );
 

@@ -259,6 +259,16 @@ bool Persist::ToArchive( const FilePath& path, ObjectPtr object, ObjectIdentifie
 			safetyPath.Delete();
 			return false;
 		}
+		catch( ... )
+		{
+			if ( open )
+			{
+				archive->Close();
+			}
+
+			safetyPath.Delete();
+			throw;
+		}
 	}
 
 	try
@@ -286,14 +296,14 @@ bool Persist::ToArchive( const FilePath& path, ObjectPtr object, ObjectIdentifie
 	return true;
 }
 
-template<>
-StrongPtr< Object > Persist::FromArchive( const FilePath& path, ObjectResolver* resolver, ArchiveType archiveType )
+bool Persist::FromArchive( const FilePath& path, ObjectPtr& object, ObjectResolver* resolver, ArchiveType archiveType, tstring* error )
 {
 	HELIUM_ASSERT( !path.empty() );
 	PERSIST_SCOPE_TIMER( ( "%s", path.c_str() ) );
 	Log::Debug( TXT( "Parsing '%s'\n" ), path.c_str() );
 
 	ArchiveReaderPtr archive = GetReader( path, resolver, archiveType );
+	archive->Put( object );
 
 	if ( Helium::IsDebuggerPresent() )
 	{
@@ -303,32 +313,44 @@ StrongPtr< Object > Persist::FromArchive( const FilePath& path, ObjectResolver* 
 	}
 	else
 	{
+		bool open = false;
+
 		try
 		{
 			archive->Open();
-
-			try
-			{
-				archive->Read();
-			}
-			catch (...)
-			{
-				archive->Close();
-				throw;
-			}
-
+			open = true;
+			archive->Read();
 			archive->Close(); 
 		}
-		catch (Helium::Exception& ex)
+		catch ( Helium::Exception& ex )
 		{
 			tstringstream str;
 			str << "While reading '" << path.c_str() << "': " << ex.Get();
-			ex.Set( str.str() );
+
+			if ( error )
+			{
+				*error = str.str();
+			}
+
+			if ( open )
+			{
+				archive->Close();
+			}
+
+			return false;
+		}
+		catch ( ... )
+		{
+			if ( open )
+			{
+				archive->Close();
+			}
+
 			throw;
 		}
 	}
 
-	ObjectPtr object;
 	archive->Get( object );
-	return object;
+
+	return true;
 }
