@@ -1,243 +1,243 @@
 namespace Helium
 {
-    /// ArrayCopy() implementation for types with a trivial assignment operator.
-    ///
-    /// @param[in] pDest              Base address of the destination array.
-    /// @param[in] pSource            Base address of the source array.
-    /// @param[in] count              Number of elements to copy.
-    /// @param[in] rHasTrivialAssign  std::true_type.
-    template< typename T >
-    void _ArrayCopy( T* pDest, const T* pSource, size_t count, const std::true_type& /*rHasTrivialAssign*/ )
-    {
-        MemoryCopy( pDest, pSource, sizeof( T ) * count );
-    }
+	/// ArrayCopy() implementation for types with a trivial assignment operator.
+	///
+	/// @param[in] pDest              Base address of the destination array.
+	/// @param[in] pSource            Base address of the source array.
+	/// @param[in] count              Number of elements to copy.
+	/// @param[in] rHasTrivialAssign  std::true_type.
+	template< typename T >
+	void _ArrayCopy( T* pDest, const T* pSource, size_t count, const std::true_type& /*rHasTrivialAssign*/ )
+	{
+		MemoryCopy( pDest, pSource, sizeof( T ) * count );
+	}
 
-    /// ArrayCopy() implementation for types without a trivial assignment operator.
-    ///
-    /// @param[in] pDest              Base address of the destination array.
-    /// @param[in] pSource            Base address of the source array.
-    /// @param[in] count              Number of elements to copy.
-    /// @param[in] rHasTrivialAssign  std::false_type.
-    template< typename T >
-    void _ArrayCopy( T* pDest, const T* pSource, size_t count, const std::false_type& /*rHasTrivialAssign*/ )
-    {
-        for( size_t elementIndex = 0; elementIndex < count; ++elementIndex )
-        {
-            pDest[ elementIndex ] = pSource[ elementIndex ];
-        }
-    }
+	/// ArrayCopy() implementation for types without a trivial assignment operator.
+	///
+	/// @param[in] pDest              Base address of the destination array.
+	/// @param[in] pSource            Base address of the source array.
+	/// @param[in] count              Number of elements to copy.
+	/// @param[in] rHasTrivialAssign  std::false_type.
+	template< typename T >
+	void _ArrayCopy( T* pDest, const T* pSource, size_t count, const std::false_type& /*rHasTrivialAssign*/ )
+	{
+		for( size_t elementIndex = 0; elementIndex < count; ++elementIndex )
+		{
+			pDest[ elementIndex ] = pSource[ elementIndex ];
+		}
+	}
 
-    /// ArrayMove() implementation for types with a trivial assignment operator.
-    ///
-    /// @param[in] pDest              Base address of the destination array.
-    /// @param[in] pSource            Base address of the source array.
-    /// @param[in] count              Number of elements to copy.
-    /// @param[in] rHasTrivialAssign  std::true_type.
-    template< typename T >
-    void _ArrayMove( T* pDest, const T* pSource, size_t count, const std::true_type& /*rHasTrivialAssign*/ )
-    {
-        MemoryMove( pDest, pSource, sizeof( T ) * count );
-    }
+	/// ArrayMove() implementation for types with a trivial assignment operator.
+	///
+	/// @param[in] pDest              Base address of the destination array.
+	/// @param[in] pSource            Base address of the source array.
+	/// @param[in] count              Number of elements to copy.
+	/// @param[in] rHasTrivialAssign  std::true_type.
+	template< typename T >
+	void _ArrayMove( T* pDest, const T* pSource, size_t count, const std::true_type& /*rHasTrivialAssign*/ )
+	{
+		MemoryMove( pDest, pSource, sizeof( T ) * count );
+	}
 
-    /// ArrayMove() implementation for types without a trivial assignment operator.
-    ///
-    /// @param[in] pDest              Base address of the destination array.
-    /// @param[in] pSource            Base address of the source array.
-    /// @param[in] count              Number of elements to copy.
-    /// @param[in] rHasTrivialAssign  std::false_type.
-    template< typename T >
-    void _ArrayMove( T* pDest, const T* pSource, size_t count, const std::false_type& /*rHasTrivialAssign*/ )
-    {
-        if( pDest <= pSource )
-        {
-            for( size_t elementIndex = 0; elementIndex < count; ++elementIndex )
-            {
-                pDest[ elementIndex ] = pSource[ elementIndex ];
-            }
-        }
-        else
-        {
-            size_t elementIndex = count;
-            while( elementIndex != 0 )
-            {
-                --elementIndex;
-                pDest[ elementIndex ] = pSource[ elementIndex ];
-            }
-        }
-    }
+	/// ArrayMove() implementation for types without a trivial assignment operator.
+	///
+	/// @param[in] pDest              Base address of the destination array.
+	/// @param[in] pSource            Base address of the source array.
+	/// @param[in] count              Number of elements to copy.
+	/// @param[in] rHasTrivialAssign  std::false_type.
+	template< typename T >
+	void _ArrayMove( T* pDest, const T* pSource, size_t count, const std::false_type& /*rHasTrivialAssign*/ )
+	{
+		if( pDest <= pSource )
+		{
+			for( size_t elementIndex = 0; elementIndex < count; ++elementIndex )
+			{
+				pDest[ elementIndex ] = pSource[ elementIndex ];
+			}
+		}
+		else
+		{
+			size_t elementIndex = count;
+			while( elementIndex != 0 )
+			{
+				--elementIndex;
+				pDest[ elementIndex ] = pSource[ elementIndex ];
+			}
+		}
+	}
 
-    /// ArrayInPlaceConstruct() implementation for types with a trivial constructor.
-    ///
-    /// @param[in] pMemory                 Base address of the memory buffer in which the objects should be constructed.
-    /// @param[in] count                   Number of objects to construct.
-    /// @param[in] rHasTrivialConstructor  std::true_type.
-    ///
-    /// @return  Pointer to the first element in the array.  This address will actually be the same as @c pMemory, but
-    ///          cast to the template type.
-    template< typename T >
-    T* _ArrayInPlaceConstruct( void* pMemory, size_t /*count*/, const std::true_type& /*rHasTrivialConstructor*/ )
-    {
-        // Nothing needs to be done.
-        return static_cast< T* >( pMemory );
-    }
+	/// ArrayInPlaceConstruct() implementation for types with a trivial constructor.
+	///
+	/// @param[in] pMemory                 Base address of the memory buffer in which the objects should be constructed.
+	/// @param[in] count                   Number of objects to construct.
+	/// @param[in] rHasTrivialConstructor  std::true_type.
+	///
+	/// @return  Pointer to the first element in the array.  This address will actually be the same as @c pMemory, but
+	///          cast to the template type.
+	template< typename T >
+	T* _ArrayInPlaceConstruct( void* pMemory, size_t /*count*/, const std::true_type& /*rHasTrivialConstructor*/ )
+	{
+		// Nothing needs to be done.
+		return static_cast< T* >( pMemory );
+	}
 
-    /// ArrayInPlaceConstruct() implementation for types without a trivial constructor.
-    ///
-    /// @param[in] pMemory                 Base address of the memory buffer in which the objects should be constructed.
-    /// @param[in] count                   Number of objects to construct.
-    /// @param[in] rHasTrivialConstructor  std::false_type.
-    ///
-    /// @return  Pointer to the first element in the array.  This address will actually be the same as @c pMemory, but
-    ///          cast to the template type.
-    template< typename T >
-    T* _ArrayInPlaceConstruct( void* pMemory, size_t count, const std::false_type& /*rHasTrivialConstructor*/ )
-    {
-        HELIUM_ASSERT( pMemory || count == 0 );
+	/// ArrayInPlaceConstruct() implementation for types without a trivial constructor.
+	///
+	/// @param[in] pMemory                 Base address of the memory buffer in which the objects should be constructed.
+	/// @param[in] count                   Number of objects to construct.
+	/// @param[in] rHasTrivialConstructor  std::false_type.
+	///
+	/// @return  Pointer to the first element in the array.  This address will actually be the same as @c pMemory, but
+	///          cast to the template type.
+	template< typename T >
+	T* _ArrayInPlaceConstruct( void* pMemory, size_t count, const std::false_type& /*rHasTrivialConstructor*/ )
+	{
+		HELIUM_ASSERT( pMemory || count == 0 );
 
-        T* pArray = static_cast< T* >( pMemory );
+		T* pArray = static_cast< T* >( pMemory );
 
-        T* pObject = pArray;
-        for( size_t elementIndex = 0; elementIndex < count; ++elementIndex )
-        {
-            new( pObject ) T;
-            ++pObject;
-        }
+		T* pObject = pArray;
+		for( size_t elementIndex = 0; elementIndex < count; ++elementIndex )
+		{
+			new( pObject ) T;
+			++pObject;
+		}
 
-        return pArray;
-    }
+		return pArray;
+	}
 
-    /// ArrayInPlaceDestroy() implementation for types with a trivial destructor.
-    ///
-    /// @param[in] pMemory                Base address of the array of objects being destroyed.
-    /// @param[in] count                  Number of objects being destroyed.
-    /// @param[in] rHasTrivialDestructor  std::true_type.
-    template< typename T >
-    void _ArrayInPlaceDestroy( T* /*pMemory*/, size_t /*count*/, const std::true_type& /*rHasTrivialDestructor*/ )
-    {
-        // Nothing needs to be done...
-    }
+	/// ArrayInPlaceDestruct() implementation for types with a trivial destructor.
+	///
+	/// @param[in] pMemory                Base address of the array of objects being destroyed.
+	/// @param[in] count                  Number of objects being destroyed.
+	/// @param[in] rHasTrivialDestructor  std::true_type.
+	template< typename T >
+	void _ArrayInPlaceDestruct( T* /*pMemory*/, size_t /*count*/, const std::true_type& /*rHasTrivialDestructor*/ )
+	{
+		// Nothing needs to be done...
+	}
 
-    /// ArrayInPlaceDestroy() implementation for types without a trivial destructor.
-    ///
-    /// @param[in] pMemory                Base address of the array of objects being destroyed.
-    /// @param[in] count                  Number of objects being destroyed.
-    /// @param[in] rHasTrivialDestructor  std::false_type.
-    template< typename T >
-    void _ArrayInPlaceDestroy( T* pMemory, size_t count, const std::false_type& /*rHasTrivialDestructor*/ )
-    {
-        for( size_t elementIndex = 0; elementIndex < count; ++elementIndex )
-        {
-            pMemory[ elementIndex ].~T();
-        }
-    }
+	/// ArrayInPlaceDestruct() implementation for types without a trivial destructor.
+	///
+	/// @param[in] pMemory                Base address of the array of objects being destroyed.
+	/// @param[in] count                  Number of objects being destroyed.
+	/// @param[in] rHasTrivialDestructor  std::false_type.
+	template< typename T >
+	void _ArrayInPlaceDestruct( T* pMemory, size_t count, const std::false_type& /*rHasTrivialDestructor*/ )
+	{
+		for( size_t elementIndex = 0; elementIndex < count; ++elementIndex )
+		{
+			pMemory[ elementIndex ].~T();
+		}
+	}
 
-    /// ArrayUninitializedCopy() implementation for types with a trivial copy constructor.
-    ///
-    /// @param[in] pDest            Destination buffer in which each element should be constructed.
-    /// @param[in] pSource          Source array from which to copy.
-    /// @param[in] count            Number of elements to copy.
-    /// @param[in] rHasTrivialCopy  std::true_type.
-    template< typename T >
-    void _ArrayUninitializedCopy( T* pDest, const T* pSource, size_t count, const std::true_type& /*rHasTrivialCopy*/ )
-    {
-        MemoryCopy( pDest, pSource, sizeof( T ) * count );
-    }
+	/// ArrayUninitializedCopy() implementation for types with a trivial copy constructor.
+	///
+	/// @param[in] pDest            Destination buffer in which each element should be constructed.
+	/// @param[in] pSource          Source array from which to copy.
+	/// @param[in] count            Number of elements to copy.
+	/// @param[in] rHasTrivialCopy  std::true_type.
+	template< typename T >
+	void _ArrayUninitializedCopy( T* pDest, const T* pSource, size_t count, const std::true_type& /*rHasTrivialCopy*/ )
+	{
+		MemoryCopy( pDest, pSource, sizeof( T ) * count );
+	}
 
-    /// ArrayUninitializedCopy() implementation for types without a trivial copy constructor.
-    ///
-    /// @param[in] pDest            Destination buffer in which each element should be constructed.
-    /// @param[in] pSource          Source array from which to copy.
-    /// @param[in] count            Number of elements to copy.
-    /// @param[in] rHasTrivialCopy  std::false_type.
-    template< typename T >
-    void _ArrayUninitializedCopy( T* pDest, const T* pSource, size_t count, const std::false_type& /*rHasTrivialCopy*/ )
-    {
-        for( size_t elementIndex = 0; elementIndex < count; ++elementIndex )
-        {
-            new( pDest + elementIndex ) T( pSource[ elementIndex ] );
-        }
-    }
+	/// ArrayUninitializedCopy() implementation for types without a trivial copy constructor.
+	///
+	/// @param[in] pDest            Destination buffer in which each element should be constructed.
+	/// @param[in] pSource          Source array from which to copy.
+	/// @param[in] count            Number of elements to copy.
+	/// @param[in] rHasTrivialCopy  std::false_type.
+	template< typename T >
+	void _ArrayUninitializedCopy( T* pDest, const T* pSource, size_t count, const std::false_type& /*rHasTrivialCopy*/ )
+	{
+		for( size_t elementIndex = 0; elementIndex < count; ++elementIndex )
+		{
+			new( pDest + elementIndex ) T( pSource[ elementIndex ] );
+		}
+	}
 
-    /// ArrayUninitializedFill() implementation for single-byte types with a trivial copy constructor.
-    ///
-    /// @param[in] pDest              Destination buffer in which each element should be constructed.
-    /// @param[in] rValue             Value to copy.
-    /// @param[in] count              Number of copies to fill.
-    /// @param[in] rCopyTrivialBytes  std::true_type.
-    template< typename T >
-    void _ArrayUninitializedFill( T* pDest, const T& rValue, size_t count, const std::true_type& /*rCopyTrivialBytes*/ )
-    {
-        MemorySet( pDest, rValue, count );
-    }
+	/// ArrayUninitializedFill() implementation for single-byte types with a trivial copy constructor.
+	///
+	/// @param[in] pDest              Destination buffer in which each element should be constructed.
+	/// @param[in] rValue             Value to copy.
+	/// @param[in] count              Number of copies to fill.
+	/// @param[in] rCopyTrivialBytes  std::true_type.
+	template< typename T >
+	void _ArrayUninitializedFill( T* pDest, const T& rValue, size_t count, const std::true_type& /*rCopyTrivialBytes*/ )
+	{
+		MemorySet( pDest, rValue, count );
+	}
 
-    /// ArrayUninitializedFill() implementation for multi-byte types and types without a trivial copy constructor.
-    ///
-    /// @param[in] pDest              Destination buffer in which each element should be constructed.
-    /// @param[in] rValue             Value to copy.
-    /// @param[in] count              Number of copies to fill.
-    /// @param[in] rCopyTrivialBytes  std::false_type.
-    template< typename T >
-    void _ArrayUninitializedFill( T* pDest, const T& rValue, size_t count, const std::false_type& /*rCopyTrivialBytes*/ )
-    {
-        for( size_t elementIndex = 0; elementIndex < count; ++elementIndex )
-        {
-            new( pDest + elementIndex ) T( rValue );
-        }
-    }
+	/// ArrayUninitializedFill() implementation for multi-byte types and types without a trivial copy constructor.
+	///
+	/// @param[in] pDest              Destination buffer in which each element should be constructed.
+	/// @param[in] rValue             Value to copy.
+	/// @param[in] count              Number of copies to fill.
+	/// @param[in] rCopyTrivialBytes  std::false_type.
+	template< typename T >
+	void _ArrayUninitializedFill( T* pDest, const T& rValue, size_t count, const std::false_type& /*rCopyTrivialBytes*/ )
+	{
+		for( size_t elementIndex = 0; elementIndex < count; ++elementIndex )
+		{
+			new( pDest + elementIndex ) T( rValue );
+		}
+	}
 
-    /// Align() implementation for pointer types.
-    ///
-    /// @param[in] rValue      Pointer to align.
-    /// @param[in] alignment   Byte alignment (must be a power of two).
-    /// @param[in] rIsPointer  std::true_type.
-    ///
-    /// @return  Aligned value.
-    template< typename T >
-    T _Align( const T& rValue, size_t alignment, const std::true_type& /*rIsPointer*/ )
-    {
-        uintptr_t valueInt = reinterpret_cast< uintptr_t >( rValue );
+	/// Align() implementation for pointer types.
+	///
+	/// @param[in] rValue      Pointer to align.
+	/// @param[in] alignment   Byte alignment (must be a power of two).
+	/// @param[in] rIsPointer  std::true_type.
+	///
+	/// @return  Aligned value.
+	template< typename T >
+	T _Align( const T& rValue, size_t alignment, const std::true_type& /*rIsPointer*/ )
+	{
+		uintptr_t valueInt = reinterpret_cast< uintptr_t >( rValue );
 
-        return reinterpret_cast< T >( ( valueInt + alignment - 1 ) & ~( alignment - 1 ) );
-    }
+		return reinterpret_cast< T >( ( valueInt + alignment - 1 ) & ~( alignment - 1 ) );
+	}
 
-    /// Align() implementation for non-pointer types.
-    ///
-    /// @param[in] rValue      Integer to align.
-    /// @param[in] alignment   Byte alignment (must be a power of two).
-    /// @param[in] rIsPointer  std::false_type.
-    ///
-    /// @return  Aligned value.
-    template< typename T >
-    T _Align( const T& rValue, size_t alignment, const std::false_type& /*rIsPointer*/ )
-    {
-        return ( rValue + alignment - 1 ) & ~( alignment - 1 );
-    }
+	/// Align() implementation for non-pointer types.
+	///
+	/// @param[in] rValue      Integer to align.
+	/// @param[in] alignment   Byte alignment (must be a power of two).
+	/// @param[in] rIsPointer  std::false_type.
+	///
+	/// @return  Aligned value.
+	template< typename T >
+	T _Align( const T& rValue, size_t alignment, const std::false_type& /*rIsPointer*/ )
+	{
+		return ( rValue + alignment - 1 ) & ~( alignment - 1 );
+	}
 
-    /// CastIndex() implementation when casting to a larger unsigned integer type.
-    ///
-    /// @param[in] index          Index to cast.
-    /// @param[in] rIsDestLarger  std::true_type.
-    ///
-    /// @return  Cast index type, with invalid values properly retained when casting to larger types.
-    template< typename DestIndexType, typename SourceIndexType >
-    DestIndexType _CastIndex( SourceIndexType index, const std::true_type& /*rIsDestLarger*/ )
-    {
-        return ( index == static_cast< SourceIndexType >( -1 )
-                 ? static_cast< DestIndexType >( -1 )
-                 : static_cast< DestIndexType >( index ) );
-    }
+	/// CastIndex() implementation when casting to a larger unsigned integer type.
+	///
+	/// @param[in] index          Index to cast.
+	/// @param[in] rIsDestLarger  std::true_type.
+	///
+	/// @return  Cast index type, with invalid values properly retained when casting to larger types.
+	template< typename DestIndexType, typename SourceIndexType >
+	DestIndexType _CastIndex( SourceIndexType index, const std::true_type& /*rIsDestLarger*/ )
+	{
+		return ( index == static_cast< SourceIndexType >( -1 )
+				 ? static_cast< DestIndexType >( -1 )
+				 : static_cast< DestIndexType >( index ) );
+	}
 
-    /// CastIndex() implementation when not casting to a larger unsigned integer type.
-    ///
-    /// @param[in] index          Index to cast.
-    /// @param[in] rIsDestLarger  std::false_type.
-    ///
-    /// @return  Cast index type, with invalid values properly retained when casting to larger types.
-    template< typename DestIndexType, typename SourceIndexType >
-    DestIndexType _CastIndex( SourceIndexType index, const std::false_type& /*rIsDestLarger*/ )
-    {
-        return static_cast< DestIndexType >( index );
-    }
+	/// CastIndex() implementation when not casting to a larger unsigned integer type.
+	///
+	/// @param[in] index          Index to cast.
+	/// @param[in] rIsDestLarger  std::false_type.
+	///
+	/// @return  Cast index type, with invalid values properly retained when casting to larger types.
+	template< typename DestIndexType, typename SourceIndexType >
+	DestIndexType _CastIndex( SourceIndexType index, const std::false_type& /*rIsDestLarger*/ )
+	{
+		return static_cast< DestIndexType >( index );
+	}
 }
 
 /// Copy data from one region of memory to another.
@@ -253,9 +253,9 @@ namespace Helium
 void Helium::MemoryCopy( void* pDest, const void* pSource, size_t size )
 {
 #if HELIUM_CC_CL
-    memcpy_s( pDest, size, pSource, size );
+	memcpy_s( pDest, size, pSource, size );
 #else
-    memcpy( pDest, pSource, size );
+	memcpy( pDest, pSource, size );
 #endif
 }
 
@@ -269,9 +269,9 @@ void Helium::MemoryCopy( void* pDest, const void* pSource, size_t size )
 void Helium::MemoryMove( void* pDest, const void* pSource, size_t size )
 {
 #if HELIUM_CC_CL
-    memmove_s( pDest, size, pSource, size );
+	memmove_s( pDest, size, pSource, size );
 #else
-    memmove( pDest, pSource, size );
+	memmove( pDest, pSource, size );
 #endif
 }
 
@@ -284,7 +284,7 @@ void Helium::MemoryMove( void* pDest, const void* pSource, size_t size )
 /// @see ArraySet()
 void Helium::MemorySet( void* pDest, int value, size_t size )
 {
-    memset( pDest, value, size );
+	memset( pDest, value, size );
 }
 
 /// Set each byte in a region of memory to zero.
@@ -293,7 +293,7 @@ void Helium::MemorySet( void* pDest, int value, size_t size )
 /// @param[in] size   Number of bytes to clear.
 void Helium::MemoryZero( void* pDest, size_t size )
 {
-    memset( pDest, 0, size );
+	memset( pDest, 0, size );
 }
 
 /// Compare each byte between two regions of memory.
@@ -307,7 +307,29 @@ void Helium::MemoryZero( void* pDest, size_t size )
 ///          memory buffer.
 int Helium::MemoryCompare( const void* pMemory0, const void* pMemory1, size_t size )
 {
-    return memcmp( pMemory0, pMemory1, size );
+	return memcmp( pMemory0, pMemory1, size );
+}
+
+/// Call the constructor for the given type.
+///
+/// @param[in] pMemory  Address of the memory buffer in which the object should be constructed.
+///
+/// @see InPlaceDestruct()
+template< typename T >
+void Helium::InPlaceConstruct( void* pMemory )
+{
+	new ( pMemory ) T;
+}
+
+/// Call the destructor for the given type.
+///
+/// @param[in] pMemory  Address of the memory buffer in which the object should be destructed.
+///
+/// @see InPlaceConstruct()
+template< typename T >
+void Helium::InPlaceDestruct( void* pMemory )
+{
+	static_cast< T* >( pMemory )->~T();
 }
 
 /// Copy an array of data from one region of memory to another.
@@ -328,7 +350,7 @@ int Helium::MemoryCompare( const void* pMemory0, const void* pMemory1, size_t si
 template< typename T >
 void Helium::ArrayCopy( T* pDest, const T* pSource, size_t count )
 {
-    _ArrayCopy( pDest, pSource, count, std::has_trivial_assign< T >() );
+	_ArrayCopy( pDest, pSource, count, std::has_trivial_assign< T >() );
 }
 
 /// Copy an array of data from one region of memory to another, with support for overlapping regions of memory.
@@ -346,7 +368,7 @@ void Helium::ArrayCopy( T* pDest, const T* pSource, size_t count )
 template< typename T >
 void Helium::ArrayMove( T* pDest, const T* pSource, size_t count )
 {
-    _ArrayMove( pDest, pSource, count, std::has_trivial_assign< T >() );
+	_ArrayMove( pDest, pSource, count, std::has_trivial_assign< T >() );
 }
 
 /// Set each element in an array to a given value.
@@ -359,10 +381,10 @@ void Helium::ArrayMove( T* pDest, const T* pSource, size_t count )
 template< typename T >
 void Helium::ArraySet( T* pDest, const T& rValue, size_t count )
 {
-    for( size_t elementIndex = 0; elementIndex < count; ++elementIndex )
-    {
-        pDest[ elementIndex ] = rValue;
-    }
+	for( size_t elementIndex = 0; elementIndex < count; ++elementIndex )
+	{
+		pDest[ elementIndex ] = rValue;
+	}
 }
 
 /// Call the constructor for the given type on each element in the given array.
@@ -377,7 +399,7 @@ void Helium::ArraySet( T* pDest, const T& rValue, size_t count )
 ///
 /// This should only be called if the destination buffer is allocated as uninitialized memory (not created using "new T"
 /// or "new T []", where "T" is the type of array element).  Elements should be destroyed later using
-/// ArrayInPlaceDestroy() prior to freeing the buffer memory.
+/// ArrayInPlaceDestruct() prior to freeing the buffer memory.
 ///
 /// @param[in] pMemory  Base address of the memory buffer in which the objects should be constructed.
 /// @param[in] count    Number of objects to construct.
@@ -385,11 +407,11 @@ void Helium::ArraySet( T* pDest, const T& rValue, size_t count )
 /// @return  Pointer to the first element in the array.  This address will actually be the same as @c pMemory, but cast
 ///          to the template type.
 ///
-/// @see ArrayInPlaceDestroy()
+/// @see ArrayInPlaceDestruct()
 template< typename T >
 T* Helium::ArrayInPlaceConstruct( void* pMemory, size_t count )
 {
-    return _ArrayInPlaceConstruct< T >( pMemory, count, std::has_trivial_constructor< T >() );
+	return _ArrayInPlaceConstruct< T >( pMemory, count, std::has_trivial_constructor< T >() );
 }
 
 /// Call the destructor on each element in the given array without deallocating the array.
@@ -403,9 +425,9 @@ T* Helium::ArrayInPlaceConstruct( void* pMemory, size_t count )
 ///
 /// @see ArrayInPlaceConstruct()
 template< typename T >
-void Helium::ArrayInPlaceDestroy( T* pMemory, size_t count )
+void Helium::ArrayInPlaceDestruct( T* pMemory, size_t count )
 {
-    _ArrayInPlaceDestroy( pMemory, count, std::has_trivial_destructor< T >() );
+	_ArrayInPlaceDestruct( pMemory, count, std::has_trivial_destructor< T >() );
 }
 
 /// Construct copies of objects from the source array in the uninitialized destination buffer.
@@ -419,7 +441,7 @@ void Helium::ArrayInPlaceDestroy( T* pMemory, size_t count )
 template< typename T >
 void Helium::ArrayUninitializedCopy( T* pDest, const T* pSource, size_t count )
 {
-    _ArrayUninitializedCopy( pDest, pSource, count, std::has_trivial_copy< T >() );
+	_ArrayUninitializedCopy( pDest, pSource, count, std::has_trivial_copy< T >() );
 }
 
 /// Construct copies of the given object in the uninitialized destination buffer.
@@ -433,7 +455,7 @@ void Helium::ArrayUninitializedCopy( T* pDest, const T* pSource, size_t count )
 template< typename T >
 void Helium::ArrayUninitializedFill( T* pDest, const T& rValue, size_t count )
 {
-    _ArrayUninitializedFill( pDest, rValue, count, std::integral_constant< bool, std::has_trivial_copy< T >::value && sizeof( T ) == 1 >() );
+	_ArrayUninitializedFill( pDest, rValue, count, std::integral_constant< bool, std::has_trivial_copy< T >::value && sizeof( T ) == 1 >() );
 }
 
 /// Align a value (size or memory address) up to a given byte alignment.
@@ -445,9 +467,9 @@ void Helium::ArrayUninitializedFill( T* pDest, const T& rValue, size_t count )
 template< typename T >
 T Helium::Align( const T& rValue, size_t alignment )
 {
-    HELIUM_ASSERT( ( alignment & ( alignment - 1 ) ) == 0 ); // affirm power of two
+	HELIUM_ASSERT( ( alignment & ( alignment - 1 ) ) == 0 ); // affirm power of two
 
-    return _Align( rValue, alignment, std::is_pointer< T >() );
+	return _Align( rValue, alignment, std::is_pointer< T >() );
 }
 
 /// Swap two values.
@@ -461,9 +483,9 @@ T Helium::Align( const T& rValue, size_t alignment )
 template< typename T >
 void Helium::Swap( T& rValue0, T& rValue1 )
 {
-    T temp( rValue0 );
-    rValue0 = rValue1;
-    rValue1 = temp;
+	T temp( rValue0 );
+	rValue0 = rValue1;
+	rValue1 = temp;
 }
 
 /// Compute a 32-bit hash value for a string.
@@ -474,17 +496,17 @@ void Helium::Swap( T& rValue0, T& rValue1 )
 template< typename T >
 uint32_t Helium::StringHash( const T* pString )
 {
-    // djb2...GO!
-    uint32_t hash = 5381;
-    if( pString )
-    {
-        for( T character = *pString; character != static_cast< T >( '\0' ); character = *( ++pString ) )
-        {
-            hash = ( ( hash * 33 ) ^ static_cast< uint32_t >( character ) );
-        }
-    }
+	// djb2...GO!
+	uint32_t hash = 5381;
+	if( pString )
+	{
+		for( T character = *pString; character != static_cast< T >( '\0' ); character = *( ++pString ) )
+		{
+			hash = ( ( hash * 33 ) ^ static_cast< uint32_t >( character ) );
+		}
+	}
 
-    return hash;
+	return hash;
 }
 
 /// Get the length of a C-style string.
@@ -499,14 +521,14 @@ uint32_t Helium::StringHash( const T* pString )
 template< typename T >
 size_t Helium::StringLength( const T* pString )
 {
-    HELIUM_ASSERT( pString );
-    const T* pEnd = pString;
-    while( *pEnd != static_cast< T >( 0 ) )
-    {
-        ++pEnd;
-    }
+	HELIUM_ASSERT( pString );
+	const T* pEnd = pString;
+	while( *pEnd != static_cast< T >( 0 ) )
+	{
+		++pEnd;
+	}
 
-    return static_cast< size_t >( pEnd - pString );
+	return static_cast< size_t >( pEnd - pString );
 }
 
 /// Get the invalid index value for the template integer type.
@@ -517,9 +539,9 @@ size_t Helium::StringLength( const T* pString )
 template< typename IndexType >
 IndexType Helium::Invalid()
 {
-    // NOT operator implicitly casts 8-bit types to ints, so we will wrap the result with another static cast to the
-    // index type.
-    return static_cast< IndexType >( ~static_cast< IndexType >( 0 ) );
+	// NOT operator implicitly casts 8-bit types to ints, so we will wrap the result with another static cast to the
+	// index type.
+	return static_cast< IndexType >( ~static_cast< IndexType >( 0 ) );
 }
 
 /// Get whether the given value is a valid index value.
@@ -532,7 +554,7 @@ IndexType Helium::Invalid()
 template< typename IndexType >
 bool Helium::IsValid( IndexType index )
 {
-    return( index != Invalid< typename std::remove_cv< IndexType >::type >() );
+	return( index != Invalid< typename std::remove_cv< IndexType >::type >() );
 }
 
 /// Get whether the given value is an invalid index value.
@@ -545,7 +567,7 @@ bool Helium::IsValid( IndexType index )
 template< typename IndexType >
 bool Helium::IsInvalid( IndexType index )
 {
-    return( index == Invalid< typename std::remove_cv< IndexType >::type >() );
+	return( index == Invalid< typename std::remove_cv< IndexType >::type >() );
 }
 
 /// Set the given integer to the reserved invalid index value.
@@ -556,7 +578,7 @@ bool Helium::IsInvalid( IndexType index )
 template< typename IndexType >
 void Helium::SetInvalid( IndexType& rIndex )
 {
-    rIndex = Invalid< typename std::remove_cv< IndexType >::type >();
+	rIndex = Invalid< typename std::remove_cv< IndexType >::type >();
 }
 
 /// Cast an index value to a different integer type, retaining invalid index values.
@@ -567,9 +589,9 @@ void Helium::SetInvalid( IndexType& rIndex )
 template< typename DestIndexType, typename SourceIndexType >
 DestIndexType Helium::CastIndex( SourceIndexType index )
 {
-    return _CastIndex< DestIndexType >(
-        index,
-        std::integral_constant< bool, ( sizeof( DestIndexType ) > sizeof( SourceIndexType ) ) >() );
+	return _CastIndex< DestIndexType >(
+		index,
+		std::integral_constant< bool, ( sizeof( DestIndexType ) > sizeof( SourceIndexType ) ) >() );
 }
 
 /// Get the integer array offset and the mask bit index for manipulating the specified bit in a bit array.
@@ -579,12 +601,12 @@ DestIndexType Helium::CastIndex( SourceIndexType index )
 /// @param[out] rMaskIndex     Index of the bit within the array element.
 template< typename ElementType >
 void Helium::GetBitElementAndMaskIndex(
-    size_t bitIndex,
-    size_t& rElementIndex,
-    size_t& rMaskIndex )
+	size_t bitIndex,
+	size_t& rElementIndex,
+	size_t& rMaskIndex )
 {
-    rElementIndex = bitIndex / ( sizeof( ElementType ) * 8 );
-    rMaskIndex = bitIndex % ( sizeof( ElementType ) * 8 );
+	rElementIndex = bitIndex / ( sizeof( ElementType ) * 8 );
+	rMaskIndex = bitIndex % ( sizeof( ElementType ) * 8 );
 }
 
 /// Get the state of a bit in the given integer element.
@@ -598,7 +620,7 @@ void Helium::GetBitElementAndMaskIndex(
 template< typename ElementType >
 bool Helium::GetBit( const ElementType& rElement, size_t maskIndex )
 {
-    return( ( rElement & ( static_cast< ElementType >( 1 ) << maskIndex ) ) != 0 );
+	return( ( rElement & ( static_cast< ElementType >( 1 ) << maskIndex ) ) != 0 );
 }
 
 /// Set a bit in the given integer element.
@@ -610,7 +632,7 @@ bool Helium::GetBit( const ElementType& rElement, size_t maskIndex )
 template< typename ElementType >
 void Helium::SetBit( ElementType& rElement, size_t maskIndex )
 {
-    rElement |= ( static_cast< ElementType >( 1 ) << maskIndex );
+	rElement |= ( static_cast< ElementType >( 1 ) << maskIndex );
 }
 
 /// Unset a bit in the given integer element.
@@ -622,7 +644,7 @@ void Helium::SetBit( ElementType& rElement, size_t maskIndex )
 template< typename ElementType >
 void Helium::ClearBit( ElementType& rElement, size_t maskIndex )
 {
-    rElement &= ~( static_cast< ElementType >( 1 ) << maskIndex );
+	rElement &= ~( static_cast< ElementType >( 1 ) << maskIndex );
 }
 
 /// Toggle a bit in the given integer element.
@@ -634,7 +656,7 @@ void Helium::ClearBit( ElementType& rElement, size_t maskIndex )
 template< typename ElementType >
 void Helium::ToggleBit( ElementType& rElement, size_t maskIndex )
 {
-    rElement ^= ( static_cast< ElementType >( 1 ) << maskIndex );
+	rElement ^= ( static_cast< ElementType >( 1 ) << maskIndex );
 }
 
 /// Set a range of bits in a bit array.
@@ -647,45 +669,45 @@ void Helium::ToggleBit( ElementType& rElement, size_t maskIndex )
 template< typename ElementType >
 void Helium::SetBitRange( ElementType* pElements, size_t bitStart, size_t bitCount )
 {
-    if( bitCount == 0 )
-    {
-        return;
-    }
+	if( bitCount == 0 )
+	{
+		return;
+	}
 
-    HELIUM_ASSERT( pElements );
+	HELIUM_ASSERT( pElements );
 
-    size_t startElementIndex, startMaskIndex;
-    GetBitElementAndMaskIndex< ElementType >( bitStart, startElementIndex, startMaskIndex );
+	size_t startElementIndex, startMaskIndex;
+	GetBitElementAndMaskIndex< ElementType >( bitStart, startElementIndex, startMaskIndex );
 
-    size_t endElementIndex, endMaskIndex;
-    GetBitElementAndMaskIndex< ElementType >( bitStart + bitCount - 1, endElementIndex, endMaskIndex );
+	size_t endElementIndex, endMaskIndex;
+	GetBitElementAndMaskIndex< ElementType >( bitStart + bitCount - 1, endElementIndex, endMaskIndex );
 
-    ElementType endMaskBit = static_cast< ElementType >( 1 ) << endMaskIndex;
+	ElementType endMaskBit = static_cast< ElementType >( 1 ) << endMaskIndex;
 
-    if( startMaskIndex != 0 )
-    {
-        if( startElementIndex == endElementIndex )
-        {
-            ElementType mask =
-                ( ( endMaskBit - 1 ) | endMaskBit ) & ~( ( static_cast< ElementType >( 1 ) << startMaskIndex ) - 1 );
-            pElements[ startElementIndex ] |= mask;
+	if( startMaskIndex != 0 )
+	{
+		if( startElementIndex == endElementIndex )
+		{
+			ElementType mask =
+				( ( endMaskBit - 1 ) | endMaskBit ) & ~( ( static_cast< ElementType >( 1 ) << startMaskIndex ) - 1 );
+			pElements[ startElementIndex ] |= mask;
 
-            return;
-        }
+			return;
+		}
 
-        ElementType mask = ~( ( static_cast< ElementType >( 1 ) << startMaskIndex ) - 1 );
-        pElements[ startElementIndex ] |= mask;
+		ElementType mask = ~( ( static_cast< ElementType >( 1 ) << startMaskIndex ) - 1 );
+		pElements[ startElementIndex ] |= mask;
 
-        ++startElementIndex;
-    }
+		++startElementIndex;
+	}
 
-    MemorySet(
-        pElements + startElementIndex,
-        0xff,
-        ( endElementIndex - startElementIndex ) * sizeof( ElementType ) );
+	MemorySet(
+		pElements + startElementIndex,
+		0xff,
+		( endElementIndex - startElementIndex ) * sizeof( ElementType ) );
 
-    ElementType mask = ( endMaskBit - 1 ) | endMaskBit;
-    pElements[ endElementIndex ] |= mask;
+	ElementType mask = ( endMaskBit - 1 ) | endMaskBit;
+	pElements[ endElementIndex ] |= mask;
 }
 
 /// Unset a range of bits in a bit array.
@@ -698,42 +720,42 @@ void Helium::SetBitRange( ElementType* pElements, size_t bitStart, size_t bitCou
 template< typename ElementType >
 void Helium::ClearBitRange( ElementType* pElements, size_t bitStart, size_t bitCount )
 {
-    if( bitCount == 0 )
-    {
-        return;
-    }
+	if( bitCount == 0 )
+	{
+		return;
+	}
 
-    HELIUM_ASSERT( pElements );
+	HELIUM_ASSERT( pElements );
 
-    size_t startElementIndex, startMaskIndex;
-    GetBitElementAndMaskIndex< ElementType >( bitStart, startElementIndex, startMaskIndex );
+	size_t startElementIndex, startMaskIndex;
+	GetBitElementAndMaskIndex< ElementType >( bitStart, startElementIndex, startMaskIndex );
 
-    size_t endElementIndex, endMaskIndex;
-    GetBitElementAndMaskIndex< ElementType >( bitStart + bitCount - 1, endElementIndex, endMaskIndex );
+	size_t endElementIndex, endMaskIndex;
+	GetBitElementAndMaskIndex< ElementType >( bitStart + bitCount - 1, endElementIndex, endMaskIndex );
 
-    ElementType endMaskBit = static_cast< ElementType >( 1 ) << endMaskIndex;
+	ElementType endMaskBit = static_cast< ElementType >( 1 ) << endMaskIndex;
 
-    if( startMaskIndex != 0 )
-    {
-        if( startElementIndex == endElementIndex )
-        {
-            ElementType mask =
-                ~( ( endMaskBit - 1 ) | endMaskBit ) | ( ( static_cast< ElementType >( 1 ) << startMaskIndex ) - 1 );
-            pElements[ startElementIndex ] &= mask;
+	if( startMaskIndex != 0 )
+	{
+		if( startElementIndex == endElementIndex )
+		{
+			ElementType mask =
+				~( ( endMaskBit - 1 ) | endMaskBit ) | ( ( static_cast< ElementType >( 1 ) << startMaskIndex ) - 1 );
+			pElements[ startElementIndex ] &= mask;
 
-            return;
-        }
+			return;
+		}
 
-        ElementType mask = ( static_cast< ElementType >( 1 ) << startMaskIndex ) - 1;
-        pElements[ startElementIndex ] &= mask;
+		ElementType mask = ( static_cast< ElementType >( 1 ) << startMaskIndex ) - 1;
+		pElements[ startElementIndex ] &= mask;
 
-        ++startElementIndex;
-    }
+		++startElementIndex;
+	}
 
-    MemoryZero( pElements + startElementIndex, ( endElementIndex - startElementIndex ) * sizeof( ElementType ) );
+	MemoryZero( pElements + startElementIndex, ( endElementIndex - startElementIndex ) * sizeof( ElementType ) );
 
-    ElementType mask = ~( ( endMaskBit - 1 ) | endMaskBit );
-    pElements[ endElementIndex ] &= mask;
+	ElementType mask = ~( ( endMaskBit - 1 ) | endMaskBit );
+	pElements[ endElementIndex ] &= mask;
 }
 
 /// Toggle a range of bits in a bit array.
@@ -746,46 +768,46 @@ void Helium::ClearBitRange( ElementType* pElements, size_t bitStart, size_t bitC
 template< typename ElementType >
 void Helium::ToggleBitRange( ElementType* pElements, size_t bitStart, size_t bitCount )
 {
-    if( bitCount == 0 )
-    {
-        return;
-    }
+	if( bitCount == 0 )
+	{
+		return;
+	}
 
-    HELIUM_ASSERT( pElements );
+	HELIUM_ASSERT( pElements );
 
-    size_t startElementIndex, startMaskIndex;
-    GetBitElementAndMaskIndex< ElementType >( bitStart, startElementIndex, startMaskIndex );
+	size_t startElementIndex, startMaskIndex;
+	GetBitElementAndMaskIndex< ElementType >( bitStart, startElementIndex, startMaskIndex );
 
-    size_t endElementIndex, endMaskIndex;
-    GetBitElementAndMaskIndex< ElementType >( bitStart + bitCount - 1, endElementIndex, endMaskIndex );
+	size_t endElementIndex, endMaskIndex;
+	GetBitElementAndMaskIndex< ElementType >( bitStart + bitCount - 1, endElementIndex, endMaskIndex );
 
-    ElementType endMaskBit = static_cast< ElementType >( 1 ) << endMaskIndex;
+	ElementType endMaskBit = static_cast< ElementType >( 1 ) << endMaskIndex;
 
-    if( startMaskIndex != 0 )
-    {
-        if( startElementIndex == endElementIndex )
-        {
-            ElementType mask =
-                ( ( endMaskBit - 1 ) | endMaskBit ) & ~( ( static_cast< ElementType >( 1 ) << startMaskIndex ) - 1 );
-            pElements[ startElementIndex ] ^= mask;
+	if( startMaskIndex != 0 )
+	{
+		if( startElementIndex == endElementIndex )
+		{
+			ElementType mask =
+				( ( endMaskBit - 1 ) | endMaskBit ) & ~( ( static_cast< ElementType >( 1 ) << startMaskIndex ) - 1 );
+			pElements[ startElementIndex ] ^= mask;
 
-            return;
-        }
+			return;
+		}
 
-        ElementType mask = ~( ( static_cast< ElementType >( 1 ) << startMaskIndex ) - 1 );
-        pElements[ startElementIndex ] ^= mask;
+		ElementType mask = ~( ( static_cast< ElementType >( 1 ) << startMaskIndex ) - 1 );
+		pElements[ startElementIndex ] ^= mask;
 
-        ++startElementIndex;
-    }
+		++startElementIndex;
+	}
 
-    ElementType mask = ~static_cast< ElementType >( 0 );
-    for( size_t elementIndex = startElementIndex; elementIndex < endElementIndex; ++elementIndex )
-    {
-        pElements[ elementIndex ] ^= mask;
-    }
+	ElementType mask = ~static_cast< ElementType >( 0 );
+	for( size_t elementIndex = startElementIndex; elementIndex < endElementIndex; ++elementIndex )
+	{
+		pElements[ elementIndex ] ^= mask;
+	}
 
-    mask = ( endMaskBit - 1 ) | endMaskBit;
-    pElements[ endElementIndex ] ^= mask;
+	mask = ( endMaskBit - 1 ) | endMaskBit;
+	pElements[ endElementIndex ] ^= mask;
 }
 
 /// Load a value from a byte stream without performing byte swapping.
@@ -799,11 +821,11 @@ void Helium::ToggleBitRange( ElementType* pElements, size_t bitStart, size_t bit
 template< typename T >
 const void* Helium::LoadValue( T& rDest, const void* pSource )
 {
-    HELIUM_ASSERT( pSource );
+	HELIUM_ASSERT( pSource );
 
-    MemoryCopy( &rDest, pSource, sizeof( T ) );
+	MemoryCopy( &rDest, pSource, sizeof( T ) );
 
-    return static_cast< const uint8_t* >( pSource ) + sizeof( T );
+	return static_cast< const uint8_t* >( pSource ) + sizeof( T );
 }
 
 /// Load a value from a byte stream, reversing the byte order of the read value.
@@ -817,11 +839,11 @@ const void* Helium::LoadValue( T& rDest, const void* pSource )
 template< typename T >
 const void* Helium::LoadValueSwapped( T& rDest, const void* pSource )
 {
-    HELIUM_ASSERT( pSource );
+	HELIUM_ASSERT( pSource );
 
-    ReverseByteOrder( &rDest, pSource, sizeof( T ) );
+	ReverseByteOrder( &rDest, pSource, sizeof( T ) );
 
-    return static_cast< const uint8_t* >( pSource ) + sizeof( T );
+	return static_cast< const uint8_t* >( pSource ) + sizeof( T );
 }
 
 /// Reverse the order of each byte in the source memory buffer, storing the result in the destination buffer.
@@ -835,31 +857,31 @@ const void* Helium::LoadValueSwapped( T& rDest, const void* pSource )
 /// @see LoadValueSwapped()
 void Helium::ReverseByteOrder( void* pDest, const void* pSource, size_t size )
 {
-    HELIUM_ASSERT( pDest );
-    HELIUM_ASSERT( pSource );
+	HELIUM_ASSERT( pDest );
+	HELIUM_ASSERT( pSource );
 
-    const uint8_t* pSourceLow = static_cast< const uint8_t* >( pSource );
-    const uint8_t* pSourceHigh = pSourceLow + size;
+	const uint8_t* pSourceLow = static_cast< const uint8_t* >( pSource );
+	const uint8_t* pSourceHigh = pSourceLow + size;
 
-    uint8_t* pDestLow = static_cast< uint8_t* >( pDest );
-    uint8_t* pDestHigh = pDestLow + size;
+	uint8_t* pDestLow = static_cast< uint8_t* >( pDest );
+	uint8_t* pDestHigh = pDestLow + size;
 
-    size_t halfSize = ( size + 1 ) / 2;
+	size_t halfSize = ( size + 1 ) / 2;
 
-    for( size_t byteIndex = 0; byteIndex < halfSize; ++byteIndex )
-    {
-        --pSourceHigh;
-        --pDestHigh;
+	for( size_t byteIndex = 0; byteIndex < halfSize; ++byteIndex )
+	{
+		--pSourceHigh;
+		--pDestHigh;
 
-        uint8_t byteLow = *pSourceLow;
-        uint8_t byteHigh = *pSourceHigh;
+		uint8_t byteLow = *pSourceLow;
+		uint8_t byteHigh = *pSourceHigh;
 
-        *pDestLow = byteHigh;
-        *pDestHigh = byteLow;
+		*pDestLow = byteHigh;
+		*pDestHigh = byteLow;
 
-        ++pSourceLow;
-        ++pDestLow;
-    }
+		++pSourceLow;
+		++pDestLow;
+	}
 }
 
 /// Constructor.

@@ -68,12 +68,15 @@ namespace Helium
     inline void MemoryZero( void* pDest, size_t size );
     inline int MemoryCompare( const void* pMemory0, const void* pMemory1, size_t size );
 
-    template< typename T > void ArrayCopy( T* pDest, const T* pSource, size_t count );
+    template< typename T > void InPlaceConstruct( void* pMemory );
+    template< typename T > void InPlaceDestruct( void* pMemory );
+
+	template< typename T > void ArrayCopy( T* pDest, const T* pSource, size_t count );
     template< typename T > void ArrayMove( T* pDest, const T* pSource, size_t count );
     template< typename T > void ArraySet( T* pDest, const T& rValue, size_t count );
 
     template< typename T > T* ArrayInPlaceConstruct( void* pMemory, size_t count );
-    template< typename T > void ArrayInPlaceDestroy( T* pMemory, size_t count );
+    template< typename T > void ArrayInPlaceDestruct( T* pMemory, size_t count );
     template< typename T > void ArrayUninitializedCopy( T* pDest, const T* pSource, size_t count );
     template< typename T > void ArrayUninitializedFill( T* pDest, const T& rValue, size_t count );
 
