@@ -36,7 +36,7 @@ Helium::ObjectPool< T, Allocator >::~ObjectPool()
         pNextBlock = pNextBlock->pNext;
 
         T* pObjects = pBlock->pObjects;
-        ArrayInPlaceDestroy( pObjects, m_blockSize );
+        ArrayInPlaceDestruct( pObjects, m_blockSize );
         allocator.Free( pObjects );
     }
 

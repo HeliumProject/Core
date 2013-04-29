@@ -953,6 +953,6 @@ template<
     typename InternalValue >
 void Helium::HashTable< Value, Key, HashFunction, ExtractKey, EqualKey, Allocator, InternalValue >::Finalize()
 {
-    ArrayInPlaceDestroy( m_pBuckets, m_bucketCount );
+    ArrayInPlaceDestruct( m_pBuckets, m_bucketCount );
     m_allocator.Free( m_pBuckets );
 }

@@ -467,7 +467,7 @@ void Helium::DynamicArray< T, Allocator >::Resize( size_t size )
 	{
 		if( size < m_size )
 		{
-			ArrayInPlaceDestroy( m_pBuffer + size, m_size - size );
+			ArrayInPlaceDestruct( m_pBuffer + size, m_size - size );
 		}
 		else
 		{
@@ -544,7 +544,7 @@ const T* Helium::DynamicArray< T, Allocator >::GetData() const
 template< typename T, typename Allocator >
 void Helium::DynamicArray< T, Allocator >::Clear()
 {
-	ArrayInPlaceDestroy( m_pBuffer, m_size );
+	ArrayInPlaceDestruct( m_pBuffer, m_size );
 	Free( m_pBuffer );
 	m_pBuffer = NULL;
 	m_size = 0;
@@ -631,7 +631,7 @@ template< typename T, typename Allocator >
 void Helium::DynamicArray< T, Allocator >::Set( const T* pSource, size_t size )
 {
 	HELIUM_ASSERT( pSource );
-	ArrayInPlaceDestroy( m_pBuffer, m_size );
+	ArrayInPlaceDestruct( m_pBuffer, m_size );
 	if( size != m_capacity )
 	{
 		m_pBuffer = Reallocate( m_pBuffer, size );
@@ -788,7 +788,7 @@ void Helium::DynamicArray< T, Allocator >::Remove( size_t index, size_t count )
 	size_t newSize = m_size - count;
 
 	ArrayMove( m_pBuffer + index, m_pBuffer + shiftStartIndex, m_size - shiftStartIndex );
-	ArrayInPlaceDestroy( m_pBuffer + newSize, count );
+	ArrayInPlaceDestruct( m_pBuffer + newSize, count );
 	m_size = newSize;
 }
 
@@ -826,7 +826,7 @@ void Helium::DynamicArray< T, Allocator >::RemoveSwap( size_t index, size_t coun
 		ArrayCopy( m_pBuffer + index, m_pBuffer + newSize, count );
 	}
 
-	ArrayInPlaceDestroy( m_pBuffer + newSize, count );
+	ArrayInPlaceDestruct( m_pBuffer + newSize, count );
 	m_size = newSize;
 }
 
@@ -1169,7 +1169,7 @@ void Helium::DynamicArray< T, Allocator >::CopyConstruct( const DynamicArray< T,
 template< typename T, typename Allocator >
 void Helium::DynamicArray< T, Allocator >::Finalize()
 {
-	ArrayInPlaceDestroy( m_pBuffer, m_size );
+	ArrayInPlaceDestruct( m_pBuffer, m_size );
 	Free( m_pBuffer );
 }
 
@@ -1408,7 +1408,7 @@ T* Helium::DynamicArray< T, Allocator >::ResizeBuffer( T* pMemory, size_t elemen
 			ArrayUninitializedCopy( pNewMemory, pMemory, elementCount );
 		}
 
-		ArrayInPlaceDestroy( pMemory, elementCount );
+		ArrayInPlaceDestruct( pMemory, elementCount );
 		Free( pMemory );
 	}
 
