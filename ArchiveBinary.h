@@ -23,7 +23,7 @@ namespace Helium
 			virtual void Write() HELIUM_OVERRIDE;
 
 		private:
-			void SerializeInstance( void* instance, const Reflect::Composite* type, Reflect::Object* object );
+			void SerializeInstance( void* instance, const Reflect::Structure* structure, Reflect::Object* object );
 			void SerializeField( void* instance, const Reflect::Field* field, Reflect::Object* object );
 			void SerializeData( Reflect::DataPointer pointer, Reflect::Data* data, const Reflect::Field* field, Reflect::Object* object );
 
@@ -48,7 +48,7 @@ namespace Helium
 
 		private:
 			void Deserialize( DynamicArray< Reflect::ObjectPtr >& objects );
-			void DeserializeInstance( void* instance, const Reflect::Composite* composite, Reflect::Object* object );
+			void DeserializeInstance( void* instance, const Reflect::Structure* composite, Reflect::Object* object );
 			void DeserializeField( void* instance, const Reflect::Field* field, Reflect::Object* object );
 			void DeserializeData( Reflect::DataPointer pointer, Reflect::Data* data, const Reflect::Field* field, Reflect::Object* object );
 

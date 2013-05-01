@@ -5,7 +5,7 @@
 #include "Foundation/FileStream.h"
 
 #include "Reflect/Object.h"
-#include "Reflect/Composite.h"
+#include "Reflect/Structure.h"
 #include "Reflect/Registry.h"
 #include "Reflect/DataDeduction.h"
 
@@ -107,15 +107,15 @@ void ArchiveWriterBinary::Write()
 	e_Status.Raise( info );
 }
 
-void ArchiveWriterBinary::SerializeInstance( void* instance, const Composite* composite, Object* object )
+void ArchiveWriterBinary::SerializeInstance( void* instance, const Structure* structure, Object* object )
 {
 #if PERSIST_ARCHIVE_VERBOSE
-	Log::Print( TXT( "Serializing %s\n" ), composite->m_Name );
+	Log::Print( TXT( "Serializing %s\n" ), structure->m_Name );
 #endif
 
 #pragma TODO("Declare a max depth for inheritance to save heap allocs -geoff")
-	DynamicArray< const Composite* > bases;
-	for ( const Composite* current = composite; current != NULL; current = current->m_Base )
+	DynamicArray< const Structure* > bases;
+	for ( const Structure* current = structure; current != NULL; current = current->m_Base )
 	{
 		bases.Push( current );
 	}
@@ -124,7 +124,7 @@ void ArchiveWriterBinary::SerializeInstance( void* instance, const Composite* co
 	DynamicArray< const Field* > fields;
 	while ( !bases.IsEmpty() )
 	{
-		const Composite* current = bases.Pop();
+		const Structure* current = bases.Pop();
 		DynamicArray< Field >::ConstIterator itr = current->m_Fields.Begin();
 		DynamicArray< Field >::ConstIterator end = current->m_Fields.End();
 		for ( ; itr != end; ++itr )
@@ -171,8 +171,6 @@ void ArchiveWriterBinary::SerializeField( void* instance, const Field* field, Ob
 		// write the actual string
 		m_Writer.Write( field->m_Name );
 	}
-
-#pragma TODO("Structure support")
 
 	if ( field->m_Count > 1 )
 	{
@@ -413,30 +411,30 @@ void ArchiveReaderBinary::Read()
 				{
 					m_Reader.BeginMap( length );
 
-					uint32_t typeCrc = 0;
+					uint32_t objectClassCrc = 0;
 					if ( m_Reader.IsNumber() )
 					{
-						m_Reader.Read( typeCrc );
+						m_Reader.Read( objectClassCrc );
 					}
 					else
 					{
 						String typeStr;
 						m_Reader.Read( typeStr );
-						typeCrc = Helium::Crc32( typeStr.GetData() );
+						objectClassCrc = Helium::Crc32( typeStr.GetData() );
 					}
 
 					m_Reader.Advance();
 
-					const Class* type = NULL;
-					if ( typeCrc != 0 )
+					const Class* objectClass = NULL;
+					if ( objectClassCrc != 0 )
 					{
-						type = Registry::GetInstance()->GetClass( typeCrc );
+						objectClass = Registry::GetInstance()->GetClass( objectClassCrc );
 					}
 
 					ObjectPtr object;
-					if ( type )
+					if ( objectClass )
 					{
-						object = Registry::GetInstance()->CreateInstance( type );
+						object = Registry::GetInstance()->CreateInstance( objectClass );
 					}
 
 					m_Objects.Push( object );
@@ -491,10 +489,10 @@ void ArchiveReaderBinary::Read()
 	e_Status.Raise( info );
 }
 
-void ArchiveReaderBinary::DeserializeInstance( void* instance, const Composite* composite, Object* object )
+void ArchiveReaderBinary::DeserializeInstance( void* instance, const Structure* structure, Object* object )
 {
 #if PERSIST_ARCHIVE_VERBOSE
-	Log::Print(TXT("Deserializing %s\n"), composite->m_Name);
+	Log::Print(TXT("Deserializing %s\n"), structure->m_Name);
 #endif
 
 	object->PreDeserialize( NULL );
@@ -520,7 +518,7 @@ void ArchiveReaderBinary::DeserializeInstance( void* instance, const Composite* 
 
 			m_Reader.Advance();
 
-			const Field* field = composite->FindFieldByName( fieldNameCrc );
+			const Field* field = structure->FindFieldByName( fieldNameCrc );
 			if ( field )
 			{
 				object->PreDeserialize( field );
