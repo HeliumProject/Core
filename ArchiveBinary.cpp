@@ -251,9 +251,16 @@ void ArchiveWriterBinary::SerializeData( DataPointer pointer, Data* data, const 
 			break;
 		}
 
+	case ReflectionTypes::StructureData:
+		{
+			StructureData* structure = static_cast< StructureData* >( data );
+			SerializeInstance( pointer.m_Address, structure->GetStructure(), object );
+			break;
+		}
+
 	case ReflectionTypes::SetData:
 		{
-			SetData* set = static_cast< SetData* >( field->m_Data );
+			SetData* set = static_cast< SetData* >( data );
 
 			Data* itemData = set->GetItemData();
 			DynamicArray< DataPointer > items;
@@ -274,7 +281,7 @@ void ArchiveWriterBinary::SerializeData( DataPointer pointer, Data* data, const 
 
 	case ReflectionTypes::SequenceData:
 		{
-			SequenceData* sequence = static_cast< SequenceData* >( field->m_Data );
+			SequenceData* sequence = static_cast< SequenceData* >( data );
 
 			Data* itemData = sequence->GetItemData();
 			DynamicArray< DataPointer > items;
@@ -295,7 +302,7 @@ void ArchiveWriterBinary::SerializeData( DataPointer pointer, Data* data, const 
 
 	case ReflectionTypes::AssociationData:
 		{
-			AssociationData* association = static_cast< AssociationData* >( field->m_Data );
+			AssociationData* association = static_cast< AssociationData* >( data );
 
 			Data* keyData = association->GetKeyData();
 			Data* valueData = association->GetValueData();
@@ -583,7 +590,7 @@ void ArchiveReaderBinary::DeserializeData( DataPointer pointer, Data* data, cons
 	{
 		if ( data->GetReflectionType() == ReflectionTypes::ScalarData )
 		{
-			ScalarData* scalar = static_cast< ScalarData* >( field->m_Data );
+			ScalarData* scalar = static_cast< ScalarData* >( data );
 			if ( scalar->m_Type == ScalarTypes::Boolean )
 			{
 				m_Reader.Read( pointer.As<bool>() );
@@ -602,7 +609,7 @@ void ArchiveReaderBinary::DeserializeData( DataPointer pointer, Data* data, cons
 	{
 		if ( data->GetReflectionType() == ReflectionTypes::ScalarData )
 		{
-			ScalarData* scalar = static_cast< ScalarData* >( field->m_Data );
+			ScalarData* scalar = static_cast< ScalarData* >( data );
 			bool clamp = true;
 			switch ( scalar->m_Type )
 			{
@@ -660,7 +667,7 @@ void ArchiveReaderBinary::DeserializeData( DataPointer pointer, Data* data, cons
 	{
 		if ( data->GetReflectionType() == ReflectionTypes::ScalarData )
 		{
-			ScalarData* scalar = static_cast< ScalarData* >( field->m_Data );
+			ScalarData* scalar = static_cast< ScalarData* >( data );
 			if ( scalar->m_Type == ScalarTypes::String )
 			{
 				String str;
@@ -675,12 +682,11 @@ void ArchiveReaderBinary::DeserializeData( DataPointer pointer, Data* data, cons
 	}
 	else if ( m_Reader.IsArray() )
 	{
-		uint32_t length = m_Reader.ReadArrayLength();
-
 		if ( data->GetReflectionType() == ReflectionTypes::SetData )
 		{
-			SetData* set = static_cast< SetData* >( field->m_Data );
+			SetData* set = static_cast< SetData* >( data );
 			Data* itemData = set->GetItemData();
+			uint32_t length = m_Reader.ReadArrayLength();
 			for ( uint32_t i=0; i<length; ++i )
 			{
 				DataVariable item ( itemData );
@@ -690,8 +696,9 @@ void ArchiveReaderBinary::DeserializeData( DataPointer pointer, Data* data, cons
 		}
 		else if ( data->GetReflectionType() == ReflectionTypes::SequenceData )
 		{
-			SequenceData* sequence = static_cast< SequenceData* >( field->m_Data );
+			SequenceData* sequence = static_cast< SequenceData* >( data );
 			Data* itemData = sequence->GetItemData();
+			uint32_t length = m_Reader.ReadArrayLength();
 			for ( uint32_t i=0; i<length; ++i )
 			{
 				DataVariable item ( itemData );
@@ -706,16 +713,19 @@ void ArchiveReaderBinary::DeserializeData( DataPointer pointer, Data* data, cons
 	}
 	else if ( m_Reader.IsMap() )
 	{
-		uint32_t length = m_Reader.ReadMapLength();
-
-#pragma TODO("Structure support")
-		if ( data->GetReflectionType() == ReflectionTypes::AssociationData )
+		if ( data->GetReflectionType() == ReflectionTypes::StructureData )
 		{
-			AssociationData* assocation = static_cast< AssociationData* >( field->m_Data );
+			StructureData* structure = static_cast< StructureData* >( data );
+			DeserializeInstance( pointer.m_Address,  structure->GetStructure(), object );
+		}
+		else if ( data->GetReflectionType() == ReflectionTypes::AssociationData )
+		{
+			AssociationData* assocation = static_cast< AssociationData* >( data );
 			Data* keyData = assocation->GetKeyData();
 			Data* valueData = assocation->GetValueData();
 			DataVariable key ( keyData );
 			DataVariable value ( valueData );
+			uint32_t length = m_Reader.ReadMapLength();
 			for ( uint32_t i=0; i<length; ++i )
 			{
 				DeserializeData( key, keyData, field, object );
