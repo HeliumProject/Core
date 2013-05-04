@@ -37,12 +37,15 @@ namespace Helium
 		{
 			enum ArchiveType
 			{
-				Auto,
-				Binary,
-				Text,
+				Json,
+				MessagePack,
+				Count,
+				Auto = -1,
 			};
 		}
 		typedef ArchiveTypes::ArchiveType ArchiveType;
+
+		HELIUM_PERSIST_API extern const char* ArchiveExtensions[ ArchiveTypes::Count ];
 
 		namespace ArchiveModes
 		{

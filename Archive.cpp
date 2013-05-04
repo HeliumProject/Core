@@ -12,7 +12,8 @@
 #include "Reflect/DataDeduction.h"
 #include "Reflect/Registry.h"
 
-#include "Persist/ArchiveBinary.h"
+#include "Persist/ArchiveJson.h"
+#include "Persist/ArchiveMessagePack.h"
 
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -21,6 +22,12 @@
 using namespace Helium;
 using namespace Helium::Reflect;
 using namespace Helium::Persist;
+
+const char* Persist::ArchiveExtensions[] =
+{
+	"json",
+	"msgpack"
+};
 
 Archive::Archive()
 	: m_Progress( 0 )
@@ -166,15 +173,22 @@ ArchiveWriterPtr Persist::GetWriter( const FilePath& path, ObjectIdentifier* ide
 	{
 	case ArchiveTypes::Auto:
 		{
-			if ( CaseInsensitiveCompareString( path.Extension().c_str(), TXT( "reflect" ) ) )
+			if ( CaseInsensitiveCompareString( path.Extension().c_str(), ArchiveExtensions[ ArchiveTypes::Json ] ) )
 			{
-				return new ArchiveWriterBinary( path, identifier );
+				return new ArchiveWriterJson( path, identifier );
+			}
+			else if ( CaseInsensitiveCompareString( path.Extension().c_str(), ArchiveExtensions[ ArchiveTypes::MessagePack ] ) )
+			{
+				return new ArchiveWriterMessagePack( path, identifier );
 			}
 			break;
 		}
 
-	case ArchiveTypes::Binary:
-		return new ArchiveWriterBinary( path, identifier );
+	case ArchiveTypes::Json:
+		return new ArchiveWriterJson( path, identifier );
+
+	case ArchiveTypes::MessagePack:
+		return new ArchiveWriterMessagePack( path, identifier );
 
 	default:
 		HELIUM_ASSERT( false );
@@ -190,15 +204,22 @@ ArchiveReaderPtr Persist::GetReader( const FilePath& path, ObjectResolver* resol
 	{
 	case ArchiveTypes::Auto:
 		{
-			if ( CaseInsensitiveCompareString( path.Extension().c_str(), TXT( "reflect" ) ) )
+			if ( CaseInsensitiveCompareString( path.Extension().c_str(), ArchiveExtensions[ ArchiveTypes::Json ] ) )
 			{
-				return new ArchiveReaderBinary( path, resolver );
+				return new ArchiveReaderJson( path, resolver );
+			}
+			else if ( CaseInsensitiveCompareString( path.Extension().c_str(), ArchiveExtensions[ ArchiveTypes::MessagePack ] ) )
+			{
+				return new ArchiveReaderMessagePack( path, resolver );
 			}
 			break;
 		}
 
-	case ArchiveTypes::Binary:
-		return new ArchiveReaderBinary( path, resolver );
+	case ArchiveTypes::Json:
+		return new ArchiveReaderJson( path, resolver );
+
+	case ArchiveTypes::MessagePack:
+		return new ArchiveReaderMessagePack( path, resolver );
 
 	default:
 		HELIUM_ASSERT( false );

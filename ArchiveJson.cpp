@@ -1,5 +1,5 @@
 #include "PersistPch.h"
-#include "Persist/ArchiveBinary.h"
+#include "Persist/ArchiveJson.h"
 
 #include "Foundation/Endian.h"
 #include "Foundation/FileStream.h"
@@ -13,25 +13,24 @@ using namespace Helium;
 using namespace Helium::Reflect;
 using namespace Helium::Persist;
 
-ArchiveWriterBinary::ArchiveWriterBinary( const FilePath& path, ObjectIdentifier* identifier )
+ArchiveWriterJson::ArchiveWriterJson( const FilePath& path, ObjectIdentifier* identifier )
 	: ArchiveWriter( path, identifier )
 {
 }
 
-ArchiveWriterBinary::ArchiveWriterBinary( Stream *stream, ObjectIdentifier* identifier )
+ArchiveWriterJson::ArchiveWriterJson( Stream *stream, ObjectIdentifier* identifier )
 	: ArchiveWriter( identifier )
 {
 	m_Stream.Reset( stream );
 	m_Stream.Orphan( true );
-	m_Writer.SetStream( stream );
 }
 
-ArchiveType ArchiveWriterBinary::GetType() const
+ArchiveType ArchiveWriterJson::GetType() const
 {
-	return ArchiveTypes::Binary;
+	return ArchiveTypes::Json;
 }
 
-void ArchiveWriterBinary::Open()
+void ArchiveWriterJson::Open()
 {
 #if PERSIST_ARCHIVE_VERBOSE
 	Log::Print(TXT("Opening file '%s'\n"), m_Path.c_str());
@@ -40,19 +39,18 @@ void ArchiveWriterBinary::Open()
 	FileStream* stream = new FileStream();
 	stream->Open( m_Path, FileStream::MODE_WRITE );
 	m_Stream.Reset( stream );
-	m_Writer.SetStream( stream );
 }
 
-void ArchiveWriterBinary::Close()
+void ArchiveWriterJson::Close()
 {
 	HELIUM_ASSERT( m_Stream );
 	m_Stream->Close(); 
 	m_Stream.Release(); 
 }
 
-void ArchiveWriterBinary::Write()
+void ArchiveWriterJson::Write()
 {
-	PERSIST_SCOPE_TIMER( ("Reflect - Binary Write") );
+	PERSIST_SCOPE_TIMER( ("Reflect - Json Write") );
 
 	// notify starting
 	ArchiveStatus info( *this, ArchiveStates::Starting );
@@ -62,7 +60,7 @@ void ArchiveWriterBinary::Write()
 	m_Objects.Push( m_Object );
 
 	// begin top level array of objects
-	m_Writer.BeginArray();
+	//m_Writer.BeginArray();
 
 	// objects can get changed during this iteration (in Identify), so use indices
 	for ( int index = 0; index < m_Objects.GetSize(); ++index )
@@ -70,21 +68,10 @@ void ArchiveWriterBinary::Write()
 		Object* object = m_Objects.GetElement( index );
 		const Class* objectClass = object->GetClass();
 
-		m_Writer.BeginMap( 1 );
-
-		if ( m_Flags & ArchiveFlags::StringCrc )
-		{
-			uint32_t typeCrc = Crc32( objectClass->m_Name );
-			m_Writer.Write( typeCrc );
-		}
-		else
-		{
-			m_Writer.Write( objectClass->m_Name );
-		}
-
+		//m_Writer.BeginMap( 1 );
+		//m_Writer.Write( objectClass->m_Name );
 		SerializeInstance( object, objectClass, object );
-
-		m_Writer.EndMap();
+		//m_Writer.EndMap();
 
 		info.m_State = ArchiveStates::ObjectProcessed;
 		info.m_Progress = (int)(((float)(index) / (float)m_Objects.GetSize()) * 100.0f);
@@ -92,7 +79,7 @@ void ArchiveWriterBinary::Write()
 	}
 
 	// end top level array
-	m_Writer.EndArray();
+	//m_Writer.EndArray();
 
 	// notify completion of last object processed
 	info.m_State = ArchiveStates::ObjectProcessed;
@@ -107,7 +94,7 @@ void ArchiveWriterBinary::Write()
 	e_Status.Raise( info );
 }
 
-void ArchiveWriterBinary::SerializeInstance( void* instance, const Structure* structure, Object* object )
+void ArchiveWriterJson::SerializeInstance( void* instance, const Structure* structure, Object* object )
 {
 #if PERSIST_ARCHIVE_VERBOSE
 	Log::Print( TXT( "Serializing %s\n" ), structure->m_Name );
@@ -137,7 +124,7 @@ void ArchiveWriterBinary::SerializeInstance( void* instance, const Structure* st
 		}
 	}
 
-	m_Writer.BeginMap( static_cast< uint32_t >( fields.GetSize() ) );
+	//m_Writer.BeginMap( static_cast< uint32_t >( fields.GetSize() ) );
 	object->PreSerialize( NULL );
 
 	DynamicArray< const Field* >::ConstIterator itr = fields.Begin();
@@ -151,37 +138,28 @@ void ArchiveWriterBinary::SerializeInstance( void* instance, const Structure* st
 	}
 
 	object->PostSerialize( NULL );
-	m_Writer.EndMap();
+	//m_Writer.EndMap();
 }
 
-void ArchiveWriterBinary::SerializeField( void* instance, const Field* field, Object* object )
+void ArchiveWriterJson::SerializeField( void* instance, const Field* field, Object* object )
 {
 #if PERSIST_ARCHIVE_VERBOSE
 	Log::Print(TXT("Serializing field %s\n"), field->m_Name);
 #endif
 
-	if ( m_Flags & ArchiveFlags::StringCrc )
-	{
-		// write the crc of the field name (used to associate a field when reading)
-		uint32_t fieldNameCrc = Crc32( field->m_Name );
-		m_Writer.Write( fieldNameCrc );
-	}
-	else
-	{
-		// write the actual string
-		m_Writer.Write( field->m_Name );
-	}
+	// write the actual string
+	//m_Writer.Write( field->m_Name );
 
 	if ( field->m_Count > 1 )
 	{
-		m_Writer.BeginArray( field->m_Count );
+		//m_Writer.BeginArray( field->m_Count );
 
 		for ( uint32_t i=0; i<field->m_Count; ++i )
 		{
 			SerializeData( DataPointer ( field, object, i ), field->m_Data, field, object );
 		}
 
-		m_Writer.EndArray();
+		//m_Writer.EndArray();
 	}
 	else
 	{
@@ -189,7 +167,7 @@ void ArchiveWriterBinary::SerializeField( void* instance, const Field* field, Ob
 	}
 }
 
-void ArchiveWriterBinary::SerializeData( DataPointer pointer, Data* data, const Field* field, Object* object )
+void ArchiveWriterJson::SerializeData( DataPointer pointer, Data* data, const Field* field, Object* object )
 {
 	switch ( data->GetReflectionType() )
 	{
@@ -199,53 +177,53 @@ void ArchiveWriterBinary::SerializeData( DataPointer pointer, Data* data, const 
 			switch ( scalar->m_Type )
 			{
 			case ScalarTypes::Boolean:
-				m_Writer.Write( pointer.As<bool>() );
+				//m_Writer.Write( pointer.As<bool>() );
 				break;
 
 			case ScalarTypes::Unsigned8:
-				m_Writer.Write( pointer.As<uint8_t>() );
+				//m_Writer.Write( pointer.As<uint8_t>() );
 				break;
 
 			case ScalarTypes::Unsigned16:
-				m_Writer.Write( pointer.As<uint16_t>() );
+				//m_Writer.Write( pointer.As<uint16_t>() );
 				break;
 
 			case ScalarTypes::Unsigned32:
-				m_Writer.Write( pointer.As<uint32_t>() );
+				//m_Writer.Write( pointer.As<uint32_t>() );
 				break;
 
 			case ScalarTypes::Unsigned64:
-				m_Writer.Write( pointer.As<uint64_t>() );
+				//m_Writer.Write( pointer.As<uint64_t>() );
 				break;
 
 			case ScalarTypes::Signed8:
-				m_Writer.Write( pointer.As<int8_t>() );
+				//m_Writer.Write( pointer.As<int8_t>() );
 				break;
 
 			case ScalarTypes::Signed16:
-				m_Writer.Write( pointer.As<int16_t>() );
+				//m_Writer.Write( pointer.As<int16_t>() );
 				break;
 
 			case ScalarTypes::Signed32:
-				m_Writer.Write( pointer.As<int32_t>() );
+				//m_Writer.Write( pointer.As<int32_t>() );
 				break;
 
 			case ScalarTypes::Signed64:
-				m_Writer.Write( pointer.As<int64_t>() );
+				//m_Writer.Write( pointer.As<int64_t>() );
 				break;
 
 			case ScalarTypes::Float32:
-				m_Writer.Write( pointer.As<float32_t>() );
+				//m_Writer.Write( pointer.As<float32_t>() );
 				break;
 
 			case ScalarTypes::Float64:
-				m_Writer.Write( pointer.As<float64_t>() );
+				//m_Writer.Write( pointer.As<float64_t>() );
 				break;
 
 			case ScalarTypes::String:
 				String str;
 				scalar->Print( pointer, str, *this );
-				m_Writer.Write( str.GetData() );
+				//m_Writer.Write( str.GetData() );
 				break;
 			}
 			break;
@@ -267,14 +245,14 @@ void ArchiveWriterBinary::SerializeData( DataPointer pointer, Data* data, const 
 			set->GetItems( pointer, items );
 
 			uint32_t length = static_cast< uint32_t >( items.GetSize() );
-			m_Writer.BeginArray( length );
+			//m_Writer.BeginArray( length );
 
 			for ( DynamicArray< DataPointer >::Iterator itr = items.Begin(), end = items.End(); itr != end; ++itr )
 			{
 				SerializeData( *itr, itemData, field, object );
 			}
 
-			m_Writer.EndArray();
+			//m_Writer.EndArray();
 
 			break;
 		}
@@ -288,14 +266,14 @@ void ArchiveWriterBinary::SerializeData( DataPointer pointer, Data* data, const 
 			sequence->GetItems( pointer, items );
 
 			uint32_t length = static_cast< uint32_t >( items.GetSize() );
-			m_Writer.BeginArray( length );
+			//m_Writer.BeginArray( length );
 
 			for ( DynamicArray< DataPointer >::Iterator itr = items.Begin(), end = items.End(); itr != end; ++itr )
 			{
 				SerializeData( *itr, itemData, field, object );
 			}
 
-			m_Writer.EndArray();
+			//m_Writer.EndArray();
 
 			break;
 		}
@@ -310,7 +288,7 @@ void ArchiveWriterBinary::SerializeData( DataPointer pointer, Data* data, const 
 			association->GetItems( pointer, keys, values );
 
 			uint32_t length = static_cast< uint32_t >( keys.GetSize() );
-			m_Writer.BeginMap( length );
+			//m_Writer.BeginMap( length );
 
 			for ( DynamicArray< DataPointer >::Iterator keyItr = keys.Begin(), valueItr = values.Begin(), keyEnd = keys.End(), valueEnd = values.End();
 				keyItr != keyEnd && valueItr != valueEnd;
@@ -320,45 +298,44 @@ void ArchiveWriterBinary::SerializeData( DataPointer pointer, Data* data, const 
 				SerializeData( *valueItr, valueData, field, object );
 			}
 
-			m_Writer.EndMap();
+			//m_Writer.EndMap();
 
 			break;
 		}
 	}
 }
 
-void ArchiveWriterBinary::ToStream( Object* object, Stream& stream, ObjectIdentifier* identifier, uint32_t flags )
+void ArchiveWriterJson::ToStream( Object* object, Stream& stream, ObjectIdentifier* identifier, uint32_t flags )
 {
-	ArchiveWriterBinary archive ( &stream, identifier );
+	ArchiveWriterJson archive ( &stream, identifier );
 	archive.m_Object = object;
 	archive.m_Flags = flags;
 	archive.Write();   
 	archive.Close(); 
 }
 
-ArchiveReaderBinary::ArchiveReaderBinary( const FilePath& path, ObjectResolver* resolver )
+ArchiveReaderJson::ArchiveReaderJson( const FilePath& path, ObjectResolver* resolver )
 	: ArchiveReader( path, resolver )
 	, m_Stream( NULL )
 	, m_Size( 0 )
 {
 }
 
-ArchiveReaderBinary::ArchiveReaderBinary( Stream *stream, ObjectResolver* resolver )
+ArchiveReaderJson::ArchiveReaderJson( Stream *stream, ObjectResolver* resolver )
 	: ArchiveReader( resolver )
 	, m_Stream( NULL )
 	, m_Size( 0 )
 {
 	m_Stream.Reset( stream );
 	m_Stream.Orphan( true );
-	m_Reader.SetStream( stream );
 }
 
-ArchiveType ArchiveReaderBinary::GetType() const
+ArchiveType ArchiveReaderJson::GetType() const
 {
-	return ArchiveTypes::Binary;
+	return ArchiveTypes::Json;
 }
 
-void ArchiveReaderBinary::Open()
+void ArchiveReaderJson::Open()
 {
 #if PERSIST_ARCHIVE_VERBOSE
 	Log::Print(TXT("Opening file '%s'\n"), m_Path.c_str());
@@ -367,19 +344,18 @@ void ArchiveReaderBinary::Open()
 	FileStream* stream = new FileStream();
 	stream->Open( m_Path, FileStream::MODE_READ );
 	m_Stream.Reset( stream );
-	m_Reader.SetStream( stream );
 }
 
-void ArchiveReaderBinary::Close()
+void ArchiveReaderJson::Close()
 {
 	HELIUM_ASSERT( m_Stream );
 	m_Stream->Close(); 
 	m_Stream.Release(); 
 }
 
-void ArchiveReaderBinary::Read()
+void ArchiveReaderJson::Read()
 {
-	PERSIST_SCOPE_TIMER( ("Reflect - Binary Read") );
+	PERSIST_SCOPE_TIMER( ("Reflect - Json Read") );
 
 	ArchiveStatus info( *this, ArchiveStates::Starting );
 	e_Status.Raise( info );
@@ -400,14 +376,15 @@ void ArchiveReaderBinary::Read()
 	const int64_t startOffset = m_Stream->Tell();
 
 	// parse the first byte of the stream
-	m_Reader.Advance();
+	//m_Reader.Advance();
 
+#if 0
 	if ( m_Reader.IsArray() )
 	{
 		uint32_t length = m_Reader.ReadArrayLength();
 		m_Objects.Reserve( length );
 
-		m_Reader.BeginArray( length );
+		//m_Reader.BeginArray( length );
 
 		for ( uint32_t i=0; i<length; i++ )
 		{
@@ -478,6 +455,7 @@ void ArchiveReaderBinary::Read()
 
 		m_Reader.EndArray();
 	}
+#endif
 
 	info.m_State = ArchiveStates::ObjectProcessed;
 	info.m_Progress = 100;
@@ -496,14 +474,14 @@ void ArchiveReaderBinary::Read()
 	e_Status.Raise( info );
 }
 
-void ArchiveReaderBinary::DeserializeInstance( void* instance, const Structure* structure, Object* object )
+void ArchiveReaderJson::DeserializeInstance( void* instance, const Structure* structure, Object* object )
 {
 #if PERSIST_ARCHIVE_VERBOSE
 	Log::Print(TXT("Deserializing %s\n"), structure->m_Name);
 #endif
 
 	object->PreDeserialize( NULL );
-
+#if 0
 	if ( m_Reader.IsMap() )
 	{
 		uint32_t length = m_Reader.ReadMapLength();
@@ -544,11 +522,11 @@ void ArchiveReaderBinary::DeserializeInstance( void* instance, const Structure* 
 	{
 		m_Reader.Skip();
 	}
-
+#endif
 	object->PostDeserialize( NULL );
 }
 
-void ArchiveReaderBinary::DeserializeField( void* instance, const Field* field, Object* object )
+void ArchiveReaderJson::DeserializeField( void* instance, const Field* field, Object* object )
 {
 #if PERSIST_ARCHIVE_VERBOSE
 	Log::Print(TXT("Deserializing field %s\n"), field->m_Name);
@@ -556,6 +534,7 @@ void ArchiveReaderBinary::DeserializeField( void* instance, const Field* field, 
 	
 	if ( field->m_Count > 1 )
 	{
+#if 0
 		if ( m_Reader.IsArray() )
 		{
 			uint32_t length = m_Reader.ReadArrayLength();
@@ -577,6 +556,7 @@ void ArchiveReaderBinary::DeserializeField( void* instance, const Field* field, 
 		{
 			DeserializeData( DataPointer ( field, object, 0 ), field->m_Data, field, object );
 		}
+#endif
 	}
 	else
 	{
@@ -584,8 +564,9 @@ void ArchiveReaderBinary::DeserializeField( void* instance, const Field* field, 
 	}
 }
 
-void ArchiveReaderBinary::DeserializeData( DataPointer pointer, Data* data, const Field* field, Object* object )
+void ArchiveReaderJson::DeserializeData( DataPointer pointer, Data* data, const Field* field, Object* object )
 {
+#if 0
 	if ( m_Reader.IsBoolean() )
 	{
 		if ( data->GetReflectionType() == ReflectionTypes::ScalarData )
@@ -742,11 +723,12 @@ void ArchiveReaderBinary::DeserializeData( DataPointer pointer, Data* data, cons
 	{
 		m_Reader.Skip(); // no implicit conversion, discard data
 	}
+#endif
 }
 
-ObjectPtr ArchiveReaderBinary::FromStream( Stream& stream, ObjectResolver* resolver, uint32_t flags )
+ObjectPtr ArchiveReaderJson::FromStream( Stream& stream, ObjectResolver* resolver, uint32_t flags )
 {
-	ArchiveReaderBinary archive( &stream, resolver );
+	ArchiveReaderJson archive( &stream, resolver );
 	archive.m_Flags = flags;
 	archive.Read();
 	archive.Close(); 

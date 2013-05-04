@@ -2,7 +2,6 @@
 
 #include "Foundation/DynamicArray.h"
 #include "Foundation/FilePath.h"
-#include "Foundation/MessagePack.h"
 #include "Foundation/Stream.h"
 
 #include "Persist/Archive.h"
@@ -11,11 +10,11 @@ namespace Helium
 {
 	namespace Persist
 	{
-		class HELIUM_PERSIST_API ArchiveWriterBinary : public ArchiveWriter
+		class HELIUM_PERSIST_API ArchiveWriterJson : public ArchiveWriter
 		{
 		public:
-			ArchiveWriterBinary( const FilePath& path, Reflect::ObjectIdentifier* identifier = NULL );
-			ArchiveWriterBinary( Stream *stream, Reflect::ObjectIdentifier* identifier = NULL );
+			ArchiveWriterJson( const FilePath& path, Reflect::ObjectIdentifier* identifier = NULL );
+			ArchiveWriterJson( Stream *stream, Reflect::ObjectIdentifier* identifier = NULL );
 			
 			virtual ArchiveType GetType() const HELIUM_OVERRIDE;
 			virtual void Open() HELIUM_OVERRIDE;
@@ -32,14 +31,13 @@ namespace Helium
 
 		private:
 			AutoPtr< Stream > m_Stream;
-			MessagePackWriter m_Writer;
 		};
 
-		class HELIUM_PERSIST_API ArchiveReaderBinary : public ArchiveReader
+		class HELIUM_PERSIST_API ArchiveReaderJson : public ArchiveReader
 		{
 		public:
-			ArchiveReaderBinary( const FilePath& path, Reflect::ObjectResolver* resolver = NULL );
-			ArchiveReaderBinary( Stream *stream, Reflect::ObjectResolver* resolver = NULL );
+			ArchiveReaderJson( const FilePath& path, Reflect::ObjectResolver* resolver = NULL );
+			ArchiveReaderJson( Stream *stream, Reflect::ObjectResolver* resolver = NULL );
 			
 			virtual ArchiveType GetType() const HELIUM_OVERRIDE;
 			virtual void Open() HELIUM_OVERRIDE;
@@ -57,7 +55,6 @@ namespace Helium
 
 		private:
 			AutoPtr< Stream > m_Stream;
-			MessagePackReader m_Reader;
 			int64_t           m_Size;
 		};
 	}
