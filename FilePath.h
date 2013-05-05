@@ -13,8 +13,7 @@ namespace Helium
 {
     const static tchar_t s_InternalPathSeparator = '/';
 
-#pragma TODO("FilePath should not be heap allocated and therefore reference counted")
-    class HELIUM_FOUNDATION_API FilePath : public Helium::RefCountBase< FilePath >
+    class HELIUM_FOUNDATION_API FilePath
     {
     private:
         tstring m_Path;
