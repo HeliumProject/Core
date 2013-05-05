@@ -1,7 +1,7 @@
 #include "MathPch.h"
 #include "Math/Vector3.h"
 #include "Math/Scale.h"
-#include "Reflect/DataDeduction.h"
+#include "Reflect/TranslatorDeduction.h"
 
 REFLECT_DEFINE_BASE_STRUCTURE( Helium::Vector3 );
 
