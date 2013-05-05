@@ -9,112 +9,115 @@
 
 namespace Helium
 {
-    class HELIUM_MATH_API Matrix4;
+	class HELIUM_MATH_API Matrix4;
 
-    class HELIUM_MATH_API Vector4
-    {
-    public:
-        float32_t x, y, z, w;
+	struct HELIUM_MATH_API Vector4 : Reflect::StructureBase
+	{
+	public:
+		REFLECT_DECLARE_BASE_STRUCTURE( Vector4 );
+		static void PopulateStructure( Reflect::Structure& comp );
 
-        const static Vector4 Zero;
-        const static Vector4 Point;
-        const static Vector4 BasisX;
-        const static Vector4 BasisY;
-        const static Vector4 BasisZ;
-        const static Vector4 BasisW;
+		float32_t x, y, z, w;
 
-        Vector4           () : x(0), y(0), z(0), w(0) {}
-        explicit Vector4  ( const Vector3& v ) : x(v.x), y(v.y), z(v.z), w(0) {}
-        explicit Vector4  ( float32_t vx, float32_t vy, float32_t vz, float32_t vw ) : x(vx), y(vy), z(vz), w(vw) {}
-        explicit Vector4  ( float32_t val ) : x( val ), y( val ), z( val ), w( val ) {}
+		const static Vector4 Zero;
+		const static Vector4 Point;
+		const static Vector4 BasisX;
+		const static Vector4 BasisY;
+		const static Vector4 BasisZ;
+		const static Vector4 BasisW;
 
-        // lame, people just called SetXYZW too much in the old lib, this is a concession to that
-        inline void       Set( float32_t vx, float32_t vy, float32_t vz, float32_t vw ) { x = vx; y = vy; z = vz; w = vw; }
+		Vector4           () : x(0), y(0), z(0), w(0) {}
+		explicit Vector4  ( const Vector3& v ) : x(v.x), y(v.y), z(v.z), w(0) {}
+		explicit Vector4  ( float32_t vx, float32_t vy, float32_t vz, float32_t vw ) : x(vx), y(vy), z(vz), w(vw) {}
+		explicit Vector4  ( float32_t val ) : x( val ), y( val ), z( val ), w( val ) {}
 
-        Vector4&          operator= (const Vector4& v) { x = v.x; y = v.y; z = v.z; w = v.w; return *this; }
-        Vector4&          operator= (const Vector3& v) { x = v.x; y = v.y; z = v.z; return *this; }
-        Vector4&          operator+= (const Vector4& v) { x += v.x; y += v.y; z += v.z; w += v.w; return *this; }
-        Vector4&          operator-= (const Vector4& v) { x -= v.x; y -= v.y; z -= v.z; w -= v.w; return *this; }
-        Vector4&          operator*= (const Vector4& v) { x *= v.x; y *= v.y; z *= v.z; w *= v.w; return *this; }
-        Vector4&          operator*= (const float32_t v) { x *= v; y *= v; z *= v; w *= v; return *this; }
-        Vector4&          operator/= (const Vector4& v) { x /= v.x; y /= v.y; z /= v.z; w /= v.w; return *this; }
-        Vector4&          operator/= (const float32_t v) { x /= v; y /= v; z /= v; w /= v; return *this; }
+		// lame, people just called SetXYZW too much in the old lib, this is a concession to that
+		inline void       Set( float32_t vx, float32_t vy, float32_t vz, float32_t vw ) { x = vx; y = vy; z = vz; w = vw; }
 
-        Vector4           operator+ (const Vector4& v) const { return Vector4 (x + v.x, y + v.y, z + v.z, w + v.w); }
-        Vector4           operator- (const Vector4& v) const { return Vector4 (x - v.x, y - v.y, z - v.z, w - v.w); }
-        Vector4           operator* (const Vector4& v) const { return Vector4 (x * v.x, y * v.y, z * v.z, w * v.w); }
-        Vector4           operator* (const float32_t v) const { return Vector4 (x * v, y * v, z * v, w * v); }
-        Vector4           operator/ (const Vector4& v) const { return Vector4 (x / v.x, y / v.y, z / v.z, w / v.w); }
-        Vector4           operator/ (const float32_t v) const { return Vector4 (x / v, y / v, z / v, w / v); }
+		Vector4&          operator= (const Vector4& v) { x = v.x; y = v.y; z = v.z; w = v.w; return *this; }
+		Vector4&          operator= (const Vector3& v) { x = v.x; y = v.y; z = v.z; return *this; }
+		Vector4&          operator+= (const Vector4& v) { x += v.x; y += v.y; z += v.z; w += v.w; return *this; }
+		Vector4&          operator-= (const Vector4& v) { x -= v.x; y -= v.y; z -= v.z; w -= v.w; return *this; }
+		Vector4&          operator*= (const Vector4& v) { x *= v.x; y *= v.y; z *= v.z; w *= v.w; return *this; }
+		Vector4&          operator*= (const float32_t v) { x *= v; y *= v; z *= v; w *= v; return *this; }
+		Vector4&          operator/= (const Vector4& v) { x /= v.x; y /= v.y; z /= v.z; w /= v.w; return *this; }
+		Vector4&          operator/= (const float32_t v) { x /= v; y /= v; z /= v; w /= v; return *this; }
 
-        // unary negation
-        Vector4           operator- () const { return Vector4( -x, -y, -z, -w ); }
+		Vector4           operator+ (const Vector4& v) const { return Vector4 (x + v.x, y + v.y, z + v.z, w + v.w); }
+		Vector4           operator- (const Vector4& v) const { return Vector4 (x - v.x, y - v.y, z - v.z, w - v.w); }
+		Vector4           operator* (const Vector4& v) const { return Vector4 (x * v.x, y * v.y, z * v.z, w * v.w); }
+		Vector4           operator* (const float32_t v) const { return Vector4 (x * v, y * v, z * v, w * v); }
+		Vector4           operator/ (const Vector4& v) const { return Vector4 (x / v.x, y / v.y, z / v.z, w / v.w); }
+		Vector4           operator/ (const float32_t v) const { return Vector4 (x / v, y / v, z / v, w / v); }
 
-        float32_t&        operator[] (const uint32_t i) {  HELIUM_ASSERT(i < 4); return (&x)[i]; }
-        const float32_t&  operator[] (const uint32_t i) const {  HELIUM_ASSERT(i < 4); return (&x)[i]; }
+		// unary negation
+		Vector4           operator- () const { return Vector4( -x, -y, -z, -w ); }
 
-        bool              operator== (const Vector4& v) const { return (x == v.x && y == v.y && z == v.z && w == v.w); }
-        bool              operator!= (const Vector4& v) const { return !(x == v.x && y == v.y && z == v.z && w == v.w); }
-        bool              Equal (const Vector4& v, float32_t error = 0) const;
-        bool              Finite() { return IsFinite(x) && IsFinite(y) && IsFinite(z) && IsFinite(w); }
+		float32_t&        operator[] (const uint32_t i) {  HELIUM_ASSERT(i < 4); return (&x)[i]; }
+		const float32_t&  operator[] (const uint32_t i) const {  HELIUM_ASSERT(i < 4); return (&x)[i]; }
 
-        float32_t         LengthSquared () const { return x * x + y * y + z * z + w * w; }
-        float32_t         Length () const;
+		bool              operator== (const Vector4& v) const { return (x == v.x && y == v.y && z == v.z && w == v.w); }
+		bool              operator!= (const Vector4& v) const { return !(x == v.x && y == v.y && z == v.z && w == v.w); }
+		bool              Equal (const Vector4& v, float32_t error = 0) const;
+		bool              Finite() { return IsFinite(x) && IsFinite(y) && IsFinite(z) && IsFinite(w); }
 
-        Vector4&          Normalize ();
-        Vector4           Normalized () const;
+		float32_t         LengthSquared () const { return x * x + y * y + z * z + w * w; }
+		float32_t         Length () const;
 
-        float32_t         Dot (const Vector4& other) const; 
-        Vector4           Cross (const Vector4& v) const;
+		Vector4&          Normalize ();
+		Vector4           Normalized () const;
 
-        void              Transform (const Matrix4& m);
-    };
+		float32_t         Dot (const Vector4& other) const; 
+		Vector4           Cross (const Vector4& v) const;
 
-    typedef std::vector< Vector4 > V_Vector4;
-    typedef std::vector< V_Vector4 > VV_Vector4;
+		void              Transform (const Matrix4& m);
+	};
 
-    inline bool Vector4::Equal(const Vector4& v, float32_t error) const
-    {
-        return (fabs(x - v.x) <= error && fabs(y - v.y) <= error && fabs(z - v.z) <= error && fabs(w - v.w) <= error);
-    }
+	typedef std::vector< Vector4 > V_Vector4;
+	typedef std::vector< V_Vector4 > VV_Vector4;
 
-    inline float32_t Vector4::Length() const
-    {
-        float32_t lenSqr = this->LengthSquared();
+	inline bool Vector4::Equal(const Vector4& v, float32_t error) const
+	{
+		return (fabs(x - v.x) <= error && fabs(y - v.y) <= error && fabs(z - v.z) <= error && fabs(w - v.w) <= error);
+	}
 
-        if (lenSqr <= 0)
-            return 0;
+	inline float32_t Vector4::Length() const
+	{
+		float32_t lenSqr = this->LengthSquared();
 
-        return sqrt((float32_t)lenSqr);
-    }
+		if (lenSqr <= 0)
+			return 0;
 
-    inline Vector4& Vector4::Normalize() 
-    { 
-        float32_t len = this->Length();
+		return sqrt((float32_t)lenSqr);
+	}
 
-        if (len > HELIUM_DIVISOR_NEAR_ZERO)
-        {
-            return *this /= len;
-        }
-        else
-        {
-            return *this = Vector4 (0, 0, 0, 0);
-        }
-    }
+	inline Vector4& Vector4::Normalize() 
+	{ 
+		float32_t len = this->Length();
 
-    inline Vector4 Vector4::Normalized() const 
-    {
-        Vector4 result = *this;
-        return result.Normalize();
-    }
+		if (len > HELIUM_DIVISOR_NEAR_ZERO)
+		{
+			return *this /= len;
+		}
+		else
+		{
+			return *this = Vector4 (0, 0, 0, 0);
+		}
+	}
 
-    inline float32_t Vector4::Dot(const Vector4& v) const
-    {
-        return (x * v.x + y * v.y + z * v.z + w * v.w);
-    }
+	inline Vector4 Vector4::Normalized() const 
+	{
+		Vector4 result = *this;
+		return result.Normalize();
+	}
 
-    inline Vector4 Vector4::Cross(const Vector4& v) const
-    {
-        return Vector4 (y*v.z - z*v.y, z*v.x - x*v.z, x*v.y - y*v.x, 0);
-    }
+	inline float32_t Vector4::Dot(const Vector4& v) const
+	{
+		return (x * v.x + y * v.y + z * v.z + w * v.w);
+	}
+
+	inline Vector4 Vector4::Cross(const Vector4& v) const
+	{
+		return Vector4 (y*v.z - z*v.y, z*v.x - x*v.z, x*v.y - y*v.x, 0);
+	}
 }
