@@ -7,7 +7,7 @@
 #include "Foundation/Log.h" 
 #include "Foundation/SmartPtr.h"
 
-#include "Reflect/Data.h"
+#include "Reflect/Translator.h"
 #include "Reflect/Class.h"
 #include "Reflect/Exceptions.h"
 

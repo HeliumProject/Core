@@ -25,7 +25,7 @@ namespace Helium
 		private:
 			void SerializeInstance( void* instance, const Reflect::Structure* structure, Reflect::Object* object );
 			void SerializeField( void* instance, const Reflect::Field* field, Reflect::Object* object );
-			void SerializeData( Reflect::DataPointer pointer, Reflect::Data* data, const Reflect::Field* field, Reflect::Object* object );
+			void SerializeTranslator( Reflect::Pointer pointer, Reflect::Translator* translator, const Reflect::Field* field, Reflect::Object* object );
 
 		public:
 			static void ToStream( Reflect::Object* object, Stream& stream, Reflect::ObjectIdentifier* identifier = NULL, uint32_t flags = 0 );
@@ -50,7 +50,7 @@ namespace Helium
 			void Deserialize( DynamicArray< Reflect::ObjectPtr >& objects );
 			void DeserializeInstance( void* instance, const Reflect::Structure* composite, Reflect::Object* object );
 			void DeserializeField( void* instance, const Reflect::Field* field, Reflect::Object* object );
-			void DeserializeData( Reflect::DataPointer pointer, Reflect::Data* data, const Reflect::Field* field, Reflect::Object* object );
+			void DeserializeTranslator( Reflect::Pointer pointer, Reflect::Translator* translator, const Reflect::Field* field, Reflect::Object* object );
 
 		public:
 			static Reflect::ObjectPtr FromStream( Stream& stream, Reflect::ObjectResolver* resolver = NULL, uint32_t flags = 0 );

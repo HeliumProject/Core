@@ -7,7 +7,7 @@
 #include "Reflect/Object.h"
 #include "Reflect/Structure.h"
 #include "Reflect/Registry.h"
-#include "Reflect/DataDeduction.h"
+#include "Reflect/TranslatorDeduction.h"
 
 using namespace Helium;
 using namespace Helium::Reflect;
@@ -178,24 +178,24 @@ void ArchiveWriterMessagePack::SerializeField( void* instance, const Field* fiel
 
 		for ( uint32_t i=0; i<field->m_Count; ++i )
 		{
-			SerializeData( DataPointer ( field, object, i ), field->m_Data, field, object );
+			SerializeTranslator( Pointer ( field, object, i ), field->m_Translator, field, object );
 		}
 
 		m_Writer.EndArray();
 	}
 	else
 	{
-		SerializeData( DataPointer ( field, object ), field->m_Data, field, object );
+		SerializeTranslator( Pointer ( field, object ), field->m_Translator, field, object );
 	}
 }
 
-void ArchiveWriterMessagePack::SerializeData( DataPointer pointer, Data* data, const Field* field, Object* object )
+void ArchiveWriterMessagePack::SerializeTranslator( Pointer pointer, Translator* data, const Field* field, Object* object )
 {
 	switch ( data->GetReflectionType() )
 	{
-	case ReflectionTypes::ScalarData:
+	case ReflectionTypes::ScalarTranslator:
 		{
-			ScalarData* scalar = static_cast< ScalarData* >( data );
+			ScalarTranslator* scalar = static_cast< ScalarTranslator* >( data );
 			switch ( scalar->m_Type )
 			{
 			case ScalarTypes::Boolean:
@@ -251,27 +251,27 @@ void ArchiveWriterMessagePack::SerializeData( DataPointer pointer, Data* data, c
 			break;
 		}
 
-	case ReflectionTypes::StructureData:
+	case ReflectionTypes::StructureTranslator:
 		{
-			StructureData* structure = static_cast< StructureData* >( data );
+			StructureTranslator* structure = static_cast< StructureTranslator* >( data );
 			SerializeInstance( pointer.m_Address, structure->GetStructure(), object );
 			break;
 		}
 
-	case ReflectionTypes::SetData:
+	case ReflectionTypes::SetTranslator:
 		{
-			SetData* set = static_cast< SetData* >( data );
+			SetTranslator* set = static_cast< SetTranslator* >( data );
 
-			Data* itemData = set->GetItemData();
-			DynamicArray< DataPointer > items;
+			Translator* itemTranslator = set->GetItemTranslator();
+			DynamicArray< Pointer > items;
 			set->GetItems( pointer, items );
 
 			uint32_t length = static_cast< uint32_t >( items.GetSize() );
 			m_Writer.BeginArray( length );
 
-			for ( DynamicArray< DataPointer >::Iterator itr = items.Begin(), end = items.End(); itr != end; ++itr )
+			for ( DynamicArray< Pointer >::Iterator itr = items.Begin(), end = items.End(); itr != end; ++itr )
 			{
-				SerializeData( *itr, itemData, field, object );
+				SerializeTranslator( *itr, itemTranslator, field, object );
 			}
 
 			m_Writer.EndArray();
@@ -279,20 +279,20 @@ void ArchiveWriterMessagePack::SerializeData( DataPointer pointer, Data* data, c
 			break;
 		}
 
-	case ReflectionTypes::SequenceData:
+	case ReflectionTypes::SequenceTranslator:
 		{
-			SequenceData* sequence = static_cast< SequenceData* >( data );
+			SequenceTranslator* sequence = static_cast< SequenceTranslator* >( data );
 
-			Data* itemData = sequence->GetItemData();
-			DynamicArray< DataPointer > items;
+			Translator* itemTranslator = sequence->GetItemTranslator();
+			DynamicArray< Pointer > items;
 			sequence->GetItems( pointer, items );
 
 			uint32_t length = static_cast< uint32_t >( items.GetSize() );
 			m_Writer.BeginArray( length );
 
-			for ( DynamicArray< DataPointer >::Iterator itr = items.Begin(), end = items.End(); itr != end; ++itr )
+			for ( DynamicArray< Pointer >::Iterator itr = items.Begin(), end = items.End(); itr != end; ++itr )
 			{
-				SerializeData( *itr, itemData, field, object );
+				SerializeTranslator( *itr, itemTranslator, field, object );
 			}
 
 			m_Writer.EndArray();
@@ -300,24 +300,24 @@ void ArchiveWriterMessagePack::SerializeData( DataPointer pointer, Data* data, c
 			break;
 		}
 
-	case ReflectionTypes::AssociationData:
+	case ReflectionTypes::AssociationTranslator:
 		{
-			AssociationData* association = static_cast< AssociationData* >( data );
+			AssociationTranslator* association = static_cast< AssociationTranslator* >( data );
 
-			Data* keyData = association->GetKeyData();
-			Data* valueData = association->GetValueData();
-			DynamicArray< DataPointer > keys, values;
+			Translator* keyTranslator = association->GetKeyTranslator();
+			Translator* valueTranslator = association->GetValueTranslator();
+			DynamicArray< Pointer > keys, values;
 			association->GetItems( pointer, keys, values );
 
 			uint32_t length = static_cast< uint32_t >( keys.GetSize() );
 			m_Writer.BeginMap( length );
 
-			for ( DynamicArray< DataPointer >::Iterator keyItr = keys.Begin(), valueItr = values.Begin(), keyEnd = keys.End(), valueEnd = values.End();
+			for ( DynamicArray< Pointer >::Iterator keyItr = keys.Begin(), valueItr = values.Begin(), keyEnd = keys.End(), valueEnd = values.End();
 				keyItr != keyEnd && valueItr != valueEnd;
 				++keyItr, ++valueItr )
 			{
-				SerializeData( *keyItr, keyData, field, object );
-				SerializeData( *valueItr, valueData, field, object );
+				SerializeTranslator( *keyItr, keyTranslator, field, object );
+				SerializeTranslator( *valueItr, valueTranslator, field, object );
 			}
 
 			m_Writer.EndMap();
@@ -564,7 +564,7 @@ void ArchiveReaderMessagePack::DeserializeField( void* instance, const Field* fi
 			{
 				if ( i < field->m_Count )
 				{
-					DeserializeData( DataPointer ( field, object, i ), field->m_Data, field, object );
+					DeserializeTranslator( Pointer ( field, object, i ), field->m_Translator, field, object );
 				}
 				else
 				{
@@ -575,22 +575,22 @@ void ArchiveReaderMessagePack::DeserializeField( void* instance, const Field* fi
 		}
 		else
 		{
-			DeserializeData( DataPointer ( field, object, 0 ), field->m_Data, field, object );
+			DeserializeTranslator( Pointer ( field, object, 0 ), field->m_Translator, field, object );
 		}
 	}
 	else
 	{
-		DeserializeData( DataPointer ( field, object ), field->m_Data, field, object );
+		DeserializeTranslator( Pointer ( field, object ), field->m_Translator, field, object );
 	}
 }
 
-void ArchiveReaderMessagePack::DeserializeData( DataPointer pointer, Data* data, const Field* field, Object* object )
+void ArchiveReaderMessagePack::DeserializeTranslator( Pointer pointer, Translator* data, const Field* field, Object* object )
 {
 	if ( m_Reader.IsBoolean() )
 	{
-		if ( data->GetReflectionType() == ReflectionTypes::ScalarData )
+		if ( data->GetReflectionType() == ReflectionTypes::ScalarTranslator )
 		{
-			ScalarData* scalar = static_cast< ScalarData* >( data );
+			ScalarTranslator* scalar = static_cast< ScalarTranslator* >( data );
 			if ( scalar->m_Type == ScalarTypes::Boolean )
 			{
 				m_Reader.Read( pointer.As<bool>() );
@@ -607,9 +607,9 @@ void ArchiveReaderMessagePack::DeserializeData( DataPointer pointer, Data* data,
 	}
 	else if ( m_Reader.IsNumber() )
 	{
-		if ( data->GetReflectionType() == ReflectionTypes::ScalarData )
+		if ( data->GetReflectionType() == ReflectionTypes::ScalarTranslator )
 		{
-			ScalarData* scalar = static_cast< ScalarData* >( data );
+			ScalarTranslator* scalar = static_cast< ScalarTranslator* >( data );
 			bool clamp = true;
 			switch ( scalar->m_Type )
 			{
@@ -665,9 +665,9 @@ void ArchiveReaderMessagePack::DeserializeData( DataPointer pointer, Data* data,
 	}
 	else if ( m_Reader.IsRaw() )
 	{
-		if ( data->GetReflectionType() == ReflectionTypes::ScalarData )
+		if ( data->GetReflectionType() == ReflectionTypes::ScalarTranslator )
 		{
-			ScalarData* scalar = static_cast< ScalarData* >( data );
+			ScalarTranslator* scalar = static_cast< ScalarTranslator* >( data );
 			if ( scalar->m_Type == ScalarTypes::String )
 			{
 				String str;
@@ -682,27 +682,27 @@ void ArchiveReaderMessagePack::DeserializeData( DataPointer pointer, Data* data,
 	}
 	else if ( m_Reader.IsArray() )
 	{
-		if ( data->GetReflectionType() == ReflectionTypes::SetData )
+		if ( data->GetReflectionType() == ReflectionTypes::SetTranslator )
 		{
-			SetData* set = static_cast< SetData* >( data );
-			Data* itemData = set->GetItemData();
+			SetTranslator* set = static_cast< SetTranslator* >( data );
+			Translator* itemTranslator = set->GetItemTranslator();
 			uint32_t length = m_Reader.ReadArrayLength();
 			for ( uint32_t i=0; i<length; ++i )
 			{
-				DataVariable item ( itemData );
-				DeserializeData( item, itemData, field, object );
+				Variable item ( itemTranslator );
+				DeserializeTranslator( item, itemTranslator, field, object );
 				set->InsertItem( pointer, item );
 			}
 		}
-		else if ( data->GetReflectionType() == ReflectionTypes::SequenceData )
+		else if ( data->GetReflectionType() == ReflectionTypes::SequenceTranslator )
 		{
-			SequenceData* sequence = static_cast< SequenceData* >( data );
-			Data* itemData = sequence->GetItemData();
+			SequenceTranslator* sequence = static_cast< SequenceTranslator* >( data );
+			Translator* itemTranslator = sequence->GetItemTranslator();
 			uint32_t length = m_Reader.ReadArrayLength();
 			for ( uint32_t i=0; i<length; ++i )
 			{
-				DataVariable item ( itemData );
-				DeserializeData( item, itemData, field, object );
+				Variable item ( itemTranslator );
+				DeserializeTranslator( item, itemTranslator, field, object );
 				sequence->SetItem( pointer, i, item );
 			}
 		}
@@ -713,23 +713,23 @@ void ArchiveReaderMessagePack::DeserializeData( DataPointer pointer, Data* data,
 	}
 	else if ( m_Reader.IsMap() )
 	{
-		if ( data->GetReflectionType() == ReflectionTypes::StructureData )
+		if ( data->GetReflectionType() == ReflectionTypes::StructureTranslator )
 		{
-			StructureData* structure = static_cast< StructureData* >( data );
+			StructureTranslator* structure = static_cast< StructureTranslator* >( data );
 			DeserializeInstance( pointer.m_Address,  structure->GetStructure(), object );
 		}
-		else if ( data->GetReflectionType() == ReflectionTypes::AssociationData )
+		else if ( data->GetReflectionType() == ReflectionTypes::AssociationTranslator )
 		{
-			AssociationData* assocation = static_cast< AssociationData* >( data );
-			Data* keyData = assocation->GetKeyData();
-			Data* valueData = assocation->GetValueData();
-			DataVariable key ( keyData );
-			DataVariable value ( valueData );
+			AssociationTranslator* assocation = static_cast< AssociationTranslator* >( data );
+			Translator* keyTranslator = assocation->GetKeyTranslator();
+			Translator* valueTranslator = assocation->GetValueTranslator();
+			Variable key ( keyTranslator );
+			Variable value ( valueTranslator );
 			uint32_t length = m_Reader.ReadMapLength();
 			for ( uint32_t i=0; i<length; ++i )
 			{
-				DeserializeData( key, keyData, field, object );
-				DeserializeData( value, valueData, field, object );
+				DeserializeTranslator( key, keyTranslator, field, object );
+				DeserializeTranslator( value, valueTranslator, field, object );
 				assocation->SetItem( pointer, key, value );
 			}
 		}

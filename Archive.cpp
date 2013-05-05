@@ -9,7 +9,7 @@
 #include "Foundation/Profile.h"
 
 #include "Reflect/Object.h"
-#include "Reflect/DataDeduction.h"
+#include "Reflect/TranslatorDeduction.h"
 #include "Reflect/Registry.h"
 
 #include "Persist/ArchiveJson.h"
