@@ -377,13 +377,42 @@ void ArchiveReaderMessagePack::Close()
 	m_Stream.Release(); 
 }
 
-void ArchiveReaderMessagePack::Read(uint32_t maxObjectCount)
+void ArchiveReaderMessagePack::Read()
 {
 	PERSIST_SCOPE_TIMER( ("Reflect - MessagePack Read") );
 
+	Start();
+
+	if ( m_Reader.IsArray() )
+	{
+		uint32_t length = m_Reader.ReadArrayLength();
+
+		m_Objects.Reserve( length );
+
+		m_Reader.BeginArray( length );
+
+		for ( uint32_t i=0; i<length; i++ )
+		{
+			ObjectPtr object;
+			ReadNext( object );
+			m_Objects.Push( object );
+			ArchiveStatus info( *this, ArchiveStates::ObjectProcessed );
+			info.m_Progress = (int)(((float)(m_Stream->Tell()) / (float)m_Size) * 100.0f);
+			e_Status.Raise( info );
+			if ( m_Abort )
+			{
+				break;
+			}
+		}
+
+		m_Reader.EndArray();
+	}
+}
+
+void ArchiveReaderMessagePack::Start()
+{
 	ArchiveStatus info( *this, ArchiveStates::Starting );
 	e_Status.Raise( info );
-
 	m_Abort = false;
 
 	// determine the size of the input stream
@@ -397,94 +426,69 @@ void ArchiveReaderMessagePack::Read(uint32_t maxObjectCount)
 		throw Persist::StreamException( TXT( "Input stream is empty (%s)" ), m_Path.c_str() );
 	}
 
-	const int64_t startOffset = m_Stream->Tell();
-
 	// parse the first byte of the stream
 	m_Reader.Advance();
+}
 
-	if ( m_Reader.IsArray() )
+void ArchiveReaderMessagePack::ReadNext( ObjectPtr& object )
+{
+	if ( m_Reader.IsMap() )
 	{
-		uint32_t length = m_Reader.ReadArrayLength();
-		if (maxObjectCount)
+		uint32_t length = m_Reader.ReadMapLength();
+		if ( length == 1 )
 		{
-			length = Helium::Min(length, maxObjectCount);
-		}
+			m_Reader.BeginMap( length );
 
-		m_Objects.Reserve( length );
-
-		m_Reader.BeginArray( length );
-
-		for ( uint32_t i=0; i<length; i++ )
-		{
-			if ( m_Reader.IsMap() )
+			uint32_t objectClassCrc = 0;
+			if ( m_Reader.IsNumber() )
 			{
-				uint32_t length = m_Reader.ReadMapLength();
-				if ( length == 1 )
-				{
-					m_Reader.BeginMap( length );
-
-					uint32_t objectClassCrc = 0;
-					if ( m_Reader.IsNumber() )
-					{
-						m_Reader.Read( objectClassCrc );
-					}
-					else
-					{
-						String typeStr;
-						m_Reader.Read( typeStr );
-						objectClassCrc = Helium::Crc32( typeStr.GetData() );
-					}
-
-					m_Reader.Advance();
-
-					const Class* objectClass = NULL;
-					if ( objectClassCrc != 0 )
-					{
-						objectClass = Registry::GetInstance()->GetClass( objectClassCrc );
-					}
-
-					ObjectPtr object;
-					if ( objectClass )
-					{
-						object = Registry::GetInstance()->CreateInstance( objectClass );
-					}
-
-					m_Objects.Push( object );
-
-					if ( object.ReferencesObject() )
-					{
-						DeserializeInstance( object, object->GetClass(), object );
-
-						int64_t current = m_Stream->Tell();
-
-						info.m_State = ArchiveStates::ObjectProcessed;
-						info.m_Progress = (int)(((float)(current - startOffset) / (float)m_Size) * 100.0f);
-						e_Status.Raise( info );
-
-						m_Abort |= info.m_Abort;
-					}
-					else // object.ReferencesObject()
-					{
-						m_Reader.Skip();
-					}
-
-					m_Reader.EndMap();
-				}
-				else // length == 1
-				{
-					m_Reader.Skip();
-				}
+				m_Reader.Read( objectClassCrc );
 			}
-			else // IsMap
+			else
+			{
+				String typeStr;
+				m_Reader.Read( typeStr );
+				objectClassCrc = Helium::Crc32( typeStr.GetData() );
+			}
+
+			m_Reader.Advance();
+
+			const Class* objectClass = NULL;
+			if ( objectClassCrc != 0 )
+			{
+				objectClass = Registry::GetInstance()->GetClass( objectClassCrc );
+			}
+
+			if ( !object && objectClass )
+			{
+				object = Registry::GetInstance()->CreateInstance( objectClass );
+			}
+
+			if ( object.ReferencesObject() )
+			{
+				DeserializeInstance( object, object->GetClass(), object );
+			}
+			else // object.ReferencesObject()
 			{
 				m_Reader.Skip();
 			}
-		} // for
 
-		m_Reader.EndArray();
+			m_Reader.EndMap();
+		}
+		else // length == 1
+		{
+			m_Reader.Skip();
+		}
 	}
+	else // IsMap
+	{
+		m_Reader.Skip();
+	}
+}
 
-	info.m_State = ArchiveStates::ObjectProcessed;
+void ArchiveReaderMessagePack::Resolve()
+{
+	ArchiveStatus info( *this, ArchiveStates::ObjectProcessed );
 	info.m_Progress = 100;
 	e_Status.Raise( info );
 
@@ -493,7 +497,7 @@ void ArchiveReaderMessagePack::Read(uint32_t maxObjectCount)
 	{
 		for ( DynamicArray< Fixup >::ConstIterator itr = m_Fixups.Begin(), end = m_Fixups.End(); itr != end; ++itr )
 		{
-			Resolve( itr->m_Identity, itr->m_Pointer, itr->m_PointerClass );
+			ArchiveReader::Resolve( itr->m_Identity, itr->m_Pointer, itr->m_PointerClass );
 		}
 	}
 

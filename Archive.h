@@ -62,7 +62,6 @@ namespace Helium
 		{
 			enum ArchiveState
 			{
-				Created,
 				Starting,
 				PreProcessing,
 				ArchiveStarting,
@@ -154,7 +153,7 @@ namespace Helium
 			ArchiveReader( const FilePath& path, Reflect::ObjectResolver* resolver = NULL );
 
 			virtual ArchiveMode GetMode() const HELIUM_OVERRIDE;
-			virtual void Read(uint32_t maxObjectCount = 0) = 0;
+			virtual void Read() = 0;
 			virtual void Resolve( const Name& identity, Reflect::ObjectPtr& pointer, const Reflect::Class* pointerClass ) HELIUM_OVERRIDE;
 
 		protected:

@@ -319,22 +319,18 @@ void ArchiveWriterJson::ToStream( Object* object, Stream& stream, ObjectIdentifi
 ArchiveReaderJson::ArchiveReaderJson( const FilePath& path, ObjectResolver* resolver )
 	: ArchiveReader( path, resolver )
 	, m_Stream( NULL )
+	, m_Next( 0 )
 	, m_Size( 0 )
-	, m_StartOffset( 0 )
-	, m_CurrentOffset( 0 )
 {
-	m_Status.Reset( new ArchiveStatus( *this, ArchiveStates::Created ) );
+
 }
 
 ArchiveReaderJson::ArchiveReaderJson( Stream *stream, ObjectResolver* resolver )
 	: ArchiveReader( resolver )
 	, m_Stream( NULL )
+	, m_Next( 0 )
 	, m_Size( 0 )
-	, m_StartOffset( 0 )
-	, m_CurrentOffset( 0 )
 {
-	m_Status.Reset( new ArchiveStatus( *this, ArchiveStates::Created ) );
-
 	m_Stream.Reset( stream );
 	m_Stream.Orphan( true );
 }
@@ -362,37 +358,122 @@ void ArchiveReaderJson::Close()
 	m_Stream.Release();
 }
 
-void ArchiveReaderJson::Read(uint32_t maxObjectCount)
+void ArchiveReaderJson::Read()
 {
 	PERSIST_SCOPE_TIMER( ("Reflect - Json Read") );
 
-	BeginRead();
+	Start();
 
 	if ( m_Reader.IsArray() )
 	{
 		uint32_t length = m_Reader.Size();
-
-		if (maxObjectCount)
-		{
-			length = Helium::Min(length, maxObjectCount);
-		}
 
 		m_Objects.Reserve( length );
 
 		for ( uint32_t i=0; i<length; i++ )
 		{
 			ObjectPtr object;
-			ReadOneObject(i, object);
-
-			m_Status->m_State = ArchiveStates::ObjectProcessed;
-			m_Status->m_Progress = (int)(((float)(m_CurrentOffset - m_StartOffset) / (float)m_Size) * 100.0f);
-			e_Status.Raise( *m_Status );
-
-			m_Abort |= m_Status->m_Abort;
+			ReadNext( object );
+			m_Objects.Push( object );
+			ArchiveStatus info( *this, ArchiveStates::ObjectProcessed );
+			info.m_Progress = (int)(((float)(m_Stream->Tell()) / (float)m_Size) * 100.0f);
+			e_Status.Raise( info );
+			m_Abort |= info.m_Abort;
+			if ( m_Abort )
+			{
+				break;
+			}
 		}
 	}
 
-	EndRead();
+	Resolve();
+}
+
+void Helium::Persist::ArchiveReaderJson::Start()
+{
+	ArchiveStatus info( *this, ArchiveStates::Starting );
+	e_Status.Raise( info );
+	m_Abort = false;
+
+	// determine the size of the input stream
+	m_Stream->Seek(0, SeekOrigins::End);
+	m_Size = m_Stream->Tell();
+	m_Stream->Seek(0, SeekOrigins::Begin);
+
+	// fail on an empty input stream
+	if ( m_Size == 0 )
+	{
+		throw Persist::StreamException( TXT( "Input stream is empty (%s)" ), m_Path.c_str() );
+	}
+
+	// read entire contents
+	DynamicArray< uint8_t > buffer;
+	buffer.Resize( m_Size );
+	m_Stream->Read( buffer.GetData(),  m_Size, 1 );
+	if ( m_Reader.ParseInsitu< 0 >( reinterpret_cast< char* >( buffer.GetData() ) ).HasParseError() )
+	{
+		throw Persist::Exception( "Error parsing JSON: %s", m_Reader.GetParseError() );
+	}
+}
+
+void Helium::Persist::ArchiveReaderJson::ReadNext( Reflect::ObjectPtr& object )
+{
+	rapidjson::Value& v = m_Reader[ m_Next++ ];
+	if ( v.IsObject() )
+	{
+		uint32_t length = v.Size();
+		if ( length == 1 )
+		{
+			rapidjson::Value::Member* member = v[ rapidjson::SizeType(0) ].MemberBegin();
+
+			uint32_t objectClassCrc = 0;
+			if ( member->name.IsNumber() )
+			{
+				objectClassCrc = member->name.GetInt();
+			}
+			else
+			{
+				String typeStr;
+				typeStr = member->name.GetString();
+				objectClassCrc = Helium::Crc32( typeStr.GetData() );
+			}
+
+			const Class* objectClass = NULL;
+			if ( objectClassCrc != 0 )
+			{
+				objectClass = Registry::GetInstance()->GetClass( objectClassCrc );
+			}
+			
+			if ( !object && objectClass )
+			{
+				object = Registry::GetInstance()->CreateInstance( objectClass );
+			}
+
+			if ( object.ReferencesObject() )
+			{
+				DeserializeInstance( member->value, object, object->GetClass(), object );
+			}
+		}
+	}
+}
+
+void Helium::Persist::ArchiveReaderJson::Resolve()
+{
+	ArchiveStatus info( *this, ArchiveStates::ObjectProcessed );
+	info.m_Progress = 100;
+	e_Status.Raise( info );
+
+	// finish linking objects (unless we have a custom handler)
+	if ( !m_Resolver )
+	{
+		for ( DynamicArray< Fixup >::ConstIterator itr = m_Fixups.Begin(), end = m_Fixups.End(); itr != end; ++itr )
+		{
+			ArchiveReader::Resolve( itr->m_Identity, itr->m_Pointer, itr->m_PointerClass );
+		}
+	}
+
+	info.m_State = ArchiveStates::Complete;
+	e_Status.Raise( info );
 }
 
 void ArchiveReaderJson::DeserializeInstance( rapidjson::Value& value, void* instance, const Structure* structure, Object* object )
@@ -654,102 +735,4 @@ ObjectPtr ArchiveReaderJson::FromStream( Stream& stream, ObjectResolver* resolve
 	archive.Read();
 	archive.Close(); 
 	return archive.m_Object;
-}
-
-void Helium::Persist::ArchiveReaderJson::BeginRead()
-{
-	m_Status->m_State = ArchiveStates::Starting;
-	e_Status.Raise( *m_Status );
-
-	m_Abort = false;
-
-	// determine the size of the input stream
-	m_Stream->Seek(0, SeekOrigins::End);
-	m_Size = m_Stream->Tell();
-	m_Stream->Seek(0, SeekOrigins::Begin);
-
-	// fail on an empty input stream
-	if ( m_Size == 0 )
-	{
-		throw Persist::StreamException( TXT( "Input stream is empty (%s)" ), m_Path.c_str() );
-	}
-
-	m_StartOffset = m_Stream->Tell();
-
-	// read entire contents
-	DynamicArray< uint8_t > buffer;
-	buffer.Resize( m_Size );
-	m_Stream->Read( buffer.GetData(),  m_Size, 1 );
-	if ( m_Reader.ParseInsitu< 0 >( reinterpret_cast< char* >( buffer.GetData() ) ).HasParseError() )
-	{
-		throw Persist::Exception( "Error parsing JSON: %s", m_Reader.GetParseError() );
-	}
-}
-
-void Helium::Persist::ArchiveReaderJson::ReadOneObject(uint32_t index, Reflect::ObjectPtr &object)
-{
-	rapidjson::Value& v = m_Reader[ index ];
-	if ( v.IsObject() )
-	{
-		uint32_t length = v.Size();
-		if ( length == 1 )
-		{
-			rapidjson::Value::Member* member = v[ rapidjson::SizeType(0) ].MemberBegin();
-
-			uint32_t objectClassCrc = 0;
-			if ( member->name.IsNumber() )
-			{
-				objectClassCrc = member->name.GetInt();
-			}
-			else
-			{
-				String typeStr;
-				typeStr = member->name.GetString();
-				objectClassCrc = Helium::Crc32( typeStr.GetData() );
-			}
-
-			const Class* objectClass = NULL;
-			if ( objectClassCrc != 0 )
-			{
-				objectClass = Registry::GetInstance()->GetClass( objectClassCrc );
-			}
-			
-			ObjectPtr object;
-			if (!object)
-			{
-				if ( objectClass )
-				{
-					object = Registry::GetInstance()->CreateInstance( objectClass );
-				}
-			}
-
-			m_Objects.Push( object );
-
-			if ( object.ReferencesObject() )
-			{
-				DeserializeInstance( member->value, object, object->GetClass(), object );
-
-				m_CurrentOffset = m_Stream->Tell();
-			}
-		}
-	}
-}
-
-void Helium::Persist::ArchiveReaderJson::EndRead()
-{
-	m_Status->m_State = ArchiveStates::ObjectProcessed;
-	m_Status->m_Progress = 100;
-	e_Status.Raise( *m_Status );
-
-	// finish linking objects (unless we have a custom handler)
-	if ( !m_Resolver )
-	{
-		for ( DynamicArray< Fixup >::ConstIterator itr = m_Fixups.Begin(), end = m_Fixups.End(); itr != end; ++itr )
-		{
-			Resolve( itr->m_Identity, itr->m_Pointer, itr->m_PointerClass );
-		}
-	}
-
-	m_Status->m_State = ArchiveStates::Complete;
-	e_Status.Raise( *m_Status );
 }
