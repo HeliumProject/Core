@@ -75,7 +75,11 @@ namespace Helium
 			virtual ArchiveType GetType() const HELIUM_OVERRIDE;
 			virtual void Open() HELIUM_OVERRIDE;
 			virtual void Close() HELIUM_OVERRIDE; 
-			virtual void Read() HELIUM_OVERRIDE;
+			virtual void Read(uint32_t maxObjectCount = 0) HELIUM_OVERRIDE;
+
+			void BeginRead();
+			void ReadOneObject(uint32_t index, Reflect::ObjectPtr &object);
+			void EndRead();
 
 		private:
 			void DeserializeInstance( rapidjson::Value& value, void* instance, const Reflect::Structure* composite, Reflect::Object* object );
@@ -86,9 +90,13 @@ namespace Helium
 			static Reflect::ObjectPtr FromStream( Stream& stream, Reflect::ObjectResolver* resolver = NULL, uint32_t flags = 0 );
 
 		private:
-			AutoPtr< Stream >    m_Stream;
-			rapidjson::Document  m_Reader;
-			int64_t              m_Size;
+			AutoPtr< Stream >         m_Stream;
+			rapidjson::Document       m_Reader;
+			int64_t                   m_Size;
+
+			AutoPtr< ArchiveStatus >  m_Status;
+			uint64_t                  m_StartOffset;
+			uint64_t                  m_CurrentOffset;
 		};
 	}
 }

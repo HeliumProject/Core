@@ -44,7 +44,7 @@ namespace Helium
 			virtual ArchiveType GetType() const HELIUM_OVERRIDE;
 			virtual void Open() HELIUM_OVERRIDE;
 			virtual void Close() HELIUM_OVERRIDE; 
-			virtual void Read() HELIUM_OVERRIDE;
+			virtual void Read(uint32_t maxObjectCount = 0) HELIUM_OVERRIDE;
 
 		private:
 			void DeserializeInstance( void* instance, const Reflect::Structure* composite, Reflect::Object* object );

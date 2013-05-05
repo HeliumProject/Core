@@ -377,7 +377,7 @@ void ArchiveReaderMessagePack::Close()
 	m_Stream.Release(); 
 }
 
-void ArchiveReaderMessagePack::Read()
+void ArchiveReaderMessagePack::Read(uint32_t maxObjectCount)
 {
 	PERSIST_SCOPE_TIMER( ("Reflect - MessagePack Read") );
 
@@ -405,6 +405,11 @@ void ArchiveReaderMessagePack::Read()
 	if ( m_Reader.IsArray() )
 	{
 		uint32_t length = m_Reader.ReadArrayLength();
+		if (maxObjectCount)
+		{
+			length = Helium::Min(length, maxObjectCount);
+		}
+
 		m_Objects.Reserve( length );
 
 		m_Reader.BeginArray( length );
