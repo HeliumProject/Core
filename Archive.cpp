@@ -71,22 +71,6 @@ void ArchiveWriter::Identify( Object* object, Name& identity )
 	if ( m_Identifier )
 	{
 		m_Identifier->Identify( object, identity );
-
-		bool found = false;
-		for ( DynamicArray< ObjectPtr >::ConstIterator itr = m_Objects.Begin(), end = m_Objects.End(); itr != end; ++itr )
-		{
-			if ( itr->Ptr() == object )
-			{
-				found = true;
-				break;
-			}
-		}
-
-		if ( !found )
-		{
-			// this will cause it to be written after the current object-in-progress (see Write)
-			m_Objects.Push( object );
-		}
 	}
 	else
 	{

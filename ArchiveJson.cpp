@@ -461,7 +461,7 @@ void ArchiveReaderJson::Read()
 	info.m_Progress = 100;
 	e_Status.Raise( info );
 
-	// finish linking objects (unless we have a custom handler
+	// finish linking objects (unless we have a custom handler)
 	if ( !m_Resolver )
 	{
 		for ( DynamicArray< Fixup >::ConstIterator itr = m_Fixups.Begin(), end = m_Fixups.End(); itr != end; ++itr )
