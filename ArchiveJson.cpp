@@ -15,14 +15,17 @@ using namespace Helium::Persist;
 
 ArchiveWriterJson::ArchiveWriterJson( const FilePath& path, ObjectIdentifier* identifier )
 	: ArchiveWriter( path, identifier )
+	, m_Writer( m_Output )
 {
 }
 
 ArchiveWriterJson::ArchiveWriterJson( Stream *stream, ObjectIdentifier* identifier )
 	: ArchiveWriter( identifier )
+	, m_Writer( m_Output )
 {
 	m_Stream.Reset( stream );
 	m_Stream.Orphan( true );
+	m_Output.SetStream( stream );
 }
 
 ArchiveType ArchiveWriterJson::GetType() const
@@ -39,13 +42,15 @@ void ArchiveWriterJson::Open()
 	FileStream* stream = new FileStream();
 	stream->Open( m_Path, FileStream::MODE_WRITE );
 	m_Stream.Reset( stream );
+	m_Output.SetStream( stream );
 }
 
 void ArchiveWriterJson::Close()
 {
 	HELIUM_ASSERT( m_Stream );
-	m_Stream->Close(); 
-	m_Stream.Release(); 
+	m_Stream->Close();
+	m_Stream.Release();
+	m_Output.SetStream( NULL );
 }
 
 void ArchiveWriterJson::Write()
@@ -60,7 +65,7 @@ void ArchiveWriterJson::Write()
 	m_Objects.Push( m_Object );
 
 	// begin top level array of objects
-	//m_Writer.BeginArray();
+	m_Writer.StartArray();
 
 	// objects can get changed during this iteration (in Identify), so use indices
 	for ( int index = 0; index < m_Objects.GetSize(); ++index )
@@ -68,10 +73,10 @@ void ArchiveWriterJson::Write()
 		Object* object = m_Objects.GetElement( index );
 		const Class* objectClass = object->GetClass();
 
-		//m_Writer.BeginMap( 1 );
-		//m_Writer.Write( objectClass->m_Name );
+		m_Writer.StartObject();
+		m_Writer.String( objectClass->m_Name );
 		SerializeInstance( object, objectClass, object );
-		//m_Writer.EndMap();
+		m_Writer.EndObject();
 
 		info.m_State = ArchiveStates::ObjectProcessed;
 		info.m_Progress = (int)(((float)(index) / (float)m_Objects.GetSize()) * 100.0f);
@@ -79,7 +84,7 @@ void ArchiveWriterJson::Write()
 	}
 
 	// end top level array
-	//m_Writer.EndArray();
+	m_Writer.EndArray();
 
 	// notify completion of last object processed
 	info.m_State = ArchiveStates::ObjectProcessed;
@@ -124,7 +129,7 @@ void ArchiveWriterJson::SerializeInstance( void* instance, const Structure* stru
 		}
 	}
 
-	//m_Writer.BeginMap( static_cast< uint32_t >( fields.GetSize() ) );
+	m_Writer.StartObject();
 	object->PreSerialize( NULL );
 
 	DynamicArray< const Field* >::ConstIterator itr = fields.Begin();
@@ -138,7 +143,7 @@ void ArchiveWriterJson::SerializeInstance( void* instance, const Structure* stru
 	}
 
 	object->PostSerialize( NULL );
-	//m_Writer.EndMap();
+	m_Writer.EndObject();
 }
 
 void ArchiveWriterJson::SerializeField( void* instance, const Field* field, Object* object )
@@ -148,18 +153,18 @@ void ArchiveWriterJson::SerializeField( void* instance, const Field* field, Obje
 #endif
 
 	// write the actual string
-	//m_Writer.Write( field->m_Name );
+	m_Writer.String( field->m_Name );
 
 	if ( field->m_Count > 1 )
 	{
-		//m_Writer.BeginArray( field->m_Count );
+		m_Writer.StartArray();
 
 		for ( uint32_t i=0; i<field->m_Count; ++i )
 		{
 			SerializeTranslator( Pointer ( field, object, i ), field->m_Translator, field, object );
 		}
 
-		//m_Writer.EndArray();
+		m_Writer.EndArray();
 	}
 	else
 	{
@@ -177,53 +182,53 @@ void ArchiveWriterJson::SerializeTranslator( Pointer pointer, Translator* transl
 			switch ( scalar->m_Type )
 			{
 			case ScalarTypes::Boolean:
-				//m_Writer.Write( pointer.As<bool>() );
+				m_Writer.Bool( pointer.As<bool>() );
 				break;
 
 			case ScalarTypes::Unsigned8:
-				//m_Writer.Write( pointer.As<uint8_t>() );
+				m_Writer.Uint( pointer.As<uint8_t>() );
 				break;
 
 			case ScalarTypes::Unsigned16:
-				//m_Writer.Write( pointer.As<uint16_t>() );
+				m_Writer.Uint( pointer.As<uint16_t>() );
 				break;
 
 			case ScalarTypes::Unsigned32:
-				//m_Writer.Write( pointer.As<uint32_t>() );
+				m_Writer.Uint( pointer.As<uint32_t>() );
 				break;
 
 			case ScalarTypes::Unsigned64:
-				//m_Writer.Write( pointer.As<uint64_t>() );
+				m_Writer.Uint64( pointer.As<uint64_t>() );
 				break;
 
 			case ScalarTypes::Signed8:
-				//m_Writer.Write( pointer.As<int8_t>() );
+				m_Writer.Int( pointer.As<int8_t>() );
 				break;
 
 			case ScalarTypes::Signed16:
-				//m_Writer.Write( pointer.As<int16_t>() );
+				m_Writer.Int( pointer.As<int16_t>() );
 				break;
 
 			case ScalarTypes::Signed32:
-				//m_Writer.Write( pointer.As<int32_t>() );
+				m_Writer.Int( pointer.As<int32_t>() );
 				break;
 
 			case ScalarTypes::Signed64:
-				//m_Writer.Write( pointer.As<int64_t>() );
+				m_Writer.Int64( pointer.As<int64_t>() );
 				break;
 
 			case ScalarTypes::Float32:
-				//m_Writer.Write( pointer.As<float32_t>() );
+				m_Writer.Double( pointer.As<float32_t>() );
 				break;
 
 			case ScalarTypes::Float64:
-				//m_Writer.Write( pointer.As<float64_t>() );
+				m_Writer.Double( pointer.As<float64_t>() );
 				break;
 
 			case ScalarTypes::String:
 				String str;
 				scalar->Print( pointer, str, *this );
-				//m_Writer.Write( str.GetTranslator() );
+				m_Writer.String( str.GetData() );
 				break;
 			}
 			break;
@@ -244,15 +249,14 @@ void ArchiveWriterJson::SerializeTranslator( Pointer pointer, Translator* transl
 			DynamicArray< Pointer > items;
 			set->GetItems( pointer, items );
 
-			uint32_t length = static_cast< uint32_t >( items.GetSize() );
-			//m_Writer.BeginArray( length );
+			m_Writer.StartArray();
 
 			for ( DynamicArray< Pointer >::Iterator itr = items.Begin(), end = items.End(); itr != end; ++itr )
 			{
 				SerializeTranslator( *itr, itemTranslator, field, object );
 			}
 
-			//m_Writer.EndArray();
+			m_Writer.EndArray();
 
 			break;
 		}
@@ -265,15 +269,14 @@ void ArchiveWriterJson::SerializeTranslator( Pointer pointer, Translator* transl
 			DynamicArray< Pointer > items;
 			sequence->GetItems( pointer, items );
 
-			uint32_t length = static_cast< uint32_t >( items.GetSize() );
-			//m_Writer.BeginArray( length );
+			m_Writer.StartArray();
 
 			for ( DynamicArray< Pointer >::Iterator itr = items.Begin(), end = items.End(); itr != end; ++itr )
 			{
 				SerializeTranslator( *itr, itemTranslator, field, object );
 			}
 
-			//m_Writer.EndArray();
+			m_Writer.EndArray();
 
 			break;
 		}
@@ -287,8 +290,7 @@ void ArchiveWriterJson::SerializeTranslator( Pointer pointer, Translator* transl
 			DynamicArray< Pointer > keys, values;
 			association->GetItems( pointer, keys, values );
 
-			uint32_t length = static_cast< uint32_t >( keys.GetSize() );
-			//m_Writer.BeginMap( length );
+			m_Writer.StartObject();
 
 			for ( DynamicArray< Pointer >::Iterator keyItr = keys.Begin(), valueItr = values.Begin(), keyEnd = keys.End(), valueEnd = values.End();
 				keyItr != keyEnd && valueItr != valueEnd;
@@ -298,7 +300,7 @@ void ArchiveWriterJson::SerializeTranslator( Pointer pointer, Translator* transl
 				SerializeTranslator( *valueItr, valueTranslator, field, object );
 			}
 
-			//m_Writer.EndMap();
+			m_Writer.EndObject();
 
 			break;
 		}
@@ -349,8 +351,8 @@ void ArchiveReaderJson::Open()
 void ArchiveReaderJson::Close()
 {
 	HELIUM_ASSERT( m_Stream );
-	m_Stream->Close(); 
-	m_Stream.Release(); 
+	m_Stream->Close();
+	m_Stream.Release();
 }
 
 void ArchiveReaderJson::Read()
@@ -375,39 +377,41 @@ void ArchiveReaderJson::Read()
 
 	const int64_t startOffset = m_Stream->Tell();
 
-	// parse the first byte of the stream
-	//m_Reader.Advance();
+	// read entire contents
+	DynamicArray< uint8_t > buffer;
+	buffer.Resize( m_Size );
+	m_Stream->Read( buffer.GetData(),  m_Size, 1 );
+	if ( m_Reader.ParseInsitu< 0 >( reinterpret_cast< char* >( buffer.GetData() ) ).HasParseError() )
+	{
+		throw Persist::Exception( "Error parsing JSON: %s", m_Reader.GetParseError() );
+	}
 
-#if 0
 	if ( m_Reader.IsArray() )
 	{
-		uint32_t length = m_Reader.ReadArrayLength();
+		uint32_t length = m_Reader.Size();
 		m_Objects.Reserve( length );
-
-		//m_Reader.BeginArray( length );
 
 		for ( uint32_t i=0; i<length; i++ )
 		{
-			if ( m_Reader.IsMap() )
+			rapidjson::Value& v = m_Reader[ i ];
+			if ( v.IsObject() )
 			{
-				uint32_t length = m_Reader.ReadMapLength();
+				uint32_t length = v.Size();
 				if ( length == 1 )
 				{
-					m_Reader.BeginMap( length );
+					rapidjson::Value::Member* member = v[ rapidjson::SizeType(0) ].MemberBegin();
 
 					uint32_t objectClassCrc = 0;
-					if ( m_Reader.IsNumber() )
+					if ( member->name.IsNumber() )
 					{
-						m_Reader.Read( objectClassCrc );
+						objectClassCrc = member->name.GetInt();
 					}
 					else
 					{
 						String typeStr;
-						m_Reader.Read( typeStr );
-						objectClassCrc = Helium::Crc32( typeStr.GetTranslator() );
+						typeStr = member->name.GetString();
+						objectClassCrc = Helium::Crc32( typeStr.GetData() );
 					}
-
-					m_Reader.Advance();
 
 					const Class* objectClass = NULL;
 					if ( objectClassCrc != 0 )
@@ -425,7 +429,7 @@ void ArchiveReaderJson::Read()
 
 					if ( object.ReferencesObject() )
 					{
-						DeserializeInstance( object, object->GetClass(), object );
+						DeserializeInstance( member->value, object, object->GetClass(), object );
 
 						int64_t current = m_Stream->Tell();
 
@@ -435,27 +439,10 @@ void ArchiveReaderJson::Read()
 
 						m_Abort |= info.m_Abort;
 					}
-					else // object.ReferencesObject()
-					{
-						m_Reader.Skip();
-					}
-
-					m_Reader.EndMap();
-				}
-				else // length == 1
-				{
-					m_Reader.Skip();
 				}
 			}
-			else // IsMap
-			{
-				m_Reader.Skip();
-			}
-		} // for
-
-		m_Reader.EndArray();
+		}
 	}
-#endif
 
 	info.m_State = ArchiveStates::ObjectProcessed;
 	info.m_Progress = 100;
@@ -474,7 +461,7 @@ void ArchiveReaderJson::Read()
 	e_Status.Raise( info );
 }
 
-void ArchiveReaderJson::DeserializeInstance( void* instance, const Structure* structure, Object* object )
+void ArchiveReaderJson::DeserializeInstance( rapidjson::Value& value, void* instance, const Structure* structure, Object* object )
 {
 #if PERSIST_ARCHIVE_VERBOSE
 	Log::Print(TXT("Deserializing %s\n"), structure->m_Name);
@@ -498,7 +485,7 @@ void ArchiveReaderJson::DeserializeInstance( void* instance, const Structure* st
 			{
 				String fieldStr;
 				m_Reader.Read( fieldStr );
-				fieldCrc = Helium::Crc32( fieldStr.GetTranslator() );
+				fieldCrc = Helium::Crc32( fieldStr.GetData() );
 			}
 
 			m_Reader.Advance();
@@ -526,7 +513,7 @@ void ArchiveReaderJson::DeserializeInstance( void* instance, const Structure* st
 	object->PostDeserialize( NULL );
 }
 
-void ArchiveReaderJson::DeserializeField( void* instance, const Field* field, Object* object )
+void ArchiveReaderJson::DeserializeField( rapidjson::Value& value, void* instance, const Field* field, Object* object )
 {
 #if PERSIST_ARCHIVE_VERBOSE
 	Log::Print(TXT("Deserializing field %s\n"), field->m_Name);
@@ -560,11 +547,11 @@ void ArchiveReaderJson::DeserializeField( void* instance, const Field* field, Ob
 	}
 	else
 	{
-		DeserializeTranslator( Pointer ( field, object ), field->m_Translator, field, object );
+		DeserializeTranslator( value, Pointer ( field, object ), field->m_Translator, field, object );
 	}
 }
 
-void ArchiveReaderJson::DeserializeTranslator( Pointer pointer, Translator* translator, const Field* field, Object* object )
+void ArchiveReaderJson::DeserializeTranslator( rapidjson::Value& value, Pointer pointer, Translator* translator, const Field* field, Object* object )
 {
 #if 0
 	if ( m_Reader.IsBoolean() )

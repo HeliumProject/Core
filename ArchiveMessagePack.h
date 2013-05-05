@@ -47,7 +47,6 @@ namespace Helium
 			virtual void Read() HELIUM_OVERRIDE;
 
 		private:
-			void Deserialize( DynamicArray< Reflect::ObjectPtr >& objects );
 			void DeserializeInstance( void* instance, const Reflect::Structure* composite, Reflect::Object* object );
 			void DeserializeField( void* instance, const Reflect::Field* field, Reflect::Object* object );
 			void DeserializeTranslator( Reflect::Pointer pointer, Reflect::Translator* translator, const Reflect::Field* field, Reflect::Object* object );

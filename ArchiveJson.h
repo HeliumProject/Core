@@ -6,10 +6,41 @@
 
 #include "Persist/Archive.h"
 
+#if HELIUM_ENDIAN_BIG
+# define RAPIDJSON_ENDIAN RAPIDJSON_BIGENDIAN
+#elif HELIUM_ENDIAN_LITTLE
+# define RAPIDJSON_ENDIAN RAPIDJSON_LITTLEENDIAN
+#else
+# error Unknown endianness!
+#endif
+
+#if HELIUM_CPU_X86
+# define RAPIDJSON_SSE42
+#endif
+
+#define RAPIDJSON_ASSERT HELIUM_ASSERT
+#define RAPIDJSON_STATIC_ASSERT HELIUM_COMPILE_ASSERT
+
+#include "rapidjson/include/rapidjson/writer.h"
+#include "rapidjson/include/rapidjson/document.h"
+
 namespace Helium
 {
 	namespace Persist
 	{
+		class RapidJsonOutputStream
+		{
+		public:
+			inline RapidJsonOutputStream();
+			inline void SetStream( Stream* stream );
+			inline void Put( char c );
+			inline void Flush();
+
+		private:
+			Stream* m_Stream;
+		};
+		typedef rapidjson::Writer< RapidJsonOutputStream > RapidJsonWriter;
+
 		class HELIUM_PERSIST_API ArchiveWriterJson : public ArchiveWriter
 		{
 		public:
@@ -30,7 +61,9 @@ namespace Helium
 			static void ToStream( Reflect::Object* object, Stream& stream, Reflect::ObjectIdentifier* identifier = NULL, uint32_t flags = 0 );
 
 		private:
-			AutoPtr< Stream > m_Stream;
+			AutoPtr< Stream >          m_Stream;
+			RapidJsonOutputStream      m_Output;
+			RapidJsonWriter            m_Writer;
 		};
 
 		class HELIUM_PERSIST_API ArchiveReaderJson : public ArchiveReader
@@ -45,17 +78,19 @@ namespace Helium
 			virtual void Read() HELIUM_OVERRIDE;
 
 		private:
-			void Deserialize( DynamicArray< Reflect::ObjectPtr >& objects );
-			void DeserializeInstance( void* instance, const Reflect::Structure* composite, Reflect::Object* object );
-			void DeserializeField( void* instance, const Reflect::Field* field, Reflect::Object* object );
-			void DeserializeTranslator( Reflect::Pointer pointer, Reflect::Translator* translator, const Reflect::Field* field, Reflect::Object* object );
+			void DeserializeInstance( rapidjson::Value& value, void* instance, const Reflect::Structure* composite, Reflect::Object* object );
+			void DeserializeField( rapidjson::Value& value, void* instance, const Reflect::Field* field, Reflect::Object* object );
+			void DeserializeTranslator( rapidjson::Value& value, Reflect::Pointer pointer, Reflect::Translator* translator, const Reflect::Field* field, Reflect::Object* object );
 
 		public:
 			static Reflect::ObjectPtr FromStream( Stream& stream, Reflect::ObjectResolver* resolver = NULL, uint32_t flags = 0 );
 
 		private:
-			AutoPtr< Stream > m_Stream;
-			int64_t           m_Size;
+			AutoPtr< Stream >    m_Stream;
+			rapidjson::Document  m_Reader;
+			int64_t              m_Size;
 		};
 	}
 }
+
+#include "Persist/ArchiveJson.inl"
