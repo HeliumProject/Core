@@ -7,12 +7,6 @@
 #include "Foundation/API.h"
 #include "Foundation/Math.h"
 
-#if HELIUM_BOOST
-#include "boost/preprocessor/repetition/enum_params.hpp"
-#include "boost/preprocessor/repetition/enum_binary_params.hpp"
-#include "boost/preprocessor/repetition/repeat_from_to.hpp"
-#endif
-
 namespace Helium
 {
 	/// Constant general-purpose array iterator.
@@ -191,15 +185,17 @@ namespace Helium
 		//@{
 		T* New();
 
-#if HELIUM_BOOST
-#define HELIUM_DECLARE_DYNARRAY_NEW_Z( Z, N, DATA ) \
-	template< BOOST_PP_ENUM_PARAMS_Z( Z, N, typename Param ) > \
-	T* New( BOOST_PP_ENUM_BINARY_PARAMS_Z( Z, N, const Param, &rParam ) );
+		template <typename U>
+		T* New(const U &u);
+		
+		template <typename U, typename V>
+		T* New(const U &u, const V &v);
+		
+		template <typename U, typename V, typename W>
+		T* New(const U &u, const V &v, const W &w);
 
-		BOOST_PP_REPEAT_FROM_TO( 1, 17, HELIUM_DECLARE_DYNARRAY_NEW_Z, )
-
-#undef HELIUM_DECLARE_DYNARRAY_NEW_Z
-#endif // HELIUM_BOOST
+		template <typename U, typename V, typename W, typename X>
+		T* New(const U &u, const V &v, const W &w, const X &x);
 		//@}
 
 		/// @name Overloaded Operators
