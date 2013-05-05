@@ -967,25 +967,31 @@ T* Helium::SparseArray< T, Allocator >::New()
     return pElement;
 }
 
-#if HELIUM_BOOST
-#define HELIUM_IMPLEMENT_SPARSEARRAY_NEW_Z( Z, N, DATA ) \
-template< typename T, typename Allocator > \
-template< BOOST_PP_ENUM_PARAMS_Z( Z, N, typename Param ) > \
-T* Helium::SparseArray< T, Allocator >::New( BOOST_PP_ENUM_BINARY_PARAMS_Z( Z, N, const Param, &rParam ) ) \
-{ \
-    size_t index = AllocateSlot(); \
-    HELIUM_ASSERT( IsValid( index ) ); \
-    \
-    T* pElement = new( m_pBuffer + index ) T( BOOST_PP_ENUM_PARAMS_Z( Z, N, rParam ) ); \
-    HELIUM_ASSERT( pElement ); \
-    \
-    return pElement; \
+template < typename T, typename Allocator >
+template < typename U >
+T* Helium::SparseArray< T, Allocator >::New(const U &u)
+{
+	size_t index = AllocateSlot(); 
+	HELIUM_ASSERT( IsValid( index ) ); 
+
+	T* pElement = new( m_pBuffer + index ) T( u ); 
+	HELIUM_ASSERT( pElement ); 
+
+	return pElement; 
 }
 
-BOOST_PP_REPEAT_FROM_TO( 1, 17, HELIUM_IMPLEMENT_SPARSEARRAY_NEW_Z, )
+template < typename T, typename Allocator >
+template < typename U, typename V >
+T* Helium::SparseArray< T, Allocator >::New(const U &u, const V &v)
+{
+	size_t index = AllocateSlot(); 
+	HELIUM_ASSERT( IsValid( index ) ); 
 
-#undef HELIUM_IMPLEMENT_SPARSEARRAY_NEW_Z
-#endif // HELIUM_BOOST
+	T* pElement = new( m_pBuffer + index ) T( u, v ); 
+	HELIUM_ASSERT( pElement ); 
+
+	return pElement;
+}
 
 /// Set this array to the contents of the given array.
 ///

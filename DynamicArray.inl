@@ -981,27 +981,69 @@ T* Helium::DynamicArray< T, Allocator >::New()
 	return pObject;
 }
 
-#if HELIUM_BOOST
-#define HELIUM_IMPLEMENT_DYNARRAY_NEW_Z( Z, N, DATA ) \
-template< typename T, typename Allocator > \
-template< BOOST_PP_ENUM_PARAMS_Z( Z, N, typename Param ) > \
-T* Helium::DynamicArray< T, Allocator >::New( BOOST_PP_ENUM_BINARY_PARAMS_Z( Z, N, const Param, &rParam ) ) \
-{ \
-	size_t newSize = m_size + 1; \
-	Grow( newSize ); \
-	\
-	T* pObject = new( m_pBuffer + m_size ) T( BOOST_PP_ENUM_PARAMS_Z( Z, N, rParam ) ); \
-	HELIUM_ASSERT( pObject ); \
-	\
-	m_size = newSize; \
-	\
-	return pObject; \
+template < typename T, typename Allocator >
+template < typename U >
+T* Helium::DynamicArray< T, Allocator >::New(const U &u)
+{
+	size_t newSize = m_size + 1;
+	Grow( newSize );
+			
+	T* pObject = new( m_pBuffer + m_size ) T( u );
+			
+	HELIUM_ASSERT( pObject );
+			
+	m_size = newSize;
+			
+	return pObject;
+}
+		
+template < typename T, typename Allocator >
+template < typename U, typename V >
+T* Helium::DynamicArray< T, Allocator >::New(const U &u, const V &v)
+{
+	size_t newSize = m_size + 1;
+	Grow( newSize );
+			
+	T* pObject = new( m_pBuffer + m_size ) T( u, v );
+			
+	HELIUM_ASSERT( pObject );
+			
+	m_size = newSize;
+			
+	return pObject;
+}
+		
+template < typename T, typename Allocator >
+template < typename U, typename V, typename W >
+T* Helium::DynamicArray< T, Allocator >::New(const U &u, const V &v, const W &w)
+{
+	size_t newSize = m_size + 1;
+	Grow( newSize );
+			
+	T* pObject = new( m_pBuffer + m_size ) T( u, v, w );
+			
+	HELIUM_ASSERT( pObject );
+			
+	m_size = newSize;
+			
+	return pObject;
 }
 
-BOOST_PP_REPEAT_FROM_TO( 1, 17, HELIUM_IMPLEMENT_DYNARRAY_NEW_Z, )
-
-#undef HELIUM_IMPLEMENT_DYNARRAY_NEW_Z
-#endif // HELIUM_BOOST
+template < typename T, typename Allocator >
+template < typename U, typename V, typename W, typename X >
+T* Helium::DynamicArray< T, Allocator >::New(const U &u, const V &v, const W &w, const X &x)
+{
+	size_t newSize = m_size + 1;
+	Grow( newSize );
+			
+	T* pObject = new( m_pBuffer + m_size ) T( u, v, w, x );
+			
+	HELIUM_ASSERT( pObject );
+			
+	m_size = newSize;
+			
+	return pObject;
+}
 
 /// Set this array to the contents of the given array.
 ///
