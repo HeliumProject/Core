@@ -140,7 +140,7 @@ HELIUM_FORCEINLINE void* Helium::DefaultAllocator::ReallocateAligned( void* pMem
 {
 	HELIUM_ASSERT( ( alignment & ( alignment - 1 ) ) == 0 ); // affirm power of two
 
-#if HELIUM_OS_WIN
+#if HELIUM_OS_WIN && !HELIUM_HEAP
 	return _aligned_realloc( pMemory, size, alignment );
 #else
 	size_t existingSize = GetMemorySizeAligned( pMemory, alignment );
