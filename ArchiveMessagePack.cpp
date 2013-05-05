@@ -396,9 +396,11 @@ void ArchiveReaderMessagePack::Read()
 			ObjectPtr object;
 			ReadNext( object );
 			m_Objects.Push( object );
+
 			ArchiveStatus info( *this, ArchiveStates::ObjectProcessed );
 			info.m_Progress = (int)(((float)(m_Stream->Tell()) / (float)m_Size) * 100.0f);
 			e_Status.Raise( info );
+			m_Abort |= info.m_Abort;
 			if ( m_Abort )
 			{
 				break;
@@ -518,8 +520,6 @@ void ArchiveReaderMessagePack::DeserializeInstance( void* instance, const Struct
 		uint32_t length = m_Reader.ReadMapLength();
 		for (uint32_t i=0; i<length; i++)
 		{
-			uint32_t fieldNameCrc = BeginCrc32();
-
 			uint32_t fieldCrc = 0;
 			if ( m_Reader.IsNumber() )
 			{
@@ -534,7 +534,7 @@ void ArchiveReaderMessagePack::DeserializeInstance( void* instance, const Struct
 
 			m_Reader.Advance();
 
-			const Field* field = structure->FindFieldByName( fieldNameCrc );
+			const Field* field = structure->FindFieldByName( fieldCrc );
 			if ( field )
 			{
 				object->PreDeserialize( field );

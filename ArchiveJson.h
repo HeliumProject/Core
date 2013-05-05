@@ -91,7 +91,7 @@ namespace Helium
 
 		private:
 			AutoPtr< Stream >   m_Stream;
-			rapidjson::Document m_Reader;
+			rapidjson::Document m_Document;
 			rapidjson::SizeType m_Next;
 			int64_t             m_Size;
 		};

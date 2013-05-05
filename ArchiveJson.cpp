@@ -3,6 +3,7 @@
 
 #include "Foundation/Endian.h"
 #include "Foundation/FileStream.h"
+#include "Foundation/Numeric.h"
 
 #include "Reflect/Object.h"
 #include "Reflect/Structure.h"
@@ -364,17 +365,16 @@ void ArchiveReaderJson::Read()
 
 	Start();
 
-	if ( m_Reader.IsArray() )
+	if ( m_Document.IsArray() )
 	{
-		uint32_t length = m_Reader.Size();
-
+		uint32_t length = m_Document.Size();
 		m_Objects.Reserve( length );
-
 		for ( uint32_t i=0; i<length; i++ )
 		{
 			ObjectPtr object;
 			ReadNext( object );
 			m_Objects.Push( object );
+
 			ArchiveStatus info( *this, ArchiveStates::ObjectProcessed );
 			info.m_Progress = (int)(((float)(m_Stream->Tell()) / (float)m_Size) * 100.0f);
 			e_Status.Raise( info );
@@ -410,15 +410,15 @@ void Helium::Persist::ArchiveReaderJson::Start()
 	DynamicArray< uint8_t > buffer;
 	buffer.Resize( m_Size );
 	m_Stream->Read( buffer.GetData(),  m_Size, 1 );
-	if ( m_Reader.ParseInsitu< 0 >( reinterpret_cast< char* >( buffer.GetData() ) ).HasParseError() )
+	if ( m_Document.ParseInsitu< 0 >( reinterpret_cast< char* >( buffer.GetData() ) ).HasParseError() )
 	{
-		throw Persist::Exception( "Error parsing JSON: %s", m_Reader.GetParseError() );
+		throw Persist::Exception( "Error parsing JSON: %s", m_Document.GetParseError() );
 	}
 }
 
 void Helium::Persist::ArchiveReaderJson::ReadNext( Reflect::ObjectPtr& object )
 {
-	rapidjson::Value& v = m_Reader[ m_Next++ ];
+	rapidjson::Value& v = m_Document[ m_Next++ ];
 	if ( v.IsObject() )
 	{
 		uint32_t length = v.Size();
@@ -483,48 +483,35 @@ void ArchiveReaderJson::DeserializeInstance( rapidjson::Value& value, void* inst
 #endif
 
 	object->PreDeserialize( NULL );
-#if 0
-	if ( m_Reader.IsMap() )
-	{
-		uint32_t length = m_Reader.ReadMapLength();
-		for (uint32_t i=0; i<length; i++)
-		{
-			uint32_t fieldNameCrc = BeginCrc32();
 
+	if ( value.IsObject() )
+	{
+		for ( rapidjson::Value::MemberIterator itr = value.MemberBegin(), end = value.MemberEnd(); itr != end; ++itr )
+		{
 			uint32_t fieldCrc = 0;
-			if ( m_Reader.IsNumber() )
+			if ( itr->name.IsNumber() )
 			{
-				m_Reader.Read( fieldCrc );
+				fieldCrc = itr->name.GetUint();
 			}
 			else
 			{
 				String fieldStr;
-				m_Reader.Read( fieldStr );
+				fieldStr = itr->name.GetString();
 				fieldCrc = Helium::Crc32( fieldStr.GetData() );
 			}
 
-			m_Reader.Advance();
-
-			const Field* field = structure->FindFieldByName( fieldNameCrc );
+			const Field* field = structure->FindFieldByName( fieldCrc );
 			if ( field )
 			{
 				object->PreDeserialize( field );
 
-				DeserializeField( instance, field, object );
+				DeserializeField( itr->value, instance, field, object );
 
 				object->PostDeserialize( field );
 			}
-			else
-			{
-				m_Reader.Skip();
-			}
-		} // for
+		}
 	}
-	else // IsMap()
-	{
-		m_Reader.Skip();
-	}
-#endif
+
 	object->PostDeserialize( NULL );
 }
 
@@ -536,29 +523,20 @@ void ArchiveReaderJson::DeserializeField( rapidjson::Value& value, void* instanc
 	
 	if ( field->m_Count > 1 )
 	{
-#if 0
-		if ( m_Reader.IsArray() )
+		if ( value.IsArray() )
 		{
-			uint32_t length = m_Reader.ReadArrayLength();
-			m_Reader.BeginArray( length );
-			for ( uint32_t i=0; i<length; ++i )
+			for ( uint32_t i=0; i<value.Size(); ++i )
 			{
 				if ( i < field->m_Count )
 				{
-					DeserializeTranslator( Pointer ( field, object, i ), field->m_Translator, field, object );
-				}
-				else
-				{
-					m_Reader.Skip();
+					DeserializeTranslator( value[ i ], Pointer ( field, object, i ), field->m_Translator, field, object );
 				}
 			}
-			m_Reader.EndArray();
 		}
 		else
 		{
-			DeserializeTranslator( Pointer ( field, object, 0 ), field->m_Translator, field, object );
+			DeserializeTranslator( value, Pointer ( field, object, 0 ), field->m_Translator, field, object );
 		}
-#endif
 	}
 	else
 	{
@@ -568,27 +546,18 @@ void ArchiveReaderJson::DeserializeField( rapidjson::Value& value, void* instanc
 
 void ArchiveReaderJson::DeserializeTranslator( rapidjson::Value& value, Pointer pointer, Translator* translator, const Field* field, Object* object )
 {
-#if 0
-	if ( m_Reader.IsBoolean() )
+	if ( value.IsBool() )
 	{
 		if ( translator->GetReflectionType() == ReflectionTypes::ScalarTranslator )
 		{
 			ScalarTranslator* scalar = static_cast< ScalarTranslator* >( translator );
 			if ( scalar->m_Type == ScalarTypes::Boolean )
 			{
-				m_Reader.Read( pointer.As<bool>() );
+				pointer.As<bool>() = value.IsTrue();
 			}
-			else
-			{
-				m_Reader.Skip(); // no implicit conversion, discard data
-			}
-		}
-		else
-		{
-			m_Reader.Skip(); // no implicit conversion, discard data
 		}
 	}
-	else if ( m_Reader.IsNumber() )
+	else if ( value.IsNumber() )
 	{
 		if ( translator->GetReflectionType() == ReflectionTypes::ScalarTranslator )
 		{
@@ -597,83 +566,70 @@ void ArchiveReaderJson::DeserializeTranslator( rapidjson::Value& value, Pointer 
 			switch ( scalar->m_Type )
 			{
 			case ScalarTypes::Unsigned8:
-				m_Reader.ReadNumber( pointer.As<uint8_t>(), clamp );
+				RangeCastInteger( value.GetUint(), pointer.As<uint8_t>(), clamp );
 				break;
 
 			case ScalarTypes::Unsigned16:
-				m_Reader.ReadNumber( pointer.As<uint16_t>(), clamp );
+				RangeCastInteger( value.GetUint(), pointer.As<uint16_t>(), clamp );
 				break;
 
 			case ScalarTypes::Unsigned32:
-				m_Reader.ReadNumber( pointer.As<uint32_t>(), clamp );
+				RangeCastInteger( value.GetUint(), pointer.As<uint32_t>(), clamp );
 				break;
 
 			case ScalarTypes::Unsigned64:
-				m_Reader.ReadNumber( pointer.As<uint64_t>(), clamp );
+				RangeCastInteger( value.GetUint64(), pointer.As<uint64_t>(), clamp );
 				break;
 
 			case ScalarTypes::Signed8:
-				m_Reader.ReadNumber( pointer.As<int8_t>(), clamp );
+				RangeCastInteger( value.GetInt(), pointer.As<int8_t>(), clamp );
 				break;
 
 			case ScalarTypes::Signed16:
-				m_Reader.ReadNumber( pointer.As<int16_t>(), clamp );
+				RangeCastInteger( value.GetInt(), pointer.As<int16_t>(), clamp );
 				break;
 
 			case ScalarTypes::Signed32:
-				m_Reader.ReadNumber( pointer.As<int32_t>(), clamp );
+				RangeCastInteger( value.GetInt(), pointer.As<int32_t>(), clamp );
 				break;
 
 			case ScalarTypes::Signed64:
-				m_Reader.ReadNumber( pointer.As<int64_t>(), clamp );
+				RangeCastInteger( value.GetInt64(), pointer.As<int64_t>(), clamp );
 				break;
 
 			case ScalarTypes::Float32:
-				m_Reader.ReadNumber( pointer.As<float32_t>(), clamp );
+				RangeCastFloat( value.GetDouble(), pointer.As<float32_t>(), clamp );
 				break;
 
 			case ScalarTypes::Float64:
-				m_Reader.ReadNumber( pointer.As<float64_t>(), clamp );
-				break;
-
-			default:
-				m_Reader.Skip(); // no implicit conversion, discard data
+				RangeCastFloat( value.GetDouble(), pointer.As<float64_t>(), clamp );
 				break;
 			}
 		}
-		else
-		{
-			m_Reader.Skip(); // no implicit conversion, discard data
-		}
 	}
-	else if ( m_Reader.IsRaw() )
+	else if ( value.IsString() )
 	{
 		if ( translator->GetReflectionType() == ReflectionTypes::ScalarTranslator )
 		{
 			ScalarTranslator* scalar = static_cast< ScalarTranslator* >( translator );
 			if ( scalar->m_Type == ScalarTypes::String )
 			{
-				String str;
-				m_Reader.Read( str );
+				String str ( value.GetString() );
 				scalar->Parse( str, pointer, *this, m_Flags | ArchiveFlags::Notify ? true : false );
 			}
 		}
-		else
-		{
-			m_Reader.Skip(); // no implicit conversion, discard data
-		}
 	}
-	else if ( m_Reader.IsArray() )
+	else if ( value.IsArray() )
 	{
 		if ( translator->GetReflectionType() == ReflectionTypes::SetTranslator )
 		{
 			SetTranslator* set = static_cast< SetTranslator* >( translator );
 			Translator* itemTranslator = set->GetItemTranslator();
-			uint32_t length = m_Reader.ReadArrayLength();
+			uint32_t length = value.Size();
 			for ( uint32_t i=0; i<length; ++i )
 			{
 				Variable item ( itemTranslator );
-				DeserializeTranslator( item, itemTranslator, field, object );
+				DeserializeTranslator( value[ i ], item, itemTranslator, field, object );
 				set->InsertItem( pointer, item );
 			}
 		}
@@ -681,51 +637,37 @@ void ArchiveReaderJson::DeserializeTranslator( rapidjson::Value& value, Pointer 
 		{
 			SequenceTranslator* sequence = static_cast< SequenceTranslator* >( translator );
 			Translator* itemTranslator = sequence->GetItemTranslator();
-			uint32_t length = m_Reader.ReadArrayLength();
+			uint32_t length = value.Size();
 			for ( uint32_t i=0; i<length; ++i )
 			{
 				Variable item ( itemTranslator );
-				DeserializeTranslator( item, itemTranslator, field, object );
+				DeserializeTranslator( value[ i ], item, itemTranslator, field, object );
 				sequence->SetItem( pointer, i, item );
 			}
 		}
-		else
-		{
-			m_Reader.Skip(); // no implicit conversion, discard data
-		}
 	}
-	else if ( m_Reader.IsMap() )
+	else if ( value.IsObject() )
 	{
 		if ( translator->GetReflectionType() == ReflectionTypes::StructureTranslator )
 		{
 			StructureTranslator* structure = static_cast< StructureTranslator* >( translator );
-			DeserializeInstance( pointer.m_Address,  structure->GetStructure(), object );
+			DeserializeInstance( value, pointer.m_Address,  structure->GetStructure(), object );
 		}
 		else if ( translator->GetReflectionType() == ReflectionTypes::AssociationTranslator )
 		{
 			AssociationTranslator* assocation = static_cast< AssociationTranslator* >( translator );
 			Translator* keyTranslator = assocation->GetKeyTranslator();
 			Translator* valueTranslator = assocation->GetValueTranslator();
-			Variable key ( keyTranslator );
-			Variable value ( valueTranslator );
-			uint32_t length = m_Reader.ReadMapLength();
-			for ( uint32_t i=0; i<length; ++i )
+			Variable keyVariable ( keyTranslator );
+			Variable valueVariable ( valueTranslator );
+			for ( rapidjson::Value::MemberIterator itr = value.MemberBegin(), end = value.MemberEnd(); itr != end; ++itr )
 			{
-				DeserializeTranslator( key, keyTranslator, field, object );
-				DeserializeTranslator( value, valueTranslator, field, object );
-				assocation->SetItem( pointer, key, value );
+				DeserializeTranslator( itr->name, keyVariable, keyTranslator, field, object );
+				DeserializeTranslator( itr->value, valueVariable, valueTranslator, field, object );
+				assocation->SetItem( pointer, keyVariable, valueVariable );
 			}
 		}
-		else
-		{
-			m_Reader.Skip(); // no implicit conversion, discard data
-		}
 	}
-	else
-	{
-		m_Reader.Skip(); // no implicit conversion, discard data
-	}
-#endif
 }
 
 ObjectPtr ArchiveReaderJson::FromStream( Stream& stream, ObjectResolver* resolver, uint32_t flags )
