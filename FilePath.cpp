@@ -14,6 +14,8 @@
 
 using namespace Helium;
 
+const FilePath FilePath::NULL_FILE_PATH;
+
 void FilePath::Init( const tchar_t* path )
 {
 	m_Path = path;

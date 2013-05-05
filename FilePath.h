@@ -11,106 +11,108 @@
 
 namespace Helium
 {
-    const static tchar_t s_InternalPathSeparator = '/';
+	const static tchar_t s_InternalPathSeparator = '/';
 
-    class HELIUM_FOUNDATION_API FilePath
-    {
-    private:
-        tstring m_Path;
+	class HELIUM_FOUNDATION_API FilePath
+	{
+	private:
+		tstring m_Path;
 
-        void Init( const tchar_t* path );
+		void Init( const tchar_t* path );
 
-    public:
-        static void Normalize( tstring& path );
-        static void MakeNative( tstring& path );
-        static void GuaranteeSeparator( tstring& path );
+	public:
+		static void Normalize( tstring& path );
+		static void MakeNative( tstring& path );
+		static void GuaranteeSeparator( tstring& path );
 
-        static bool Exists( const tstring& path );
-        static bool IsAbsolute( const tchar_t* path );
-        static bool IsUnder( const tstring& location, const tstring& path );
+		static bool Exists( const tstring& path );
+		static bool IsAbsolute( const tchar_t* path );
+		static bool IsUnder( const tstring& location, const tstring& path );
 
-    public:
-        FilePath( const tchar_t* path );
-        FilePath( const tstring& path = TXT( "" ) );
-        FilePath( const FilePath& path );
+	public:
+		FilePath( const tchar_t* path );
+		FilePath( const tstring& path = TXT( "" ) );
+		FilePath( const FilePath& path );
 
-        const tchar_t* operator*() const;
+		const tchar_t* operator*() const;
 
-        FilePath& operator=( const FilePath& rhs );
-        bool operator==( const FilePath& rhs ) const;
+		FilePath& operator=( const FilePath& rhs );
+		bool operator==( const FilePath& rhs ) const;
 
-        bool operator<( const FilePath& rhs ) const;
+		bool operator<( const FilePath& rhs ) const;
 
-        FilePath operator+( const tchar_t* rhs ) const;
-        FilePath operator+( const tstring& rhs ) const;
-        FilePath operator+( const FilePath& rhs ) const;
+		FilePath operator+( const tchar_t* rhs ) const;
+		FilePath operator+( const tstring& rhs ) const;
+		FilePath operator+( const FilePath& rhs ) const;
 
-        FilePath& operator+=( const tchar_t* rhs );
-        FilePath& operator+=( const tstring& rhs );
-        FilePath& operator+=( const Helium::FilePath& rhs );
+		FilePath& operator+=( const tchar_t* rhs );
+		FilePath& operator+=( const tstring& rhs );
+		FilePath& operator+=( const Helium::FilePath& rhs );
 
-        const tstring& Get() const;
-        void Set( const tstring& path );
-        void Set( const String& path );
-        void Clear();
+		const tstring& Get() const;
+		void Set( const tstring& path );
+		void Set( const String& path );
+		void Clear();
 
-        void TrimToExisting();
+		void TrimToExisting();
 
-        void Split( tstring& directory, tstring& filename ) const;
-        void Split( tstring& directory, tstring& filename, tstring& extension ) const;
+		void Split( tstring& directory, tstring& filename ) const;
+		void Split( tstring& directory, tstring& filename, tstring& extension ) const;
 
-        tstring Basename() const;
-        tstring Filename() const;
-        tstring Directory() const;
-        std::vector< tstring > DirectoryAsVector() const;
+		tstring Basename() const;
+		tstring Filename() const;
+		tstring Directory() const;
+		std::vector< tstring > DirectoryAsVector() const;
 
-        tstring Extension() const;
-        tstring FullExtension() const;
-        void RemoveExtension();
-        void RemoveFullExtension();
-        void ReplaceExtension( const tstring& newExtension );
-        void ReplaceFullExtension( const tstring& newExtension );
-        bool HasExtension( const tchar_t* extension ) const;
+		tstring Extension() const;
+		tstring FullExtension() const;
+		void RemoveExtension();
+		void RemoveFullExtension();
+		void ReplaceExtension( const tstring& newExtension );
+		void ReplaceFullExtension( const tstring& newExtension );
+		bool HasExtension( const tchar_t* extension ) const;
 
-        tstring Native() const;
-        tstring Absolute() const;
-        tstring Normalized() const;
-        tstring Signature();
+		tstring Native() const;
+		tstring Absolute() const;
+		tstring Normalized() const;
+		tstring Signature();
 
-        bool Exists() const;
-        bool IsAbsolute() const;
-        bool IsUnder( const tstring& location ) const;
-        bool IsFile() const;
-        bool IsDirectory() const;
-        bool Writable() const;
-        bool Readable() const;
+		bool Exists() const;
+		bool IsAbsolute() const;
+		bool IsUnder( const tstring& location ) const;
+		bool IsFile() const;
+		bool IsDirectory() const;
+		bool Writable() const;
+		bool Readable() const;
 
-        bool MakePath() const;
-        bool Create() const;
-        bool Copy( const Helium::FilePath& target, bool overwrite = true ) const;
-        bool Move( const Helium::FilePath& target ) const;
-        bool Delete() const;
+		bool MakePath() const;
+		bool Create() const;
+		bool Copy( const Helium::FilePath& target, bool overwrite = true ) const;
+		bool Move( const Helium::FilePath& target ) const;
+		bool Delete() const;
 
-        tstring FileMD5() const;
-        bool VerifyFileMD5( const tstring& hash ) const;
+		tstring FileMD5() const;
+		bool VerifyFileMD5( const tstring& hash ) const;
 
-    public:
+	public:
 
-        Helium::FilePath GetAbsolutePath( const Helium::FilePath& basisPath ) const;
-        Helium::FilePath GetRelativePath( const Helium::FilePath& basisPath ) const;
+		Helium::FilePath GetAbsolutePath( const Helium::FilePath& basisPath ) const;
+		Helium::FilePath GetRelativePath( const Helium::FilePath& basisPath ) const;
 
-    public:
+	public:
 
-        size_t length() const;
-        bool empty() const;
-        const tchar_t* c_str() const;
-        operator const tchar_t*() const
-        {
-            return c_str();
-        }
-        operator const tstring&() const
-        {
-            return m_Path;
-        }
-    };
+		size_t length() const;
+		bool empty() const;
+		const tchar_t* c_str() const;
+		operator const tchar_t*() const
+		{
+			return c_str();
+		}
+		operator const tstring&() const
+		{
+			return m_Path;
+		}
+
+		static const FilePath NULL_FILE_PATH;
+	};
 }
