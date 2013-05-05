@@ -232,10 +232,14 @@ const tstring& FilePath::Get() const
 	return m_Path;
 }
 
-const tstring& FilePath::Set( const tstring& path )
+void FilePath::Set( const tstring& path )
 {
 	Init( path.c_str() );
-	return m_Path;
+}
+
+void FilePath::Set( const String& path )
+{
+	Init( path.GetData() );
 }
 
 void FilePath::Clear()

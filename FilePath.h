@@ -7,11 +7,13 @@
 
 #include "Foundation/API.h"
 #include "Foundation/SmartPtr.h"
+#include "Foundation/String.h"
 
 namespace Helium
 {
     const static tchar_t s_InternalPathSeparator = '/';
 
+#pragma TODO("FilePath should not be heap allocated and therefore reference counted")
     class HELIUM_FOUNDATION_API FilePath : public Helium::RefCountBase< FilePath >
     {
     private:
@@ -49,7 +51,8 @@ namespace Helium
         FilePath& operator+=( const Helium::FilePath& rhs );
 
         const tstring& Get() const;
-        const tstring& Set( const tstring& path );
+        void Set( const tstring& path );
+        void Set( const String& path );
         void Clear();
 
         void TrimToExisting();
