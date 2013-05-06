@@ -66,13 +66,9 @@ ArchiveMode ArchiveWriter::GetMode() const
 	return ArchiveModes::Write;
 }
 
-void ArchiveWriter::Identify( Object* object, Name& identity )
+bool ArchiveWriter::Identify( Object* object, Name& identity )
 {
-	if ( m_Identifier )
-	{
-		m_Identifier->Identify( object, identity );
-	}
-	else
+	if ( !m_Identifier || !m_Identifier->Identify( object, identity ))
 	{
 		size_t index = Invalid< size_t >();
 		for ( DynamicArray< ObjectPtr >::ConstIterator itr = m_Objects.Begin(), end = m_Objects.End(); itr != end; ++itr )
@@ -96,6 +92,8 @@ void ArchiveWriter::Identify( Object* object, Name& identity )
 		str.Format( "%d", index );
 		identity.Set( str );
 	}
+
+	return true;
 }
 
 ArchiveReader::ArchiveReader( ObjectResolver* resolver )
@@ -115,13 +113,9 @@ ArchiveMode ArchiveReader::GetMode() const
 	return ArchiveModes::Read;
 }
 
-void ArchiveReader::Resolve( const Name& identity, ObjectPtr& pointer, const Class* pointerClass )
+bool ArchiveReader::Resolve( const Name& identity, ObjectPtr& pointer, const Class* pointerClass )
 {
-	if ( m_Resolver )
-	{
-		m_Resolver->Resolve( identity, pointer, pointerClass );
-	}
-	else
+	if ( !m_Resolver || !m_Resolver->Resolve( identity, pointer, pointerClass ) )
 	{
 		uint32_t index = Invalid< uint32_t >();
 		String str ( identity.Get() );
@@ -149,6 +143,8 @@ void ArchiveReader::Resolve( const Name& identity, ObjectPtr& pointer, const Cla
 			m_Fixups.Push( Fixup ( identity, pointer, pointerClass ) );
 		}
 	}
+
+	return true;
 }
 
 ArchiveWriterPtr Persist::GetWriter( const FilePath& path, ObjectIdentifier* identifier, ArchiveType archiveType )

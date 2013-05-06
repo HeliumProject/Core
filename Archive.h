@@ -134,7 +134,7 @@ namespace Helium
 
 			virtual ArchiveMode GetMode() const HELIUM_OVERRIDE;
 			virtual void Write() = 0;
-			virtual void Identify( Reflect::Object* object, Name& identity ) HELIUM_OVERRIDE;
+			virtual bool Identify( Reflect::Object* object, Name& identity ) HELIUM_OVERRIDE;
 
 		protected:
 			DynamicArray< Reflect::ObjectPtr > m_Objects;
@@ -154,7 +154,7 @@ namespace Helium
 
 			virtual ArchiveMode GetMode() const HELIUM_OVERRIDE;
 			virtual void Read() = 0;
-			virtual void Resolve( const Name& identity, Reflect::ObjectPtr& pointer, const Reflect::Class* pointerClass ) HELIUM_OVERRIDE;
+			virtual bool Resolve( const Name& identity, Reflect::ObjectPtr& pointer, const Reflect::Class* pointerClass ) HELIUM_OVERRIDE;
 
 		protected:
 			struct Fixup

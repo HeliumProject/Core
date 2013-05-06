@@ -464,12 +464,9 @@ void Helium::Persist::ArchiveReaderJson::Resolve()
 	e_Status.Raise( info );
 
 	// finish linking objects (unless we have a custom handler)
-	if ( !m_Resolver )
+	for ( DynamicArray< Fixup >::ConstIterator itr = m_Fixups.Begin(), end = m_Fixups.End(); itr != end; ++itr )
 	{
-		for ( DynamicArray< Fixup >::ConstIterator itr = m_Fixups.Begin(), end = m_Fixups.End(); itr != end; ++itr )
-		{
-			ArchiveReader::Resolve( itr->m_Identity, itr->m_Pointer, itr->m_PointerClass );
-		}
+		ArchiveReader::Resolve( itr->m_Identity, itr->m_Pointer, itr->m_PointerClass );
 	}
 
 	info.m_State = ArchiveStates::Complete;
