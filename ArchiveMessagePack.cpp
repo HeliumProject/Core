@@ -50,7 +50,7 @@ void ArchiveWriterMessagePack::Close()
 	m_Stream.Release(); 
 }
 
-void ArchiveWriterMessagePack::Write()
+void ArchiveWriterMessagePack::Write( Reflect::Object* object )
 {
 	PERSIST_SCOPE_TIMER( ("Reflect - MessagePack Write") );
 
@@ -59,7 +59,7 @@ void ArchiveWriterMessagePack::Write()
 	e_Status.Raise( info );
 
 	// the master object
-	m_Objects.Push( m_Object );
+	m_Objects.Push( object );
 
 	// begin top level array of objects
 	m_Writer.BeginArray();
@@ -330,10 +330,9 @@ void ArchiveWriterMessagePack::SerializeTranslator( Pointer pointer, Translator*
 void ArchiveWriterMessagePack::ToStream( Object* object, Stream& stream, ObjectIdentifier* identifier, uint32_t flags )
 {
 	ArchiveWriterMessagePack archive ( &stream, identifier );
-	archive.m_Object = object;
 	archive.m_Flags = flags;
-	archive.Write();   
-	archive.Close(); 
+	archive.Write( object );
+	archive.Close();
 }
 
 ArchiveReaderMessagePack::ArchiveReaderMessagePack( const FilePath& path, ObjectResolver* resolver )
@@ -377,7 +376,7 @@ void ArchiveReaderMessagePack::Close()
 	m_Stream.Release(); 
 }
 
-void ArchiveReaderMessagePack::Read()
+void ArchiveReaderMessagePack::Read( Reflect::ObjectPtr& object )
 {
 	PERSIST_SCOPE_TIMER( ("Reflect - MessagePack Read") );
 
@@ -409,6 +408,8 @@ void ArchiveReaderMessagePack::Read()
 
 		m_Reader.EndArray();
 	}
+
+	object = m_Objects.GetFirst();
 }
 
 void ArchiveReaderMessagePack::Start()
@@ -754,7 +755,8 @@ ObjectPtr ArchiveReaderMessagePack::FromStream( Stream& stream, ObjectResolver* 
 {
 	ArchiveReaderMessagePack archive( &stream, resolver );
 	archive.m_Flags = flags;
-	archive.Read();
-	archive.Close(); 
-	return archive.m_Object;
+	ObjectPtr object;
+	archive.Read( object );
+	archive.Close();
+	return object;
 }

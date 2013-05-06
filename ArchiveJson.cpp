@@ -54,7 +54,7 @@ void ArchiveWriterJson::Close()
 	m_Output.SetStream( NULL );
 }
 
-void ArchiveWriterJson::Write()
+void ArchiveWriterJson::Write( Object* object )
 {
 	PERSIST_SCOPE_TIMER( ("Reflect - Json Write") );
 
@@ -63,7 +63,7 @@ void ArchiveWriterJson::Write()
 	e_Status.Raise( info );
 
 	// the master object
-	m_Objects.Push( m_Object );
+	m_Objects.Push( object );
 
 	// begin top level array of objects
 	m_Writer.StartArray();
@@ -311,10 +311,9 @@ void ArchiveWriterJson::SerializeTranslator( Pointer pointer, Translator* transl
 void ArchiveWriterJson::ToStream( Object* object, Stream& stream, ObjectIdentifier* identifier, uint32_t flags )
 {
 	ArchiveWriterJson archive ( &stream, identifier );
-	archive.m_Object = object;
 	archive.m_Flags = flags;
-	archive.Write();   
-	archive.Close(); 
+	archive.Write( object );
+	archive.Close();
 }
 
 ArchiveReaderJson::ArchiveReaderJson( const FilePath& path, ObjectResolver* resolver )
@@ -359,7 +358,7 @@ void ArchiveReaderJson::Close()
 	m_Stream.Release();
 }
 
-void ArchiveReaderJson::Read()
+void ArchiveReaderJson::Read( Reflect::ObjectPtr& object )
 {
 	PERSIST_SCOPE_TIMER( ("Reflect - Json Read") );
 
@@ -387,6 +386,8 @@ void ArchiveReaderJson::Read()
 	}
 
 	Resolve();
+
+	object = m_Objects.GetFirst();
 }
 
 void Helium::Persist::ArchiveReaderJson::Start()
@@ -407,10 +408,10 @@ void Helium::Persist::ArchiveReaderJson::Start()
 	}
 
 	// read entire contents
-	DynamicArray< uint8_t > buffer;
-	buffer.Resize( m_Size );
-	m_Stream->Read( buffer.GetData(),  m_Size, 1 );
-	if ( m_Document.ParseInsitu< 0 >( reinterpret_cast< char* >( buffer.GetData() ) ).HasParseError() )
+	m_Buffer.Resize( m_Size + 1 );
+	m_Stream->Read( m_Buffer.GetData(),  m_Size, 1 );
+	m_Buffer[ m_Size ] = '\0';
+	if ( m_Document.ParseInsitu< 0 >( reinterpret_cast< char* >( m_Buffer.GetData() ) ).HasParseError() )
 	{
 		throw Persist::Exception( "Error parsing JSON: %s", m_Document.GetParseError() );
 	}
@@ -661,7 +662,8 @@ ObjectPtr ArchiveReaderJson::FromStream( Stream& stream, ObjectResolver* resolve
 {
 	ArchiveReaderJson archive( &stream, resolver );
 	archive.m_Flags = flags;
-	archive.Read();
-	archive.Close(); 
-	return archive.m_Object;
+	ObjectPtr object;
+	archive.Read( object );
+	archive.Close();
+	return object;
 }

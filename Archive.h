@@ -105,9 +105,6 @@ namespace Helium
 			virtual ArchiveMode GetMode() const = 0;
 			inline const Helium::FilePath& GetPath() const;
 
-			inline void Get( Reflect::ObjectPtr& object );
-			inline void Put( Reflect::Object* object );
-
 			virtual void Open() = 0;
 			virtual void Close() = 0;
 
@@ -118,7 +115,6 @@ namespace Helium
 			bool               m_Abort;
 			uint8_t            m_Flags;
 			FilePath           m_Path;
-			Reflect::ObjectPtr m_Object;
 		};
 		typedef Helium::SmartPtr< Archive > ArchivePtr;
 
@@ -133,7 +129,7 @@ namespace Helium
 			ArchiveWriter( const FilePath& path, Reflect::ObjectIdentifier* identifier = NULL );
 
 			virtual ArchiveMode GetMode() const HELIUM_OVERRIDE;
-			virtual void Write() = 0;
+			virtual void Write( Reflect::Object* object ) = 0;
 			virtual bool Identify( Reflect::Object* object, Name& identity ) HELIUM_OVERRIDE;
 
 		protected:
@@ -153,7 +149,7 @@ namespace Helium
 			ArchiveReader( const FilePath& path, Reflect::ObjectResolver* resolver = NULL );
 
 			virtual ArchiveMode GetMode() const HELIUM_OVERRIDE;
-			virtual void Read() = 0;
+			virtual void Read( Reflect::ObjectPtr& object ) = 0;
 			virtual bool Resolve( const Name& identity, Reflect::ObjectPtr& pointer, const Reflect::Class* pointerClass ) HELIUM_OVERRIDE;
 
 		protected:

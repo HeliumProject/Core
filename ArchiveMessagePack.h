@@ -20,7 +20,7 @@ namespace Helium
 			virtual ArchiveType GetType() const HELIUM_OVERRIDE;
 			virtual void Open() HELIUM_OVERRIDE;
 			virtual void Close() HELIUM_OVERRIDE; 
-			virtual void Write() HELIUM_OVERRIDE;
+			virtual void Write( Reflect::Object* object ) HELIUM_OVERRIDE;
 
 		private:
 			void SerializeInstance( void* instance, const Reflect::Structure* structure, Reflect::Object* object );
@@ -44,7 +44,7 @@ namespace Helium
 			virtual ArchiveType GetType() const HELIUM_OVERRIDE;
 			virtual void Open() HELIUM_OVERRIDE;
 			virtual void Close() HELIUM_OVERRIDE; 
-			virtual void Read() HELIUM_OVERRIDE;
+			virtual void Read( Reflect::ObjectPtr& object ) HELIUM_OVERRIDE;
 
 			void Start();
 			void ReadNext( Reflect::ObjectPtr &object );

@@ -222,13 +222,12 @@ bool Persist::ToArchive( const FilePath& path, ObjectPtr object, ObjectIdentifie
 	safetyPath.ReplaceExtension( path.Extension() );
 
 	ArchiveWriterPtr archive = GetWriter( safetyPath, identifier, archiveType );
-	archive->Put( object );
 
 	// generate the file to the safety location
 	if ( Helium::IsDebuggerPresent() )
 	{
 		archive->Open();
-		archive->Write();
+		archive->Write( object );
 		archive->Close();
 	}
 	else
@@ -239,7 +238,7 @@ bool Persist::ToArchive( const FilePath& path, ObjectPtr object, ObjectIdentifie
 		{
 			archive->Open();
 			open = true;
-			archive->Write();
+			archive->Write( object );
 			archive->Close(); 
 		}
 		catch ( Helium::Exception& ex )
@@ -304,12 +303,11 @@ bool Persist::FromArchive( const FilePath& path, ObjectPtr& object, ObjectResolv
 	Log::Debug( TXT( "Parsing '%s'\n" ), path.c_str() );
 
 	ArchiveReaderPtr archive = GetReader( path, resolver, archiveType );
-	archive->Put( object );
 
 	if ( Helium::IsDebuggerPresent() )
 	{
 		archive->Open();
-		archive->Read();
+		archive->Read( object );
 		archive->Close(); 
 	}
 	else
@@ -320,7 +318,7 @@ bool Persist::FromArchive( const FilePath& path, ObjectPtr& object, ObjectResolv
 		{
 			archive->Open();
 			open = true;
-			archive->Read();
+			archive->Read( object );
 			archive->Close(); 
 		}
 		catch ( Helium::Exception& ex )
@@ -350,8 +348,6 @@ bool Persist::FromArchive( const FilePath& path, ObjectPtr& object, ObjectResolv
 			throw;
 		}
 	}
-
-	archive->Get( object );
 
 	return true;
 }
