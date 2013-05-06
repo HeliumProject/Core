@@ -175,7 +175,7 @@ bool DirectoryIterator::Find()
                     FilePath::GuaranteeSeparator( absolutePath );
                 }
 
-                m_Item.m_Path = absolutePath;
+                m_Item.m_Path.Set( absolutePath );
             }
 
             m_Item.m_CreateTime = entry.m_Stat.m_CreatedTime;

@@ -23,11 +23,6 @@ void FilePath::Init( const tchar_t* path )
 	std::replace( m_Path.begin(), m_Path.end(), Helium::PathSeparator, s_InternalPathSeparator );
 }
 
-FilePath::FilePath( const tchar_t* path )
-{
-	Init( path );
-}
-
 FilePath::FilePath( const tstring& path )
 {
 	Init( path.c_str() );
@@ -65,7 +60,7 @@ bool FilePath::operator<( const FilePath& rhs ) const
 
 Helium::FilePath FilePath::operator+( const tchar_t* rhs ) const
 {
-	return Helium::FilePath( Get() + rhs );
+	return FilePath( tstring( Get() + rhs ) );
 }
 
 Helium::FilePath FilePath::operator+( const tstring& rhs ) const

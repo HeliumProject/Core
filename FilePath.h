@@ -30,8 +30,7 @@ namespace Helium
 		static bool IsUnder( const tstring& location, const tstring& path );
 
 	public:
-		FilePath( const tchar_t* path );
-		FilePath( const tstring& path = TXT( "" ) );
+		explicit FilePath( const tstring& path = TXT( "" ) );
 		FilePath( const FilePath& path );
 
 		const tchar_t* operator*() const;

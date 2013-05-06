@@ -8,7 +8,10 @@ Helium::AutoPtr< T >::AutoPtr( T* ptr )
 template< typename T >
 Helium::AutoPtr< T >::~AutoPtr()
 {
-	delete Ptr(); 
+	if ( !IsOrphan() )
+	{
+		delete Ptr();
+	}
 }
 
 template< typename T >
