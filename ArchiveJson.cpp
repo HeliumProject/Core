@@ -418,20 +418,14 @@ void Helium::Persist::ArchiveReaderJson::Start()
 
 void Helium::Persist::ArchiveReaderJson::ReadNext( Reflect::ObjectPtr& object )
 {
-	rapidjson::Value& v = m_Document[ m_Next++ ];
-	if ( v.IsObject() )
+	rapidjson::Value& value = m_Document[ m_Next++ ];
+	if ( value.IsObject() )
 	{
-		uint32_t length = v.Size();
-		if ( length == 1 )
+		rapidjson::Value::Member* member = value.MemberBegin();
+		if ( member != value.MemberEnd() )
 		{
-			rapidjson::Value::Member* member = v[ rapidjson::SizeType(0) ].MemberBegin();
-
 			uint32_t objectClassCrc = 0;
-			if ( member->name.IsNumber() )
-			{
-				objectClassCrc = member->name.GetInt();
-			}
-			else
+			if ( member->name.IsString() )
 			{
 				String typeStr;
 				typeStr = member->name.GetString();
@@ -486,11 +480,7 @@ void ArchiveReaderJson::DeserializeInstance( rapidjson::Value& value, void* inst
 		for ( rapidjson::Value::MemberIterator itr = value.MemberBegin(), end = value.MemberEnd(); itr != end; ++itr )
 		{
 			uint32_t fieldCrc = 0;
-			if ( itr->name.IsNumber() )
-			{
-				fieldCrc = itr->name.GetUint();
-			}
-			else
+			if ( itr->name.IsString() )
 			{
 				String fieldStr;
 				fieldStr = itr->name.GetString();
