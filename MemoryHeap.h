@@ -11,7 +11,7 @@
 
 #ifndef HELIUM_HEAP
 /// Take control of heap allocations, as invasively as possible.
-#define HELIUM_HEAP 1
+#define HELIUM_HEAP 0
 #endif
 
 #if HELIUM_HEAP
