@@ -22,6 +22,7 @@ static uint64_t FromWindowsTime( FILETIME time )
 
 static void FromWindowsAttributes( DWORD attrs, uint32_t& mode )
 {
+	mode = 0;
 	mode |= ( attrs & FILE_ATTRIBUTE_READONLY ) ? StatusModes::Read : ( StatusModes::Read | StatusModes::Write );
 	mode |= ( attrs & FILE_ATTRIBUTE_DIRECTORY ) ? StatusModes::Directory : StatusModes::None;
 	mode |= ( attrs & FILE_ATTRIBUTE_REPARSE_POINT ) ? StatusModes::Link : StatusModes::None;
