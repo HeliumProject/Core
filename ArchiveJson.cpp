@@ -626,6 +626,7 @@ void ArchiveReaderJson::DeserializeTranslator( rapidjson::Value& value, Pointer 
 			SequenceTranslator* sequence = static_cast< SequenceTranslator* >( translator );
 			Translator* itemTranslator = sequence->GetItemTranslator();
 			uint32_t length = value.Size();
+			sequence->SetLength(pointer, length);
 			for ( uint32_t i=0; i<length; ++i )
 			{
 				Variable item ( itemTranslator );
