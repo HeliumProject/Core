@@ -162,14 +162,14 @@ void ArchiveWriterJson::SerializeField( void* instance, const Field* field, Obje
 
 		for ( uint32_t i=0; i<field->m_Count; ++i )
 		{
-			SerializeTranslator( Pointer ( field, object, i ), field->m_Translator, field, object );
+			SerializeTranslator( Pointer ( field, instance, object, i ), field->m_Translator, field, object );
 		}
 
 		m_Writer.EndArray();
 	}
 	else
 	{
-		SerializeTranslator( Pointer ( field, object ), field->m_Translator, field, object );
+		SerializeTranslator( Pointer ( field, instance, object ), field->m_Translator, field, object );
 	}
 }
 
@@ -517,18 +517,18 @@ void ArchiveReaderJson::DeserializeField( rapidjson::Value& value, void* instanc
 			{
 				if ( i < field->m_Count )
 				{
-					DeserializeTranslator( value[ i ], Pointer ( field, object, i ), field->m_Translator, field, object );
+					DeserializeTranslator( value[ i ], Pointer ( field, instance, object, i ), field->m_Translator, field, object );
 				}
 			}
 		}
 		else
 		{
-			DeserializeTranslator( value, Pointer ( field, object, 0 ), field->m_Translator, field, object );
+			DeserializeTranslator( value, Pointer ( field, instance, object, 0 ), field->m_Translator, field, object );
 		}
 	}
 	else
 	{
-		DeserializeTranslator( value, Pointer ( field, object ), field->m_Translator, field, object );
+		DeserializeTranslator( value, Pointer ( field, instance, object ), field->m_Translator, field, object );
 	}
 }
 
