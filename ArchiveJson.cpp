@@ -597,7 +597,7 @@ void ArchiveReaderJson::DeserializeTranslator( rapidjson::Value& value, Pointer 
 	}
 	else if ( value.IsString() )
 	{
-		if ( translator->GetReflectionType() == ReflectionTypes::ScalarTranslator )
+		if ( translator->HasReflectionType( ReflectionTypes::ScalarTranslator ) )
 		{
 			ScalarTranslator* scalar = static_cast< ScalarTranslator* >( translator );
 			if ( scalar->m_Type == ScalarTypes::String )
