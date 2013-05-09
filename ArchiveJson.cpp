@@ -178,6 +178,9 @@ void ArchiveWriterJson::SerializeTranslator( Pointer pointer, Translator* transl
 	switch ( translator->GetReflectionType() )
 	{
 	case ReflectionTypes::ScalarTranslator:
+	case ReflectionTypes::EnumerationTranslator:
+	case ReflectionTypes::PointerTranslator:
+	case ReflectionTypes::TypeTranslator:
 		{
 			ScalarTranslator* scalar = static_cast< ScalarTranslator* >( translator );
 			switch ( scalar->m_Type )
@@ -305,6 +308,10 @@ void ArchiveWriterJson::SerializeTranslator( Pointer pointer, Translator* transl
 
 			break;
 		}
+
+	default:
+		// Unhandled reflection type in ArchiveWriterJson::SerializeTranslator
+		HELIUM_ASSERT_FALSE();
 	}
 }
 
@@ -629,9 +636,8 @@ void ArchiveReaderJson::DeserializeTranslator( rapidjson::Value& value, Pointer 
 			sequence->SetLength(pointer, length);
 			for ( uint32_t i=0; i<length; ++i )
 			{
-				Variable item ( itemTranslator );
+				Pointer item = sequence->GetItem( pointer, i );
 				DeserializeTranslator( value[ i ], item, itemTranslator, field, object );
-				sequence->SetItem( pointer, i, item );
 			}
 		}
 	}
