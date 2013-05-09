@@ -609,7 +609,14 @@ void Helium::DeleteArrayHelper( Allocator& rAllocator, T* pArray )
 template< typename T, typename Allocator >
 void Helium::DeleteArrayHelper( Allocator& rAllocator, T* pArray, const std::true_type& /*rHasTrivialDestructor*/ )
 {
-	rAllocator.Free( pArray );
+	if( sizeof( T ) >= HELIUM_SIMD_SIZE )
+	{
+		rAllocator.FreeAligned( pArray );
+	}
+	else
+	{
+		rAllocator.Free( pArray );
+	}
 }
 
 /// Delete an allocated array of a type with a non-trivial destructor.
@@ -639,7 +646,15 @@ void Helium::DeleteArrayHelper( Allocator& rAllocator, T* pArray, const std::fal
 		}
 
 		void* pMemory = reinterpret_cast< uint8_t* >( pArray ) - allocationOffset;
-		rAllocator.Free( pMemory );
+
+		if( sizeof( T ) >= HELIUM_SIMD_SIZE )
+		{
+			rAllocator.FreeAligned( pMemory );
+		}
+		else
+		{
+			rAllocator.Free( pMemory );
+		}
 	}
 }
 
