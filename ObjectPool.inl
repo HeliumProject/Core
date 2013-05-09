@@ -37,7 +37,7 @@ Helium::ObjectPool< T, Allocator >::~ObjectPool()
 
         T* pObjects = pBlock->pObjects;
         ArrayInPlaceDestruct( pObjects, m_blockSize );
-        allocator.Free( pObjects );
+        allocator.FreeAligned( pObjects );
     }
 
     // Free the free object pool array.
