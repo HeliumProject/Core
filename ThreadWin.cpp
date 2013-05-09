@@ -135,9 +135,9 @@ bool Thread::Start( const tchar_t* pName, ThreadPriority priority )
 /// @return  True if the thread finished or was not running to begin with, false if it is still running.
 bool Thread::Join( uint32_t timeOutMilliseconds )
 {
-	bool result = false;
+	bool result = true;
 
-	if( m_Handle != 0 )
+	if( IsValid() )
 	{
 		DWORD waitResult = ::WaitForSingleObject( m_Handle, ( timeOutMilliseconds != 0 ? timeOutMilliseconds : INFINITE ) );
 		HELIUM_ASSERT( waitResult == WAIT_OBJECT_0 || waitResult == WAIT_TIMEOUT );
@@ -167,7 +167,7 @@ bool Thread::Join( uint32_t timeOutMilliseconds )
 /// @return  True if the thread finished or was not running to begin with, false if it is still running.
 bool Thread::TryJoin()
 {
-	bool result = false;
+	bool result = true;
 
 	if ( IsValid() )
 	{
