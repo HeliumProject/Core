@@ -15,7 +15,7 @@
 #include "Persist/Exceptions.h"
 
 // enable verbose archive printing
-#define PERSIST_ARCHIVE_VERBOSE 1
+#define PERSIST_ARCHIVE_VERBOSE 0
 
 namespace Helium
 {
