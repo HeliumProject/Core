@@ -138,48 +138,48 @@ void Helium::Swizzle(T& val, bool swizzle)
 namespace Helium // required for gcc error/warning: -fpermissive
 {
     template<>
-    void Swizzle<uint16_t>(uint16_t& val, bool swizzle)
+    inline void Swizzle<uint16_t>(uint16_t& val, bool swizzle)
     {
         val = ConvertEndian(val, swizzle);
     }
 
     template<>
-    void Swizzle<int16_t>(int16_t& val, bool swizzle)
+    inline void Swizzle<int16_t>(int16_t& val, bool swizzle)
     {
         val = ConvertEndian(val, swizzle);
     }
 
     template<>
-    void Swizzle<uint32_t>(uint32_t& val, bool swizzle)
+    inline void Swizzle<uint32_t>(uint32_t& val, bool swizzle)
     {
         val = ConvertEndian(val, swizzle);
     }
 
     template<>
-    void Swizzle<int32_t>(int32_t& val, bool swizzle)
+    inline void Swizzle<int32_t>(int32_t& val, bool swizzle)
     {
         val = ConvertEndian(val, swizzle);
     }
 
     template<>
-    void Swizzle<uint64_t>(uint64_t& val, bool swizzle)
+    inline void Swizzle<uint64_t>(uint64_t& val, bool swizzle)
     {
         val = ConvertEndian(val, swizzle);
     }
     template<>
-    void Swizzle<int64_t>(int64_t& val, bool swizzle)
-    {
-        val = ConvertEndian(val, swizzle);
-    }
-
-    template<>
-    void Swizzle<float32_t>(float32_t& val, bool swizzle)
+    inline void Swizzle<int64_t>(int64_t& val, bool swizzle)
     {
         val = ConvertEndian(val, swizzle);
     }
 
     template<>
-    void Swizzle<float64_t>(float64_t& val, bool swizzle)
+    inline void Swizzle<float32_t>(float32_t& val, bool swizzle)
+    {
+        val = ConvertEndian(val, swizzle);
+    }
+
+    template<>
+    inline void Swizzle<float64_t>(float64_t& val, bool swizzle)
     {
         val = ConvertEndian(val, swizzle);
     }
