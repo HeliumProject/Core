@@ -43,11 +43,10 @@ tstring Helium::GetProcessString()
 
 tstring Helium::GetProcessPath()
 {
-    char buf[ PATH_MAX ];
-    size_t len = readlink("/proc/self/exe", buf, sizeof(buf));
-    buf[len] = '\0';
-    tstring result = buf;
-	return result.substr( 0, result.find_last_of("/")+1 );
+	char buf[ PATH_MAX ];
+	size_t len = readlink("/proc/self/exe", buf, sizeof(buf));
+	buf[len] = '\0';
+	return buf;
 }
 
 tstring Helium::GetProcessName()
