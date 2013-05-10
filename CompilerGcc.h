@@ -44,9 +44,9 @@ namespace std
 	using tr1::has_trivial_destructor;
 	using tr1::integral_constant;
 	using tr1::is_pointer;
+	using tr1::is_signed;
 	using tr1::integral_constant;
 	using tr1::remove_cv;
 	using tr1::alignment_of;
-
 }
 #endif
