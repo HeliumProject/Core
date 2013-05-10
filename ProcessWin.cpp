@@ -25,7 +25,7 @@ static bool GetEnvVar( wchar_t* var, tstring& value )
 	return false;
 }
 
-int Helium::Execute( const tstring& command, bool showWindow, bool block )
+int Helium::Execute( const tstring& command )
 {
 	DWORD result = 0;
 
@@ -38,11 +38,11 @@ int Helium::Execute( const tstring& command, bool showWindow, bool block )
 	// Start the child process.
 	if( !CreateProcess(
 		NULL,                                                 // No module name (use command line)
-		(LPTSTR) command.c_str(),                            // Command line
+		(LPTSTR) command.c_str(),                             // Command line
 		NULL,                                                 // Process handle not inheritable
 		NULL,                                                 // Thread handle not inheritable
 		FALSE,                                                // Set handle inheritance to FALSE
-		showWindow ? CREATE_NEW_CONSOLE : CREATE_NO_WINDOW,  // Creation flags
+		NULL,                                                 // Creation flags
 		NULL,                                                 // Use parent's environment block
 		NULL,                                                 // Use parent's starting directory
 		&si,                                                  // Pointer to STARTUPINFO structure
@@ -51,14 +51,11 @@ int Helium::Execute( const tstring& command, bool showWindow, bool block )
 		return -1;
 	}
 
-	if (block)
-	{
-		DWORD waitResult = ::WaitForSingleObject( pi.hProcess, INFINITE );
-		HELIUM_ASSERT( waitResult != WAIT_FAILED );
+	DWORD waitResult = ::WaitForSingleObject( pi.hProcess, INFINITE );
+	HELIUM_ASSERT( waitResult != WAIT_FAILED );
 
-		BOOL codeResult = ::GetExitCodeProcess( pi.hProcess, &result );
-		HELIUM_ASSERT( codeResult );
-	}
+	BOOL codeResult = ::GetExitCodeProcess( pi.hProcess, &result );
+	HELIUM_ASSERT( codeResult );
 
 	::CloseHandle( pi.hProcess );
 	::CloseHandle( pi.hThread );
@@ -66,7 +63,7 @@ int Helium::Execute( const tstring& command, bool showWindow, bool block )
 	return result;
 }
 
-int Helium::Execute( const tstring& command, tstring& output, bool showWindow )
+int Helium::Execute( const tstring& command, tstring& output )
 {
 	HANDLE hReadPipe;
 	HANDLE hWritePipe;
@@ -98,7 +95,7 @@ int Helium::Execute( const tstring& command, tstring& output, bool showWindow )
 		NULL,                                                 // process security descriptor
 		NULL,                                                 // thread security descriptor
 		TRUE,                                                 // inherit handles?
-		showWindow ? CREATE_NEW_CONSOLE : CREATE_NO_WINDOW,   // creation flags
+		NULL,                                                 // creation flags
 		NULL,                                                 // inherited environment address
 		NULL,                                                 // startup dir; NULL = start in current
 		&si,                                                  // pointer to startup info (input)
