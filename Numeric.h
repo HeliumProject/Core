@@ -5,22 +5,6 @@
 
 #include "API.h"
 
-#define I8_MIN     (-127i8 - 1)
-#define I8_MAX       127i8
-#define U8_MAX      0xffui8
-
-#define I16_MIN    (-32767i16 - 1)
-#define I16_MAX      32767i16
-#define U16_MAX     0xffffui16
-
-#define I32_MIN    (-2147483647i32 - 1)
-#define I32_MAX      2147483647i32
-#define U32_MAX     0xffffffffui32
-
-#define I64_MIN    (-9223372036854775807i64 - 1)
-#define I64_MAX      9223372036854775807i64
-#define U64_MAX     0xffffffffffffffffui64
-
 #define F32_MIN     1.175494351e-38F
 #define F32_MAX     3.402823466e+38F
 
@@ -36,35 +20,35 @@ namespace Helium
         const static T Maximum;
     };
 
-    const int8_t NumericLimits<int8_t>::Minimum = I8_MIN;
-    const int8_t NumericLimits<int8_t>::Maximum = I8_MAX;
+    template<> const int8_t NumericLimits<int8_t>::Minimum = INT8_MIN;
+    template<> const int8_t NumericLimits<int8_t>::Maximum = INT8_MAX;
 
-    const uint8_t NumericLimits<uint8_t>::Minimum = 0;
-    const uint8_t NumericLimits<uint8_t>::Maximum = U8_MAX;
+    template<> const uint8_t NumericLimits<uint8_t>::Minimum = 0;
+    template<> const uint8_t NumericLimits<uint8_t>::Maximum = UINT8_MAX;
 
-    const int16_t NumericLimits<int16_t>::Minimum = I16_MIN;
-    const int16_t NumericLimits<int16_t>::Maximum = I16_MAX;
+    template<> const int16_t NumericLimits<int16_t>::Minimum = INT16_MIN;
+    template<> const int16_t NumericLimits<int16_t>::Maximum = INT16_MAX;
 
-    const uint16_t NumericLimits<uint16_t>::Minimum = 0;
-    const uint16_t NumericLimits<uint16_t>::Maximum = U16_MAX;
+    template<> const uint16_t NumericLimits<uint16_t>::Minimum = 0;
+    template<> const uint16_t NumericLimits<uint16_t>::Maximum = UINT16_MAX;
 
-    const int32_t NumericLimits<int32_t>::Minimum = I32_MIN;
-    const int32_t NumericLimits<int32_t>::Maximum = I32_MAX;
+    template<> const int32_t NumericLimits<int32_t>::Minimum = INT32_MIN;
+    template<> const int32_t NumericLimits<int32_t>::Maximum = INT32_MAX;
 
-    const uint32_t NumericLimits<uint32_t>::Minimum = 0;
-    const uint32_t NumericLimits<uint32_t>::Maximum = U32_MAX;
+    template<> const uint32_t NumericLimits<uint32_t>::Minimum = 0;
+    template<> const uint32_t NumericLimits<uint32_t>::Maximum = UINT32_MAX;
 
-    const int64_t NumericLimits<int64_t>::Minimum = I64_MIN;
-    const int64_t NumericLimits<int64_t>::Maximum = I64_MAX;
+    template<> const int64_t NumericLimits<int64_t>::Minimum = INT64_MIN;
+    template<> const int64_t NumericLimits<int64_t>::Maximum = INT64_MAX;
 
-    const uint64_t NumericLimits<uint64_t>::Minimum = 0;
-    const uint64_t NumericLimits<uint64_t>::Maximum = U64_MAX;
+    template<> const uint64_t NumericLimits<uint64_t>::Minimum = 0;
+    template<> const uint64_t NumericLimits<uint64_t>::Maximum = UINT64_MAX;
 
-    const float32_t NumericLimits<float32_t>::Minimum = -F32_MAX;
-    const float32_t NumericLimits<float32_t>::Maximum = F32_MAX;
+    template<> const float32_t NumericLimits<float32_t>::Minimum = -F32_MIN;
+    template<> const float32_t NumericLimits<float32_t>::Maximum = F32_MAX;
 
-    const float64_t NumericLimits<float64_t>::Minimum = -F64_MAX;
-    const float64_t NumericLimits<float64_t>::Maximum = F64_MAX;
+    template<> const float64_t NumericLimits<float64_t>::Minimum = -F64_MIN;
+    template<> const float64_t NumericLimits<float64_t>::Maximum = F64_MAX;
 
     template< class S, class D >
     inline bool RangeCastInteger( const S source, D& dest, bool clamp = false )
@@ -153,7 +137,7 @@ namespace Helium
     template< class S, class D >
     inline bool RangeCast( const S source, D& dest, bool clamp = false )
     {
-        HELIUM_COMPILE_ASSERT( false );
+        HELIUM_ASSERT( false );
         return false;
     }
 

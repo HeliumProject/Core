@@ -28,13 +28,13 @@ int Helium::StringNCompare( const T* pString0, const T* pString1, size_t count )
 */
 
 template< class T >
-static int CaseSensitiveCompare( T a, T b )
+int CaseSensitiveCompare( T a, T b )
 {
 	return a - b;
 }
 
 template< class T >
-static int CaseInsensitiveCompare( T a, T b )
+int CaseInsensitiveCompare( T a, T b )
 {
 	HELIUM_COMPILE_ASSERT( 'a' > 'A' );
 	const static int offset = 'a' - 'A';
@@ -50,7 +50,7 @@ static int CaseInsensitiveCompare( T a, T b )
 }
 
 template< class T, int (*C)( T a, T b ) >
-static int CompareStringHelper( const T* a, const T* b, size_t count )
+int CompareStringHelper( const T* a, const T* b, size_t count )
 {
 	size_t lenA = StringLength( a );
 	size_t lenB = StringLength( b );

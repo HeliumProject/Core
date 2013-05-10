@@ -7,7 +7,9 @@
 #include <vector>
 #include <set>
 #include <map>
-#include <hash_map>
+#if HELIUM_OS_WIN
+# include <hash_map>
+#endif
 
 #include "Platform/Types.h"
 
@@ -176,7 +178,7 @@ namespace Helium
         return stream;
     }
 
-
+#if HELIUM_OS_WIN
     // 
     // Hashing class for storing UIDs as keys to a hash_map.
     // 
@@ -205,4 +207,5 @@ namespace Helium
         // operator tuid() const will handle the conversion into the other swizzle func
         val = ConvertEndian(val, swizzle);
     }
+#endif
 }

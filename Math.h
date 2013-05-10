@@ -2,6 +2,7 @@
 
 #include "Platform/Types.h"
 #include "Platform/Assert.h"
+#include "Platform/Utility.h"
 
 #if HELIUM_CC_CL
 # pragma warning( push )
@@ -9,7 +10,6 @@
 # pragma warning( disable : 4985 ) // Temporary workaround for bug in Visual C++ 2008 with including intrin.h and math.h simultaneously (see http://connect.microsoft.com/VisualStudio/feedback/details/381422/warning-of-attributes-not-present-on-previous-declaration-on-ceil-using-both-math-h-and-intrin-h).
 #endif
 
-#include <type_traits>
 #include <cmath>
 
 #if HELIUM_CC_CL
