@@ -11,6 +11,7 @@
 
 namespace Helium
 {
+#if HELIUM_OS_WIN
     //
     // Filter exceptions via CRT
     //
@@ -72,4 +73,5 @@ namespace Helium
     HELIUM_FOUNDATION_API uint32_t ProcessException( LPEXCEPTION_POINTERS info,
         bool print = false,
         bool fatal = false );
+#endif
 }

@@ -70,19 +70,19 @@ namespace Helium
 		//@{
 
 		/// @copydoc Stream::CanRead()
-		virtual bool FileStream::CanRead() const
+		virtual bool CanRead() const
 		{
 			return( IsOpen() && ( m_modeFlags & MODE_READ ) != 0 );
 		}
 
 		/// @copydoc Stream::CanWrite()
-		virtual bool FileStream::CanWrite() const
+		virtual bool CanWrite() const
 		{
 			return( IsOpen() && ( m_modeFlags & MODE_WRITE ) != 0 );
 		}
 
 		/// @copydoc Stream::CanSeek()
-		virtual bool FileStream::CanSeek() const
+		virtual bool CanSeek() const
 		{
 			return IsOpen();
 		}
