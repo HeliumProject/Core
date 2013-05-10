@@ -229,6 +229,7 @@ bool Directory::FindNext( DirectoryEntry& entry )
 	{
 		entry.m_Name = dirEntry->d_name;
 		entry.m_Stat.Read( entry.m_Name.c_str() );
+		return true;
 	}
 	return false;
 }
