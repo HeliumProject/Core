@@ -80,7 +80,6 @@ int Helium::Execute( const tstring& command, tstring& output )
 	memset( &si, 0, sizeof(si) );
 	si.cb          = sizeof(si);
 	si.dwFlags     = STARTF_USESHOWWINDOW | STARTF_USESTDHANDLES;
-	si.wShowWindow = static_cast<int>( showWindow );
 	si.hStdOutput  = hWritePipe;
 	si.hStdError   = hWritePipe;      
 
