@@ -62,6 +62,8 @@ void Helium::TUID::Reset()
 	m_ID = 0x0;
 }
 
+#if HELIUM_OS_WIN
+
 size_t Helium::TUIDHasher::operator()( const TUID& tuid ) const
 {
 	return stdext::hash_compare< uint64_t >::operator()( 0 );
@@ -71,6 +73,8 @@ bool Helium::TUIDHasher::operator()( const TUID& tuid1, const TUID& tuid2 ) cons
 {
 	return stdext::hash_compare< uint64_t >::operator()( tuid1, tuid2 );
 }
+
+#endif
 
 template<>
 inline void Helium::Swizzle< Helium::TUID >(TUID& val, bool swizzle)

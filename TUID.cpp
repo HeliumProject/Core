@@ -5,10 +5,13 @@
 #include "Foundation/Endian.h"
 
 #include <time.h>
-#include <iphlpapi.h>
 #include <sstream>
 #include <algorithm>
 #include <cctype>
+
+#if HELIUM_OS_WIN
+# include <iphlpapi.h>
+#endif
 
 using namespace Helium;
 
@@ -53,7 +56,7 @@ template< class T >
 bool FromString( const std::basic_string< T >& str, tuid& id )
 {
     std::basic_stringstream< T > stream;
-    std::basic_string< T >::const_iterator alphaIt = std::find_if( str.begin(), str.end(), isAlpha );
+    typename std::basic_string< T >::const_iterator alphaIt = std::find_if( str.begin(), str.end(), isAlpha );
     if ( alphaIt != str.end() )
     {
         if ( str.length() >= 2 && ( str[1] == 'x' || str[1] == 'X' ) )
@@ -119,6 +122,7 @@ void TUID::Generate( tuid& uid )
     // fetches the MAC address (if it has not already been set)
     if ( s_CachedMacBits64 == 0 )
     {
+#if HELIUM_OS_WIN
         IP_ADAPTER_INFO adapterInfo[16];
         DWORD bufLength = sizeof( adapterInfo );
         DWORD status = GetAdaptersInfo( adapterInfo, &bufLength );
@@ -137,6 +141,9 @@ void TUID::Generate( tuid& uid )
         }
 
         s_CachedMacBits64 |= (bits << 8); // shift left 8 to center
+#else
+        HELIUM_ASSERT( false );
+#endif
     }
 
     uid |= s_CachedMacBits64;
@@ -144,6 +151,7 @@ void TUID::Generate( tuid& uid )
     uint64_t timeBits = 0;
 
     // get the clock ticks
+#if HELIUM_OS_WIN
     LARGE_INTEGER ticks;
     BOOL result = QueryPerformanceCounter( &ticks );
     if ( !result )
@@ -152,6 +160,9 @@ void TUID::Generate( tuid& uid )
     }
     timeBits = ticks.LowPart;
     timeBits = timeBits << 32; // shift left
+#else
+    HELIUM_ASSERT( false );
+#endif
 
     // get the system time
     time_t systemTime;

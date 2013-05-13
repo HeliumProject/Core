@@ -86,9 +86,7 @@ void md5_append(md5_state_t *pms, const md5_byte_t *data, int nbytes);
 /* Finish the message and return the digest. */
 void md5_finish(md5_state_t *pms, md5_byte_t digest[16]);
 
-#ifdef BYTE_ORDER
-#error BYTE_ORDER is defined, feel free to modify this source file
-#endif
+#undef BYTE_ORDER
 
 /* 1 = big-endian, -1 = little-endian, 0 = unknown */
 #ifdef HELIUM_ENDIAN_BIG

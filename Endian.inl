@@ -161,49 +161,52 @@ void Helium::Swizzle(T& val, bool swizzle)
     }
 }
 
-template<>
-inline void Helium::Swizzle<uint16_t>(uint16_t& val, bool swizzle)
+namespace Helium // required for gcc error/warning: -fpermissive
 {
-    val = ConvertEndian(val, swizzle);
-}
+    template<>
+    inline void Swizzle<uint16_t>(uint16_t& val, bool swizzle)
+    {
+        val = ConvertEndian(val, swizzle);
+    }
 
-template<>
-inline void Helium::Swizzle<int16_t>(int16_t& val, bool swizzle)
-{
-    val = ConvertEndian(val, swizzle);
-}
+    template<>
+    inline void Swizzle<int16_t>(int16_t& val, bool swizzle)
+    {
+        val = ConvertEndian(val, swizzle);
+    }
 
-template<>
-inline void Helium::Swizzle<uint32_t>(uint32_t& val, bool swizzle)
-{
-    val = ConvertEndian(val, swizzle);
-}
+    template<>
+    inline void Swizzle<uint32_t>(uint32_t& val, bool swizzle)
+    {
+        val = ConvertEndian(val, swizzle);
+    }
 
-template<>
-inline void Helium::Swizzle<int32_t>(int32_t& val, bool swizzle)
-{
-    val = ConvertEndian(val, swizzle);
-}
+    template<>
+    inline void Swizzle<int32_t>(int32_t& val, bool swizzle)
+    {
+        val = ConvertEndian(val, swizzle);
+    }
 
-template<>
-inline void Helium::Swizzle<uint64_t>(uint64_t& val, bool swizzle)
-{
-    val = ConvertEndian(val, swizzle);
-}
-template<>
-inline void Helium::Swizzle<int64_t>(int64_t& val, bool swizzle)
-{
-    val = ConvertEndian(val, swizzle);
-}
+    template<>
+    inline void Swizzle<uint64_t>(uint64_t& val, bool swizzle)
+    {
+        val = ConvertEndian(val, swizzle);
+    }
+    template<>
+    inline void Swizzle<int64_t>(int64_t& val, bool swizzle)
+    {
+        val = ConvertEndian(val, swizzle);
+    }
 
-template<>
-inline void Helium::Swizzle<float32_t>(float32_t& val, bool swizzle)
-{
-    val = ConvertEndian(val, swizzle);
-}
+    template<>
+    inline void Swizzle<float32_t>(float32_t& val, bool swizzle)
+    {
+        val = ConvertEndian(val, swizzle);
+    }
 
-template<>
-inline void Helium::Swizzle<float64_t>(float64_t& val, bool swizzle)
-{
-    val = ConvertEndian(val, swizzle);
+    template<>
+    inline void Swizzle<float64_t>(float64_t& val, bool swizzle)
+    {
+        val = ConvertEndian(val, swizzle);
+    }
 }

@@ -3,7 +3,14 @@
 #include <iostream>
 #include <iomanip>
 #include <string>
-#include <hash_map>
+
+#include <vector>
+#include <set>
+#include <map>
+
+#if HELIUM_OS_WIN
+# include <hash_map>
+#endif
 
 #include "Platform/Types.h"
 
@@ -61,6 +68,7 @@ namespace Helium
 		static std::wostream& HexFormat( std::wostream& base );
 	};
 
+#if HELIUM_OS_WIN
 	// 
 	// Hashing class for storing UIDs as keys to a hash_map.
 	// 
@@ -71,6 +79,7 @@ namespace Helium
 		inline size_t operator()( const TUID& tuid ) const;
 		inline bool operator()( const TUID& tuid1, const TUID& tuid2 ) const;
 	};
+#endif
 
 	template<>
 	inline void Swizzle<TUID>(TUID& val, bool swizzle);

@@ -17,6 +17,8 @@
 
 using namespace Helium;
 
+#if HELIUM_OS_WIN
+
 BreakpointSignature::Delegate   Helium::g_BreakpointOccurred;
 ExceptionSignature::Delegate    Helium::g_ExceptionOccurred;
 TerminateSignature::Event       Helium::g_Terminating;
@@ -170,3 +172,5 @@ uint32_t Helium::ProcessException(LPEXCEPTION_POINTERS info, bool print, bool fa
 
     return EXCEPTION_CONTINUE_SEARCH;
 }
+
+#endif
