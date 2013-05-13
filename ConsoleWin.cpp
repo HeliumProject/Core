@@ -43,7 +43,7 @@ static inline int LookupColor( ConsoleColor color )
 	return ConsoleColors::None;
 }
 
-#pragma TODO("These char overloads are really ASCII, not UTF-8.  Track down some UTF-8 implementations.  -Geoff")
+#pragma TODO("Enable UTF-8 support on windows via _setmode(_fileno(stdout), _O_U8TEXT);  -Geoff")
 
 int Helium::Scan(const char* fmt, ...)
 {
