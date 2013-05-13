@@ -244,7 +244,7 @@ void ArchiveWriterMessagePack::SerializeTranslator( Pointer pointer, Translator*
 
 			case ScalarTypes::String:
 				String str;
-				scalar->Print( pointer, str, *this );
+				scalar->Print( pointer, str, this );
 				m_Writer.Write( str.GetData() );
 				break;
 			}
@@ -679,7 +679,7 @@ void ArchiveReaderMessagePack::DeserializeTranslator( Pointer pointer, Translato
 			{
 				String str;
 				m_Reader.Read( str );
-				scalar->Parse( str, pointer, *this, m_Flags | ArchiveFlags::Notify ? true : false );
+				scalar->Parse( str, pointer, this, m_Flags | ArchiveFlags::Notify ? true : false );
 			}
 		}
 		else

@@ -231,7 +231,7 @@ void ArchiveWriterJson::SerializeTranslator( Pointer pointer, Translator* transl
 
 			case ScalarTypes::String:
 				String str;
-				scalar->Print( pointer, str, *this );
+				scalar->Print( pointer, str, this );
 				m_Writer.String( str.GetData() );
 				break;
 			}
@@ -610,7 +610,7 @@ void ArchiveReaderJson::DeserializeTranslator( rapidjson::Value& value, Pointer 
 			if ( scalar->m_Type == ScalarTypes::String )
 			{
 				String str ( value.GetString() );
-				scalar->Parse( str, pointer, *this, m_Flags | ArchiveFlags::Notify ? true : false );
+				scalar->Parse( str, pointer, this, m_Flags | ArchiveFlags::Notify ? true : false );
 			}
 		}
 	}
