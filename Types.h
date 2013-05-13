@@ -1,5 +1,9 @@
 #pragma once
 
+#ifndef __STDC_LIMIT_MACROS
+#define __STDC_LIMIT_MACROS
+#endif
+
 #include <stdint.h>
 #include <stddef.h>
 

@@ -6,10 +6,10 @@
 namespace Helium
 {
 	/// Creates a new process with no window or output, use it for running scripts and file association apps
-	HELIUM_PLATFORM_API int Execute( const tstring& command, bool showWindow = false, bool block = false );
+	HELIUM_PLATFORM_API int Execute( const tstring& command );
 
 	/// Creates a new process and captures its standard out and standard error into the passed string
-	HELIUM_PLATFORM_API int Execute( const tstring& command, tstring& output, bool showWindow = false );
+	HELIUM_PLATFORM_API int Execute( const tstring& command, tstring& output );
 
 	/// Get a unique string for this process
 	HELIUM_PLATFORM_API tstring GetProcessString();

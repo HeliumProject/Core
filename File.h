@@ -60,7 +60,7 @@ namespace Helium
 #ifdef HELIUM_OS_WIN
 		typedef HANDLE Handle;
 #elif HELIUM_OS_LINUX
-		typedef FILE* Handle;
+		typedef int Handle;
 #else
 #error Implement File for this platform.
 #endif
