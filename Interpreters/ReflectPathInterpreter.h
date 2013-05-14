@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Inspect/API.h"
-#include "Inspect/Interpreters/Reflect/ReflectFieldInterpreter.h"
+#include "Inspect/Interpreters/ReflectFieldInterpreter.h"
 
 #include "Application/FileDialog.h"
 

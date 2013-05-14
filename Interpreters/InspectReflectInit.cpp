@@ -5,14 +5,14 @@
 #include "Inspect/Inspect.h"
 #include "Inspect/Container.h"
 
-#include "Inspect/Interpreters/Reflect/ReflectInterpreter.h"
-#include "Inspect/Interpreters/Reflect/ReflectBitfieldInterpreter.h"
-#include "Inspect/Interpreters/Reflect/ReflectVectorInterpreter.h"
-#include "Inspect/Interpreters/Reflect/ReflectColorInterpreter.h"
-#include "Inspect/Interpreters/Reflect/ReflectStlVectorInterpreter.h"
-#include "Inspect/Interpreters/Reflect/ReflectStlSetInterpreter.h"
+#include "Inspect/Interpreters/ReflectInterpreter.h"
+#include "Inspect/Interpreters/ReflectBitfieldInterpreter.h"
+#include "Inspect/Interpreters/ReflectVectorInterpreter.h"
+#include "Inspect/Interpreters/ReflectColorInterpreter.h"
+#include "Inspect/Interpreters/ReflectStlVectorInterpreter.h"
+#include "Inspect/Interpreters/ReflectStlSetInterpreter.h"
 
-#include "Inspect/Interpreters/Reflect/ReflectPathInterpreter.h"
+#include "Inspect/Interpreters/ReflectPathInterpreter.h"
 
 REFLECT_DEFINE_ABSTRACT( Helium::Inspect::ClientDataFilter );
 

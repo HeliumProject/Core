@@ -1,6 +1,6 @@
 #include "InspectPch.h"
 #include "ReflectInterpreter.h"
-#include "Inspect/Interpreters/Reflect/ReflectValueInterpreter.h"
+#include "Inspect/Interpreters/ReflectValueInterpreter.h"
 
 #include "Inspect/Script.h"
 #include "Inspect/Controls/ButtonControl.h"
