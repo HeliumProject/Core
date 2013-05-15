@@ -9,7 +9,7 @@ Helium::SortedMap< Key, Data, CompareKey, Allocator >::SortedMap()
 /// @param[in] rSource  Source object from which to copy.
 template< typename Key, typename Data, typename CompareKey, typename Allocator >
 Helium::SortedMap< Key, Data, CompareKey, Allocator >::SortedMap( const SortedMap& rSource )
-    : RedBlackTree( rSource )
+    : Base( rSource )
 {
 }
 
@@ -20,7 +20,7 @@ template< typename Key, typename Data, typename CompareKey, typename Allocator >
 template< typename OtherAllocator >
 Helium::SortedMap< Key, Data, CompareKey, Allocator >::SortedMap(
     const SortedMap< Key, Data, CompareKey, OtherAllocator >& rSource )
-    : RedBlackTree( rSource )
+    : Base( rSource )
 {
 }
 
@@ -62,7 +62,7 @@ Helium::SortedMap< Key, Data, CompareKey, Allocator >& Helium::SortedMap< Key, D
 template< typename Key, typename Data, typename CompareKey, typename Allocator >
 Data& Helium::SortedMap< Key, Data, CompareKey, Allocator >::operator[]( const Key& rKey )
 {
-    Iterator iterator;
+    typename Base::Iterator iterator;
     Insert( iterator, Pair< Key, Data >( rKey, Data() ) );
 
     return iterator->Second();
@@ -134,16 +134,16 @@ template< typename OtherAllocator >
 bool Helium::SortedMap< Key, Data, CompareKey, Allocator >::Equals(
     const SortedMap< Key, Data, CompareKey, OtherAllocator >& rOther ) const
 {
-    if( GetSize() != rOther.GetSize() )
+    if( Base::GetSize() != rOther.GetSize() )
     {
         return false;
     }
 
-    ConstIterator thisIter = Begin();
-    ConstIterator thisEnd = End();
+    typename Base::ConstIterator thisIter = Base::Begin();
+    typename Base::ConstIterator thisEnd = Base::End();
 
-    ConstIterator otherIter = rOther.Begin();
-    ConstIterator otherEnd = rOther.End();
+    typename Base::ConstIterator otherIter = rOther.Begin();
+    typename Base::ConstIterator otherEnd = rOther.End();
 
     CompareKey keyCompare;
 

@@ -98,10 +98,10 @@ Helium::ConstConcurrentHashTableAccessor< Value, Key, HashFunction, ExtractKey, 
 
     ++m_elementIndex;
 
-    TableType::Bucket* pBuckets = m_pTable->m_pBuckets;
+    typename TableType::Bucket* pBuckets = m_pTable->m_pBuckets;
     HELIUM_ASSERT( pBuckets );
 
-    TableType::Bucket& rCurrentBucket = pBuckets[ m_bucketIndex ];
+    typename TableType::Bucket& rCurrentBucket = pBuckets[ m_bucketIndex ];
     if( m_elementIndex >= rCurrentBucket.entries.GetSize() )
     {
         rCurrentBucket.lock.UnlockRead();
@@ -111,7 +111,7 @@ Helium::ConstConcurrentHashTableAccessor< Value, Key, HashFunction, ExtractKey, 
         size_t bucketCount = m_pTable->m_bucketCount;
         for( size_t bucketIndex = m_bucketIndex + 1; bucketIndex < bucketCount; ++bucketIndex )
         {
-            TableType::Bucket& rBucket = pBuckets[ bucketIndex ];
+            typename TableType::Bucket& rBucket = pBuckets[ bucketIndex ];
             rBucket.lock.LockRead();
             if( !rBucket.entries.IsEmpty() )
             {
@@ -148,7 +148,7 @@ Helium::ConstConcurrentHashTableAccessor< Value, Key, HashFunction, ExtractKey, 
         return *this;
     }
 
-    TableType::Bucket* pBuckets = m_pTable->m_pBuckets;
+    typename TableType::Bucket* pBuckets = m_pTable->m_pBuckets;
     HELIUM_ASSERT( pBuckets );
 
     size_t bucketIndex = m_bucketIndex;
@@ -158,7 +158,7 @@ Helium::ConstConcurrentHashTableAccessor< Value, Key, HashFunction, ExtractKey, 
     {
         --bucketIndex;
 
-        TableType::Bucket& rBucket = pBuckets[ bucketIndex ];
+        typename TableType::Bucket& rBucket = pBuckets[ bucketIndex ];
         rBucket.lock.LockRead();
 
         size_t entryCount = rBucket.entries.GetSize();
@@ -335,10 +335,10 @@ Helium::ConcurrentHashTableAccessor< Value, Key, HashFunction, ExtractKey, Equal
 
     ++m_elementIndex;
 
-    TableType::Bucket* pBuckets = m_pTable->m_pBuckets;
+    typename TableType::Bucket* pBuckets = m_pTable->m_pBuckets;
     HELIUM_ASSERT( pBuckets );
 
-    TableType::Bucket& rCurrentBucket = pBuckets[ m_bucketIndex ];
+    typename TableType::Bucket& rCurrentBucket = pBuckets[ m_bucketIndex ];
     if( m_elementIndex >= rCurrentBucket.entries.GetSize() )
     {
         rCurrentBucket.lock.UnlockWrite();
@@ -348,7 +348,7 @@ Helium::ConcurrentHashTableAccessor< Value, Key, HashFunction, ExtractKey, Equal
         size_t bucketCount = m_pTable->m_bucketCount;
         for( size_t bucketIndex = m_bucketIndex + 1; bucketIndex < bucketCount; ++bucketIndex )
         {
-            TableType::Bucket& rBucket = pBuckets[ bucketIndex ];
+            typename TableType::Bucket& rBucket = pBuckets[ bucketIndex ];
             rBucket.lock.LockWrite();
             if( !rBucket.entries.IsEmpty() )
             {
@@ -385,7 +385,7 @@ Helium::ConcurrentHashTableAccessor< Value, Key, HashFunction, ExtractKey, Equal
         return *this;
     }
 
-    TableType::Bucket* pBuckets = m_pTable->m_pBuckets;
+    typename TableType::Bucket* pBuckets = m_pTable->m_pBuckets;
     HELIUM_ASSERT( pBuckets );
 
     size_t bucketIndex = m_bucketIndex;
@@ -395,7 +395,7 @@ Helium::ConcurrentHashTableAccessor< Value, Key, HashFunction, ExtractKey, Equal
     {
         --bucketIndex;
 
-        TableType::Bucket& rBucket = pBuckets[ bucketIndex ];
+        typename TableType::Bucket& rBucket = pBuckets[ bucketIndex ];
         rBucket.lock.LockWrite();
 
         size_t entryCount = rBucket.entries.GetSize();
@@ -490,7 +490,7 @@ Helium::ConcurrentHashTable< Value, Key, HashFunction, ExtractKey, EqualKey, All
     const EqualKey& rKeyEquals,
     const ExtractKey& rExtractKey,
     const Allocator& rAllocator )
-    : m_bucketCount( Max( bucketCount, 1 ) )
+    : m_bucketCount( Max<size_t>( bucketCount, 1 ) )
     , m_size( 0 )
     , m_hasher( rHasher )
     , m_keyEquals( rKeyEquals )

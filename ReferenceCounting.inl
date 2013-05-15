@@ -99,13 +99,13 @@ void Helium::RefCountProxy< BaseT >::DestroyObject()
 {
     BaseT* pObject = static_cast< BaseT* >( m_pObject );
     HELIUM_ASSERT( pObject );
-    typename BaseT::RefCountSupportType::PreDestroy( pObject );
+    BaseT::RefCountSupportType::PreDestroy( pObject );
 
     BaseT* pAtomicObjectOld = static_cast< BaseT* >( AtomicExchangeRelease< void >( m_pObject, NULL ) );
     HELIUM_ASSERT( pAtomicObjectOld == pObject );
     HELIUM_UNREF( pAtomicObjectOld );
 
-    typename BaseT::RefCountSupportType::Destroy( pObject );
+    BaseT::RefCountSupportType::Destroy( pObject );
 }
 
 /// Constructor.
@@ -304,7 +304,7 @@ void Helium::StrongPtr< T >::Release()
 
     if( pProxy && pProxy->RemoveStrongRef() )
     {
-        typename T::RefCountSupportType::Release( pProxy );
+        T::RefCountSupportType::Release( pProxy );
     }
 }
 

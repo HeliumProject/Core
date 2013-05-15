@@ -108,7 +108,7 @@ namespace Helium
     public:
         /// @name Overloaded Operators
         //@{
-        typename const PairType::FirstType& operator()( const PairType& rPair ) const;
+        const typename PairType::FirstType& operator()( const PairType& rPair ) const;
         //@}
     };
 }

@@ -13,8 +13,7 @@ namespace Helium
     {
     public:
         /// Parent class type.
-        typedef RedBlackTree< KeyValue< Key, Data >, Key, SelectKey< KeyValue< Key, Data > >, CompareKey, Allocator, Pair< Key, Data > >
-            Base;
+        typedef RedBlackTree< KeyValue< Key, Data >, Key, SelectKey< KeyValue< Key, Data > >, CompareKey, Allocator, Pair< Key, Data > > Base;
 
         /// Type for map keys.
         typedef typename Base::KeyType KeyType;

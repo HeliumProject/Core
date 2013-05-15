@@ -86,9 +86,9 @@ namespace Helium
 
         public:
             // STL iterator support.
-            typedef ConstIterator::iterator_category iterator_category;
+            typedef typename ConstIterator::iterator_category iterator_category;
             typedef typename ConstIterator::value_type value_type;
-            typedef ConstIterator::difference_type difference_type;
+            typedef typename ConstIterator::difference_type difference_type;
 
             typedef Value* pointer;
             typedef Value& reference;

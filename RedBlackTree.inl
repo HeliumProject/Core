@@ -275,7 +275,7 @@ bool Helium::RedBlackTree< Value, Key, ExtractKey, CompareKey, Allocator, Intern
     {
         // If the current node is black, we no longer need to correct anything, as there should be no more coloring
         // violations.
-        BitArray< Allocator >::ReferenceType nodeIsBlack( m_blackNodes[ nodeIndex ] );
+        typename BitArray< Allocator >::ReferenceType nodeIsBlack( m_blackNodes[ nodeIndex ] );
         if( nodeIsBlack )
         {
             break;
@@ -306,7 +306,7 @@ bool Helium::RedBlackTree< Value, Key, ExtractKey, CompareKey, Allocator, Intern
 
         if( IsValid( siblingIndex ) )
         {
-            BitArray< Allocator >::ReferenceType siblingIsBlack( m_blackNodes[ siblingIndex ] );
+            typename BitArray< Allocator >::ReferenceType siblingIsBlack( m_blackNodes[ siblingIndex ] );
             if( !siblingIsBlack )
             {
                 // Parent must be black, since red nodes can't have red children (current node can be potentially
@@ -511,7 +511,7 @@ void Helium::RedBlackTree< Value, Key, ExtractKey, CompareKey, Allocator, Intern
             }
 
             {
-                BitArray< Allocator >::ReferenceType siblingIsBlack( m_blackNodes[ siblingNodeIndex ] );
+                typename BitArray< Allocator >::ReferenceType siblingIsBlack( m_blackNodes[ siblingNodeIndex ] );
                 if( !siblingIsBlack )
                 {
                     break;
@@ -526,7 +526,7 @@ void Helium::RedBlackTree< Value, Key, ExtractKey, CompareKey, Allocator, Intern
                     {
                         siblingIsBlack = false;
 
-                        BitArray< Allocator >::ReferenceType parentIsBlack( m_blackNodes[ parentNodeIndex ] );
+                        typename BitArray< Allocator >::ReferenceType parentIsBlack( m_blackNodes[ parentNodeIndex ] );
                         if( !parentIsBlack )
                         {
                             parentIsBlack = true;
@@ -551,7 +551,7 @@ void Helium::RedBlackTree< Value, Key, ExtractKey, CompareKey, Allocator, Intern
                 }
             }
 
-            BitArray< Allocator >::ReferenceType parentIsBlack( m_blackNodes[ parentNodeIndex ] );
+            typename BitArray< Allocator >::ReferenceType parentIsBlack( m_blackNodes[ parentNodeIndex ] );
             bool bParentIsBlackState = parentIsBlack;
 
             LinkData& rSiblingLinkData = m_links[ siblingNodeIndex ];
@@ -1355,10 +1355,10 @@ Helium::RedBlackTree< Value, Key, ExtractKey, CompareKey, Allocator, InternalVal
 template< typename Value, typename Key, typename ExtractKey, typename CompareKey, typename Allocator, typename InternalValue >
 Value& Helium::RedBlackTree< Value, Key, ExtractKey, CompareKey, Allocator, InternalValue >::Iterator::operator*() const
 {
-    HELIUM_ASSERT( m_pTree );
-    HELIUM_ASSERT( m_index < m_pTree->m_values.GetSize() );
+    HELIUM_ASSERT( this->m_pTree );
+    HELIUM_ASSERT( this->m_index < this->m_pTree->m_values.GetSize() );
 
-    return m_pTree->m_values[ m_index ];
+    return this->m_pTree->m_values[ this->m_index ];
 }
 
 /// Access the current tree entry.
@@ -1367,10 +1367,10 @@ Value& Helium::RedBlackTree< Value, Key, ExtractKey, CompareKey, Allocator, Inte
 template< typename Value, typename Key, typename ExtractKey, typename CompareKey, typename Allocator, typename InternalValue >
 Value* Helium::RedBlackTree< Value, Key, ExtractKey, CompareKey, Allocator, InternalValue >::Iterator::operator->() const
 {
-    HELIUM_ASSERT( m_pTree );
-    HELIUM_ASSERT( m_index < m_pTree->m_values.GetSize() );
+    HELIUM_ASSERT( this->m_pTree );
+    HELIUM_ASSERT( this->m_index < this->m_pTree->m_values.GetSize() );
 
-    return &m_pTree->m_values[ m_index ];
+    return &this->m_pTree->m_values[ this->m_index ];
 }
 
 /// Increment this iterator to the next tree entry.

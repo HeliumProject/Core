@@ -2,6 +2,7 @@
 
 #include "Foundation/API.h"
 #include "Foundation/DynamicArray.h"
+#include "Foundation/Functions.h"
 #include "Foundation/Pair.h"
 
 namespace Helium

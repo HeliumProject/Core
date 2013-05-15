@@ -103,7 +103,7 @@ Helium::Pair< T1, T2 >::Pair()
 /// @param[in] rSecond  Value to which the second pair element should be initialized.
 template< typename T1, typename T2 >
 Helium::Pair< T1, T2 >::Pair( const T1& rFirst, const T2& rSecond )
-    : KeyValue( rFirst, rSecond )
+    : KeyValue< T1, T2 >( rFirst, rSecond )
 {
 }
 
@@ -112,7 +112,7 @@ Helium::Pair< T1, T2 >::Pair( const T1& rFirst, const T2& rSecond )
 /// @param[in] rKeyValue  Pair from which to initialize this pair.
 template< typename T1, typename T2 >
 Helium::Pair< T1, T2 >::Pair( const KeyValue< T1, T2 >& rKeyValue )
-    : KeyValue( rKeyValue )
+    : KeyValue< T1, T2 >( rKeyValue )
 {
 }
 
@@ -124,7 +124,7 @@ Helium::Pair< T1, T2 >::Pair( const KeyValue< T1, T2 >& rKeyValue )
 template< typename T1, typename T2 >
 T1& Helium::Pair< T1, T2 >::First()
 {
-    return m_first;
+    return this->m_first;
 }
 
 /// Assignment operator.
@@ -135,8 +135,8 @@ T1& Helium::Pair< T1, T2 >::First()
 template< typename T1, typename T2 >
 Helium::Pair< T1, T2 >& Helium::Pair< T1, T2 >::operator=( const Pair< T1, T2 >& rOther )
 {
-    m_first = rOther.m_first;
-    m_second = rOther.m_second;
+    this->m_first = rOther.m_first;
+    this->m_second = rOther.m_second;
 
     return *this;
 }
@@ -149,8 +149,8 @@ Helium::Pair< T1, T2 >& Helium::Pair< T1, T2 >::operator=( const Pair< T1, T2 >&
 template< typename T1, typename T2 >
 Helium::Pair< T1, T2 >& Helium::Pair< T1, T2 >::operator=( const KeyValue< T1, T2 >& rOther )
 {
-    m_first = rOther.m_first;
-    m_second = rOther.m_second;
+    this->m_first = rOther.m_first;
+    this->m_second = rOther.m_second;
 
     return *this;
 }

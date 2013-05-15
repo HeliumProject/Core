@@ -72,7 +72,7 @@ typename Helium::Attribute< T >::ChangedSignature::Event& Helium::Attribute< T >
 }
 
 template< class T >
-void Helium::Attribute< T >::RaiseChanged( const T& previous = T() )
+void Helium::Attribute< T >::RaiseChanged( const T& previous )
 {
     m_Changed.Raise( ChangeArgs( previous, m_Value ) );
 }
