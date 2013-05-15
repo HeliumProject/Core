@@ -13,14 +13,14 @@ namespace Helium
             enum Type
             {
                 Windows,
-                PlayStation3,
+                Posix,
                 Count,
             };
 
             static const tchar_t* Strings[] = 
             {
                 TXT("Windows"),
-                TXT("PlayStation3"),
+                TXT("Posix"),
             };
 
             HELIUM_COMPILE_ASSERT( Platform::Types::Count == sizeof(Strings) / sizeof(const tchar_t*) );
