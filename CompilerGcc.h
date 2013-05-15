@@ -36,17 +36,19 @@
 namespace std
 {
 	namespace tr1 {}
-	using tr1::has_trivial_assign;
-	using tr1::has_trivial_constructor;
-	using tr1::has_trivial_copy;
 	using tr1::true_type;
 	using tr1::false_type;
-	using tr1::has_trivial_destructor;
 	using tr1::integral_constant;
+	using tr1::is_base_of;
 	using tr1::is_pointer;
 	using tr1::is_signed;
-	using tr1::integral_constant;
+	using tr1::is_array;
 	using tr1::remove_cv;
+	using tr1::remove_extent;
 	using tr1::alignment_of;
+	using tr1::has_trivial_assign;
+	using tr1::has_trivial_constructor;
+	using tr1::has_trivial_destructor;
+	using tr1::has_trivial_copy;
 }
 #endif
