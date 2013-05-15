@@ -69,7 +69,7 @@ void ArchiveWriterJson::Write( Object* object )
 	m_Writer.StartArray();
 
 	// objects can get changed during this iteration (in Identify), so use indices
-	for ( int index = 0; index < m_Objects.GetSize(); ++index )
+	for ( size_t index = 0; index < m_Objects.GetSize(); ++index )
 	{
 		Object* object = m_Objects.GetElement( index );
 		const Class* objectClass = object->GetClass();
@@ -415,9 +415,9 @@ void Helium::Persist::ArchiveReaderJson::Start()
 	}
 
 	// read entire contents
-	m_Buffer.Resize( m_Size + 1 );
-	m_Stream->Read( m_Buffer.GetData(),  m_Size, 1 );
-	m_Buffer[ m_Size ] = '\0';
+	m_Buffer.Resize( static_cast< size_t >( m_Size + 1 ) );
+	m_Stream->Read( m_Buffer.GetData(),  static_cast< size_t >( m_Size ), 1 );
+	m_Buffer[ static_cast< size_t >( m_Size ) ] = '\0';
 	if ( m_Document.ParseInsitu< 0 >( reinterpret_cast< char* >( m_Buffer.GetData() ) ).HasParseError() )
 	{
 		throw Persist::Exception( "Error parsing JSON: %s", m_Document.GetParseError() );
