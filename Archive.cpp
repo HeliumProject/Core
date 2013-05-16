@@ -351,3 +351,10 @@ bool Persist::FromArchive( const FilePath& path, ObjectPtr& object, ObjectResolv
 
 	return true;
 }
+
+ObjectPtr Persist::FromArchive( const FilePath& path, ObjectResolver* resolver, ArchiveType archiveType, tstring* error )
+{
+	ObjectPtr object;
+	FromArchive( path, object, resolver, archiveType, error );
+	return object;
+}
