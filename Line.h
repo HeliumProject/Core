@@ -6,7 +6,7 @@
 namespace Helium
 {
     class AlignedBox;
-    class Matrix4;
+    struct Matrix4;
     class Plane;
 
     class HELIUM_MATH_API Line

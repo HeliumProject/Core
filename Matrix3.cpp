@@ -3,11 +3,21 @@
 #include "Math/Matrix4.h"
 #include "Math/AngleAxis.h"
 #include "Math/EulerAngles.h"
+#include "Reflect/TranslatorDeduction.h"
+
+REFLECT_DEFINE_BASE_STRUCTURE( Helium::Matrix3 );
 
 using namespace Helium;
 
 const Matrix3 Matrix3::Identity (Vector3 (1, 0, 0), Vector3 (0, 1, 0), Vector3 (0, 0, 1));
 const Matrix3 Matrix3::Zero (Vector3 (0, 0, 0), Vector3 (0, 0, 0), Vector3 (0, 0, 0));
+
+void Matrix3::PopulateStructure( Reflect::Structure& comp )
+{
+	comp.AddField( &Matrix3::x, "x" );
+	comp.AddField( &Matrix3::y, "y" );
+	comp.AddField( &Matrix3::z, "z" );
+}
 
 Matrix3::Matrix3(const Matrix4& v)
 {

@@ -6,8 +6,8 @@
 
 namespace Helium
 {
-    class Matrix3;
-    class Matrix4;
+    struct Matrix3;
+    struct Matrix4;
     class EulerAngles;
 
     class HELIUM_MATH_API AngleAxis

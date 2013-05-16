@@ -4,15 +4,21 @@
 #include <vector>
 #include <iostream>
 
-#include "Math/API.h"
 #include "Foundation/Math.h"
+
+#include "Reflect/Structure.h"
+
+#include "Math/API.h"
 #include "Math/Color3.h"
 
 namespace Helium
 {
-	class HELIUM_MATH_API Color4
+	struct HELIUM_MATH_API Color4 : Reflect::StructureBase
 	{
 	public:
+		REFLECT_DECLARE_BASE_STRUCTURE( Color4 );
+		static void PopulateStructure( Reflect::Structure& comp );
+
 		uint8_t r, g, b, a;
 
 		Color4            () : r(0), g(0), b(0), a(255) {}

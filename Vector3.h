@@ -4,8 +4,9 @@
 #include <vector>
 #include <map>
 
-#include "Math/API.h"
 #include "Foundation/Math.h"
+
+#include "Math/API.h"
 #include "Math/Vector2.h"
 
 namespace Helium

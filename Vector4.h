@@ -9,7 +9,7 @@
 
 namespace Helium
 {
-	class HELIUM_MATH_API Matrix4;
+	struct HELIUM_MATH_API Matrix4;
 
 	struct HELIUM_MATH_API Vector4 : Reflect::StructureBase
 	{
