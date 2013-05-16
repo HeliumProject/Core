@@ -15,10 +15,10 @@ namespace Helium
         class List;
         typedef Helium::StrongPtr<Button> ButtonPtr;
 
-        class HELIUM_INSPECT_API ReflectStlVectorInterpreter : public ReflectFieldInterpreter
+        class HELIUM_INSPECT_API ReflectSequenceInterpreter : public ReflectFieldInterpreter
         {
         public:
-            ReflectStlVectorInterpreter (Container* container);
+            ReflectSequenceInterpreter (Container* container);
 
             virtual void InterpretField(const Reflect::Field* field, const std::vector<Reflect::Object*>& instances, Container* parent) override;
 

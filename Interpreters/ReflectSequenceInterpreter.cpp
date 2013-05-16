@@ -1,5 +1,5 @@
 #include "InspectPch.h"
-#include "ReflectStlVectorInterpreter.h"
+#include "ReflectSequenceInterpreter.h"
 #include "InspectReflectInit.h"
 
 #include "Inspect/Controls/LabelControl.h"
@@ -16,14 +16,15 @@ using namespace Helium;
 using namespace Helium::Reflect;
 using namespace Helium::Inspect;
 
-ReflectStlVectorInterpreter::ReflectStlVectorInterpreter (Container* labelContainer)
+ReflectSequenceInterpreter::ReflectSequenceInterpreter (Container* labelContainer)
 : ReflectFieldInterpreter (labelContainer)
 {
 
 }
 
-void ReflectStlVectorInterpreter::InterpretField(const Field* field, const std::vector<Reflect::Object*>& instances, Container* parent)
+void ReflectSequenceInterpreter::InterpretField(const Field* field, const std::vector<Reflect::Object*>& instances, Container* parent)
 {
+#if REFLECT_REFACTOR
     if (field->m_Flags & FieldFlags::Hide)
     {
         return;
@@ -112,12 +113,13 @@ void ReflectStlVectorInterpreter::InterpretField(const Field* field, const std::
         *defaultData >> defaultStream;
         list->a_Default.Set( defaultStream.str() );
     }
+#endif
 }
 
-ButtonPtr ReflectStlVectorInterpreter::AddAddButton( List* list )
+ButtonPtr ReflectSequenceInterpreter::AddAddButton( List* list )
 {
     ButtonPtr addButton =CreateControl< Button >();
-    addButton->ButtonClickedEvent().Add( ButtonClickedSignature::Delegate ( this, &ReflectStlVectorInterpreter::OnAdd ) );
+    addButton->ButtonClickedEvent().Add( ButtonClickedSignature::Delegate ( this, &ReflectSequenceInterpreter::OnAdd ) );
     addButton->SetClientData( new ClientData( list ) );
     addButton->a_Label.Set( TXT( "Add" ) );
     addButton->a_HelpText.Set( TXT( "Add an item to the list." ) );
@@ -125,40 +127,40 @@ ButtonPtr ReflectStlVectorInterpreter::AddAddButton( List* list )
     return addButton;
 }
 
-ButtonPtr ReflectStlVectorInterpreter::AddRemoveButton( List* list )
+ButtonPtr ReflectSequenceInterpreter::AddRemoveButton( List* list )
 {
     ButtonPtr removeButton = CreateControl< Button >();
     removeButton->a_Label.Set( TXT( "Remove" ) );
-    removeButton->ButtonClickedEvent().Add( ButtonClickedSignature::Delegate ( this, &ReflectStlVectorInterpreter::OnRemove ) );
+    removeButton->ButtonClickedEvent().Add( ButtonClickedSignature::Delegate ( this, &ReflectSequenceInterpreter::OnRemove ) );
     removeButton->SetClientData( new ClientData( list ) );
     removeButton->a_HelpText.Set( TXT( "Remove the selected item(s) from the list." ) );
 
     return removeButton;
 }
 
-ButtonPtr ReflectStlVectorInterpreter::AddMoveUpButton( List* list )
+ButtonPtr ReflectSequenceInterpreter::AddMoveUpButton( List* list )
 {
     ButtonPtr upButton = CreateControl< Button >();
     upButton->a_Icon.Set( TXT( "actions/go-up" ) );
-    upButton->ButtonClickedEvent().Add( ButtonClickedSignature::Delegate ( this, &ReflectStlVectorInterpreter::OnMoveUp ) );
+    upButton->ButtonClickedEvent().Add( ButtonClickedSignature::Delegate ( this, &ReflectSequenceInterpreter::OnMoveUp ) );
     upButton->SetClientData( new ClientData( list ) );
     upButton->a_HelpText.Set( TXT( "Move the selected item(s) up the list." ) );
 
     return upButton;
 }
 
-ButtonPtr ReflectStlVectorInterpreter::AddMoveDownButton( List* list )
+ButtonPtr ReflectSequenceInterpreter::AddMoveDownButton( List* list )
 {
     ButtonPtr downButton = CreateControl< Button >();
     downButton->a_Icon.Set( TXT( "actions/go-down" ) );
-    downButton->ButtonClickedEvent().Add( ButtonClickedSignature::Delegate ( this, &ReflectStlVectorInterpreter::OnMoveDown ) );
+    downButton->ButtonClickedEvent().Add( ButtonClickedSignature::Delegate ( this, &ReflectSequenceInterpreter::OnMoveDown ) );
     downButton->SetClientData( new ClientData( list ) );
     downButton->a_HelpText.Set( TXT( "Move the selected item(s) down the list." ) );
 
     return downButton;
 }
 
-void ReflectStlVectorInterpreter::OnAdd( const ButtonClickedArgs& args )
+void ReflectSequenceInterpreter::OnAdd( const ButtonClickedArgs& args )
 {
     Reflect::ObjectPtr clientData = args.m_Control->GetClientData();
     if ( clientData.ReferencesObject() && clientData->IsClass( Reflect::GetClass<ClientData>() ) )
@@ -170,8 +172,9 @@ void ReflectStlVectorInterpreter::OnAdd( const ButtonClickedArgs& args )
     }
 }
 
-void ReflectStlVectorInterpreter::OnRemove( const ButtonClickedArgs& args )
+void ReflectSequenceInterpreter::OnRemove( const ButtonClickedArgs& args )
 {
+#if REFLECT_REFACTOR
     Reflect::ObjectPtr clientData = args.m_Control->GetClientData();
     if ( clientData.ReferencesObject() && clientData->IsClass( Reflect::GetClass<ClientData>() ) )
     {
@@ -201,10 +204,12 @@ void ReflectStlVectorInterpreter::OnRemove( const ButtonClickedArgs& args )
             args.m_Control->GetCanvas()->Read();
         }
     }
+#endif
 }
 
-void ReflectStlVectorInterpreter::OnMoveUp( const ButtonClickedArgs& args )
+void ReflectSequenceInterpreter::OnMoveUp( const ButtonClickedArgs& args )
 {
+#if REFLECT_REFACTOR
     Reflect::ObjectPtr clientData = args.m_Control->GetClientData();
     if ( clientData.ReferencesObject() && clientData->IsClass( Reflect::GetClass<ClientData>() ) )
     {
@@ -228,10 +233,12 @@ void ReflectStlVectorInterpreter::OnMoveUp( const ButtonClickedArgs& args )
             args.m_Control->GetCanvas()->Read();
         }
     }
+#endif
 }
 
-void ReflectStlVectorInterpreter::OnMoveDown( const ButtonClickedArgs& args )
+void ReflectSequenceInterpreter::OnMoveDown( const ButtonClickedArgs& args )
 {
+#if REFLECT_REFACTOR
     Reflect::ObjectPtr clientData = args.m_Control->GetClientData();
     if ( clientData.ReferencesObject() && clientData->IsClass( Reflect::GetClass<ClientData>() ) )
     {
@@ -255,4 +262,5 @@ void ReflectStlVectorInterpreter::OnMoveDown( const ButtonClickedArgs& args )
             args.m_Control->GetCanvas()->Read();
         }
     }
+#endif
 }

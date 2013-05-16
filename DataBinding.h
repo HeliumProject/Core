@@ -522,19 +522,17 @@ namespace Helium
 			{
 				bool result = false;
 
-				Reflect::Data data = Reflect::AssertCast< Reflect::Data >( Reflect::Data::Create( s ) );
-
+				AutoPtr< Reflect::Translator > translator( Reflect::AllocateTranslator< tstring >() );
+				Reflect::Data data ( Reflect::Pointer( const_cast< tstring* >( &s ) ), translator.Ptr() );
 				DataChangingArgs args ( this, data );
 				m_Changing.Raise( args );
 				if ( !args.m_Veto )
 				{
-					tstring newValue;
-					Reflect::Data::GetValue< tstring >( data, newValue );
 					std::vector<T*>::iterator itr = m_Data.begin();
 					std::vector<T*>::iterator end = m_Data.end();
 					for ( ; itr != end; ++itr )
 					{
-						Extract<T>( tstringstream( newValue ), *itr );
+						Extract<T>( tstringstream( s ), *itr );
 						result = true;
 					}
 
@@ -554,14 +552,13 @@ namespace Helium
 					std::vector< tstring >::const_iterator end = values.end();
 					for ( size_t index = 0; itr != end; ++itr, ++index )
 					{
-						Reflect::Data data = Reflect::AssertCast< Reflect::Data >( Reflect::Data::Create( *itr ) );
+						AutoPtr< Reflect::Translator > translator( Reflect::AllocateTranslator< tstring >() );
+						Reflect::Data data ( Reflect::Pointer( const_cast< tstring* >( &*itr ) ), translator.Ptr() );
 						DataChangingArgs args ( this, data );
 						m_Changing.Raise( args );
 						if ( !args.m_Veto )
 						{
-							tstring newValue;
-							Reflect::Data::GetValue< tstring >( data, newValue );
-							Extract<T>( tstringstream ( newValue ), m_Data[ index ] );
+							Extract<T>( tstringstream ( *itr ), m_Data[ index ] );
 							result = true;
 						}
 					}
@@ -678,15 +675,14 @@ namespace Helium
 			{
 				bool result = false;
 
-				Reflect::Data data = Reflect::AssertCast< Reflect::Data >( Reflect::Data::Create( s ) );
+				AutoPtr< Reflect::Translator > translator( Reflect::AllocateTranslator< tstring >() );
+				Reflect::Data data ( Reflect::Pointer( const_cast< tstring* >( &s ) ), translator.Ptr() );
 				DataChangingArgs args ( this, data );
 				m_Changing.Raise( args );
 				if ( !args.m_Veto )
 				{
 					T value;
-					tstring newValue;
-					Reflect::Data::GetValue< tstring >( data, newValue );
-					Extract< T >( tstringstream( newValue ), &value );
+					Extract< T >( tstringstream( s ), &value );
 					m_Property->Set( value );
 					m_Changed.RaiseWithEmitter( this, emitter );
 					result = true;
@@ -766,15 +762,14 @@ namespace Helium
 					std::vector< tstring >::const_iterator end = s.end();
 					for ( size_t index = 0; itr != end; ++itr, ++index )
 					{
-						Reflect::Data data = Reflect::AssertCast< Reflect::Data >( Reflect::Data::Create( *itr ) );
+						AutoPtr< Reflect::Translator > translator( Reflect::AllocateTranslator< tstring >() );
+						Reflect::Data data ( Reflect::Pointer( const_cast< tstring* >( &*itr ) ), translator.Ptr() );
 						DataChangingArgs args ( this, data );
 						m_Changing.Raise( args );
 						if ( !args.m_Veto )
 						{
 							T value;
-							tstring newValue;
-							Reflect::Data::GetValue< tstring >( data, newValue );
-							Extract<T>( tstringstream ( newValue ), &value );
+							Extract<T>( tstringstream ( *itr ), &value );
 							m_Properties[ index ]->Set(value);
 							result = true;
 						}
@@ -897,14 +892,13 @@ namespace Helium
 			{
 				bool result = false;
 
-				Reflect::Data data = Reflect::AssertCast< Reflect::Data >( Reflect::Data::Create( value ) );
+				AutoPtr< Reflect::Translator > translator( Reflect::AllocateTranslator< T >() );
+				Reflect::Data data ( Reflect::Pointer( const_cast< T* >( &value ) ), translator.Ptr() );
 				DataChangingArgs args ( this, data );
 				m_Changing.Raise( args );
 				if ( !args.m_Veto )
 				{
-					T newValue;
-					Reflect::Data::GetValue< T >( data, newValue );
-					m_Property->Set( newValue );
+					m_Property->Set( value );
 					m_Changed.RaiseWithEmitter( this, emitter );
 					result = true;
 				}
@@ -915,115 +909,6 @@ namespace Helium
 			virtual void Get(T& value) const HELIUM_OVERRIDE
 			{
 				value = m_Property->Get();
-			}
-		};
-
-
-		//
-		// MultiDataFormatter handles conversion between a property of T and string
-		//
-
-		template< class T >
-		class MultiDataFormatter : public TypedDataBinding< T >
-		{
-		protected:
-			std::vector< Reflect::Data > m_Datas;
-			const Reflect::Field* m_Field;
-
-		public:
-			MultiDataFormatter( const std::vector< Reflect::Data >& datas, const Reflect::Field* field )
-				: m_Datas( datas )
-				, m_Field( field )
-			{
-
-			}
-
-			virtual ~MultiDataFormatter()
-			{
-
-			}
-
-			const Reflect::Field* GetField() const
-			{
-				return m_Field;
-			}
-
-			virtual bool Set(const T& value, const DataChangedSignature::Delegate& emitter = DataChangedSignature::Delegate ()) HELIUM_OVERRIDE
-			{
-				bool result = false;
-
-				Reflect::Data data = Reflect::AssertCast< Reflect::Data >( Reflect::Data::Create( value ) );
-				DataChangingArgs args ( this, data );
-				m_Changing.Raise( args );
-				if ( !args.m_Veto )
-				{
-					T newValue;
-					Data::GetValue< T >( data, newValue );
-					std::vector< Reflect::Data >::iterator itr = m_Datas.begin();
-					std::vector< Reflect::Data >::iterator end = m_Datas.end();
-					for ( ; itr != end; ++itr )
-					{
-						Reflect::Data::SetValue< T >( *itr, newValue );
-						result = true;
-					}
-
-					m_Changed.RaiseWithEmitter( this, emitter );
-				}
-
-				return result;
-			}
-
-			virtual bool SetAll(std::vector< T >& values, const DataChangedSignature::Delegate& emitter = DataChangedSignature::Delegate ()) HELIUM_OVERRIDE
-			{
-				bool result = false;
-
-				if ( values.size() == m_Datas.size() )
-				{
-					std::vector< Reflect::Data >::const_iterator itr = values.begin();
-					std::vector< Reflect::Data >::const_iterator end = values.end();
-					for ( size_t index=0; itr != end; ++itr, ++index )
-					{
-						Reflect::Data data = Reflect::AssertCast< Reflect::Data >( Reflect::Data::Create( *itr ) );
-						DataChangingArgs args ( this, data );
-						m_Changing.Raise( args );
-						if ( !args.m_Veto )
-						{
-							T newValue;
-							Data::GetValue< T >( data, newValue );
-							m_Datas[ index ]->SetValue( newValue );
-							result = true;
-						}
-					}
-
-					m_Changed.RaiseWithEmitter( this, emitter );
-				}
-				else
-				{
-					HELIUM_BREAK();
-				}
-
-				return result;
-			}
-
-			virtual void Get( T& value ) const
-			{
-				if ( m_Datas.size() == 1 )
-				{
-					Reflect::Data::GetValue< T >( m_Datas.front(), value );
-				}
-			}
-
-			virtual void GetAll(std::vector< T >& values) const HELIUM_OVERRIDE
-			{
-				values.resize( m_Datas.size() );
-				std::vector< Reflect::Data >::const_iterator itr = m_Datas.begin();
-				std::vector< Reflect::Data >::const_iterator end = m_Datas.end();
-				for ( size_t index = 0; itr != end; ++itr, ++index )
-				{
-					T v;
-					Reflect::Data::GetValue< T >( *itr, v );
-					values[ index ] = v;
-				}
 			}
 		};
 	}

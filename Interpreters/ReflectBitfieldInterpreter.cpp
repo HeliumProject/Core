@@ -124,23 +124,23 @@ void ReflectBitfieldInterpreter::InterpretField(const Field* field, const std::v
 	parent->AddChild(container);
 
 	// create the data objects
+	std::vector< Data* > datas;
 	std::vector<Reflect::Object*>::const_iterator itr = instances.begin();
 	std::vector<Reflect::Object*>::const_iterator end = instances.end();
 	for ( ; itr != end; ++itr )
 	{
-		Data s = field->CreateData();
-		s->ConnectField(*itr, field);
-		m_Datas.push_back(s);
+		datas.push_back( new Data( Reflect::Pointer( field, *itr ), field->m_Translator ) );
 	}
 
-	tstringstream defaultStream;
-	Data defaultData = field->CreateDefaultData();
-	if ( defaultData )
+	String defaultStr;
+	Pointer defaultPtr ( field, field->m_Structure->m_Default, NULL );
+	ScalarTranslator* scalar = Reflect::ReflectionCast< ScalarTranslator >( field->m_Translator );
+	if ( scalar )
 	{
-		*defaultData >> defaultStream;
+		scalar->Print( defaultPtr, defaultStr );
 	}
 
-	const Reflect::Enumeration* enumeration = Reflect::ReflectionCast< Enumeration >( field->m_Type );
+	const Reflect::Enumeration* enumeration = Reflect::ReflectionCast< Enumeration >( field->m_ValueType );
 
 	// build the child gui elements
 	bool readOnly = ( field->m_Flags & FieldFlags::ReadOnly ) == FieldFlags::ReadOnly;
@@ -160,8 +160,8 @@ void ReflectBitfieldInterpreter::InterpretField(const Field* field, const std::v
 		checkbox->a_IsReadOnly.Set( readOnly );
 		checkbox->a_HelpText.Set( enumItr->m_HelpText );
 #pragma TODO("Compute correct default value")
-		checkbox->a_Default.Set( defaultStream.str() );
-		checkbox->Bind( new MultiBitfieldStringFormatter ( &*enumItr, (std::vector<Reflect::Data*>&)m_Datas ) );
+		checkbox->a_Default.Set( defaultStr.GetData() );
+		checkbox->Bind( new MultiBitfieldStringFormatter ( &*enumItr, datas ) );
 		row->AddChild( checkbox );
 	}
 }

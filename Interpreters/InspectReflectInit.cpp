@@ -7,10 +7,9 @@
 
 #include "Inspect/Interpreters/ReflectInterpreter.h"
 #include "Inspect/Interpreters/ReflectBitfieldInterpreter.h"
-#include "Inspect/Interpreters/ReflectVectorInterpreter.h"
 #include "Inspect/Interpreters/ReflectColorInterpreter.h"
-#include "Inspect/Interpreters/ReflectStlVectorInterpreter.h"
-#include "Inspect/Interpreters/ReflectStlSetInterpreter.h"
+#include "Inspect/Interpreters/ReflectSequenceInterpreter.h"
+#include "Inspect/Interpreters/ReflectSetInterpreter.h"
 
 #include "Inspect/Interpreters/ReflectPathInterpreter.h"
 
@@ -27,6 +26,7 @@ void InspectReflect::Initialize()
     {
         g_InspectReflectInitStack.Push( Inspect::Initialize, Inspect::Cleanup );
 
+#if REFLECT_REFACTOR
         // scalars
         ReflectFieldInterpreterFactory::Register<ReflectBitfieldInterpreter>( Reflect::GetClass<Reflect::BitfieldData>() );
         ReflectFieldInterpreterFactory::Register<ReflectVectorInterpreter>( Reflect::GetClass<Reflect::Vector2Data>() );
@@ -38,11 +38,12 @@ void InspectReflect::Initialize()
         ReflectFieldInterpreterFactory::Register<ReflectColorInterpreter>( Reflect::GetClass<Reflect::HDRColor4Data>() );
 
         // containers
-        ReflectFieldInterpreterFactory::Register<ReflectStlVectorInterpreter>( Reflect::GetClass<Reflect::StlVectorData>() );
-        ReflectFieldInterpreterFactory::Register<ReflectStlSetInterpreter>( Reflect::GetClass<Reflect::StlSetData>() );
+        ReflectFieldInterpreterFactory::Register<ReflectSequenceInterpreter>( Reflect::GetClass<Reflect::StlVectorData>() );
+        ReflectFieldInterpreterFactory::Register<ReflectSetInterpreter>( Reflect::GetClass<Reflect::StlSetData>() );
 
         // paths
         ReflectFieldInterpreterFactory::Register<PathInterpreter>( Reflect::GetClass<Reflect::PathData>() );
+#endif
     }
 }
 

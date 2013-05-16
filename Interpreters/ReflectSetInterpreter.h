@@ -12,10 +12,10 @@ namespace Helium
         class Button;
         class Container;
 
-        class HELIUM_INSPECT_API ReflectStlSetInterpreter : public ReflectFieldInterpreter
+        class HELIUM_INSPECT_API ReflectSetInterpreter : public ReflectFieldInterpreter
         {
         public:
-            ReflectStlSetInterpreter( Container* container );
+            ReflectSetInterpreter( Container* container );
 
             virtual void InterpretField( const Reflect::Field* field, const std::vector<Reflect::Object*>& instances, Container* parent ) HELIUM_OVERRIDE;
 

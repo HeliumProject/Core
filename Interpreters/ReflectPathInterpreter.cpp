@@ -24,6 +24,7 @@ PathInterpreter::PathInterpreter (Container* container)
 
 void PathInterpreter::InterpretField(const Field* field, const std::vector<Reflect::Object*>& instances, Container* parent)
 {
+#if REFLECT_REFACTOR
     if (field->m_Flags & FieldFlags::Hide)
     {
         return;
@@ -212,10 +213,12 @@ void PathInterpreter::InterpretField(const Field* field, const std::vector<Refle
             parent->AddChild(*itr);
         }
     }
+#endif
 }
 
 void PathInterpreter::DataChanging( const DataChangingArgs& args )
 {
+#if REFLECT_REFACTOR
     tstring text;
     Reflect::Data::GetValue( args.m_NewValue, text );
 
@@ -234,6 +237,7 @@ void PathInterpreter::DataChanging( const DataChangingArgs& args )
         d_FindMissingFile.Invoke( fileDialogArgs );
         Reflect::Data::SetValue< tstring >( args.m_NewValue, fileDialogArgs.m_Result.Get() );
     }
+#endif
 }
 
 void PathInterpreter::Edit( const ButtonClickedArgs& args )

@@ -19,7 +19,6 @@ namespace Helium
 
         private:
             std::vector< Reflect::Object* > m_Instances;
-            std::vector< Reflect::Data > m_Datas;
             std::vector< ReflectFieldInterpreterPtr > m_Interpreters;
         };
 

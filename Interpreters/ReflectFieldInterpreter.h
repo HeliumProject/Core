@@ -18,7 +18,6 @@ namespace Helium
 
         protected:
             std::vector<Reflect::Object*> m_Instances;
-            std::vector<Reflect::Data> m_Datas;
         };
 
         typedef Helium::StrongPtr<ReflectFieldInterpreter> ReflectFieldInterpreterPtr;

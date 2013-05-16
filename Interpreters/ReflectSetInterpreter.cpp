@@ -1,5 +1,5 @@
 #include "InspectPch.h"
-#include "ReflectStlSetInterpreter.h"
+#include "ReflectSetInterpreter.h"
 #include "InspectReflectInit.h"
 
 #include "Inspect/Controls/ButtonControl.h"
@@ -16,7 +16,7 @@ using namespace Helium::Inspect;
 ///////////////////////////////////////////////////////////////////////////////
 // Constructor
 // 
-ReflectStlSetInterpreter::ReflectStlSetInterpreter( Container* container )
+ReflectSetInterpreter::ReflectSetInterpreter( Container* container )
 : ReflectFieldInterpreter( container )
 {
 }
@@ -24,8 +24,9 @@ ReflectStlSetInterpreter::ReflectStlSetInterpreter( Container* container )
 ///////////////////////////////////////////////////////////////////////////////
 // Creates UI for the field variable specified.
 // 
-void ReflectStlSetInterpreter::InterpretField( const Reflect::Field* field, const std::vector<Reflect::Object*>& instances, Container* parent )
+void ReflectSetInterpreter::InterpretField( const Reflect::Field* field, const std::vector<Reflect::Object*>& instances, Container* parent )
 {
+#if REFLECT_REFACTOR
     if ( field->m_Flags & Reflect::FieldFlags::Hide )
     {
         return;
@@ -74,14 +75,14 @@ void ReflectStlSetInterpreter::InterpretField( const Reflect::Field* field, cons
         buttonContainer->AddChild( buttonAdd );
         buttonAdd->a_Label.Set( TXT( "Add" ) );
         buttonAdd->a_HelpText.Set( TXT( "Add an item to the list." ) );
-        buttonAdd->ButtonClickedEvent().Add( ButtonClickedSignature::Delegate ( this, &ReflectStlSetInterpreter::OnAdd ) );
+        buttonAdd->ButtonClickedEvent().Add( ButtonClickedSignature::Delegate ( this, &ReflectSetInterpreter::OnAdd ) );
         buttonAdd->SetClientData( new ClientData( list ) );
 
         ButtonPtr buttonRemove = CreateControl< Button >();
         buttonContainer->AddChild( buttonRemove );
         buttonRemove->a_Label.Set( TXT( "Remove" ) );
         buttonRemove->a_HelpText.Set( TXT( "Remove the selected item(s) from the list." ) );
-        buttonRemove->ButtonClickedEvent().Add( ButtonClickedSignature::Delegate ( this, &ReflectStlSetInterpreter::OnRemove ) );
+        buttonRemove->ButtonClickedEvent().Add( ButtonClickedSignature::Delegate ( this, &ReflectSetInterpreter::OnRemove ) );
         buttonRemove->SetClientData( new ClientData( list ) );
     }
 
@@ -90,6 +91,7 @@ void ReflectStlSetInterpreter::InterpretField( const Reflect::Field* field, cons
     {
         container->a_IsEnabled.Set( false );
     }
+#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -97,7 +99,7 @@ void ReflectStlSetInterpreter::InterpretField( const Reflect::Field* field, cons
 // you enter a new key-value pair.  If you enter a key that already exists in
 // the list, you will be asked if you want to replace it or not.
 // 
-void ReflectStlSetInterpreter::OnAdd( const ButtonClickedArgs& args )
+void ReflectSetInterpreter::OnAdd( const ButtonClickedArgs& args )
 {
     Reflect::ObjectPtr clientData = args.m_Control->GetClientData();
     if ( clientData.ReferencesObject() && clientData->IsClass( Reflect::GetClass<ClientData>() ) )
@@ -113,8 +115,9 @@ void ReflectStlSetInterpreter::OnAdd( const ButtonClickedArgs& args )
 // Callback for when the remove button is pressed.  If there are any items 
 // selected in the list control, they will be removed from the list.
 // 
-void ReflectStlSetInterpreter::OnRemove( const ButtonClickedArgs& args )
+void ReflectSetInterpreter::OnRemove( const ButtonClickedArgs& args )
 {
+#if REFLECT_REFACTOR
     Reflect::ObjectPtr clientData = args.m_Control->GetClientData();
     if ( clientData.ReferencesObject() && clientData->IsClass( Reflect::GetClass<ClientData>() ) )
     {
@@ -145,4 +148,5 @@ void ReflectStlSetInterpreter::OnRemove( const ButtonClickedArgs& args )
             args.m_Control->GetCanvas()->Read();
         }
     }
+#endif
 }

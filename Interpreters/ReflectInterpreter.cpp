@@ -29,6 +29,7 @@ void ReflectInterpreter::Interpret(const std::vector<Reflect::Object*>& instance
 
 void ReflectInterpreter::InterpretType(const std::vector<Reflect::Object*>& instances, Container* parent, int32_t includeFlags, int32_t excludeFlags, bool expandPanel)
 {
+#if REFLECT_REFACTOR
     const Composite* composite = instances[0]->GetClass();
 
     // create a container
@@ -308,6 +309,7 @@ void ReflectInterpreter::InterpretType(const std::vector<Reflect::Object*>& inst
     {
         parent->AddChild(container);
     }
+#endif
 }
 
 

@@ -2,6 +2,8 @@
 
 #include "Math/Color3.h"
 #include "Math/Color4.h"
+#include "Math/HDRColor3.h"
+#include "Math/HDRColor4.h"
 #include "Reflect/Class.h"
 
 #include "Inspect/API.h"
@@ -23,9 +25,8 @@ namespace Helium
             void SetToDefault( const ContextMenuEventArgs& event );
 
         public:
-            Attribute< bool >             a_Highlight;
-
-            Attribute< bool >             a_Alpha;
+            Attribute< bool >       a_Highlight;
+            Attribute< bool >       a_Alpha;
             Attribute< Color3 >     a_Color3;
             Attribute< Color4 >     a_Color4;
         };
