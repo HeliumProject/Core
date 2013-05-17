@@ -420,7 +420,38 @@ void Helium::Persist::ArchiveReaderJson::Start()
 	m_Buffer[ static_cast< size_t >( m_Size ) ] = '\0';
 	if ( m_Document.ParseInsitu< 0 >( reinterpret_cast< char* >( m_Buffer.GetData() ) ).HasParseError() )
 	{
-		throw Persist::Exception( "Error parsing JSON: %s", m_Document.GetParseError() );
+		m_Stream->Seek( 0, SeekOrigins::Begin );
+		size_t lineCount = 1;
+		size_t charCount = 0;
+
+		int i = 0;
+		while ( true )
+		{
+			char c;
+			if ( m_Stream->Read( &c, 1, 1 ) && i < m_Document.GetErrorOffset() )
+			{
+				if (c == '\n')
+				{
+					++lineCount;
+					charCount = 0;
+				}
+				else
+				{
+					if (c != '\r')
+					{
+						++charCount;
+					}
+				}
+			}
+			else
+			{
+				break;
+			}
+			
+			++i;
+		}
+
+		throw Persist::Exception( "Error parsing JSON (%d,%d): %s", lineCount, charCount, m_Document.GetParseError() );
 	}
 }
 
