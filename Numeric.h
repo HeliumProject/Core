@@ -5,11 +5,17 @@
 
 #include "API.h"
 
-#define F32_MIN     1.175494351e-38F
-#define F32_MAX     3.402823466e+38F
+#define F32_SMALLEST     1.175494351e-38F
+#define F32_BIGGEST      3.402823466e+38F
 
-#define F64_MIN     2.2250738585072014e-308
-#define F64_MAX     1.7976931348623158e+308
+#define F32_MIN         -F32_BIGGEST
+#define F32_MAX          F32_BIGGEST
+
+#define F64_SMALLEST     2.2250738585072014e-308
+#define F64_BIGGEST      1.7976931348623158e+308
+
+#define F64_MIN         -F64_BIGGEST
+#define F64_MAX          F64_BIGGEST
 
 namespace Helium
 {
@@ -44,10 +50,10 @@ namespace Helium
     template<> const uint64_t NumericLimits<uint64_t>::Minimum = 0;
     template<> const uint64_t NumericLimits<uint64_t>::Maximum = UINT64_MAX;
 
-    template<> const float32_t NumericLimits<float32_t>::Minimum = -F32_MIN;
+    template<> const float32_t NumericLimits<float32_t>::Minimum = F32_MIN;
     template<> const float32_t NumericLimits<float32_t>::Maximum = F32_MAX;
 
-    template<> const float64_t NumericLimits<float64_t>::Minimum = -F64_MIN;
+    template<> const float64_t NumericLimits<float64_t>::Minimum = F64_MIN;
     template<> const float64_t NumericLimits<float64_t>::Maximum = F64_MAX;
 
     template< class S, class D >
