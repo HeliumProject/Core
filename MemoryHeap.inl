@@ -713,13 +713,13 @@ template< typename Allocator > void Helium::FreeAlignmentHelper( Allocator& rAll
 	rAllocator.Free( pMemory );
 }
 
+#if HELIUM_HEAP
+
 #if !HELIUM_DEBUG
 #define HELIUM_NEW_DELETE_SPEC HELIUM_FORCEINLINE
 #include "Platform/NewDelete.h"
 #undef HELIUM_NEW_DELETE_SPEC
 #endif
-
-#if HELIUM_HEAP
 
 /// Create a new object using a Helium::MemoryHeap instance.
 ///
