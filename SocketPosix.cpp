@@ -216,8 +216,10 @@ bool Socket::Write(void* buffer, uint32_t bytes, uint32_t& wrote, const tchar_t*
     bool udp = m_Protocol == SocketProtocols::Udp;
     if (udp)
     {
-        bool opt = !ip;
-        ::setsockopt( m_Handle, SOL_SOCKET, SO_BROADCAST, (char*)&opt, sizeof(opt) );
+	int opt = ip ? 0 : 1;
+        int err = ::setsockopt( m_Handle, SOL_SOCKET, SO_BROADCAST, (char*)&opt, sizeof(opt) );
+        if (err < 0)
+          return false;
     }
 
     uint32_t addrLen = sizeof( addr );
