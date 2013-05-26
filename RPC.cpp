@@ -104,7 +104,7 @@ void Host::Reset()
     memset(m_Interfaces, 0, sizeof(Interface*) * MAX_INTERFACES);
 }
 
-void Host::AddInterface(Interface* interface)
+void Host::AddInterface(Interface* iface)
 {
     if (m_InterfaceCount >= MAX_INTERFACES)
     {
@@ -112,9 +112,9 @@ void Host::AddInterface(Interface* interface)
         return;
     }
 
-    m_Interfaces[m_InterfaceCount++] = interface;
+    m_Interfaces[m_InterfaceCount++] = iface;
 
-    interface->SetHost( this );
+    iface->SetHost( this );
 }
 
 Interface* Host::GetInterface(const char* name)
@@ -327,8 +327,8 @@ bool Host::Invoke(IPC::Message* msg)
     const char* interfaceName = NULL;
 
     // find the interface
-    Interface* interface = GetInterface(interfaceName);
-    if (interface == NULL)
+    Interface* iface = GetInterface(interfaceName);
+    if (iface == NULL)
     {
         printf("RPC::Unable to find interface '%s'\n", interfaceName);
         delete msg;
@@ -336,7 +336,7 @@ bool Host::Invoke(IPC::Message* msg)
     }
 
     // find the invoker
-    Invoker* invoker = interface->GetInvoker(invokerName);
+    Invoker* invoker = iface->GetInvoker(invokerName);
     if (invoker == NULL)
     {
         printf("RPC::Unable to find invoker '%s' in interface '%s'\n", invokerName, interfaceName);

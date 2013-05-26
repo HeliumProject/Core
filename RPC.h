@@ -154,11 +154,11 @@ namespace Helium
         class Invoker : public Helium::RefCountBase< Invoker >
         {
         public:
-            Invoker (Interface* interface, SwizzleFunc swizzler)
-                : m_Interface (interface)
+            Invoker (Interface* iface, SwizzleFunc swizzler)
+                : m_Interface (iface)
                 , m_Swizzler (swizzler)
             {
-                HELIUM_ASSERT( interface && swizzler );
+                HELIUM_ASSERT( iface && swizzler );
             }
 
             virtual ~Invoker()
@@ -248,7 +248,7 @@ namespace Helium
             //
 
             // set/query local implementations
-            void AddInterface(RPC::Interface* interface);
+            void AddInterface(RPC::Interface* iface);
             Interface* GetInterface(const char* name);
 
             //
@@ -333,8 +333,8 @@ namespace Helium
             typedef Helium::Signature< ArgsType&> InvokerSignature;
             typedef typename InvokerSignature::Delegate InvokerDelegate;
 
-            InvokerTemplate(Interface* interface, InvokerDelegate delegate)
-                : Invoker (interface, GetSwizzleFunc<ArgsType>())
+            InvokerTemplate(Interface* iface, InvokerDelegate delegate)
+                : Invoker (iface, GetSwizzleFunc<ArgsType>())
                 , m_Delegate (delegate)
             {
 
