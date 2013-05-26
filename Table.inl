@@ -261,7 +261,7 @@ bool Helium::Table< Value, Key, ExtractKey, EqualKey, Allocator, InternalValue >
 template< typename Value, typename Key, typename ExtractKey, typename EqualKey, typename Allocator, typename InternalValue >
 void Helium::Table< Value, Key, ExtractKey, EqualKey, Allocator, InternalValue >::Remove( Iterator iterator )
 {
-    m_elements.RemoveSwap( static_cast< size_t >( &( *iterator ) - m_elements.GetData() ) );
+	m_elements.RemoveSwap( static_cast< size_t >( static_cast< const InternalValue* >( &( *iterator ) ) - m_elements.GetData() ) );
 }
 
 /// Remove the elements referenced by the given range from this table.
