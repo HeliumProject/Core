@@ -55,9 +55,11 @@
 /// @param[in] ALIGNMENT  Byte alignment (must be a power of two).
 #define HELIUM_ALIGN_POST( ALIGNMENT )
 
+#if _MSC_VER < 1700
 // Import tr1 into std
 namespace std
 {
 	namespace tr1 {}
 	using namespace tr1;
 }
+#endif
