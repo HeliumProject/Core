@@ -7,7 +7,56 @@
 #include <unistd.h>
 #include <sched.h>
 #include <sys/types.h>
-#include <sys/prctl.h>
+
+#if HELIUM_OS_LINUX
+# include <sys/prctl.h>
+#endif
+
+#if HELIUM_OS_MAC
+struct args {
+    int joined;
+    pthread_t td;
+    pthread_mutex_t mtx;
+    pthread_cond_t cond;
+    void **res;
+};
+
+static void *waiter(void *ap)
+{
+    struct args *args = (struct args *)ap;
+    pthread_join(args->td, args->res);
+    pthread_mutex_lock(&args->mtx);
+    pthread_mutex_unlock(&args->mtx);
+    args->joined = 1;
+    pthread_cond_signal(&args->cond);
+    return 0;
+}
+
+int pthread_timedjoin_np(pthread_t td, void **res, struct timespec *ts)
+{
+    pthread_t tmp;
+    int ret;
+    struct args args = { .td = td, .res = res };
+
+    pthread_mutex_init(&args.mtx, 0);
+    pthread_cond_init(&args.cond, 0);
+    pthread_mutex_lock(&args.mtx);
+
+    ret = pthread_create(&tmp, 0, waiter, &args);
+    if (ret) return 1;
+
+    do ret = pthread_cond_timedwait(&args.cond, &args.mtx, ts);
+    while (!args.joined && ret != ETIMEDOUT);
+
+    pthread_cancel(tmp);
+    pthread_join(tmp, 0);
+
+    pthread_cond_destroy(&args.cond);
+    pthread_mutex_destroy(&args.mtx);
+
+    return args.joined ? 0 : ret;
+}
+#endif
 
 using namespace Helium;
 
@@ -72,7 +121,6 @@ bool Thread::Start( const tchar_t* pName, ThreadPriority priority )
     if ( pthread_create( &(this->m_Handle), &attr, ThreadCallback, this) == 0 )
     {
         m_Valid = true;
-        prctl( PR_SET_NAME, reinterpret_cast< unsigned long >( pName ) );
     }
 
     HELIUM_VERIFY( pthread_attr_destroy(&attr) == 0);
@@ -113,7 +161,11 @@ bool Thread::TryJoin()
 
     if ( IsValid() )
     {
-        result = pthread_tryjoin_np( m_Handle, NULL ) == 0;
+        // zero signal here won't really send a signal, just poll for thread running state
+        if ( pthread_kill( m_Handle, 0 ) == ESRCH )
+        {
+            result = pthread_join( m_Handle, NULL ) == 0;
+        }
     }
 
     if ( result )
@@ -153,7 +205,11 @@ void* Thread::ThreadCallback( void* pData )
 
     Thread* pThread = static_cast< Thread* >( pData );
 
+#if HELIUM_OS_LINUX
     prctl( PR_SET_NAME, reinterpret_cast< unsigned long >( pThread->m_Name ) );
+#elif HELIUM_OS_MAC
+    pthread_setname_np( pThread->m_Name );
+#endif
 
     pThread->Run();
 
@@ -189,12 +245,12 @@ void ThreadLocalPointer::SetPointer(void* pointer)
 
 static Thread::id_t g_MainThread = pthread_self();
 
-uint32_t Helium::GetMainThreadID()
+Thread::id_t Helium::GetMainThreadID()
 {
     return g_MainThread;
 }
 
-uint32_t Helium::GetCurrentThreadID()
+Thread::id_t Helium::GetCurrentThreadID()
 {
     return pthread_self();
 }

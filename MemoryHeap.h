@@ -1,7 +1,11 @@
 #pragma once
 
 #include <new>
-#include <malloc.h>
+#if HELIUM_OS_MAC
+# include <malloc/malloc.h>
+#else
+# include <malloc.h>
+#endif
 
 #include "Platform/Types.h"
 #include "Platform/Utility.h"

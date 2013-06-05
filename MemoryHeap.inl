@@ -183,11 +183,11 @@ HELIUM_FORCEINLINE void Helium::DefaultAllocator::FreeAligned( void* pMemory )
 #if HELIUM_HEAP
 	HELIUM_DEFAULT_HEAP.Free( pMemory );
 #else
-#if HELIUM_OS_WIN
+# if HELIUM_OS_WIN
 	::_aligned_free( pMemory );
-#else
+# else
 	::free( pMemory );
-#endif
+# endif
 #endif
 }
 
@@ -201,11 +201,13 @@ HELIUM_FORCEINLINE size_t Helium::DefaultAllocator::GetMemorySize( void* pMemory
 #if HELIUM_HEAP
 	return HELIUM_DEFAULT_HEAP.GetMemorySize( pMemory );
 #else
-#if HELIUM_OS_WIN
+# if HELIUM_OS_WIN
 	return _msize( pMemory );
-#else
+# elif HELIUM_OS_LINUX
 	return malloc_usable_size( pMemory );
-#endif
+# elif HELIUM_OS_MAC
+	return malloc_size( pMemory );
+# endif
 #endif
 }
 
@@ -221,11 +223,13 @@ HELIUM_FORCEINLINE size_t Helium::DefaultAllocator::GetMemorySizeAligned( void* 
 #if HELIUM_HEAP
 	return HELIUM_DEFAULT_HEAP.GetMemorySize( pMemory );
 #else
-#if HELIUM_OS_WIN
+# if HELIUM_OS_WIN
 	return _aligned_msize( pMemory, alignment, 0 );
-#else
+# elif HELIUM_OS_LINUX
 	return malloc_usable_size( pMemory );
-#endif
+# elif HELIUM_OS_MAC
+	return malloc_size( pMemory );
+# endif
 #endif
 }
 

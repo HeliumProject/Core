@@ -63,6 +63,8 @@ float64_t Timer::GetSeconds()
     return ( static_cast< float64_t >( ticks - sm_startTickCount ) * sm_secondsPerTick );
 }
 
+#if !HELIUM_OS_MAC
+
 IntervalTimer::IntervalTimer()
 : m_Thread( GetCurrentThreadID() )
 , m_Signal( 0 )
@@ -125,3 +127,5 @@ void IntervalTimer::Wait()
     sigwait( &m_AlarmSet, &sig );
     m_WakeupsMissed += timer_getoverrun( m_Handle );
 }
+
+#endif

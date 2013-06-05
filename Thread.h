@@ -44,20 +44,23 @@ namespace Helium
 
 		/// Thread ID type.
 		typedef unsigned long id_t;
-#elif HELIUM_OS_LINUX
+#else
 		/// Posix threads handle
 		typedef pthread_t Handle;
 
+# if HELIUM_OS_LINUX
 		/// Posix threads are identified as process IDs
 		typedef pid_t id_t;
-#else
-# error Implement Thread for this platform.
+# elif HELIUM_OS_MAC
+		/// Posix threads are identified as process IDs
+		typedef pthread_t id_t;
+# endif
 #endif
 
 	private:
 		/// Platform-specific thread handle.
 		Handle m_Handle;
-#if HELIUM_OS_LINUX
+#if !HELIUM_OS_WIN
 		/// Validity of the handle
 		bool m_Valid;
 #endif
@@ -68,7 +71,7 @@ namespace Helium
 		//@{
 #if HELIUM_OS_WIN
 		static unsigned int __stdcall ThreadCallback( void* pData );
-#elif HELIUM_OS_LINUX
+#else
 		static void* ThreadCallback( void* pData );
 #endif
 		//@}
@@ -220,15 +223,13 @@ namespace Helium
 	protected:
 #if HELIUM_OS_WIN
 		unsigned long m_Key;
-#elif HELIUM_OS_LINUX
-		pthread_key_t m_Key;
 #else
-# error Implement ThreadLocalPointer for this platform.
+		pthread_key_t m_Key;
 #endif
 	};
 
-	HELIUM_PLATFORM_API uint32_t GetMainThreadID();
-	HELIUM_PLATFORM_API uint32_t GetCurrentThreadID();
+	HELIUM_PLATFORM_API Thread::id_t GetMainThreadID();
+	HELIUM_PLATFORM_API Thread::id_t GetCurrentThreadID();
 
 	inline bool IsMainThread()
 	{

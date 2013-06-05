@@ -11,6 +11,10 @@
 #include <fcntl.h>
 #include <unistd.h>
 
+#if HELIUM_OS_MAC
+# include <copyfile.h>
+#endif
+
 using namespace Helium;
 
 //
@@ -43,7 +47,7 @@ bool File::Open( const tchar_t* filename, FileMode mode, bool truncate )
 	case FileModes::Write:
 		flags = O_WRONLY;
 
-	case FileModes::Read | FileModes::Write:
+	case FileModes::Both:
 		flags = O_RDWR;
 	}
 
@@ -81,7 +85,7 @@ bool File::Read( void* buffer, size_t numberOfBytesToRead, size_t* numberOfBytes
 		return false;
 	}
 
-	*numberOfBytesRead == numberOfBytesToRead;
+	*numberOfBytesRead = numberOfBytesToRead;
 	return true;
 }
 
@@ -94,7 +98,7 @@ bool File::Write( const void* buffer, size_t numberOfBytesToWrite, size_t* numbe
 		return false;
 	}
 
-	*numberOfBytesWritten == numberOfBytesToWrite;
+	*numberOfBytesWritten = numberOfBytesToWrite;
 	return true;
 }
 
@@ -310,6 +314,7 @@ bool Helium::MakePath( const tchar_t* path )
 
 bool Helium::Copy( const tchar_t* source, const tchar_t* dest, bool overwrite )
 {
+#if HELIUM_OS_LINUX
 #define splice(a, b, c) splice(a, 0, b, 0, c, 0)
 	int p[2];
 	pipe(p);
@@ -317,6 +322,9 @@ bool Helium::Copy( const tchar_t* source, const tchar_t* dest, bool overwrite )
 	int in = open(source, O_RDONLY);
 	while(splice(p[0], out, splice(in, p[1], 4096))>0);
 #undef splice
+#else
+	return 0 == copyfile( source, dest, NULL, COPYFILE_STAT | COPYFILE_DATA );
+#endif
 }
 
 bool Helium::Move( const tchar_t* source, const tchar_t* dest )

@@ -4,7 +4,7 @@
 #include "Platform/Types.h"
 #include "Platform/Utility.h"
 
-#ifdef HELIUM_OS_LINUX
+#if !HELIUM_OS_WIN
 #include <sys/types.h>
 #include <dirent.h>
 #endif
@@ -34,6 +34,7 @@ namespace Helium
 		{
 			Read  = ( 1 << 0 ),  ///< Read access.
 			Write = ( 1 << 1 ),  ///< Write access.
+			Both  = Read | Write
 		};
 	};
 	typedef FileModes::FileMode FileMode;
@@ -59,10 +60,8 @@ namespace Helium
 	private:
 #ifdef HELIUM_OS_WIN
 		typedef HANDLE Handle;
-#elif HELIUM_OS_LINUX
-		typedef int Handle;
 #else
-#error Implement File for this platform.
+		typedef int Handle;
 #endif
 		Handle m_Handle;
 	};
@@ -134,10 +133,8 @@ namespace Helium
 
 #if HELIUM_OS_WIN
 		typedef void* Handle;
-#elif HELIUM_OS_LINUX
-		typedef DIR* Handle;
 #else
-#error Implement Directory for this platform.
+		typedef DIR* Handle;
 #endif
 		Handle m_Handle;
 	};

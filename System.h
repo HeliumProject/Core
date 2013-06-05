@@ -58,6 +58,8 @@
 #  error Helium requires at least VS2008 with SP1 applied to compile.  Please update your compiler.
 # endif
 # define HELIUM_CC_CL 1
+#elif defined( __clang__ )
+# define HELIUM_CC_CLANG 1
 #elif defined( __GNUC__ )
 # define HELIUM_CC_GCC 1
 #elif defined( __SNC__ )
@@ -68,6 +70,8 @@
 
 #if HELIUM_CC_CL
 # include "Platform/CompilerCl.h"
+#elif HELIUM_CC_CLANG
+# include "Platform/CompilerClang.h"
 #elif HELIUM_CC_GCC
 # include "Platform/CompilerGcc.h"
 #endif
