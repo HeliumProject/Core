@@ -8,6 +8,8 @@
 #define _UNICODE 1
 
 #include <stdlib.h>
+#include <io.h>
+#include <fcntl.h>
 
 using namespace Helium;
 
@@ -42,8 +44,6 @@ static inline int LookupColor( ConsoleColor color )
 	HELIUM_ASSERT( false );
 	return ConsoleColors::None;
 }
-
-#pragma TODO("Enable UTF-8 support on windows via _setmode(_fileno(stdout), _O_U8TEXT);  -Geoff")
 
 int Helium::Scan(const char* fmt, ...)
 {
@@ -137,6 +137,7 @@ int Helium::Print(const char* fmt, ...)
 {
 	va_list args;
 	va_start(args, fmt);
+	_setmode(_fileno(stdout), _O_U8TEXT);
 	int result = vprintf(fmt, args);
 	va_end(args);
 	return result;
@@ -153,6 +154,7 @@ int Helium::Print(const wchar_t* fmt, ...)
 
 int Helium::PrintArgs(const char* fmt, va_list args)
 {
+	_setmode(_fileno(stdout), _O_U8TEXT);
 	return vprintf(fmt, args);
 }
 
@@ -165,6 +167,7 @@ int Helium::FilePrint(FILE* f, const char* fmt, ...)
 {
 	va_list args;
 	va_start(args, fmt);
+	_setmode(_fileno(f), _O_U8TEXT);
 	int result = vfprintf(f, fmt, args);
 	va_end(args);
 	return result;
@@ -181,6 +184,7 @@ int Helium::FilePrint(FILE* f, const wchar_t* fmt, ...)
 
 int Helium::FilePrintArgs(FILE* f, const char* fmt, va_list args)
 {
+	_setmode(_fileno(f), _O_U8TEXT);
 	return vfprintf(f, fmt, args);
 }
 
