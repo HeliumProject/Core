@@ -101,7 +101,7 @@ namespace Helium
 			const CharType* pCharacters, size_t startIndex = Invalid< size_t >(),
 			size_t characterCount = Invalid< size_t >() ) const;
 		template< typename OtherAllocator > size_t FindAnyReverse(
-			const StringBase< CharType, OtherAllocator >& rCharacters, size_t startIndex = Invalid< size_t > ) const;
+			const StringBase< CharType, OtherAllocator >& rCharacters, size_t startIndex = Invalid< size_t >() ) const;
 
 		size_t FindNone(
 			const CharType* pCharacters, size_t startIndex = 0, size_t characterCount = Invalid< size_t >() ) const;
@@ -112,7 +112,7 @@ namespace Helium
 			const CharType* pCharacters, size_t startIndex = Invalid< size_t >(),
 			size_t characterCount = Invalid< size_t >() ) const;
 		template< typename OtherAllocator > size_t FindNoneReverse(
-			const StringBase< CharType, OtherAllocator >& rCharacters, size_t startIndex = Invalid< size_t > ) const;
+			const StringBase< CharType, OtherAllocator >& rCharacters, size_t startIndex = Invalid< size_t >() ) const;
 
 		bool Contains( CharType character ) const;
 		template< typename OtherAllocator > bool Contains(

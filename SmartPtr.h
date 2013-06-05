@@ -81,6 +81,7 @@ namespace Helium
 		//@{
 		RefCountBase();
 		RefCountBase( const RefCountBase& rSource );
+		virtual ~RefCountBase();
 		//@}
 
 		/// @name Reference Counting

@@ -227,7 +227,7 @@ namespace Helium
             const char*   m_Name;
             Host*         m_Host;
             InvokerPtr    m_Invokers[MAX_INVOKERS];
-            uint32_t           m_InvokerCount;
+            uint32_t      m_InvokerCount;
         };
 
 
@@ -370,7 +370,7 @@ namespace Helium
             {
                 args->m_Payload = payload;
                 args->m_PayloadSize = size;
-                m_Interface->m_Host->Emit(this, args, sizeof(ArgsType), m_Swizzler);
+                m_Interface->GetHost()->Emit(this, args, sizeof(ArgsType), m_Swizzler);
             }
 
         private:

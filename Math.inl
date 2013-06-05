@@ -98,16 +98,10 @@ T Helium::Abs( const T& rValue )
 /// @return  Absolute value of the given value.
 int64_t Helium::Abs( int64_t value )
 {
-#if HELIUM_OS_WIN
-#if HELIUM_CC_CL
+#if HELIUM_OS_WIN && HELIUM_CC_CL
     return ::_abs64( value );
 #else
     return llabs( value );
-#endif
-#elif HELIUM_OS_LINUX
-    return llabs( value );
-#else
-#error TODO: Implement 64-bit Abs() on this platform/compiler.
 #endif
 }
 
@@ -215,7 +209,7 @@ size_t Helium::Log2( uint32_t value )
     HELIUM_VERIFY( _BitScanReverse( &bitIndex, value ) );
 
     return bitIndex;
-#elif HELIUM_CC_GCC
+#elif HELIUM_CC_GCC || HELIUM_CC_CLANG
     return ( 31 - __builtin_clz( value ) );
 #else
 #warning Compiling unoptimized Log2() implementation.  Please evaluate the availability of more optimal implementations for the current platform/compiler.
@@ -264,7 +258,7 @@ size_t Helium::Log2( uint64_t value )
 #endif
 
     return bitIndex;
-#elif HELIUM_CC_GCC
+#elif HELIUM_CC_GCC || HELIUM_CC_CLANG
     HELIUM_COMPILE_ASSERT( sizeof( long long ) == 8 ); /* sizeof is in bytes. JWS 2-27-13 */
 
     return ( 63 - __builtin_clzll( static_cast< unsigned long long >( value ) ) );

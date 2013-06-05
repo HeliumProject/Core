@@ -95,14 +95,14 @@ FileManager g_FileManager;
 
 struct OutputFile
 {
-	Stream      m_StreamType;
-	int         m_RefCount;
-	uint32_t    m_ThreadId;
+	Stream       m_StreamType;
+	int          m_RefCount;
+	Thread::id_t m_ThreadId;
 
 	OutputFile()
 		: m_StreamType( Streams::Normal )
 		, m_RefCount( 0 )
-		, m_ThreadId( -1 )
+		, m_ThreadId()
 	{
 
 	}
@@ -203,11 +203,9 @@ void Redirect(const tstring& fileName, const tchar_t* str, bool stampNewLine = t
 #if defined(HELIUM_OS_WIN)
 			_timeb currentTime;
 			_ftime( &currentTime );
-#elif defined(HELIUM_OS_LINUX)
+#else
 			struct timeb currentTime;
 			ftime( &currentTime );
-#else
-# error "define timeb for this platform"
 #endif
 
 			uint32_t time = (uint32_t) currentTime.time;
@@ -229,7 +227,7 @@ void Redirect(const tstring& fileName, const tchar_t* str, bool stampNewLine = t
 	}
 }
 
-bool AddFile( M_OutputFile& files, const tstring& fileName, Stream stream, uint32_t threadId, bool append )
+bool AddFile( M_OutputFile& files, const tstring& fileName, Stream stream, Thread::id_t threadId, bool append )
 {
 	Helium::MutexScopeLock mutex (g_Mutex);
 
@@ -296,7 +294,7 @@ void RemoveFile( M_OutputFile& files, const tstring& fileName )
 	}
 }
 
-bool Log::AddTraceFile( const tstring& fileName, Stream stream, uint32_t threadId, bool append )
+bool Log::AddTraceFile( const tstring& fileName, Stream stream, Thread::id_t threadId, bool append )
 {
 	return AddFile( g_TraceFiles, fileName, stream, threadId, append );
 }
@@ -421,7 +419,7 @@ void Log::PrintString(const tchar_t* string, Stream stream, Level level, Console
 	for( ; itr != end; ++itr )
 	{
 		if ( ( (*itr).second.m_StreamType & stream ) == stream
-			&& ( (*itr).second.m_ThreadId == -1 || (*itr).second.m_ThreadId == GetCurrentThreadID() ) )
+			&& ( (*itr).second.m_ThreadId == Thread::id_t () || (*itr).second.m_ThreadId == GetCurrentThreadID() ) )
 		{
 			trace = true;
 		}
@@ -491,7 +489,7 @@ void Log::PrintString(const tchar_t* string, Stream stream, Level level, Console
 			for( ; itr != end; ++itr )
 			{
 				if ( ( (*itr).second.m_StreamType & stream ) == stream
-					&& ( (*itr).second.m_ThreadId == -1 || (*itr).second.m_ThreadId == GetCurrentThreadID() ) )
+					&& ( (*itr).second.m_ThreadId == Thread::id_t () || (*itr).second.m_ThreadId == GetCurrentThreadID() ) )
 				{
 					Redirect( (*itr).first, statement.m_String.c_str(), stampNewLine );
 				}

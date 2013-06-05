@@ -3,6 +3,7 @@
 #include <string>
 
 #include "Platform/Types.h"
+#include "Platform/Thread.h"
 #include "Platform/Console.h"
 
 #include "Foundation/API.h"
@@ -116,14 +117,14 @@ namespace Helium
 		//
 
 		// the trace file gets everything Console delivers to the console and more
-		HELIUM_FOUNDATION_API bool AddTraceFile( const tstring& fileName, Stream stream, uint32_t threadId = -1, bool append = false );
+		HELIUM_FOUNDATION_API bool AddTraceFile( const tstring& fileName, Stream stream, Thread::id_t threadId = Thread::id_t (), bool append = false );
 		HELIUM_FOUNDATION_API void RemoveTraceFile( const tstring& fileName );
 
-		template <bool (*AddFunc)(const tstring& fileName, Stream stream, uint32_t threadId, bool append), void (*RemoveFunc)(const tstring& fileName)>
+		template <bool (*AddFunc)(const tstring& fileName, Stream stream, Thread::id_t threadId, bool append), void (*RemoveFunc)(const tstring& fileName)>
 		class FileHandle
 		{
 		public:
-			inline FileHandle(const tstring& file, Stream stream, uint32_t threadId = -1, bool append = false );
+			inline FileHandle(const tstring& file, Stream stream, Thread::id_t threadId = Thread::id_t (), bool append = false );
 			inline ~FileHandle();
 
 			inline const tstring& GetFile();
@@ -267,7 +268,7 @@ namespace Helium
 			void Print( Log::PrintingArgs& args );
 
 		private:
-			uint32_t            m_Thread;
+			Thread::id_t        m_Thread;
 			uint32_t            m_Throttle;
 			uint32_t*           m_ErrorCount;
 			uint32_t*           m_WarningCount;

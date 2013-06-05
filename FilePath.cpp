@@ -405,7 +405,7 @@ bool FilePath::HasExtension( const tchar_t* extension ) const
 {
 	size_t len = StringLength( extension );
 
-	if ( m_Path.length() - len < 0 )
+	if ( m_Path.length() < len )
 	{
 		return false;
 	}

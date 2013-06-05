@@ -148,6 +148,13 @@ Helium::RefCountBase< T >::RefCountBase( const RefCountBase& /*rSource*/ )
 	// Note that the reference count is not copied.
 }
 
+/// Destructor.
+///
+template< typename T >
+Helium::RefCountBase< T >::~RefCountBase()
+{
+}
+
 /// Get the current reference count of this object.
 ///
 /// @return  Current reference count.

@@ -76,7 +76,7 @@ namespace Helium
                 return false;
             }
         }
-        else if ( source < 0 )
+        else if ( source != 0 )
         {
             if ( (int64_t)source >= (int64_t)NumericLimits<D>::Minimum )
             {
@@ -118,7 +118,7 @@ namespace Helium
                 return false;
             }
         }
-        else if ( source < 0 )
+        else if ( source != 0 )
         {
             if ( source >= NumericLimits<D>::Minimum )
             {

@@ -27,8 +27,8 @@ Helium::Log::PrintedArgs::PrintedArgs( const Statement& statement )
 
 }
 
-template <bool (*AddFunc)(const tstring& fileName, Helium::Log::Stream stream, uint32_t threadId, bool append), void (*RemoveFunc)(const tstring& fileName)>
-Helium::Log::FileHandle< AddFunc, RemoveFunc >::FileHandle(const tstring& file, Stream stream, uint32_t threadId, bool append  )
+template <bool (*AddFunc)(const tstring& fileName, Helium::Log::Stream stream, Helium::Thread::id_t threadId, bool append), void (*RemoveFunc)(const tstring& fileName)>
+Helium::Log::FileHandle< AddFunc, RemoveFunc >::FileHandle(const tstring& file, Stream stream, Helium::Thread::id_t threadId, bool append  )
     : m_File (file)
 {
     if (!m_File.empty())
@@ -37,7 +37,7 @@ Helium::Log::FileHandle< AddFunc, RemoveFunc >::FileHandle(const tstring& file, 
     }
 }
 
-template <bool (*AddFunc)(const tstring& fileName, Helium::Log::Stream stream, uint32_t threadId, bool append), void (*RemoveFunc)(const tstring& fileName)>
+template <bool (*AddFunc)(const tstring& fileName, Helium::Log::Stream stream, Helium::Thread::id_t threadId, bool append), void (*RemoveFunc)(const tstring& fileName)>
 Helium::Log::FileHandle< AddFunc, RemoveFunc >::~FileHandle()
 {
     if (!m_File.empty())
@@ -46,7 +46,7 @@ Helium::Log::FileHandle< AddFunc, RemoveFunc >::~FileHandle()
     }
 }
 
-template <bool (*AddFunc)(const tstring& fileName, Helium::Log::Stream stream, uint32_t threadId, bool append), void (*RemoveFunc)(const tstring& fileName)>
+template <bool (*AddFunc)(const tstring& fileName, Helium::Log::Stream stream, Helium::Thread::id_t threadId, bool append), void (*RemoveFunc)(const tstring& fileName)>
 const tstring& Helium::Log::FileHandle< AddFunc, RemoveFunc >::GetFile()
 {
     return m_File;
