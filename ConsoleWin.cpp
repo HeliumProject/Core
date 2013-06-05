@@ -137,7 +137,6 @@ int Helium::Print(const char* fmt, ...)
 {
 	va_list args;
 	va_start(args, fmt);
-	//_setmode(_fileno(stdout), _O_U8TEXT);
 	int result = vprintf(fmt, args);
 	va_end(args);
 	return result;
@@ -154,7 +153,6 @@ int Helium::Print(const wchar_t* fmt, ...)
 
 int Helium::PrintArgs(const char* fmt, va_list args)
 {
-	//_setmode(_fileno(stdout), _O_U8TEXT);
 	return vprintf(fmt, args);
 }
 
@@ -167,7 +165,6 @@ int Helium::FilePrint(FILE* f, const char* fmt, ...)
 {
 	va_list args;
 	va_start(args, fmt);
-	//_setmode(_fileno(f), _O_U8TEXT);
 	int result = vfprintf(f, fmt, args);
 	va_end(args);
 	return result;
@@ -184,7 +181,6 @@ int Helium::FilePrint(FILE* f, const wchar_t* fmt, ...)
 
 int Helium::FilePrintArgs(FILE* f, const char* fmt, va_list args)
 {
-	//_setmode(_fileno(f), _O_U8TEXT);
 	return vfprintf(f, fmt, args);
 }
 
