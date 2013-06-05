@@ -479,7 +479,7 @@ void Helium::Persist::ArchiveReaderJson::ReadNext( Reflect::ObjectPtr& object )
 			
 			if ( !object && objectClass )
 			{
-				object = Registry::GetInstance()->CreateInstance( objectClass );
+				object = objectClass->m_Creator();
 			}
 
 			if ( object.ReferencesObject() )

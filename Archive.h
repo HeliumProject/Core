@@ -7,9 +7,10 @@
 #include "Foundation/Log.h" 
 #include "Foundation/SmartPtr.h"
 
-#include "Reflect/Translator.h"
 #include "Reflect/Class.h"
 #include "Reflect/Exceptions.h"
+#include "Reflect/Object.h"
+#include "Reflect/Translator.h"
 
 #include "Persist/API.h"
 #include "Persist/Exceptions.h"
