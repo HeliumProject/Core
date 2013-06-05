@@ -29,7 +29,6 @@ namespace Helium
             PRINCIPAL_AXIS = 0,
             BSPHERE_QUICK,
             BSPHERE_OPTIMIZED,
-            NUM_METHODS
         };
 
         ////////////////////////////////////////////////////////////////////////////////////////////////
