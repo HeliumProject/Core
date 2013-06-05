@@ -261,8 +261,7 @@ void Helium::StrongPtr< T >::Set( T* pObject )
     // Link indices must be cleared before using as a pointer
     HELIUM_ASSERT(!HELIUM_IS_LINK_INDEX(m_LinkIndex));
 
-    RefCountProxy< typename T::RefCountSupportType::BaseType >* pProxy =
-        static_cast< RefCountProxy< typename T::RefCountSupportType::BaseType >* >( m_pProxy );
+    RefCountProxy< typename T::RefCountSupportType::BaseType >* pProxy = static_cast< RefCountProxy< typename T::RefCountSupportType::BaseType >* >( m_pProxy );
     if( pProxy )
     {
         if( pProxy->GetObject() == pObject )
@@ -274,7 +273,8 @@ void Helium::StrongPtr< T >::Set( T* pObject )
 
         if( pProxy->RemoveStrongRef() )
         {
-            typename T::RefCountSupportType::Release( pProxy );
+            typedef typename T::RefCountSupportType RefCountSupportType;
+            RefCountSupportType::Release( pProxy );
         }
     }
 

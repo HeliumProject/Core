@@ -68,7 +68,7 @@ template< typename Key, typename Data, typename EqualKey, typename Allocator >
 Data& Helium::Map< Key, Data, EqualKey, Allocator >::operator[]( const Key& rKey )
 {
     typename Base::Iterator iterator;
-    Insert( iterator, InternalValueType( rKey, Data() ) );
+    this->Insert( iterator, typename Base::InternalValueType( rKey, Data() ) );
 
     return iterator->Second();
 }
