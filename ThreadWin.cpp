@@ -288,14 +288,14 @@ void ThreadLocalPointer::SetPointer(void* pointer)
 	TlsSetValue(m_Key, pointer); 
 }
 
-uint32_t g_MainThreadID = (uint32_t)::GetCurrentThreadId();
+Thread::id_t g_MainThreadID = ::GetCurrentThreadId();
 
-uint32_t Helium::GetMainThreadID()
+Thread::id_t Helium::GetMainThreadID()
 {
 	return g_MainThreadID;
 }
 
-uint32_t Helium::GetCurrentThreadID()
+Thread::id_t Helium::GetCurrentThreadID()
 {
-	return (uint32_t)::GetCurrentThreadId();
+	return ::GetCurrentThreadId();
 }
