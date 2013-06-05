@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Platform/Trace.h"
+
 #include "Foundation/BitArray.h"
 #include "Foundation/DynamicArray.h"
 #include "Foundation/Pair.h"

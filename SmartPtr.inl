@@ -97,7 +97,7 @@ template< typename T >
 T* Helium::AutoPtr< T >::Release()
 {
 	T* return_value = Ptr();
-	m_Ptr = NULL;
+	m_Ptr = 0;
 	return return_value;
 }
 
