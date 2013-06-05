@@ -24,10 +24,10 @@ namespace Helium
         typedef Table< KeyValue< Key, Data >, Key, SelectKey< KeyValue< Key, Data > >, EqualKey, Allocator, Pair< Key, Data > >
             Base;
 
-        /// Type for map keys.
-        typedef typename Base::KeyType KeyType;
         /// Type for map data.
         typedef Data DataType;
+        /// Type for map keys.
+        typedef typename Base::KeyType KeyType;
         /// Type for map entries.
         typedef typename Base::ValueType ValueType;
 
