@@ -591,6 +591,10 @@ void ArchiveReaderJson::DeserializeTranslator( rapidjson::Value& value, Pointer 
 			bool clamp = true;
 			switch ( scalar->m_Type )
 			{
+			case ScalarTypes::Boolean:
+			case ScalarTypes::String:
+				break;
+				
 			case ScalarTypes::Unsigned8:
 				RangeCastInteger( value.GetUint(), pointer.As<uint8_t>(), clamp );
 				break;

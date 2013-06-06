@@ -14,10 +14,6 @@
 # error Unknown endianness!
 #endif
 
-#if HELIUM_CPU_X86
-# define RAPIDJSON_SSE42
-#endif
-
 #define RAPIDJSON_ASSERT HELIUM_ASSERT
 #define RAPIDJSON_STATIC_ASSERT HELIUM_COMPILE_ASSERT
 

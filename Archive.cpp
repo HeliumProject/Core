@@ -119,10 +119,9 @@ bool ArchiveReader::Resolve( const Name& identity, ObjectPtr& pointer, const Cla
 	{
 		uint32_t index = Invalid< uint32_t >();
 		String str ( identity.Get() );
-		str.Parse( "%d", &index );
 
 		Object* found = NULL;
-		if ( index >=0 && index <= m_Objects.GetSize() )
+		if ( str.Parse( "%d", &index ) && index <= m_Objects.GetSize() )
 		{
 			found = m_Objects.GetElement( index );
 		}
