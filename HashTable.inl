@@ -70,7 +70,7 @@ Helium::ConstHashTableIterator< Value, Key, HashFunction, ExtractKey, EqualKey, 
 
     ++m_elementIndex;
 
-    TableType::Bucket* pBuckets = m_pTable->m_pBuckets;
+    typename TableType::Bucket* pBuckets = m_pTable->m_pBuckets;
     HELIUM_ASSERT( pBuckets );
 
     if( m_elementIndex >= pBuckets[ m_bucketIndex ].GetSize() )
@@ -128,7 +128,7 @@ Helium::ConstHashTableIterator< Value, Key, HashFunction, ExtractKey, EqualKey, 
         return *this;
     }
 
-    TableType::Bucket* pBuckets = m_pTable->m_pBuckets;
+    typename TableType::Bucket* pBuckets = m_pTable->m_pBuckets;
     HELIUM_ASSERT( pBuckets );
 
     size_t bucketIndex = m_bucketIndex;
@@ -218,7 +218,7 @@ bool Helium::ConstHashTableIterator< Value, Key, HashFunction, ExtractKey, Equal
     return ( m_pTable < rOther.m_pTable ||
              ( m_pTable == rOther.m_pTable &&
                ( m_bucketIndex < rOther.m_bucketIndex ||
-                 m_bucketIndex == rOther.m_bucketIndex && m_elementIndex < rOther.m_elementIndex ) ) );
+                 ( m_bucketIndex == rOther.m_bucketIndex && m_elementIndex < rOther.m_elementIndex ) ) ) );
 }
 
 /// Get whether this iterator references a hash table location that succeeds that of another iterator.
@@ -236,7 +236,7 @@ bool Helium::ConstHashTableIterator< Value, Key, HashFunction, ExtractKey, Equal
     return ( m_pTable > rOther.m_pTable ||
              ( m_pTable == rOther.m_pTable &&
                ( m_bucketIndex > rOther.m_bucketIndex ||
-                 m_bucketIndex == rOther.m_bucketIndex && m_elementIndex > rOther.m_elementIndex ) ) );
+                 ( m_bucketIndex == rOther.m_bucketIndex && m_elementIndex > rOther.m_elementIndex ) ) ) );
 }
 
 /// Get whether this iterator references a hash table location that matches or precedes that of another iterator.
@@ -254,7 +254,7 @@ bool Helium::ConstHashTableIterator< Value, Key, HashFunction, ExtractKey, Equal
     return ( m_pTable < rOther.m_pTable ||
              ( m_pTable == rOther.m_pTable &&
                ( m_bucketIndex < rOther.m_bucketIndex ||
-                 m_bucketIndex == rOther.m_bucketIndex && m_elementIndex <= rOther.m_elementIndex ) ) );
+                 ( m_bucketIndex == rOther.m_bucketIndex && m_elementIndex <= rOther.m_elementIndex ) ) ) );
 }
 
 /// Get whether this iterator references a hash table location that matches or succeeds that of another iterator.
@@ -272,7 +272,7 @@ bool Helium::ConstHashTableIterator< Value, Key, HashFunction, ExtractKey, Equal
     return ( m_pTable > rOther.m_pTable ||
              ( m_pTable == rOther.m_pTable &&
                ( m_bucketIndex > rOther.m_bucketIndex ||
-                 m_bucketIndex == rOther.m_bucketIndex && m_elementIndex >= rOther.m_elementIndex ) ) );
+                 ( m_bucketIndex == rOther.m_bucketIndex && m_elementIndex >= rOther.m_elementIndex ) ) ) );
 }
 
 /// Constructor.
@@ -297,7 +297,7 @@ template<
 Helium::HashTableIterator<
     Value, Key, HashFunction, ExtractKey, EqualKey, Allocator, InternalValue >::HashTableIterator(
         TableType* pTable, size_t bucketIndex, size_t elementIndex )
-    : ConstHashTableIterator( pTable, bucketIndex, elementIndex )
+    : ConstHashTableIterator< Value, Key, HashFunction, ExtractKey, EqualKey, Allocator, InternalValue >( pTable, bucketIndex, elementIndex )
 {
 }
 
@@ -310,10 +310,10 @@ template<
 Value& Helium::HashTableIterator<
     Value, Key, HashFunction, ExtractKey, EqualKey, Allocator, InternalValue >::operator*() const
 {
-    HELIUM_ASSERT( m_pTable );
-    HELIUM_ASSERT( m_pTable->m_pBuckets );
+    HELIUM_ASSERT( this->m_pTable );
+    HELIUM_ASSERT( this->m_pTable->m_pBuckets );
 
-    return m_pTable->m_pBuckets[ m_bucketIndex ][ m_elementIndex ];
+    return this->m_pTable->m_pBuckets[ this->m_bucketIndex ][ this->m_elementIndex ];
 }
 
 /// Access the current hash table entry.
@@ -325,10 +325,10 @@ template<
 Value* Helium::HashTableIterator<
     Value, Key, HashFunction, ExtractKey, EqualKey, Allocator, InternalValue >::operator->() const
 {
-    HELIUM_ASSERT( m_pTable );
-    HELIUM_ASSERT( m_pTable->m_pBuckets );
+    HELIUM_ASSERT( this->m_pTable );
+    HELIUM_ASSERT( this->m_pTable->m_pBuckets );
 
-    return &m_pTable->m_pBuckets[ m_bucketIndex ][ m_elementIndex ];
+    return &this->m_pTable->m_pBuckets[ this->m_bucketIndex ][ this->m_elementIndex ];
 }
 
 /// Increment this iterator to the next hash table entry.
@@ -340,7 +340,7 @@ template<
 Helium::HashTableIterator< Value, Key, HashFunction, ExtractKey, EqualKey, Allocator, InternalValue >&
     Helium::HashTableIterator< Value, Key, HashFunction, ExtractKey, EqualKey, Allocator, InternalValue >::operator++()
 {
-    ConstHashTableIterator::operator++();
+    ConstHashTableIterator< Value, Key, HashFunction, ExtractKey, EqualKey, Allocator, InternalValue >::operator++();
 
     return *this;
 }
@@ -369,7 +369,7 @@ template<
 Helium::HashTableIterator< Value, Key, HashFunction, ExtractKey, EqualKey, Allocator, InternalValue >&
     Helium::HashTableIterator< Value, Key, HashFunction, ExtractKey, EqualKey, Allocator, InternalValue >::operator--()
 {
-    ConstHashTableIterator::operator--();
+    ConstHashTableIterator< Value, Key, HashFunction, ExtractKey, EqualKey, Allocator, InternalValue >::operator--();
 
     return *this;
 }
@@ -406,7 +406,7 @@ Helium::HashTable< Value, Key, HashFunction, ExtractKey, EqualKey, Allocator, In
     const EqualKey& rKeyEquals,
     const ExtractKey& rExtractKey,
     const Allocator& rAllocator )
-    : m_bucketCount( Max( bucketCount, 1 ) )
+    : m_bucketCount( Max<size_t>( bucketCount, 1 ) )
     , m_size( 0 )
     , m_hasher( rHasher )
     , m_keyEquals( rKeyEquals )
@@ -783,8 +783,6 @@ void Helium::HashTable< Value, Key, HashFunction, ExtractKey, EqualKey, Allocato
     HELIUM_ASSERT( iterator.m_elementIndex < m_pBuckets[ iterator.m_bucketIndex ].GetSize() );
     m_pBuckets[ iterator.m_bucketIndex ].RemoveSwap( iterator.m_elementIndex );
     --m_size;
-
-    return true;
 }
 
 /// Remove a range of entries between the specified iterators.
@@ -824,7 +822,7 @@ void Helium::HashTable< Value, Key, HashFunction, ExtractKey, EqualKey, Allocato
 
     if( endBucketIndex < m_bucketCount )
     {
-        rEntries.Remove( elementIndex, endElementIndex - elementIndex );
+        this->rEntries.Remove( elementIndex, endElementIndex - elementIndex );
     }
 }
 

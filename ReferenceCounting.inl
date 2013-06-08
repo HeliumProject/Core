@@ -233,9 +233,10 @@ Helium::StrongPtr< T >::~StrongPtr()
 template< typename T >
 T* Helium::StrongPtr< T >::Get() const
 {
+    typedef typename T::RefCountSupportType RefCountSupportType;
     HELIUM_ASSERT(!HELIUM_IS_LINK_INDEX(m_LinkIndex));
     return ( m_pProxy
-        ? static_cast< T* >( static_cast< RefCountProxy< typename T::RefCountSupportType::BaseType >* >( m_pProxy )->GetObject() )
+        ? static_cast< T* >( static_cast< RefCountProxy< typename RefCountSupportType::BaseType >* >( m_pProxy )->GetObject() )
         : NULL );
 }
 
@@ -717,7 +718,8 @@ void Helium::WeakPtr< T >::Set( T* pObject )
 
         if( pProxy->RemoveWeakRef() )
         {
-            typename T::RefCountSupportType::Release( pProxy );
+            typedef typename T::RefCountSupportType RefCountSupportType;
+            RefCountSupportType::Release( pProxy );
         }
     }
 
@@ -740,7 +742,8 @@ void Helium::WeakPtr< T >::Release()
 
     if( pProxy && pProxy->RemoveWeakRef() )
     {
-        typename T::RefCountSupportType::Release( pProxy );
+        typedef typename T::RefCountSupportType RefCountSupportType;
+        RefCountSupportType::Release( pProxy );
     }
 }
 
