@@ -82,8 +82,6 @@ void PathInterpreter::InterpretField(const Field* field, const std::vector<Refle
                 container->AddChild( fileDialogButton );
 
                 value->SetProperty( TXT( "FileFilter" ), m_FileFilter );
-
-                m_Value = value;
             }
 
             if ( instances.size() == 1 )

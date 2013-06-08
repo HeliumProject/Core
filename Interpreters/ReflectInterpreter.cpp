@@ -22,8 +22,6 @@ ReflectInterpreter::ReflectInterpreter (Container* container)
 
 void ReflectInterpreter::Interpret(const std::vector<Reflect::Object*>& instances, int32_t includeFlags, int32_t excludeFlags, bool expandPanel)
 {
-    m_Instances = instances;
-
     InterpretType(instances, m_Container, includeFlags, excludeFlags, expandPanel);
 }
 

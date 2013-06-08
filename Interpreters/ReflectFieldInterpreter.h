@@ -15,9 +15,6 @@ namespace Helium
             ReflectFieldInterpreter (Container* container);
 
             virtual void InterpretField(const Reflect::Field* field, const std::vector<Reflect::Object*>& instances, Container* parent) = 0;
-
-        protected:
-            std::vector<Reflect::Object*> m_Instances;
         };
 
         typedef Helium::StrongPtr<ReflectFieldInterpreter> ReflectFieldInterpreterPtr;

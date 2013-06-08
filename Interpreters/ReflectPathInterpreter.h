@@ -19,19 +19,12 @@ namespace Helium
             FileDialogSignature::Delegate d_FindMissingFile;
 
         private:
-
             // callbacks
             void DataChanging( const DataChangingArgs& args );
             void Edit( const ButtonClickedArgs& args );
 
         protected:
             tstring m_FileFilter;
-
-        private:
-            Inspect::Value* m_Value;
         };
-
-        typedef Helium::SmartPtr<PathInterpreter> PathInterpreterPtr;
-        typedef std::vector< PathInterpreterPtr > V_PathInterpreter;
     }
 }

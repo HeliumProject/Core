@@ -26,7 +26,6 @@ ReflectSetInterpreter::ReflectSetInterpreter( Container* container )
 // 
 void ReflectSetInterpreter::InterpretField( const Reflect::Field* field, const std::vector<Reflect::Object*>& instances, Container* parent )
 {
-#if REFLECT_REFACTOR
     if ( field->m_Flags & Reflect::FieldFlags::Hide )
     {
         return;
@@ -47,14 +46,12 @@ void ReflectSetInterpreter::InterpretField( const Reflect::Field* field, const s
     container->a_Name.Set( temp );
 
     // create the data objects
+	std::vector<Data*> ser;
     std::vector< Reflect::Object* >::const_iterator itr = instances.begin();
     std::vector< Reflect::Object* >::const_iterator end = instances.end();
     for ( ; itr != end; ++itr )
     {
-        Reflect::Data ser = Reflect::AssertCast< Reflect::Data >( Reflect::Registry::GetInstance()->CreateInstance( field->m_DataClass ) );
-        uintptr_t fieldAddress = ( uintptr_t )( *itr ) + field->m_Offset;
-        ser->ConnectData( ( void* )fieldAddress );
-        m_Datas.push_back( ser );
+		ser.push_back( new Data ( Pointer( field, *itr ), field->m_Translator ) );
     }
 
     // create the list
@@ -63,7 +60,7 @@ void ReflectSetInterpreter::InterpretField( const Reflect::Field* field, const s
     container->AddChild( list );
 
     // bind the ui to the serialiers
-    list->Bind( new MultiStringFormatter< Reflect::Data >( (std::vector<Reflect::Data*>&)m_Datas ) );
+    list->Bind( new MultiStringFormatter< Reflect::Data >( ser, true ) );
 
     // create the buttons if we are not read only
     if ( !( field->m_Flags & Reflect::FieldFlags::ReadOnly ) )
@@ -91,7 +88,6 @@ void ReflectSetInterpreter::InterpretField( const Reflect::Field* field, const s
     {
         container->a_IsEnabled.Set( false );
     }
-#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -117,7 +113,6 @@ void ReflectSetInterpreter::OnAdd( const ButtonClickedArgs& args )
 // 
 void ReflectSetInterpreter::OnRemove( const ButtonClickedArgs& args )
 {
-#if REFLECT_REFACTOR
     Reflect::ObjectPtr clientData = args.m_Control->GetClientData();
     if ( clientData.ReferencesObject() && clientData->IsClass( Reflect::GetClass<ClientData>() ) )
     {
@@ -131,6 +126,7 @@ void ReflectSetInterpreter::OnRemove( const ButtonClickedArgs& args )
             std::set< size_t >::const_reverse_iterator end = selectedItemIndices.rend();
             for ( ; itr != end; ++itr )
             {
+#if REFLECT_REFACTOR
                 // for each array in the selection set (the objects the array data is connected to)
                 std::vector< Data >::const_iterator serItr = m_Datas.begin();
                 std::vector< Data >::const_iterator serEnd = m_Datas.end();
@@ -141,6 +137,7 @@ void ReflectSetInterpreter::OnRemove( const ButtonClickedArgs& args )
                     setData->GetItems( items );
                     setData->RemoveItem( items[ *itr ] );
                 }
+#endif
             }
 
             list->a_SelectedItemIndices.Set( std::set< size_t > () );
@@ -148,5 +145,4 @@ void ReflectSetInterpreter::OnRemove( const ButtonClickedArgs& args )
             args.m_Control->GetCanvas()->Read();
         }
     }
-#endif
 }
