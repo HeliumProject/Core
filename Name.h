@@ -130,13 +130,8 @@ namespace Helium
     /// WideString name table entry.
     typedef NameBase< WideNameTable > WideName;
 
-#if HELIUM_WCHAR_T
-    /// String table entry.
-    typedef WideName Name;
-#else
-    /// String table entry.
+	/// String table entry.
     typedef CharName Name;
-#endif
 
 	/// Default Name hash.
     template< typename TableType >

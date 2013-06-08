@@ -271,13 +271,8 @@ namespace Helium
 		size_t operator()( const WideString& rKey ) const;
 	};
 
-#if HELIUM_WCHAR_T
-	/// Default string class.
-	typedef WideString String;
-#else  // HELIUM_WCHAR_T
 	/// Default string class.
 	typedef CharString String;
-#endif  // HELIUM_WCHAR_T
 }
 
 #include "Foundation/String.inl"

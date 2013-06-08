@@ -475,11 +475,7 @@ void Log::PrintString(const tchar_t* string, Stream stream, Level level, Console
 
 			// send the text to the debugger, if no debugger nothing happens
 #if HELIUM_OS_WIN
-#if HELIUM_WCHAR_T
-			OutputDebugStringW(statement.m_String.c_str());
-#else
 			OutputDebugStringA(statement.m_String.c_str());
-#endif
 #endif
 			// output to trace file(s)
 			static bool stampNewLine = true;
