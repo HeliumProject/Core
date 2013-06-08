@@ -61,88 +61,6 @@
 /// "char" string format macro for size_t.
 #define PRIuSZ "Iu"
 
-/// "wchar_t" string format macro for signed 8-bit integers.
-#define WPRId8 L"hhd"
-/// "wchar_t" string format macro for signed 16-bit integers.
-#define WPRId16 L"hd"
-/// "wchar_t" string format macro for signed 32-bit integers.
-#define WPRId32 L"I32d"
-/// "wchar_t" string format macro for signed 64-bit integers.
-#define WPRId64 L"I64d"
-
-/// "wchar_t" string format macro for unsigned 8-bit integers.
-#define WPRIu8 L"hhu"
-/// "wchar_t" string format macro for unsigned 16-bit integers.
-#define WPRIu16 L"hu"
-/// "wchar_t" string format macro for unsigned 32-bit integers.
-#define WPRIu32 L"I32u"
-/// "wchar_t" string format macro for unsigned 64-bit integers.
-#define WPRIu64 L"I64u"
-
-/// "wchar_t" string format macro for int_fast8_t.
-#define WPRIdFAST8 WPRId8
-/// "wchar_t" string format macro for int_fast16_t.
-#define WPRIdFAST16 WPRId32
-/// "wchar_t" string format macro for int_fast32_t.
-#define WPRIdFAST32 WPRId32
-/// "wchar_t" string format macro for int_fast64_t.
-#define WPRIdFAST64 WPRId64
-
-/// "wchar_t" string format macro for uint_fast8_t.
-#define WPRIuFAST8 WPRIu8
-/// "wchar_t" string format macro for uint_fast16_t.
-#define WPRIuFAST16 WPRIu32
-/// "wchar_t" string format macro for uint_fast32_t.
-#define WPRIuFAST32 WPRIu32
-/// "wchar_t" string format macro for uint_fast64_t.
-#define WPRIuFAST64 WPRIu64
-
-/// "wchar_t" string format macro for ptrdiff_t.
-#define WPRIdPD L"Id"
-/// "wchar_t" string format macro for size_t.
-#define WPRIuSZ L"Iu"
-
-/// "tchar_t" string format macro for signed 8-bit integers.
-#define TPRId8 TXT( "hhd" )
-/// "tchar_t" string format macro for signed 16-bit integers.
-#define TPRId16 TXT( "hd" )
-/// "tchar_t" string format macro for signed 32-bit integers.
-#define TPRId32 TXT( "I32d" )
-/// "tchar_t" string format macro for signed 64-bit integers.
-#define TPRId64 TXT( "I64d" )
-
-/// "tchar_t" string format macro for unsigned 8-bit integers.
-#define TPRIu8 TXT( "hhu" )
-/// "tchar_t" string format macro for unsigned 16-bit integers.
-#define TPRIu16 TXT( "hu" )
-/// "tchar_t" string format macro for unsigned 32-bit integers.
-#define TPRIu32 TXT( "I32u" )
-/// "tchar_t" string format macro for unsigned 64-bit integers.
-#define TPRIu64 TXT( "I64u" )
-
-/// "tchar_t" string format macro for int_fast8_t.
-#define TPRIdFAST8 TPRId8
-/// "tchar_t" string format macro for int_fast16_t.
-#define TPRIdFAST16 TPRId32
-/// "tchar_t" string format macro for int_fast32_t.
-#define TPRIdFAST32 TPRId32
-/// "tchar_t" string format macro for int_fast64_t.
-#define TPRIdFAST64 TPRId64
-
-/// "tchar_t" string format macro for uint_fast8_t.
-#define TPRIuFAST8 TPRIu8
-/// "tchar_t" string format macro for uint_fast16_t.
-#define TPRIuFAST16 TPRIu32
-/// "tchar_t" string format macro for uint_fast32_t.
-#define TPRIuFAST32 TPRIu32
-/// "tchar_t" string format macro for uint_fast64_t.
-#define TPRIuFAST64 TPRIu64
-
-/// "tchar_t" string format macro for ptrdiff_t.
-#define TPRIdPD TXT( "Id" )
-/// "tchar_t" string format macro for size_t.
-#define TPRIuSZ TXT( "Iu" )
-
 //@}
 
 /// @defgroup intscanf Integer "scanf" Formatting Macros
@@ -191,88 +109,6 @@
 /// "char" string format macro for size_t.
 #define SCNuSZ "Iu"
 
-/// "wchar_t" string format macro for signed 8-bit integers.
-#define WSCNd8 L"hhd"
-/// "wchar_t" string format macro for signed 16-bit integers.
-#define WSCNd16 L"hd"
-/// "wchar_t" string format macro for signed 32-bit integers.
-#define WSCNd32 L"I32d"
-/// "wchar_t" string format macro for signed 64-bit integers.
-#define WSCNd64 L"I64d"
-
-/// "wchar_t" string format macro for unsigned 8-bit integers.
-#define WSCNu8 L"hhu"
-/// "wchar_t" string format macro for unsigned 16-bit integers.
-#define WSCNu16 L"hu"
-/// "wchar_t" string format macro for unsigned 32-bit integers.
-#define WSCNu32 L"I32u"
-/// "wchar_t" string format macro for unsigned 64-bit integers.
-#define WSCNu64 L"I64u"
-
-/// "wchar_t" string format macro for int_fast8_t.
-#define WSCNdFAST8 WSCNd8
-/// "wchar_t" string format macro for int_fast16_t.
-#define WSCNdFAST16 WSCNd32
-/// "wchar_t" string format macro for int_fast32_t.
-#define WSCNdFAST32 WSCNd32
-/// "wchar_t" string format macro for int_fast64_t.
-#define WSCNdFAST64 WSCNd64
-
-/// "wchar_t" string format macro for uint_fast8_t.
-#define WSCNuFAST8 WSCNu8
-/// "wchar_t" string format macro for uint_fast16_t.
-#define WSCNuFAST16 WSCNu32
-/// "wchar_t" string format macro for uint_fast32_t.
-#define WSCNuFAST32 WSCNu32
-/// "wchar_t" string format macro for uint_fast64_t.
-#define WSCNuFAST64 WSCNu64
-
-/// "wchar_t" string format macro for ptrdiff_t.
-#define WSCNdPD L"Id"
-/// "wchar_t" string format macro for size_t.
-#define WSCNuSZ L"Iu"
-
-/// "tchar_t" string format macro for signed 8-bit integers.
-#define TSCNd8 TXT( "hhd" )
-/// "tchar_t" string format macro for signed 16-bit integers.
-#define TSCNd16 TXT( "hd" )
-/// "tchar_t" string format macro for signed 32-bit integers.
-#define TSCNd32 TXT( "I32d" )
-/// "tchar_t" string format macro for signed 64-bit integers.
-#define TSCNd64 TXT( "I64d" )
-
-/// "tchar_t" string format macro for unsigned 8-bit integers.
-#define TSCNu8 TXT( "hhu" )
-/// "tchar_t" string format macro for unsigned 16-bit integers.
-#define TSCNu16 TXT( "hu" )
-/// "tchar_t" string format macro for unsigned 32-bit integers.
-#define TSCNu32 TXT( "I32u" )
-/// "tchar_t" string format macro for unsigned 64-bit integers.
-#define TSCNu64 TXT( "I64u" )
-
-/// "tchar_t" string format macro for int_fast8_t.
-#define TSCNdFAST8 TSCNd8
-/// "tchar_t" string format macro for int_fast16_t.
-#define TSCNdFAST16 TSCNd32
-/// "tchar_t" string format macro for int_fast32_t.
-#define TSCNdFAST32 TSCNd32
-/// "tchar_t" string format macro for int_fast64_t.
-#define TSCNdFAST64 TSCNd64
-
-/// "tchar_t" string format macro for uint_fast8_t.
-#define TSCNuFAST8 TSCNu8
-/// "tchar_t" string format macro for uint_fast16_t.
-#define TSCNuFAST16 TSCNu32
-/// "tchar_t" string format macro for uint_fast32_t.
-#define TSCNuFAST32 TSCNu32
-/// "tchar_t" string format macro for uint_fast64_t.
-#define TSCNuFAST64 TSCNu64
-
-/// "tchar_t" string format macro for ptrdiff_t.
-#define TSCNdPD TXT( "Id" )
-/// "tchar_t" string format macro for size_t.
-#define TSCNuSZ TXT( "Iu" )
-
 //@}
 
 /// @defgroup stringprintf Char/String "printf" Formatting Macros
@@ -286,34 +122,19 @@
 #define PRIlc "lc"
 #define PRIls "ls"
 
-#define WPRItc L"c"
-#define WPRIts L"s"
-#define WPRIc L"hc"
-#define WPRIs L"hs"
-#define WPRIlc L"lc"
-#define WPRIls L"ls"
-
-#define TPRItc TXT( "c" )
-#define TPRIts TXT( "s" )
-#define TPRIc TXT( "hc" )
-#define TPRIs TXT( "hs" )
-#define TPRIlc TXT( "lc" )
-#define TPRIls TXT( "ls" )
-
 //@}
 
 #else  // HELIUM_CC_CL
 
-// Use inttypes.h where available; we simply try to provide relevant type definitions for platforms that don't provide
-// it.
+// Use inttypes.h where available; we simply try to provide relevant type definitions for platforms that don't provide it.
 #include <inttypes.h>
 
 #if defined(__GNUC__)
 /*these two are compiler defined */
 /// "tchar_t" string format macro for ptrdiff_t.
-#define TPRIdPD TXT( "td" )
+#define PRIdPD TXT( "td" )
 // "tchar_t" string format macro for size_t.
-#define TPRIuSZ TXT( "zu" )
+#define PRIuSZ TXT( "zu" )
 #endif
 
 #endif  // HELIUM_CC_CL

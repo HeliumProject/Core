@@ -196,7 +196,7 @@ void DynamicMemoryHeap::LogMemoryStats()
 
         HELIUM_TRACE(
             TraceLevels::Debug,
-            TXT( "%s\t%" ) TPRIuSZ TXT( "\t%" ) TPRIuSZ TXT( "\n" ),
+            TXT( "%s\t%" ) PRIuSZ TXT( "\t%" ) PRIuSZ TXT( "\n" ),
             pName,
             allocationCount,
             bytesActual );
@@ -234,7 +234,7 @@ void DynamicMemoryHeap::LogMemoryStats()
             {
                 HELIUM_TRACE(
                     TraceLevels::Debug,
-                    TXT( "%" ) TPRIuSZ TXT( ": 0x%p (%s)\n" ),
+                    TXT( "%" ) PRIuSZ TXT( ": 0x%p (%s)\n" ),
                     allocationIndex,
                     iter->first,
                     pHeapName );
