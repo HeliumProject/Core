@@ -51,46 +51,10 @@ static int VirtualMemoryFree( void* pMemory, size_t size )
 /// @param[in] ...      Format arguments.
 static void PrintfWrapper( const char* pFormat, ... )
 {
-#if HELIUM_WCHAR_T
-    char message[ Helium::Trace::DEFAULT_MESSAGE_BUFFER_SIZE ];
-
-    va_list argList;
-    va_start( argList, pFormat );
-#if HELIUM_OS_WIN
-    _snprintf( message, HELIUM_ARRAY_COUNT( message ), pFormat, argList );
-#else
-	snprintf( message, HELIUM_ARRAY_COUNT( message ), pFormat, argList );
-#endif
-    va_end( argList );
-
-    message[ HELIUM_ARRAY_COUNT( message ) - 1 ] = '\0';
-
-    // Do a direct conversion, assuming memory allocator logging is only using 7-bit ASCII text.
-    wchar_t messageWide[ Helium::Trace::DEFAULT_MESSAGE_BUFFER_SIZE ];
-
-    const char* pSourceCharacter = &message[ 0 ];
-    wchar_t* pDestCharacter = &messageWide[ 0 ];
-    for( ; ; )
-    {
-        uint8_t character = *pSourceCharacter;
-        *pDestCharacter = static_cast< wchar_t >( character );
-
-        if( character == '\0' )
-        {
-            break;
-        }
-
-        ++pSourceCharacter;
-        ++pDestCharacter;
-    }
-
-    HELIUM_TRACE( Helium::TraceLevels::Debug, TXT( "%s" ), messageWide );
-#else
     va_list argList;
     va_start( argList, pFormat );
     HELIUM_TRACE_VA( Helium::TraceLevels::Debug, pFormat, argList );
     va_end( argList );
-#endif
 }
 #endif  // HELIUM_ENABLE_TRACE
 

@@ -39,16 +39,9 @@ namespace Helium
 		Helium::ConvertString( chars, convertedChars, convertedChars##Count ); \
 	}
 
-#if HELIUM_WCHAR_T
-# define HELIUM_TCHAR_TO_CHAR( chars, convertedChars ) HELIUM_CONVERT_TO_CHAR( chars, convertedChars )
-# define HELIUM_CHAR_TO_TCHAR( chars, convertedChars ) HELIUM_CONVERT_TO_WIDE( chars, convertedChars )
-# define HELIUM_TCHAR_TO_WIDE( chars, convertedChars ) const wchar_t* convertedChars = chars;
-# define HELIUM_WIDE_TO_TCHAR( chars, convertedChars ) const wchar_t* convertedChars = chars;
-#else
-# define HELIUM_TCHAR_TO_CHAR( chars, convertedChars ) const wchar_t* convertedChars = chars;
-# define HELIUM_CHAR_TO_TCHAR( chars, convertedChars ) const wchar_t* convertedChars = chars;
-# define HELIUM_TCHAR_TO_WIDE( chars, convertedChars ) HELIUM_CONVERT_TO_WIDE( chars, convertedChars )
-# define HELIUM_WIDE_TO_TCHAR( chars, convertedChars ) HELIUM_CONVERT_TO_CHAR( chars, convertedChars )
-#endif
+#define HELIUM_TCHAR_TO_CHAR( chars, convertedChars ) const wchar_t* convertedChars = chars;
+#define HELIUM_CHAR_TO_TCHAR( chars, convertedChars ) const wchar_t* convertedChars = chars;
+#define HELIUM_TCHAR_TO_WIDE( chars, convertedChars ) HELIUM_CONVERT_TO_WIDE( chars, convertedChars )
+#define HELIUM_WIDE_TO_TCHAR( chars, convertedChars ) HELIUM_CONVERT_TO_CHAR( chars, convertedChars )
 
 #include "Platform/Encoding.inl"

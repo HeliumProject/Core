@@ -170,24 +170,11 @@ typedef double float64_t;
 # endif
 #endif
 
-#ifdef HELIUM_WCHAR_T
-
-/// Default character type.
-typedef wchar_t tchar_t;
-
-/// Prefix for declaring string and character literals of the default character type.
-#define TXT2(X) L ## X
-#define TXT(X) TXT2(X)
-
-#else  // HELIUM_WCHAR_T
-
 /// Default character type.
 typedef char tchar_t;
 
 /// Prefix for declaring string and character literals of the default character type.
 #define TXT( X ) X
-
-#endif  // HELIUM_WCHAR_T
 
 typedef std::basic_string< tchar_t > tstring;
 
