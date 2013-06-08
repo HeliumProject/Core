@@ -885,7 +885,7 @@ size_t Helium::RedBlackTree< Value, Key, ExtractKey, CompareKey, Allocator, Inte
     {
         HELIUM_TRACE(
             TraceLevels::Debug,
-            TXT( "Invalid RedBlackTree node index %" ) TPRIuSZ TXT( " (max: %" ) TPRIuSZ TXT( ").\n" ),
+            TXT( "Invalid RedBlackTree node index %" ) PRIuSZ TXT( " (max: %" ) PRIuSZ TXT( ").\n" ),
             nodeIndex,
             m_values.GetSize() );
 
@@ -905,7 +905,7 @@ size_t Helium::RedBlackTree< Value, Key, ExtractKey, CompareKey, Allocator, Inte
         {
             HELIUM_TRACE(
                 TraceLevels::Debug,
-                TXT( "Consecutive red nodes found in RedBlackTree (nodes %" ) TPRIuSZ TXT( " and %" ) TPRIuSZ TXT( ").\n" ),
+                TXT( "Consecutive red nodes found in RedBlackTree (nodes %" ) PRIuSZ TXT( " and %" ) PRIuSZ TXT( ").\n" ),
                 nodeIndex,
                 child0Index );
 
@@ -916,7 +916,7 @@ size_t Helium::RedBlackTree< Value, Key, ExtractKey, CompareKey, Allocator, Inte
         {
             HELIUM_TRACE(
                 TraceLevels::Debug,
-                TXT( "Consecutive red nodes found in RedBlackTree (nodes %" ) TPRIuSZ TXT( " and %" ) TPRIuSZ TXT( ").\n" ),
+                TXT( "Consecutive red nodes found in RedBlackTree (nodes %" ) PRIuSZ TXT( " and %" ) PRIuSZ TXT( ").\n" ),
                 nodeIndex,
                 child1Index );
 
@@ -936,7 +936,7 @@ size_t Helium::RedBlackTree< Value, Key, ExtractKey, CompareKey, Allocator, Inte
         {
             HELIUM_TRACE(
                 TraceLevels::Debug,
-                TXT( "RedBlackTree sort mismatch between node %" ) TPRIuSZ TXT( " and child node %" ) TPRIuSZ TXT( ".\n" ),
+                TXT( "RedBlackTree sort mismatch between node %" ) PRIuSZ TXT( " and child node %" ) PRIuSZ TXT( ".\n" ),
                 nodeIndex,
                 child0Index );
 
@@ -951,7 +951,7 @@ size_t Helium::RedBlackTree< Value, Key, ExtractKey, CompareKey, Allocator, Inte
         {
             HELIUM_TRACE(
                 TraceLevels::Debug,
-                TXT( "RedBlackTree sort mismatch between node %" ) TPRIuSZ TXT( " and child node %" ) TPRIuSZ TXT( ".\n" ),
+                TXT( "RedBlackTree sort mismatch between node %" ) PRIuSZ TXT( " and child node %" ) PRIuSZ TXT( ".\n" ),
                 nodeIndex,
                 child1Index );
 
@@ -985,8 +985,8 @@ size_t Helium::RedBlackTree< Value, Key, ExtractKey, CompareKey, Allocator, Inte
     {
         HELIUM_TRACE(
             TraceLevels::Debug,
-            ( TXT( "RedBlackTree black node depth mismatch between subtrees at nodes %" ) TPRIuSZ TXT( " (%" ) TPRIuSZ
-              TXT( " black nodes) and %" ) TPRIuSZ TXT( " (%" ) TPRIuSZ TXT( " black nodes).\n" ) ),
+            ( TXT( "RedBlackTree black node depth mismatch between subtrees at nodes %" ) PRIuSZ TXT( " (%" ) PRIuSZ
+              TXT( " black nodes) and %" ) PRIuSZ TXT( " (%" ) PRIuSZ TXT( " black nodes).\n" ) ),
             child0Index,
             child0BlackNodeCount,
             child1Index,
