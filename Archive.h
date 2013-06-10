@@ -87,7 +87,7 @@ namespace Helium
 			const Archive&  m_Archive;
 			ArchiveState    m_State;
 			int             m_Progress;
-			tstring         m_Info;
+			std::string         m_Info;
 			mutable bool    m_Abort; // flag this if you want to give up
 		};
 		typedef Helium::Signature< const ArchiveStatus& > ArchiveStatusSignature;
@@ -185,9 +185,9 @@ namespace Helium
 		HELIUM_PERSIST_API ArchiveWriterPtr GetWriter( const FilePath& path, Reflect::ObjectIdentifier* identifier = NULL, ArchiveType archiveType = ArchiveTypes::Auto );
 		HELIUM_PERSIST_API ArchiveReaderPtr GetReader( const FilePath& path, Reflect::ObjectResolver* resolver = NULL, ArchiveType archiveType = ArchiveTypes::Auto );
 
-		HELIUM_PERSIST_API bool ToArchive( const FilePath& path, Reflect::ObjectPtr object, Reflect::ObjectIdentifier* identifier = NULL, ArchiveType archiveType = ArchiveTypes::Auto, tstring* error = NULL );
-		HELIUM_PERSIST_API bool FromArchive( const FilePath& path, Reflect::ObjectPtr& object, Reflect::ObjectResolver* resolver = NULL, ArchiveType archiveType = ArchiveTypes::Auto, tstring* error = NULL );
-		HELIUM_PERSIST_API Reflect::ObjectPtr FromArchive( const FilePath& path, Reflect::ObjectResolver* resolver = NULL, ArchiveType archiveType = ArchiveTypes::Auto, tstring* error = NULL );
+		HELIUM_PERSIST_API bool ToArchive( const FilePath& path, Reflect::ObjectPtr object, Reflect::ObjectIdentifier* identifier = NULL, ArchiveType archiveType = ArchiveTypes::Auto, std::string* error = NULL );
+		HELIUM_PERSIST_API bool FromArchive( const FilePath& path, Reflect::ObjectPtr& object, Reflect::ObjectResolver* resolver = NULL, ArchiveType archiveType = ArchiveTypes::Auto, std::string* error = NULL );
+		HELIUM_PERSIST_API Reflect::ObjectPtr FromArchive( const FilePath& path, Reflect::ObjectResolver* resolver = NULL, ArchiveType archiveType = ArchiveTypes::Auto, std::string* error = NULL );
 	}
 }
 

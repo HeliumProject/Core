@@ -13,7 +13,7 @@ namespace Helium
 		class Exception : public Helium::Exception
 		{
 		public:
-			Exception( const tchar_t *msgFormat, ... )
+			Exception( const char *msgFormat, ... )
 			{
 				va_list msgArgs;
 				va_start( msgArgs, msgFormat );
@@ -32,7 +32,7 @@ namespace Helium
 		class StreamException : public Persist::Exception
 		{
 		public:
-			StreamException( const tchar_t* msgFormat, ... )
+			StreamException( const char* msgFormat, ... )
 			{
 				va_list msgArgs;
 				va_start( msgArgs, msgFormat );

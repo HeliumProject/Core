@@ -208,7 +208,7 @@ ArchiveReaderPtr Persist::GetReader( const FilePath& path, ObjectResolver* resol
 	throw Persist::StreamException( TXT( "Unknown archive type" ) );
 }
 
-bool Persist::ToArchive( const FilePath& path, ObjectPtr object, ObjectIdentifier* identifier, ArchiveType archiveType, tstring* error )
+bool Persist::ToArchive( const FilePath& path, ObjectPtr object, ObjectIdentifier* identifier, ArchiveType archiveType, std::string* error )
 {
 	HELIUM_ASSERT( !path.empty() );
 	PERSIST_SCOPE_TIMER( ( "%s", path.c_str() ) );
@@ -242,7 +242,7 @@ bool Persist::ToArchive( const FilePath& path, ObjectPtr object, ObjectIdentifie
 		}
 		catch ( Helium::Exception& ex )
 		{
-			tstringstream str;
+			std::stringstream str;
 			str << "While writing '" << path.c_str() << "': " << ex.Get();
 
 			if ( error )
@@ -280,7 +280,7 @@ bool Persist::ToArchive( const FilePath& path, ObjectPtr object, ObjectIdentifie
 	}
 	catch ( Helium::Exception& ex )
 	{
-		tstringstream str;
+		std::stringstream str;
 		str << "While moving '" << safetyPath.c_str() << "' to '" << path.c_str() << "': " << ex.Get();
 
 		if ( error )
@@ -295,7 +295,7 @@ bool Persist::ToArchive( const FilePath& path, ObjectPtr object, ObjectIdentifie
 	return true;
 }
 
-bool Persist::FromArchive( const FilePath& path, ObjectPtr& object, ObjectResolver* resolver, ArchiveType archiveType, tstring* error )
+bool Persist::FromArchive( const FilePath& path, ObjectPtr& object, ObjectResolver* resolver, ArchiveType archiveType, std::string* error )
 {
 	HELIUM_ASSERT( !path.empty() );
 	PERSIST_SCOPE_TIMER( ( "%s", path.c_str() ) );
@@ -322,7 +322,7 @@ bool Persist::FromArchive( const FilePath& path, ObjectPtr& object, ObjectResolv
 		}
 		catch ( Helium::Exception& ex )
 		{
-			tstringstream str;
+			std::stringstream str;
 			str << "While reading '" << path.c_str() << "': " << ex.Get();
 
 			if ( error )
@@ -351,7 +351,7 @@ bool Persist::FromArchive( const FilePath& path, ObjectPtr& object, ObjectResolv
 	return true;
 }
 
-ObjectPtr Persist::FromArchive( const FilePath& path, ObjectResolver* resolver, ArchiveType archiveType, tstring* error )
+ObjectPtr Persist::FromArchive( const FilePath& path, ObjectResolver* resolver, ArchiveType archiveType, std::string* error )
 {
 	ObjectPtr object;
 	FromArchive( path, object, resolver, archiveType, error );
