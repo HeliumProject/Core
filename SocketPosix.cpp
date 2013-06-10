@@ -164,7 +164,7 @@ bool Socket::Listen()
     return true;
 }
 
-bool Socket::Connect( uint16_t port, const tchar_t* ip )
+bool Socket::Connect( uint16_t port, const char* ip )
 {
     bool result = false;
 
@@ -194,8 +194,8 @@ bool Socket::Read(void* buffer, uint32_t bytes, uint32_t& read, sockaddr_in* pee
     sockaddr_in addr;
     socklen_t addrLen = sizeof( addr );
     bool udp = m_Protocol == SocketProtocols::Udp;
-    int32_t local_read = udp ? ::recvfrom( m_Handle, (tchar_t*)buffer, bytes, 0, (sockaddr*)(peer ? peer : &addr), &addrLen ) :
-                               ::recv    ( m_Handle, (tchar_t*)buffer, bytes, 0 );
+    int32_t local_read = udp ? ::recvfrom( m_Handle, (char*)buffer, bytes, 0, (sockaddr*)(peer ? peer : &addr), &addrLen ) :
+                               ::recv    ( m_Handle, (char*)buffer, bytes, 0 );
     if (local_read < 0)
     {
         return false;
@@ -206,7 +206,7 @@ bool Socket::Read(void* buffer, uint32_t bytes, uint32_t& read, sockaddr_in* pee
     return true;
 }
 
-bool Socket::Write(void* buffer, uint32_t bytes, uint32_t& wrote, const tchar_t* ip, uint16_t port)
+bool Socket::Write(void* buffer, uint32_t bytes, uint32_t& wrote, const char* ip, uint16_t port)
 {
     sockaddr_in addr;
     addr.sin_family = AF_INET;
@@ -223,8 +223,8 @@ bool Socket::Write(void* buffer, uint32_t bytes, uint32_t& wrote, const tchar_t*
     }
 
     uint32_t addrLen = sizeof( addr );
-    int32_t local_wrote = udp ? ::sendto( m_Handle, (tchar_t*)buffer, bytes, 0, (sockaddr*)&addr, addrLen ) :
-                                ::send  ( m_Handle, (tchar_t*)buffer, bytes, 0 );
+    int32_t local_wrote = udp ? ::sendto( m_Handle, (char*)buffer, bytes, 0, (sockaddr*)&addr, addrLen ) :
+                                ::send  ( m_Handle, (char*)buffer, bytes, 0 );
     if (local_wrote < 0)
     {
         return false;

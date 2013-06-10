@@ -88,7 +88,7 @@ Thread::Thread()
     : m_Handle( 0 )
     , m_Valid( false )
 {
-    m_Name[0] = tchar_t('\0');
+    m_Name[0] = char('\0');
 }
 
 Thread::~Thread()
@@ -96,12 +96,12 @@ Thread::~Thread()
     Join();
 }
 
-bool Thread::Start( const tchar_t* pName, ThreadPriority priority )
+bool Thread::Start( const char* pName, ThreadPriority priority )
 {
     HELIUM_ASSERT( priority >= ThreadPriorities::Lowest && priority <= ThreadPriorities::Inherit );
 
     // Cache the name
-    MemoryCopy( m_Name, pName, sizeof( m_Name ) / sizeof( tchar_t ) );
+    MemoryCopy( m_Name, pName, sizeof( m_Name ) / sizeof( char ) );
 
     pthread_attr_t attr;
     HELIUM_VERIFY( pthread_attr_init(&attr) == 0 );

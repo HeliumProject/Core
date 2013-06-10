@@ -15,12 +15,12 @@
 
 using namespace Helium;
 
-int Helium::Execute( const tstring& command )
+int Helium::Execute( const std::string& command )
 {
 	return system( command.c_str() );
 }
 
-int Helium::Execute( const tstring& command, tstring& output )
+int Helium::Execute( const std::string& command, std::string& output )
 {
 	FILE* f = popen( command.c_str(), "r" );
 
@@ -34,14 +34,14 @@ int Helium::Execute( const tstring& command, tstring& output )
 	return pclose( f );
 }
 
-tstring Helium::GetProcessString()
+std::string Helium::GetProcessString()
 {
-	tostringstream result;
+	std::ostringstream result;
 	result << GetProcessName() << "_" << getpid() << "_" << syscall(SYS_gettid);
 	return result.str();
 }
 
-tstring Helium::GetProcessPath()
+std::string Helium::GetProcessPath()
 {
 	char buf[ PATH_MAX ];
 	size_t len = readlink("/proc/self/exe", buf, sizeof(buf));
@@ -49,11 +49,11 @@ tstring Helium::GetProcessPath()
 	return buf;
 }
 
-tstring Helium::GetProcessName()
+std::string Helium::GetProcessName()
 {
-	tstring path = GetProcessPath();
+	std::string path = GetProcessPath();
 	size_t pos = path.find( Helium::PathSeparator );
-	if ( pos != tstring::npos )
+	if ( pos != std::string::npos )
 	{ 
 		return path.substr( pos );
 	}
@@ -62,7 +62,7 @@ tstring Helium::GetProcessName()
 	return "";
 }
 
-tstring Helium::GetUserName()
+std::string Helium::GetUserName()
 {
 	const char* user = getenv( "USER" );
 	if ( user )
@@ -73,7 +73,7 @@ tstring Helium::GetUserName()
 	return "";
 }
 
-tstring Helium::GetMachineName()
+std::string Helium::GetMachineName()
 {
 	const char* user = getenv( "HOSTNAME" );
 	if ( user )
@@ -84,30 +84,30 @@ tstring Helium::GetMachineName()
 	return "";
 }
 
-tstring Helium::GetPreferencesDirectory()
+std::string Helium::GetPreferencesDirectory()
 {
 	const char* home = getenv( "HOME" );
-	tstring path = home;
+	std::string path = home;
 	path += "/.";
 	path += GetProcessName();
 	path += "/preferences/";
 	return path;
 }
 
-tstring Helium::GetAppDataDirectory()
+std::string Helium::GetAppDataDirectory()
 {
 	const char* home = getenv( "HOME" );
-	tstring path = home;
+	std::string path = home;
 	path += "/.";
 	path += GetProcessName();
 	path += "/data/";
 	return path;
 }
 
-tstring Helium::GetDumpDirectory()
+std::string Helium::GetDumpDirectory()
 {
 	const char* home = getenv( "HOME" );
-	tstring path = home;
+	std::string path = home;
 	path += "/.";
 	path += GetProcessName();
 	path += "/dumps/";

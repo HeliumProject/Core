@@ -68,7 +68,7 @@ bool Helium::IsDebuggerPresent()
 /// Write a string to any platform-specific debug log output.
 ///
 /// @param[in] pMessage  Message string to write to the debug log.
-void Helium::DebugLog( const tchar_t* pMessage )
+void Helium::DebugLog( const char* pMessage )
 {
 	Print( ConsoleColors::Red, stderr, pMessage );
 }

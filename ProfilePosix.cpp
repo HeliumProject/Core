@@ -4,7 +4,7 @@
 #include <pthread.h>
 #include <assert.h>
 
-void Helium::TraceFile::Open(const tchar_t* file)
+void Helium::TraceFile::Open(const char* file)
 {
 
 }
@@ -14,12 +14,12 @@ void Helium::TraceFile::Close()
 
 }
 
-void Helium::TraceFile::Write(const tchar_t* data, int size)
+void Helium::TraceFile::Write(const char* data, int size)
 {
 
 }
 
-const tchar_t* Helium::TraceFile::GetFilePath()
+const char* Helium::TraceFile::GetFilePath()
 {
     return NULL;
 }
@@ -42,7 +42,7 @@ float Helium::TimeTaken(uint64_t start_time)
     return CyclesToMillis(time);
 }
 
-void Helium::ReportTime(const tchar_t* segment, uint64_t start_time, double& total_millis)
+void Helium::ReportTime(const char* segment, uint64_t start_time, double& total_millis)
 {
     uint64_t time = TimerGetClock() - start_time;
     double millis = CyclesToMillis(time);

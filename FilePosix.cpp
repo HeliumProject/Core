@@ -36,7 +36,7 @@ bool File::IsOpen() const
 	return m_Handle >= 0;
 }
 
-bool File::Open( const tchar_t* filename, FileMode mode, bool truncate )
+bool File::Open( const char* filename, FileMode mode, bool truncate )
 {
 	mode_t flags = 0;
 	switch ( mode )
@@ -143,7 +143,7 @@ Status::Status()
 
 }
 
-bool Status::Read( const tchar_t* path )
+bool Status::Read( const char* path )
 {
 	struct stat status;
 	if ( 0 == stat( path, &status ) )
@@ -192,12 +192,12 @@ bool Status::Read( const tchar_t* path )
 // Directory info
 //
 
-DirectoryEntry::DirectoryEntry( const tstring& name )
+DirectoryEntry::DirectoryEntry( const std::string& name )
 	: m_Name( name )
 {
 }
 
-Directory::Directory( const tstring& path )
+Directory::Directory( const std::string& path )
 	: m_Path( path )
 	, m_Handle( NULL )
 {
@@ -253,16 +253,16 @@ bool Directory::Close()
 // File system ops
 //
 
-const tchar_t Helium::PathSeparator = TXT('/');
+const char Helium::PathSeparator = TXT('/');
 
-void Helium::GetFullPath( const tchar_t* path, tstring& fullPath )
+void Helium::GetFullPath( const char* path, std::string& fullPath )
 {
 	char* p = realpath( path, NULL );
 	fullPath = p;
 	free( p );
 }
 
-bool Helium::IsAbsolute( const tchar_t* path )
+bool Helium::IsAbsolute( const char* path )
 {
 	if ( path && path[0] != '\0' )
 	{
@@ -275,11 +275,11 @@ bool Helium::IsAbsolute( const tchar_t* path )
 	return false;
 }
 
-static void SplitDirectories( const tstring& path, std::vector< tstring >& output )
+static void SplitDirectories( const std::string& path, std::vector< std::string >& output )
 {
-	tstring::size_type start = 0; 
-	tstring::size_type end = 0; 
-	while ( ( end = path.find( Helium::PathSeparator, start ) ) != tstring::npos )
+	std::string::size_type start = 0; 
+	std::string::size_type end = 0; 
+	while ( ( end = path.find( Helium::PathSeparator, start ) ) != std::string::npos )
 	{ 
 		output.push_back( path.substr( start, end - start ) ); 
 		start = end + 1;
@@ -287,16 +287,16 @@ static void SplitDirectories( const tstring& path, std::vector< tstring >& outpu
 	output.push_back( path.substr( start ) ); 
 }
 
-bool Helium::MakePath( const tchar_t* path )
+bool Helium::MakePath( const char* path )
 {
-	std::vector< tstring > directories;
+	std::vector< std::string > directories;
 	SplitDirectories( path, directories );
 
 	struct stat status;
-	tstring currentDirectory;
+	std::string currentDirectory;
 	currentDirectory.reserve( PATH_MAX );
 	currentDirectory = directories[ 0 ];
-	for( std::vector< tstring >::const_iterator itr = directories.begin() + 1, end = directories.end(); itr != end; ++itr )
+	for( std::vector< std::string >::const_iterator itr = directories.begin() + 1, end = directories.end(); itr != end; ++itr )
 	{
 		if ( !IsAbsolute( currentDirectory.c_str() ) && stat( currentDirectory.c_str(), &status ) != 0 )
 		{
@@ -306,13 +306,13 @@ bool Helium::MakePath( const tchar_t* path )
 			}
 		}
 
-		currentDirectory += tstring( "/" ) + *itr;
+		currentDirectory += std::string( "/" ) + *itr;
 	}
 
 	return true;
 }
 
-bool Helium::Copy( const tchar_t* source, const tchar_t* dest, bool overwrite )
+bool Helium::Copy( const char* source, const char* dest, bool overwrite )
 {
 #if HELIUM_OS_LINUX
 #define splice(a, b, c) splice(a, 0, b, 0, c, 0)
@@ -327,7 +327,7 @@ bool Helium::Copy( const tchar_t* source, const tchar_t* dest, bool overwrite )
 #endif
 }
 
-bool Helium::Move( const tchar_t* source, const tchar_t* dest )
+bool Helium::Move( const char* source, const char* dest )
 {
 	if ( Copy( source, dest, true ) )
 	{
@@ -337,7 +337,7 @@ bool Helium::Move( const tchar_t* source, const tchar_t* dest )
 	return false;
 }
 
-bool Helium::Delete( const tchar_t* path )
+bool Helium::Delete( const char* path )
 {
 	return unlink( path ) != 0;
 }

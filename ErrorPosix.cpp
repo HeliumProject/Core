@@ -9,7 +9,7 @@ uint32_t Helium::GetLastError()
     return errno;
 }
 
-tstring Helium::GetErrorString( uint32_t errorOverride )
+std::string Helium::GetErrorString( uint32_t errorOverride )
 {
     return "Unknown";
 }
