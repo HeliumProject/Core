@@ -37,7 +37,7 @@ void ReflectSequenceInterpreter::InterpretField(const Field* field, const std::v
     label->a_HelpText.Set( field->GetProperty( TXT( "HelpText" ) ) );
     labelContainer->AddChild( label );
 
-    tstring temp;
+    std::string temp;
     field->GetProperty( TXT( "UIName" ), temp );
     if ( temp.empty() )
     {
@@ -109,7 +109,7 @@ void ReflectSequenceInterpreter::InterpretField(const Field* field, const std::v
     Data defaultData = field->CreateDefaultData();
     if (defaultData)
     {
-        tstringstream defaultStream;
+        std::stringstream defaultStream;
         *defaultData >> defaultStream;
         list->a_Default.Set( defaultStream.str() );
     }

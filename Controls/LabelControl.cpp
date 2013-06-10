@@ -14,7 +14,7 @@ Label::Label()
     a_ProportionalWidth.Set( 1.f/3.f );
 }
 
-bool Label::Process(const tstring& key, const tstring& value)
+bool Label::Process(const std::string& key, const std::string& value)
 {
     bool handled = false;
 
@@ -25,7 +25,7 @@ bool Label::Process(const tstring& key, const tstring& value)
 
     if ( key == LABEL_ATTR_TEXT )
     {
-        Bind( new StringFormatter<tstring>( new tstring( value ), true ) );
+        Bind( new StringFormatter<std::string>( new std::string( value ), true ) );
         return true;
     }
 

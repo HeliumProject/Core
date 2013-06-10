@@ -9,8 +9,8 @@ namespace Helium
 {
     namespace Inspect
     {
-        const static tchar_t BUTTON_ATTR_TEXT[] = TXT( "text" );
-        const static tchar_t BUTTON_ATTR_ICON[] = TXT( "icon" );
+        const static char BUTTON_ATTR_TEXT[] = TXT( "text" );
+        const static char BUTTON_ATTR_ICON[] = TXT( "icon" );
 
         class Button;
 
@@ -44,14 +44,14 @@ namespace Helium
             }
 
         protected:
-            virtual bool Process( const tstring& key, const tstring& value );
+            virtual bool Process( const std::string& key, const std::string& value );
 
         public:
             // Label on the button
-            Attribute< tstring > a_Label;
+            Attribute< std::string > a_Label;
 
             // Icon for the button
-            Attribute< tstring > a_Icon;
+            Attribute< std::string > a_Icon;
 
         protected:
             ButtonClickedSignature::Event m_ButtonClickedEvent;

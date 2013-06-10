@@ -114,7 +114,7 @@ bool Control::IsDefault() const
 	StringDataBinding* data = CastDataBinding<StringDataBinding, DataBindingTypes::String>( m_DataBinding );
 	if ( data )
 	{
-		tstring val;
+		std::string val;
 		data->Get(val);
 		return a_Default.Get() == val;
 	}
@@ -145,7 +145,7 @@ void Control::SetContextMenu(const ContextMenuPtr& contextMenu)
 	m_ContextMenu = contextMenu;
 }
 
-bool Control::Process(const tstring& key, const tstring& value)
+bool Control::Process(const std::string& key, const std::string& value)
 {
 	if ( key == ATTR_HELPTEXT )
 	{
@@ -200,7 +200,7 @@ void Control::Read()
 	SetDefaultAppearance( IsDefault() );
 }
 
-bool Control::ReadStringData(tstring& str) const
+bool Control::ReadStringData(std::string& str) const
 {
 	StringDataBinding* data = CastDataBinding<StringDataBinding, DataBindingTypes::String>( m_DataBinding );
 	if (data)
@@ -214,7 +214,7 @@ bool Control::ReadStringData(tstring& str) const
 	return false;
 }
 
-bool Control::ReadAllStringData(std::vector< tstring >& strs) const
+bool Control::ReadAllStringData(std::vector< std::string >& strs) const
 {
 	StringDataBinding* data = CastDataBinding<StringDataBinding, DataBindingTypes::String>( m_DataBinding );
 	if ( data )
@@ -262,19 +262,19 @@ bool Control::Write()
 	return true;
 }
 
-bool Control::WriteStringData(const tstring& str, bool preview)
+bool Control::WriteStringData(const std::string& str, bool preview)
 {
 	StringDataBinding* data = CastDataBinding<StringDataBinding, DataBindingTypes::String>( m_DataBinding );
 
 	return WriteTypedData(str, data, preview);
 }
 
-bool Control::WriteAllStringData(const std::vector< tstring >& strs, bool preview)
+bool Control::WriteAllStringData(const std::vector< std::string >& strs, bool preview)
 {
 	StringDataBinding* dataBinding = CastDataBinding<StringDataBinding, DataBindingTypes::String>( m_DataBinding );
 	if (dataBinding)
 	{
-		std::vector< tstring > currentValues;
+		std::vector< std::string > currentValues;
 		dataBinding->GetAll( currentValues );
 
 		if ( strs == currentValues )
@@ -282,7 +282,7 @@ bool Control::WriteAllStringData(const std::vector< tstring >& strs, bool previe
 			return true;
 		}
 
-		AutoPtr< Reflect::Translator > translator( Reflect::AllocateTranslator< std::vector< tstring > >() );
+		AutoPtr< Reflect::Translator > translator( Reflect::AllocateTranslator< std::vector< std::string > >() );
 		if ( !PreWrite( Reflect::Data( Reflect::Pointer( &currentValues ), translator.Ptr() ), preview ) )
 		{
 			Read();

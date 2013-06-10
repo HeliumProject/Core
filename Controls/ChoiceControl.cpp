@@ -17,7 +17,7 @@ Choice::Choice()
     m_ContextMenu->AddItem( TXT( "Set To Default" ), ContextMenuSignature::Delegate(this, &Choice::SetToDefault));
 }
 
-bool Choice::Process(const tstring& key, const tstring& value)
+bool Choice::Process(const std::string& key, const std::string& value)
 {
     if (Base::Process(key, value))
         return true;
@@ -73,7 +73,7 @@ void Choice::SetToDefault(const ContextMenuEventArgs& event)
     event.m_Control->Read();
 }
 
-bool Choice::Contains( const tstring& data )
+bool Choice::Contains( const std::string& data )
 {
     if ( IsRealized() )
     {

@@ -7,8 +7,8 @@ namespace Helium
 {
     namespace Inspect
     {
-        const static tchar_t CONTAINER_ATTR_NAME[] = TXT( "name" );
-        const static tchar_t CONTAINER_ATTR_ICON[] = TXT( "icon" );
+        const static char CONTAINER_ATTR_NAME[] = TXT( "name" );
+        const static char CONTAINER_ATTR_ICON[] = TXT( "icon" );
 
         ///////////////////////////////////////////////////////////////////////
         namespace UIHint
@@ -52,7 +52,7 @@ namespace Helium
             virtual void RemoveChild( Control* control );
             virtual void Clear();
 
-            const tstring& GetPath() const
+            const std::string& GetPath() const
             {
                 if ( m_Path.empty() )
                 {
@@ -62,7 +62,7 @@ namespace Helium
                 return m_Path;
             }
 
-            void BuildPath(tstring& path) const
+            void BuildPath(std::string& path) const
             {
                 if (m_Parent)
                 {
@@ -79,7 +79,7 @@ namespace Helium
             virtual void Bind(const DataBindingPtr& data) HELIUM_OVERRIDE;
 
             // process properties coming from script
-            virtual bool Process(const tstring& key, const tstring& value) HELIUM_OVERRIDE;
+            virtual bool Process(const std::string& key, const std::string& value) HELIUM_OVERRIDE;
 
             // populate
             virtual void Populate() HELIUM_OVERRIDE;
@@ -90,8 +90,8 @@ namespace Helium
             // updates the data based on the state of the UI
             virtual bool Write() HELIUM_OVERRIDE;
 
-            Attribute< tstring > a_Name;
-            Attribute< tstring > a_Icon;
+            Attribute< std::string > a_Name;
+            Attribute< std::string > a_Icon;
 
             mutable ControlSignature::Event     e_ControlAdded;
             mutable ControlSignature::Event     e_ControlRemoved;
@@ -107,7 +107,7 @@ namespace Helium
             V_Control m_Children;
 
             // the path of the container
-            mutable tstring m_Path;
+            mutable std::string m_Path;
 
             UIHints m_UIHints;
         };

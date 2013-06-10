@@ -16,12 +16,12 @@ namespace Helium
             static void Cleanup();
 
         private:
-            static bool PreProcess(tstring& script);
-            static void ParseAttributes(tstring& attributes, Control* control);
+            static bool PreProcess(std::string& script);
+            static void ParseAttributes(std::string& attributes, Control* control);
 
         public:
             // parses script data and binds controls to data
-            static bool Parse(const tstring& script, Interpreter* interpreter, Canvas* canvas, Container* output, uint32_t fieldFlags = 0);
+            static bool Parse(const std::string& script, Interpreter* interpreter, Canvas* canvas, Container* output, uint32_t fieldFlags = 0);
         };
     }
 }

@@ -7,7 +7,7 @@ namespace Helium
 {
     namespace Inspect
     {
-        const static tchar_t LIST_ATTR_SORTED[]    = TXT( "sorted" );
+        const static char LIST_ATTR_SORTED[]    = TXT( "sorted" );
 
         namespace MoveDirections
         {
@@ -35,7 +35,7 @@ namespace Helium
             List();
 
         protected:
-            virtual bool Process(const tstring& key, const tstring& value) HELIUM_OVERRIDE;
+            virtual bool Process(const std::string& key, const std::string& value) HELIUM_OVERRIDE;
             void SetToDefault(const ContextMenuEventArgs& event);
 
         public:

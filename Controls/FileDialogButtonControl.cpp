@@ -6,7 +6,7 @@ REFLECT_DEFINE_OBJECT( Helium::Inspect::FileDialogButton );
 using namespace Helium;
 using namespace Helium::Inspect;
 
-bool FileDialogButton::Process(const tstring& key, const tstring& value)
+bool FileDialogButton::Process(const std::string& key, const std::string& value)
 {
     bool wasHandled = false;
 

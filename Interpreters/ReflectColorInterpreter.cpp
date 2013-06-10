@@ -26,7 +26,7 @@ void ReflectColorInterpreter::InterpretField( const Field* field, const std::vec
 
     LabelPtr label = CreateControl< Label >();
 
-    tstring temp;
+    std::string temp;
     field->GetProperty( TXT( "UIName" ), temp );
     if ( temp.empty() )
     {

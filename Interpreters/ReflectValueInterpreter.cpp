@@ -40,7 +40,7 @@ void ReflectValueInterpreter::InterpretField(const Field* field, const std::vect
 	// Parse
 	//
 
-	tstring fieldUI;
+	std::string fieldUI;
 	field->GetProperty( TXT( "UIScript" ), fieldUI );
 	bool result = Script::Parse(fieldUI, this, parent->GetCanvas(), container, field->m_Flags);
 
@@ -115,7 +115,7 @@ void ReflectValueInterpreter::InterpretField(const Field* field, const std::vect
 	{
 		label = CreateControl<Label>();
 
-		tstring temp;
+		std::string temp;
 		field->GetProperty( TXT( "UIName" ), temp );
 		if ( temp.empty() )
 		{

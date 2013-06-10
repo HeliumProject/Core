@@ -24,7 +24,7 @@ namespace Helium
             void Edit( const ButtonClickedArgs& args );
 
         protected:
-            tstring m_FileFilter;
+            std::string m_FileFilter;
         };
     }
 }

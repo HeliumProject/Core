@@ -21,10 +21,10 @@ public:
 
 	}
 
-	virtual bool Set(const tstring& s, const DataChangedSignature::Delegate& emitter = NULL)
+	virtual bool Set(const std::string& s, const DataChangedSignature::Delegate& emitter = NULL)
 	{
 		// get the full string set
-		tstring bitSet;
+		std::string bitSet;
 		MultiStringFormatter<Data>::Get( bitSet );
 
 		if ( s == TXT("1") )
@@ -68,7 +68,7 @@ public:
 		return MultiStringFormatter<Data>::Set( bitSet, emitter );
 	}
 
-	virtual void Get(tstring& s) const HELIUM_OVERRIDE
+	virtual void Get(std::string& s) const HELIUM_OVERRIDE
 	{
 		MultiStringFormatter<Data>::Get( s );
 
@@ -111,7 +111,7 @@ void ReflectBitfieldInterpreter::InterpretField(const Field* field, const std::v
 	// create the container
 	ContainerPtr container = CreateControl<Container>();
 
-	tstring temp;
+	std::string temp;
 	field->GetProperty( TXT( "UIName" ), temp );
 	if ( temp.empty() )
 	{

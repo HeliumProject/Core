@@ -15,7 +15,7 @@ Value::Value()
     m_ContextMenu->AddItem( TXT( "Set To Default" ), ContextMenuSignature::Delegate(this, &Value::SetToDefault));
 }
 
-bool Value::Process(const tstring& key, const tstring& value)
+bool Value::Process(const std::string& key, const std::string& value)
 {
     if ( Base::Process(key, value) )
     {

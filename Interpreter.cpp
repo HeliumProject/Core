@@ -57,7 +57,7 @@ void Interpreter::Push(Container* container)
     m_ContainerStack.Get().push(container);
 }
 
-Container* Interpreter::PushContainer( const tstring& name )
+Container* Interpreter::PushContainer( const std::string& name )
 {
     ContainerPtr container = CreateControl<Container>();
     container->a_Name.Set( name );
@@ -99,10 +99,10 @@ Container* Interpreter::Top()
     return NULL;
 }
 
-Label* Interpreter::AddLabel(const tstring& name)
+Label* Interpreter::AddLabel(const std::string& name)
 {
     LabelPtr control = new Label ();
-    control->Bind( new StringFormatter<tstring>( new tstring( name ), true ) );
+    control->Bind( new StringFormatter<std::string>( new std::string( name ), true ) );
 
     m_ContainerStack.Get().top()->AddChild(control);
 

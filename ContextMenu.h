@@ -21,9 +21,9 @@ namespace Helium
         {
             Control* m_Control;
 
-            const tstring& m_Item;
+            const std::string& m_Item;
 
-            ContextMenuEventArgs(Control* control, const tstring& item)
+            ContextMenuEventArgs(Control* control, const std::string& item)
                 : m_Control (control)
                 , m_Item (item)
             {
@@ -35,7 +35,7 @@ namespace Helium
         typedef Helium::Signature< const ContextMenuEventArgs&> ContextMenuSignature;
 
         // container for each delegate of each context menu item
-        typedef std::map<tstring, ContextMenuSignature::Delegate> M_ContextMenuDelegate;
+        typedef std::map<std::string, ContextMenuSignature::Delegate> M_ContextMenuDelegate;
 
 
         //
@@ -59,10 +59,10 @@ namespace Helium
             ContextMenu(Control* control);
             ~ContextMenu();
 
-            void AddItem(const tstring& item, ContextMenuSignature::Delegate delegate);
+            void AddItem(const std::string& item, ContextMenuSignature::Delegate delegate);
             void AddSeperator();
 
-            const std::vector< tstring >& GetItems()
+            const std::vector< std::string >& GetItems()
             {
                 return m_Items;
             }
@@ -75,7 +75,7 @@ namespace Helium
         private:
             Control*                m_Control;
             M_ContextMenuDelegate   m_Delegates;
-            std::vector< tstring >  m_Items;
+            std::vector< std::string >  m_Items;
         };
 
         typedef Helium::SmartPtr<ContextMenu> ContextMenuPtr;

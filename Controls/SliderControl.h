@@ -7,8 +7,8 @@ namespace Helium
 {
     namespace Inspect
     {
-        const static tchar_t SLIDER_ATTR_MIN[] = TXT( "min" );
-        const static tchar_t SLIDER_ATTR_MAX[] = TXT( "max" );
+        const static char SLIDER_ATTR_MIN[] = TXT( "min" );
+        const static char SLIDER_ATTR_MAX[] = TXT( "max" );
 
         class HELIUM_INSPECT_API Slider : public Control
         {
@@ -18,7 +18,7 @@ namespace Helium
             Slider();
 
         protected:
-            virtual bool Process( const tstring& key, const tstring& value );
+            virtual bool Process( const std::string& key, const std::string& value );
             void SetToDefault(const ContextMenuEventArgs& event);
 
         public:

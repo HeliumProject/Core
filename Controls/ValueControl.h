@@ -7,10 +7,10 @@ namespace Helium
 {
     namespace Inspect
     {
-        const static tchar_t TEXTBOX_ATTR_REQUIRED[] = TXT( "required" );
-        const static tchar_t TEXTBOX_ATTR_JUSTIFY[] = TXT( "justify" );
-        const static tchar_t TEXTBOX_ATTR_JUSTIFY_LEFT[] = TXT( "left" );
-        const static tchar_t TEXTBOX_ATTR_JUSTIFY_RIGHT[] = TXT( "right" );
+        const static char TEXTBOX_ATTR_REQUIRED[] = TXT( "required" );
+        const static char TEXTBOX_ATTR_JUSTIFY[] = TXT( "justify" );
+        const static char TEXTBOX_ATTR_JUSTIFY_LEFT[] = TXT( "left" );
+        const static char TEXTBOX_ATTR_JUSTIFY_RIGHT[] = TXT( "right" );
 
         namespace Justifications
         {
@@ -30,7 +30,7 @@ namespace Helium
             Value();
 
         protected:
-            virtual bool Process(const tstring& key, const tstring& value) HELIUM_OVERRIDE;
+            virtual bool Process(const std::string& key, const std::string& value) HELIUM_OVERRIDE;
             virtual void SetDefaultAppearance(bool def) HELIUM_OVERRIDE;
             void SetToDefault(const ContextMenuEventArgs& event);
 

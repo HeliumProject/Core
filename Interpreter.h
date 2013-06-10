@@ -15,14 +15,14 @@ namespace Helium
     {
         struct PopulateItem
         {
-            PopulateItem(const tstring& key, const tstring& data)
+            PopulateItem(const std::string& key, const std::string& data)
             {
                 m_Key = key;
                 m_Data = data;
             }
 
-            tstring m_Key;
-            tstring m_Data;
+            std::string m_Key;
+            std::string m_Data;
         };
 
         typedef std::vector<PopulateItem> V_PopulateItem;
@@ -38,9 +38,9 @@ namespace Helium
 
         struct SelectLinkArgs
         {
-            SelectLinkArgs(const tstring& id) : m_ID (id) {}
+            SelectLinkArgs(const std::string& id) : m_ID (id) {}
 
-            const tstring& m_ID;
+            const std::string& m_ID;
         };
         typedef Helium::Signature< const SelectLinkArgs&> SelectLinkSignature;
 
@@ -131,12 +131,12 @@ namespace Helium
             void Add(Control* control);
             void Push(Container* container);
 
-            Container* PushContainer( const tstring& name = TXT("") );
+            Container* PushContainer( const std::string& name = TXT("") );
             Container* Pop( bool setParent = true );
             Container* Top();
 
             // Label (no data binding)
-            Label* AddLabel(const tstring& name);
+            Label* AddLabel(const std::string& name);
 
             // Button that notifies a listener when it is clicked
             Button* AddButton( const ButtonClickedSignature::Delegate& listener );

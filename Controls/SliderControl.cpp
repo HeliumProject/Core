@@ -16,7 +16,7 @@ Slider::Slider()
     m_ContextMenu->AddItem( TXT( "Set To Default" ), ContextMenuSignature::Delegate(this, &Slider::SetToDefault));
 }
 
-bool Slider::Process( const tstring& key, const tstring& value )
+bool Slider::Process( const std::string& key, const std::string& value )
 {
     if (Base::Process(key, value))
     {
@@ -26,7 +26,7 @@ bool Slider::Process( const tstring& key, const tstring& value )
     if (key == SLIDER_ATTR_MIN)
     {
 		float min = 0.f;
-		tstringstream str ( value );
+		std::stringstream str ( value );
 		str >> min;
         a_Min.Set( min );
         return true;
@@ -34,7 +34,7 @@ bool Slider::Process( const tstring& key, const tstring& value )
     else if (key == SLIDER_ATTR_MAX)
     {
 		float max = 0.f;
-		tstringstream str ( value );
+		std::stringstream str ( value );
 		str >> max;
         a_Max.Set( max );
         return true;

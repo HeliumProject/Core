@@ -106,7 +106,7 @@ void Container::Bind(const DataBindingPtr& data)
     }
 }
 
-bool Container::Process(const tstring& key, const tstring& value)
+bool Container::Process(const std::string& key, const std::string& value)
 {
     if ( Base::Process( key, value ) )
     {

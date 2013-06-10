@@ -36,12 +36,12 @@ void ReflectInterpreter::InterpretType(const std::vector<Reflect::Object*>& inst
     // parse
     ContainerPtr scriptOutput = CreateControl<Container>();
 
-    tstring typeInfoUI;
+    std::string typeInfoUI;
     composite->GetProperty( TXT( "UIScript" ), typeInfoUI );
     bool result = Script::Parse(typeInfoUI, this, parent->GetCanvas(), scriptOutput);
 
     // compute container label
-    tstring labelText;
+    std::string labelText;
     if (result)
     {
         V_Control::const_iterator itr = scriptOutput->GetChildren().begin();
@@ -73,7 +73,7 @@ void ReflectInterpreter::InterpretType(const std::vector<Reflect::Object*>& inst
 
     container->a_Name.Set( labelText );
 
-    std::map< tstring, ContainerPtr > containersMap;
+    std::map< std::string, ContainerPtr > containersMap;
     containersMap.insert( std::make_pair( TXT( "" ), container) );
 
     std::stack< const Composite* > bases;
@@ -102,11 +102,11 @@ void ReflectInterpreter::InterpretType(const std::vector<Reflect::Object*>& inst
             // if we don't have flags (or we are included, and we aren't excluded) then make UI
             if ( ( noFlags || doInclude ) && ( dontExclude ) )
             {
-                tstring fieldUIGroup;
+                std::string fieldUIGroup;
                 field->GetProperty( TXT( "UIGroup" ), fieldUIGroup );
                 if ( !fieldUIGroup.empty() )
                 {
-                    std::map< tstring, ContainerPtr >::iterator itr = containersMap.find( fieldUIGroup );
+                    std::map< std::string, ContainerPtr >::iterator itr = containersMap.find( fieldUIGroup );
                     if ( itr == containersMap.end() )
                     {
                         // This container isn't in our list so make a new one
@@ -114,22 +114,22 @@ void ReflectInterpreter::InterpretType(const std::vector<Reflect::Object*>& inst
                         containersMap.insert( std::make_pair(fieldUIGroup, newContainer) );
 
                         ContainerPtr parent;
-                        tstring groupName;
+                        std::string groupName;
                         size_t idx = fieldUIGroup.find_last_of( TXT( "/" ) );
-                        if ( idx != tstring::npos )
+                        if ( idx != std::string::npos )
                         {
-                            tstring parentName = fieldUIGroup.substr( 0, idx );
+                            std::string parentName = fieldUIGroup.substr( 0, idx );
                             groupName = fieldUIGroup.substr( idx+1 );
                             if ( containersMap.find( parentName ) == containersMap.end() )
                             {          
                                 parent = CreateControl<Container>();
 
                                 // create the parent hierarchy since it hasn't already been made
-                                tstring currentParent = parentName;
+                                std::string currentParent = parentName;
                                 for (;;)
                                 {
                                     idx = currentParent.find_last_of( TXT( "/" ) );
-                                    if ( idx == tstring::npos )
+                                    if ( idx == std::string::npos )
                                     {
                                         // no more parents so we add it to the root
                                         containersMap.insert( std::make_pair(currentParent, parent) );
@@ -257,7 +257,7 @@ void ReflectInterpreter::InterpretType(const std::vector<Reflect::Object*>& inst
                         {
                             ContainerPtr childContainer = CreateControl<Container>();
 
-                            tstring temp;
+                            std::string temp;
                             field->GetProperty( TXT( "UIName" ), temp );
                             if ( temp.empty() )
                             {

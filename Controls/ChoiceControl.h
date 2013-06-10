@@ -7,10 +7,10 @@ namespace Helium
 {
     namespace Inspect
     {
-        const static tchar_t CHOICE_ATTR_ENUM[]      = TXT( "enum" );
-        const static tchar_t CHOICE_ATTR_SORTED[]    = TXT( "sorted" );
-        const static tchar_t CHOICE_ATTR_DROPDOWN[]  = TXT( "dropdown" );
-        const static tchar_t CHOICE_ATTR_PREFIX[]    = TXT( "prefix" );
+        const static char CHOICE_ATTR_ENUM[]      = TXT( "enum" );
+        const static char CHOICE_ATTR_SORTED[]    = TXT( "sorted" );
+        const static char CHOICE_ATTR_DROPDOWN[]  = TXT( "dropdown" );
+        const static char CHOICE_ATTR_PREFIX[]    = TXT( "prefix" );
 
         class Choice;
 
@@ -28,20 +28,20 @@ namespace Helium
 
         struct ChoiceEnumerateArgs : public ChoiceArgs
         {
-            ChoiceEnumerateArgs(Choice* choice, const tstring& enumeration)
+            ChoiceEnumerateArgs(Choice* choice, const std::string& enumeration)
                 : ChoiceArgs (choice)
                 , m_Enumeration (enumeration)
             {
 
             }
 
-            tstring m_Enumeration;
+            std::string m_Enumeration;
         };
         typedef Helium::Signature< const ChoiceEnumerateArgs&> ChoiceEnumerateSignature;
 
         struct ChoiceItem
         {
-            ChoiceItem(const tstring& key = TXT(""), const tstring& data = TXT(""))
+            ChoiceItem(const std::string& key = TXT(""), const std::string& data = TXT(""))
                 : m_Key( key )
                 , m_Data( data )
             {
@@ -58,8 +58,8 @@ namespace Helium
                 return !operator==( rhs );
             }
 
-            tstring m_Key;
-            tstring m_Data;
+            std::string m_Key;
+            std::string m_Data;
         };
 
         class HELIUM_INSPECT_API Choice : public Control
@@ -69,16 +69,16 @@ namespace Helium
 
             Choice();
 
-            virtual bool Process(const tstring& key, const tstring& value) HELIUM_OVERRIDE;
+            virtual bool Process(const std::string& key, const std::string& value) HELIUM_OVERRIDE;
             virtual void SetDefaultAppearance(bool def) HELIUM_OVERRIDE;
             void SetToDefault(const ContextMenuEventArgs& event);
 
-            const tstring& GetPrefix()
+            const std::string& GetPrefix()
             {
                 return m_Prefix;
             }
 
-            bool Contains(const tstring& data);
+            bool Contains(const std::string& data);
             void Clear();
 
             virtual void Populate() HELIUM_OVERRIDE;
@@ -93,8 +93,8 @@ namespace Helium
             ChoiceEnumerateSignature::Event         e_Enumerate;
 
         private:
-            tstring             m_Enum;
-            tstring             m_Prefix;
+            std::string             m_Enum;
+            std::string             m_Prefix;
         };
 
         typedef Helium::StrongPtr<Choice> ChoicePtr;

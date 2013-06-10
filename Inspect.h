@@ -14,9 +14,9 @@ namespace Helium
 
         struct EditFilePathArgs
         {
-            tstring m_File;
+            std::string m_File;
 
-            EditFilePathArgs( const tstring& file )
+            EditFilePathArgs( const std::string& file )
                 : m_File( file )
             {
 

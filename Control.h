@@ -16,9 +16,9 @@ namespace Helium
 		class Container;
 		class Canvas;
 
-		const static tchar_t ATTR_VALUE_TRUE[]    = TXT( "true" );
-		const static tchar_t ATTR_VALUE_FALSE[]   = TXT( "false" );
-		const static tchar_t ATTR_HELPTEXT[]      = TXT( "helptext" );
+		const static char ATTR_VALUE_TRUE[]    = TXT( "true" );
+		const static char ATTR_VALUE_FALSE[]   = TXT( "false" );
+		const static char ATTR_HELPTEXT[]      = TXT( "helptext" );
 
 		//
 		// Event Args and Signatures
@@ -213,7 +213,7 @@ namespace Helium
 			virtual void SetContextMenu(const ContextMenuPtr& contextMenu);
 
 			// process individual attribute key
-			virtual bool Process(const tstring& key, const tstring& value);
+			virtual bool Process(const std::string& key, const std::string& value);
 
 			// Checks for initialization status
 			virtual bool IsRealized();
@@ -235,10 +235,10 @@ namespace Helium
 			virtual void Read();
 
 			// helper read call for string based controls
-			bool ReadStringData(tstring& str) const;
+			bool ReadStringData(std::string& str) const;
 
 			// helper read call to get values of all bound data
-			bool ReadAllStringData(std::vector< tstring >& strs) const;
+			bool ReadAllStringData(std::vector< std::string >& strs) const;
 
 			// helper write function for all other types of data
 			template<class T>
@@ -258,10 +258,10 @@ namespace Helium
 			virtual bool Write();
 
 			// helper write call for string based controls
-			bool WriteStringData(const tstring& str, bool preview = false);
+			bool WriteStringData(const std::string& str, bool preview = false);
 
 			// helper to write values to each bound data member separately
-			bool WriteAllStringData(const std::vector< tstring >& strs, bool preview = false);
+			bool WriteAllStringData(const std::vector< std::string >& strs, bool preview = false);
 
 			// helper write function for all other types of data
 			template<class T>
@@ -281,8 +281,8 @@ namespace Helium
 			Attribute< bool >                       a_IsFixedHeight;
 			Attribute< float32_t >                        a_ProportionalWidth;      // are we proportional along an axis?
 			Attribute< float32_t >                        a_ProportionalHeight;
-			Attribute< tstring >                    a_Default;                // the default value
-			Attribute< tstring >                    a_HelpText;               // the help text for this control
+			Attribute< std::string >                    a_Default;                // the default value
+			Attribute< std::string >                    a_HelpText;               // the help text for this control
 			
 			mutable ControlSignature::Event         e_Realized;               // upon realization of the control
 			mutable ControlSignature::Event         e_Unrealized;
@@ -319,37 +319,37 @@ namespace Helium
 			// Properties System
 			//
 		private:
-			mutable std::map< tstring, tstring > m_Properties;
+			mutable std::map< std::string, std::string > m_Properties;
 
 		public:
 
 			template<class T>
-			inline void SetProperty( const tstring& key, const T& value )
+			inline void SetProperty( const std::string& key, const T& value )
 			{
-				tostringstream str;
+				std::ostringstream str;
 				str << value;
 
 				if ( !str.fail() )
 				{
-					SetProperty<tstring>( key, str.str() );
+					SetProperty<std::string>( key, str.str() );
 				}
 			}
 
 			template<>
-			inline void SetProperty( const tstring& key, const tstring& value )
+			inline void SetProperty( const std::string& key, const std::string& value )
 			{
 				m_Properties[key] = value;
 			}
 
 			template<class T>
-			inline bool GetProperty( const tstring& key, T& value ) const
+			inline bool GetProperty( const std::string& key, T& value ) const
 			{
-				tstring strValue;
-				bool result = GetProperty<tstring>( key, strValue );
+				std::string strValue;
+				bool result = GetProperty<std::string>( key, strValue );
 
 				if ( result )
 				{
-					tistringstream str( strValue );
+					std::istringstream str( strValue );
 					str >> value;
 					return !str.fail();
 				}
@@ -358,9 +358,9 @@ namespace Helium
 			}
 
 			template<>
-			inline bool GetProperty( const tstring& key, tstring& value ) const
+			inline bool GetProperty( const std::string& key, std::string& value ) const
 			{
-				std::map< tstring, tstring >::const_iterator found = m_Properties.find( key ); 
+				std::map< std::string, std::string >::const_iterator found = m_Properties.find( key ); 
 				if ( found != m_Properties.end() )
 				{
 					value = found->second;
@@ -370,15 +370,15 @@ namespace Helium
 				return false;
 			}
 
-			inline const tstring& GetProperty( const tstring& key ) const
+			inline const std::string& GetProperty( const std::string& key ) const
 			{
-				std::map< tstring, tstring >::const_iterator found = m_Properties.find( key );
+				std::map< std::string, std::string >::const_iterator found = m_Properties.find( key );
 				if ( found != m_Properties.end() )
 				{
 					return found->second;
 				}
 
-				static tstring empty;
+				static std::string empty;
 				return empty;
 			}
 		};

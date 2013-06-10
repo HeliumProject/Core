@@ -7,8 +7,8 @@ namespace Helium
 {
     namespace Inspect
     {
-        const static tchar_t BUTTON_FILEDIALOG_ATTR_FILTER[] = TXT( "filter" );
-        const static tchar_t BUTTON_FILEDIALOG_ATTR_TITLE[] = TXT( "caption" );
+        const static char BUTTON_FILEDIALOG_ATTR_FILTER[] = TXT( "filter" );
+        const static char BUTTON_FILEDIALOG_ATTR_TITLE[] = TXT( "caption" );
 
         namespace FileDialogTypes
         {
@@ -24,7 +24,7 @@ namespace Helium
 
         struct FileDialogButtonClickedArgs
         {
-            FileDialogButtonClickedArgs( FileDialogButton* control, const FileDialogType& type, const tstring& caption, const FilePath& startPath, const tstring& filter )
+            FileDialogButtonClickedArgs( FileDialogButton* control, const FileDialogType& type, const std::string& caption, const FilePath& startPath, const std::string& filter )
                 : m_Control( control )
                 , m_Type( type )
                 , m_Caption( caption )
@@ -35,9 +35,9 @@ namespace Helium
 
             FileDialogButton* m_Control;
             FileDialogType    m_Type;
-            tstring           m_Caption;
+            std::string           m_Caption;
             FilePath              m_StartPath;
-            tstring           m_Filter;
+            std::string           m_Filter;
             mutable FilePath      m_Result;
         };
         typedef Helium::Signature< const FileDialogButtonClickedArgs& > FileDialogButtonClickedSignature;
@@ -50,7 +50,7 @@ namespace Helium
         public:
             REFLECT_DECLARE_OBJECT( FileDialogButton, Inspect::Button );
 
-            FileDialogButton( const FileDialogType& type = FileDialogTypes::OpenFile, const tstring& caption = TXT( "Open" ), const tstring& filter = TXT( "All files (*.*)|*.*" ) )
+            FileDialogButton( const FileDialogType& type = FileDialogTypes::OpenFile, const std::string& caption = TXT( "Open" ), const std::string& filter = TXT( "All files (*.*)|*.*" ) )
             {
                 a_Type.Set( type );
                 a_Caption.Set( caption );
@@ -59,7 +59,7 @@ namespace Helium
 
             virtual bool Write() HELIUM_OVERRIDE
             {
-                tstring path;
+                std::string path;
                 ReadStringData( path );
                 FilePath startPath( path );
 
@@ -72,11 +72,11 @@ namespace Helium
             FileDialogButtonClickedSignature::Delegate d_Clicked;
 
             Attribute< FileDialogType >  a_Type;
-            Attribute< tstring >         a_Caption;
-            Attribute< tstring >         a_Filter;
+            Attribute< std::string >         a_Caption;
+            Attribute< std::string >         a_Filter;
 
         protected:
-            virtual bool  Process( const tstring& key, const tstring& value ) HELIUM_OVERRIDE;
+            virtual bool  Process( const std::string& key, const std::string& value ) HELIUM_OVERRIDE;
         };
 
         typedef Helium::StrongPtr< FileDialogButton > FileDialogButtonPtr;

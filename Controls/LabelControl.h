@@ -7,7 +7,7 @@ namespace Helium
 {
     namespace Inspect
     {
-        const static tchar_t LABEL_ATTR_TEXT[] = TXT( "text" );
+        const static char LABEL_ATTR_TEXT[] = TXT( "text" );
 
         class HELIUM_INSPECT_API Label : public Control
         {
@@ -16,11 +16,11 @@ namespace Helium
 
             Label();
 
-            virtual bool Process(const tstring& key, const tstring& value);
+            virtual bool Process(const std::string& key, const std::string& value);
 
-            void BindText( const tstring& text )
+            void BindText( const std::string& text )
             {
-                Bind( new StringFormatter<tstring>( new tstring( text ), true ) );
+                Bind( new StringFormatter<std::string>( new std::string( text ), true ) );
             }
 
             Attribute<bool> a_Ellipsize;

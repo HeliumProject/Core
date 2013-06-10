@@ -35,7 +35,7 @@ void ReflectSetInterpreter::InterpretField( const Reflect::Field* field, const s
     ContainerPtr container = CreateControl< Container >();
     parent->AddChild( container );
 
-    tstring temp;
+    std::string temp;
     field->GetProperty( TXT( "UIName" ), temp );
     if ( temp.empty() )
     {

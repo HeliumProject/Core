@@ -17,7 +17,7 @@ ContextMenu::~ContextMenu()
 
 }
 
-void ContextMenu::AddItem(const tstring& item, ContextMenuSignature::Delegate delegate)
+void ContextMenu::AddItem(const std::string& item, ContextMenuSignature::Delegate delegate)
 {
     M_ContextMenuDelegate::iterator found = m_Delegates.find(item);
 

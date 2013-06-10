@@ -49,7 +49,7 @@ void PathInterpreter::InterpretField(const Field* field, const std::vector<Refle
     //
     // Parse
     //
-    tstring fieldUI;
+    std::string fieldUI;
     field->GetProperty( TXT( "UIScript" ), fieldUI );
     bool result = Script::Parse(fieldUI, this, parent->GetCanvas(), container, field->m_Flags);
 
@@ -127,7 +127,7 @@ void PathInterpreter::InterpretField(const Field* field, const std::vector<Refle
     {
         label = CreateControl< Label >();
 
-        tstring temp;
+        std::string temp;
         field->GetProperty( TXT( "UIName" ), temp );
         if ( temp.empty() )
         {
@@ -194,7 +194,7 @@ void PathInterpreter::InterpretField(const Field* field, const std::vector<Refle
     Data defaultData = field->CreateDefaultData();
     if (defaultData.ReferencesObject())
     {
-        tstringstream defaultStream;
+        std::stringstream defaultStream;
         *defaultData >> defaultStream;
         container->a_Default.Set( defaultStream.str() );
     }
@@ -217,7 +217,7 @@ void PathInterpreter::InterpretField(const Field* field, const std::vector<Refle
 void PathInterpreter::DataChanging( const DataChangingArgs& args )
 {
 #if REFLECT_REFACTOR
-    tstring text;
+    std::string text;
     Reflect::Data::GetValue( args.m_NewValue, text );
 
     if ( !text.empty() )
@@ -233,14 +233,14 @@ void PathInterpreter::DataChanging( const DataChangingArgs& args )
 
         FileDialogArgs fileDialogArgs( Helium::FileDialogTypes::OpenFile, TXT( "FilePath Does Not Exist" ), m_FileFilter, path );
         d_FindMissingFile.Invoke( fileDialogArgs );
-        Reflect::Data::SetValue< tstring >( args.m_NewValue, fileDialogArgs.m_Result.Get() );
+        Reflect::Data::SetValue< std::string >( args.m_NewValue, fileDialogArgs.m_Result.Get() );
     }
 #endif
 }
 
 void PathInterpreter::Edit( const ButtonClickedArgs& args )
 {
-    tstring str;
+    std::string str;
     args.m_Control->ReadStringData( str );
 
     if ( !str.empty() )
