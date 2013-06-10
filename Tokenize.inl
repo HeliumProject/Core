@@ -1,5 +1,5 @@
 template< typename T >
-void Helium::Tokenize( const tstring& str, std::vector< T >& tokens, const tstring delimiters )
+void Helium::Tokenize( const std::string& str, std::vector< T >& tokens, const std::string delimiters )
 {
     tregex splitPattern(delimiters); 
 
@@ -11,7 +11,7 @@ void Helium::Tokenize( const tstring& str, std::vector< T >& tokens, const tstri
         if( (*i).matched)
         {
             T temp; 
-            tstringstream inStream(*i); 
+            std::stringstream inStream(*i); 
             inStream >> temp; 
 
             tokens.push_back(temp);
@@ -20,7 +20,7 @@ void Helium::Tokenize( const tstring& str, std::vector< T >& tokens, const tstri
 }
 
 template< typename T >
-void Helium::Tokenize( const tstring& str, std::set< T >& tokens, const tstring delimiters )
+void Helium::Tokenize( const std::string& str, std::set< T >& tokens, const std::string delimiters )
 {
     std::tr1::regex splitPattern(delimiters); 
 
@@ -32,7 +32,7 @@ void Helium::Tokenize( const tstring& str, std::set< T >& tokens, const tstring 
         if( (*i).matched)
         {
             T temp; 
-            tstringstream inStream(*i); 
+            std::stringstream inStream(*i); 
             inStream >> temp; 
 
             tokens.push_back(temp);
@@ -41,7 +41,7 @@ void Helium::Tokenize( const tstring& str, std::set< T >& tokens, const tstring 
 }
 
 template<>
-inline void Helium::Tokenize( const tstring& str, std::vector< tstring >& tokens, const tstring delimiters )
+inline void Helium::Tokenize( const std::string& str, std::vector< std::string >& tokens, const std::string delimiters )
 {
     tregex splitPattern(delimiters); 
 
@@ -58,7 +58,7 @@ inline void Helium::Tokenize( const tstring& str, std::vector< tstring >& tokens
 }
 
 template<>
-inline void Helium::Tokenize( const tstring& str, std::set< tstring >& tokens, const tstring delimiters )
+inline void Helium::Tokenize( const std::string& str, std::set< std::string >& tokens, const std::string delimiters )
 {
     tregex splitPattern(delimiters); 
 

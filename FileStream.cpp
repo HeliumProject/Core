@@ -14,7 +14,7 @@ using namespace Helium;
 /// @return  Pointer to a FileStream instance opened for the specified file if it was successfully opened, null if
 ///          opening failed.  Note that the caller is responsible for deleting the FileStream instance when it is no
 ///          longer needed.
-FileStream* FileStream::OpenFileStream( const tchar_t* pPath, uint32_t modeFlags, bool bTruncate )
+FileStream* FileStream::OpenFileStream( const char* pPath, uint32_t modeFlags, bool bTruncate )
 {
 	FileStream* pStream = new FileStream();
 	HELIUM_ASSERT( pStream );
@@ -149,7 +149,7 @@ int64_t FileStream::GetSize() const
 }
 
 /// @copydoc FileStream::OpenActual()
-bool FileStream::Open( const tchar_t* pPath, uint32_t modeFlags, bool bTruncate )
+bool FileStream::Open( const char* pPath, uint32_t modeFlags, bool bTruncate )
 {
 	HELIUM_ASSERT( pPath );
 

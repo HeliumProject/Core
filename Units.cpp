@@ -3,9 +3,9 @@
 
 #include "Platform/Console.h"
 
-tstring Helium::BytesToString( uint64_t bytes )
+std::string Helium::BytesToString( uint64_t bytes )
 {
-    tchar_t buf[ 32 ];
+    char buf[ 32 ];
 
     if ( bytes < 1024 )
     {

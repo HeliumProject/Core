@@ -16,7 +16,7 @@ Helium::TUID::TUID(const TUID &id)
 
 }
 
-Helium::TUID::TUID( const tstring& id )
+Helium::TUID::TUID( const std::string& id )
 {
 	FromString( id );
 }

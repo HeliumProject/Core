@@ -6,5 +6,5 @@
 
 namespace Helium
 {
-    HELIUM_FOUNDATION_API tstring BytesToString( uint64_t bytes );
+    HELIUM_FOUNDATION_API std::string BytesToString( uint64_t bytes );
 }

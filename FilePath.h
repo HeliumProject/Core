@@ -11,74 +11,74 @@
 
 namespace Helium
 {
-	const static tchar_t s_InternalPathSeparator = '/';
+	const static char s_InternalPathSeparator = '/';
 
 	class HELIUM_FOUNDATION_API FilePath
 	{
 	private:
-		tstring m_Path;
+		std::string m_Path;
 
-		void Init( const tchar_t* path );
-
-	public:
-		static void Normalize( tstring& path );
-		static void MakeNative( tstring& path );
-		static void GuaranteeSeparator( tstring& path );
-
-		static bool Exists( const tstring& path );
-		static bool IsAbsolute( const tchar_t* path );
-		static bool IsUnder( const tstring& location, const tstring& path );
+		void Init( const char* path );
 
 	public:
-		explicit FilePath( const tstring& path = TXT( "" ) );
+		static void Normalize( std::string& path );
+		static void MakeNative( std::string& path );
+		static void GuaranteeSeparator( std::string& path );
+
+		static bool Exists( const std::string& path );
+		static bool IsAbsolute( const char* path );
+		static bool IsUnder( const std::string& location, const std::string& path );
+
+	public:
+		explicit FilePath( const std::string& path = TXT( "" ) );
 		FilePath( const FilePath& path );
 
-		const tchar_t* operator*() const;
+		const char* operator*() const;
 
 		FilePath& operator=( const FilePath& rhs );
 		bool operator==( const FilePath& rhs ) const;
 
 		bool operator<( const FilePath& rhs ) const;
 
-		FilePath operator+( const tchar_t* rhs ) const;
-		FilePath operator+( const tstring& rhs ) const;
+		FilePath operator+( const char* rhs ) const;
+		FilePath operator+( const std::string& rhs ) const;
 		FilePath operator+( const FilePath& rhs ) const;
 
-		FilePath& operator+=( const tchar_t* rhs );
-		FilePath& operator+=( const tstring& rhs );
+		FilePath& operator+=( const char* rhs );
+		FilePath& operator+=( const std::string& rhs );
 		FilePath& operator+=( const Helium::FilePath& rhs );
 
-		const tstring& Get() const;
-		void Set( const tstring& path );
+		const std::string& Get() const;
+		void Set( const std::string& path );
 		void Set( const String& path );
 		void Clear();
 
 		void TrimToExisting();
 
-		void Split( tstring& directory, tstring& filename ) const;
-		void Split( tstring& directory, tstring& filename, tstring& extension ) const;
+		void Split( std::string& directory, std::string& filename ) const;
+		void Split( std::string& directory, std::string& filename, std::string& extension ) const;
 
-		tstring Basename() const;
-		tstring Filename() const;
-		tstring Directory() const;
-		std::vector< tstring > DirectoryAsVector() const;
+		std::string Basename() const;
+		std::string Filename() const;
+		std::string Directory() const;
+		std::vector< std::string > DirectoryAsVector() const;
 
-		tstring Extension() const;
-		tstring FullExtension() const;
+		std::string Extension() const;
+		std::string FullExtension() const;
 		void RemoveExtension();
 		void RemoveFullExtension();
-		void ReplaceExtension( const tstring& newExtension );
-		void ReplaceFullExtension( const tstring& newExtension );
-		bool HasExtension( const tchar_t* extension ) const;
+		void ReplaceExtension( const std::string& newExtension );
+		void ReplaceFullExtension( const std::string& newExtension );
+		bool HasExtension( const char* extension ) const;
 
-		tstring Native() const;
-		tstring Absolute() const;
-		tstring Normalized() const;
-		tstring Signature();
+		std::string Native() const;
+		std::string Absolute() const;
+		std::string Normalized() const;
+		std::string Signature();
 
 		bool Exists() const;
 		bool IsAbsolute() const;
-		bool IsUnder( const tstring& location ) const;
+		bool IsUnder( const std::string& location ) const;
 		bool IsFile() const;
 		bool IsDirectory() const;
 		bool Writable() const;
@@ -90,8 +90,8 @@ namespace Helium
 		bool Move( const Helium::FilePath& target ) const;
 		bool Delete() const;
 
-		tstring FileMD5() const;
-		bool VerifyFileMD5( const tstring& hash ) const;
+		std::string FileMD5() const;
+		bool VerifyFileMD5( const std::string& hash ) const;
 
 	public:
 
@@ -102,12 +102,12 @@ namespace Helium
 
 		size_t length() const;
 		bool empty() const;
-		const tchar_t* c_str() const;
-		operator const tchar_t*() const
+		const char* c_str() const;
+		operator const char*() const
 		{
 			return c_str();
 		}
-		operator const tstring&() const
+		operator const std::string&() const
 		{
 			return m_Path;
 		}

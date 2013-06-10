@@ -41,7 +41,7 @@ namespace Helium
 		inline TUID();
 		inline TUID( tuid id );
 		inline TUID( const TUID &id );
-		inline TUID( const tstring& id );
+		inline TUID( const std::string& id );
 
 		// Operators
 		inline TUID& operator=( const TUID &rhs );

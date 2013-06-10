@@ -117,7 +117,7 @@ bool DirectoryIterator::Find()
         bool ok = true;
         bool needStatPath = true;
 
-        tstring absolutePath;
+        std::string absolutePath;
 
         // skip relative path directories if fileName is "." or ".."
         if ( ( CompareString( entry.m_Name.c_str(), TXT( "." ) ) == 0 ) || ( CompareString( entry.m_Name.c_str(), TXT( ".." ) ) == 0 ) )

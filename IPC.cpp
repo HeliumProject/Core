@@ -181,7 +181,7 @@ namespace ProtocolMessageIDs
 // Debug printing
 //#define IPC_CONNECTION_DEBUG
 
-static const tchar_t* ConnectionStateNames[] = 
+static const char* ConnectionStateNames[] = 
 {
     TXT( "Waiting" ),
     TXT( "Active" ),
@@ -189,7 +189,7 @@ static const tchar_t* ConnectionStateNames[] =
     TXT( "Failed" ),
 };
 
-HELIUM_COMPILE_ASSERT( ConnectionStates::Count == (sizeof(ConnectionStateNames) / sizeof(const tchar_t*)) );
+HELIUM_COMPILE_ASSERT( ConnectionStates::Count == (sizeof(ConnectionStateNames) / sizeof(const char*)) );
 
 Connection::Connection()
 : m_Server (false)
@@ -206,7 +206,7 @@ Connection::~Connection()
 {
 }
 
-bool Connection::Initialize(bool server, const tchar_t* name)
+bool Connection::Initialize(bool server, const char* name)
 {
     CopyString(m_Name, name);
     m_Server = server;

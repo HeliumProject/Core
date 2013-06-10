@@ -22,10 +22,10 @@
 namespace Helium
 {
     template< typename T >
-    void Tokenize( const tstring& str, std::vector< T >& tokens, const tstring delimiters );
+    void Tokenize( const std::string& str, std::vector< T >& tokens, const std::string delimiters );
 
     template< typename T >
-    void Tokenize( const tstring& str, std::set< T >& tokens, const tstring delimiters );
+    void Tokenize( const std::string& str, std::set< T >& tokens, const std::string delimiters );
 }
 
 #include "Foundation/Tokenize.inl"

@@ -29,7 +29,7 @@ PipeConnection::~PipeConnection()
     Cleanup();
 }
 
-bool PipeConnection::Initialize(bool server, const tchar_t* name, const tchar_t* pipe_name, const tchar_t* server_name)
+bool PipeConnection::Initialize(bool server, const char* name, const char* pipe_name, const char* server_name)
 {
     if (!Connection::Initialize(server, name))
     {

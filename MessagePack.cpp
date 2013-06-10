@@ -327,7 +327,7 @@ void MessagePackWriter::Write( int64_t value )
 	}
 }
 
-void MessagePackWriter::Write( const tchar_t* str )
+void MessagePackWriter::Write( const char* str )
 {
 	size_t length = StringLength( str );
 	WriteRaw( str, static_cast< uint32_t >( length ) );

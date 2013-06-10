@@ -1,4 +1,4 @@
-Helium::Log::Statement::Statement( const tstring& string, Stream stream, Level level, int indent )
+Helium::Log::Statement::Statement( const std::string& string, Stream stream, Level level, int indent )
     : m_String( string )
     , m_Stream( stream )
     , m_Level( level )
@@ -9,7 +9,7 @@ Helium::Log::Statement::Statement( const tstring& string, Stream stream, Level l
 
 void Helium::Log::Statement::ApplyIndent()
 {
-    tstring indented;
+    std::string indented;
     ApplyIndent( m_String.c_str(), indented );
     m_String = indented;
 }
@@ -27,8 +27,8 @@ Helium::Log::PrintedArgs::PrintedArgs( const Statement& statement )
 
 }
 
-template <bool (*AddFunc)(const tstring& fileName, Helium::Log::Stream stream, Helium::Thread::id_t threadId, bool append), void (*RemoveFunc)(const tstring& fileName)>
-Helium::Log::FileHandle< AddFunc, RemoveFunc >::FileHandle(const tstring& file, Stream stream, Helium::Thread::id_t threadId, bool append  )
+template <bool (*AddFunc)(const std::string& fileName, Helium::Log::Stream stream, Helium::Thread::id_t threadId, bool append), void (*RemoveFunc)(const std::string& fileName)>
+Helium::Log::FileHandle< AddFunc, RemoveFunc >::FileHandle(const std::string& file, Stream stream, Helium::Thread::id_t threadId, bool append  )
     : m_File (file)
 {
     if (!m_File.empty())
@@ -37,7 +37,7 @@ Helium::Log::FileHandle< AddFunc, RemoveFunc >::FileHandle(const tstring& file, 
     }
 }
 
-template <bool (*AddFunc)(const tstring& fileName, Helium::Log::Stream stream, Helium::Thread::id_t threadId, bool append), void (*RemoveFunc)(const tstring& fileName)>
+template <bool (*AddFunc)(const std::string& fileName, Helium::Log::Stream stream, Helium::Thread::id_t threadId, bool append), void (*RemoveFunc)(const std::string& fileName)>
 Helium::Log::FileHandle< AddFunc, RemoveFunc >::~FileHandle()
 {
     if (!m_File.empty())
@@ -46,8 +46,8 @@ Helium::Log::FileHandle< AddFunc, RemoveFunc >::~FileHandle()
     }
 }
 
-template <bool (*AddFunc)(const tstring& fileName, Helium::Log::Stream stream, Helium::Thread::id_t threadId, bool append), void (*RemoveFunc)(const tstring& fileName)>
-const tstring& Helium::Log::FileHandle< AddFunc, RemoveFunc >::GetFile()
+template <bool (*AddFunc)(const std::string& fileName, Helium::Log::Stream stream, Helium::Thread::id_t threadId, bool append), void (*RemoveFunc)(const std::string& fileName)>
+const std::string& Helium::Log::FileHandle< AddFunc, RemoveFunc >::GetFile()
 {
     return m_File;
 }

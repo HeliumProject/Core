@@ -13,7 +13,7 @@ namespace Helium
 	public:
 		/// @name Convenience
 		//@{
-		static FileStream* OpenFileStream( const tchar_t* pPath, uint32_t modeFlags, bool bTruncate = true );
+		static FileStream* OpenFileStream( const char* pPath, uint32_t modeFlags, bool bTruncate = true );
 		static FileStream* OpenFileStream( const String& rPath, uint32_t modeFlags, bool bTruncate = true );
 		//@}
 
@@ -40,7 +40,7 @@ namespace Helium
 		/// @return  True if the file was successfully opened, false if not.
 		///
 		/// @see Close(), IsOpen()
-		bool Open( const tchar_t* pPath, uint32_t modeFlags, bool bTruncate = true );
+		bool Open( const char* pPath, uint32_t modeFlags, bool bTruncate = true );
 
 		/// @copydoc Stream::Close()
 		virtual void Close();

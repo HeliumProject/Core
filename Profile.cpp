@@ -177,7 +177,7 @@ void Accumulator::ReportAll()
 
 Helium::ThreadLocalPointer g_ProfileContext;
 
-ScopeTimer::ScopeTimer(Accumulator* accum, const char* func, uint32_t line, const tchar_t* desc)
+ScopeTimer::ScopeTimer(Accumulator* accum, const char* func, uint32_t line, const char* desc)
 {
     HELIUM_ASSERT(func); 
     m_Description[0] = '\0'; 
@@ -317,7 +317,7 @@ void Context::FlushFile()
     blockEnd->m_Header.m_Size    = sizeof(BlockEndPacket); 
 
     // we write the whole buffer, in large blocks
-    m_TraceFile.Write( (const tchar_t*) m_PacketBuffer, PROFILE_PACKET_BLOCK_SIZE); 
+    m_TraceFile.Write( (const char*) m_PacketBuffer, PROFILE_PACKET_BLOCK_SIZE); 
 
     // reset the packet buffer
     m_PacketBufferOffset = 0; 

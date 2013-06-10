@@ -11,11 +11,11 @@
 // a bug or flaw in it somewhere?
 //
 
-bool Helium::WildcardMatch(const tchar_t *String1,const tchar_t *String2)
+bool Helium::WildcardMatch(const char *String1,const char *String2)
 {
     bool    bStar = false;
     /* Set to true when processing a wildcard * in String1 */
-    tchar_t   *StarPos;	
+    char   *StarPos;	
     /* Set this to the text just after the
     last star, so we can resurrect String1
     when we find that String2 isnt matching
@@ -41,7 +41,7 @@ bool Helium::WildcardMatch(const tchar_t *String1,const tchar_t *String2)
             {
                 String1++;
                 bStar = true;
-                StarPos = (tchar_t *)String1;
+                StarPos = (char *)String1;
                 break;
             }
 

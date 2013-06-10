@@ -65,16 +65,16 @@ namespace Helium
 
 		struct HELIUM_FOUNDATION_API Statement
 		{
-			tstring     m_String;
+			std::string     m_String;
 			Stream      m_Stream;
 			Level       m_Level;
 			int         m_Indent;
 
-			inline Statement( const tstring& string, Stream stream = Streams::Normal, Level level = Levels::Default, int indent = 0 );
+			inline Statement( const std::string& string, Stream stream = Streams::Normal, Level level = Levels::Default, int indent = 0 );
 
 			inline void ApplyIndent();
 
-			void ApplyIndent( const tchar_t* string, tstring& output );
+			void ApplyIndent( const char* string, std::string& output );
 		};
 
 		typedef std::vector< Statement > V_Statement;
@@ -117,20 +117,20 @@ namespace Helium
 		//
 
 		// the trace file gets everything Console delivers to the console and more
-		HELIUM_FOUNDATION_API bool AddTraceFile( const tstring& fileName, Stream stream, Thread::id_t threadId = Thread::id_t (), bool append = false );
-		HELIUM_FOUNDATION_API void RemoveTraceFile( const tstring& fileName );
+		HELIUM_FOUNDATION_API bool AddTraceFile( const std::string& fileName, Stream stream, Thread::id_t threadId = Thread::id_t (), bool append = false );
+		HELIUM_FOUNDATION_API void RemoveTraceFile( const std::string& fileName );
 
-		template <bool (*AddFunc)(const tstring& fileName, Stream stream, Thread::id_t threadId, bool append), void (*RemoveFunc)(const tstring& fileName)>
+		template <bool (*AddFunc)(const std::string& fileName, Stream stream, Thread::id_t threadId, bool append), void (*RemoveFunc)(const std::string& fileName)>
 		class FileHandle
 		{
 		public:
-			inline FileHandle(const tstring& file, Stream stream, Thread::id_t threadId = Thread::id_t (), bool append = false );
+			inline FileHandle(const std::string& file, Stream stream, Thread::id_t threadId = Thread::id_t (), bool append = false );
 			inline ~FileHandle();
 
-			inline const tstring& GetFile();
+			inline const std::string& GetFile();
 
 		private:
-			tstring m_File;
+			std::string m_File;
 		};
 
 		typedef FileHandle<&AddTraceFile, &RemoveTraceFile> TraceFileHandle;
@@ -177,12 +177,12 @@ namespace Helium
 		//
 
 		// main printing function used by all prototypes
-		HELIUM_FOUNDATION_API void PrintString(const tchar_t* string,	// the string to print
+		HELIUM_FOUNDATION_API void PrintString(const char* string,	// the string to print
 			Stream stream = Streams::Normal,							// the stream its going into
 			Level level = Levels::Default,								// the verbosity level
 			ConsoleColor color = ConsoleColors::None,					// the color to use (None for auto)
 			int indent = -1,											// the amount to indent
-			tchar_t* output = NULL,										// the buffer to copy the result string to
+			char* output = NULL,										// the buffer to copy the result string to
 			uint32_t outputSize = 0);									// the size of the output buffer
 
 		// print a persisted print statment
@@ -192,27 +192,27 @@ namespace Helium
 		HELIUM_FOUNDATION_API void PrintStatements(const V_Statement& statements, uint32_t streams = Streams::All);
 
 		// simple way to print a particular color
-		HELIUM_FOUNDATION_API void PrintColor(ConsoleColor color, const tchar_t* fmt, ...);
+		HELIUM_FOUNDATION_API void PrintColor(ConsoleColor color, const char* fmt, ...);
 
 		// make a print statement
-		HELIUM_FOUNDATION_API void Print(const tchar_t *fmt,...);
-		HELIUM_FOUNDATION_API void Print(Level level, const tchar_t *fmt,...);
+		HELIUM_FOUNDATION_API void Print(const char *fmt,...);
+		HELIUM_FOUNDATION_API void Print(Level level, const char *fmt,...);
 
 		// make a debug-only statement
-		HELIUM_FOUNDATION_API void Debug(const tchar_t *fmt,...);
-		HELIUM_FOUNDATION_API void Debug(Level level, const tchar_t *fmt,...);
+		HELIUM_FOUNDATION_API void Debug(const char *fmt,...);
+		HELIUM_FOUNDATION_API void Debug(Level level, const char *fmt,...);
 
 		// make a profile-only statement
-		HELIUM_FOUNDATION_API void Profile(const tchar_t *fmt,...);
-		HELIUM_FOUNDATION_API void Profile(Level level, const tchar_t *fmt,...);
+		HELIUM_FOUNDATION_API void Profile(const char *fmt,...);
+		HELIUM_FOUNDATION_API void Profile(Level level, const char *fmt,...);
 
 		// warn the user, increments warning count
-		HELIUM_FOUNDATION_API void Warning(const tchar_t *fmt,...);
-		HELIUM_FOUNDATION_API void Warning(Level level, const tchar_t *fmt,...);
+		HELIUM_FOUNDATION_API void Warning(const char *fmt,...);
+		HELIUM_FOUNDATION_API void Warning(Level level, const char *fmt,...);
 
 		// give an error, increments error count
-		HELIUM_FOUNDATION_API void Error(const tchar_t *fmt,...);
-		HELIUM_FOUNDATION_API void Error(Level level, const tchar_t *fmt,...);
+		HELIUM_FOUNDATION_API void Error(const char *fmt,...);
+		HELIUM_FOUNDATION_API void Error(Level level, const char *fmt,...);
 
 		// stack-based indention helper object indents all output while on the stack
 		class HELIUM_FOUNDATION_API Indentation
@@ -226,7 +226,7 @@ namespace Helium
 		class HELIUM_FOUNDATION_API Heading
 		{
 		public:
-			Heading(const tchar_t *fmt, ...);
+			Heading(const char *fmt, ...);
 			~Heading();
 		};
 
@@ -239,17 +239,17 @@ namespace Helium
 			bool   m_Valid;
 
 		public:
-			Bullet(const tchar_t *fmt, ...);
-			Bullet(Stream stream, Level level, const tchar_t *fmt, ...);
+			Bullet(const char *fmt, ...);
+			Bullet(Stream stream, Level level, const char *fmt, ...);
 
 			~Bullet();
 
 		private:
-			void CreateBullet(const tchar_t *fmt, va_list args );
+			void CreateBullet(const char *fmt, va_list args );
 		};
 
 		// grab the path to the current bullet
-		HELIUM_FOUNDATION_API tstring GetOutlineState();
+		HELIUM_FOUNDATION_API std::string GetOutlineState();
 
 		class HELIUM_FOUNDATION_API Listener
 		{

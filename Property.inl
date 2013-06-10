@@ -1,4 +1,4 @@
-Helium::PropertyException::PropertyException( const tchar_t *msgFormat, ... )
+Helium::PropertyException::PropertyException( const char *msgFormat, ... )
 {
     va_list msgArgs;
     va_start( msgArgs, msgFormat );

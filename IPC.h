@@ -153,7 +153,7 @@ namespace Helium
 		class HELIUM_FOUNDATION_API Connection
 		{
 		protected:
-			tchar_t					m_Name[256];          // friendly name for this connection
+			char					m_Name[256];          // friendly name for this connection
 			bool					m_Server;             // are we the server side or the client side
 			bool                    m_Terminating;        // used by the closedown code to signal it wants the threads to terminate
 
@@ -178,7 +178,7 @@ namespace Helium
 			virtual ~Connection();
 
 		protected:
-			bool Initialize(bool server, const tchar_t* name);
+			bool Initialize(bool server, const char* name);
             virtual void Close() = 0;
 
 		public:

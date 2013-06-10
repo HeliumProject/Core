@@ -6,5 +6,5 @@
 
 namespace Helium
 {
-    HELIUM_FOUNDATION_API bool WildcardMatch(const tchar_t *String1,const tchar_t *String2);
+    HELIUM_FOUNDATION_API bool WildcardMatch(const char *String1,const char *String2);
 }

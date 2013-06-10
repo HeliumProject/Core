@@ -33,7 +33,7 @@ namespace Helium
     class PropertyException : public Helium::Exception
     {
     public:
-        inline PropertyException( const tchar_t *msgFormat, ... );
+        inline PropertyException( const char *msgFormat, ... );
 
     protected:
         inline PropertyException();

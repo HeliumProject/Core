@@ -42,24 +42,24 @@ misrepresented as being the original software.
 *
 */
 
-typedef tchar_t nat_char;
+typedef char nat_char;
 
 
 static inline int nat_isdigit(nat_char a)
 {
-    return isdigit((tchar_t) a);
+    return isdigit((char) a);
 }
 
 
 static inline int nat_isspace(nat_char a)
 {
-    return isspace((tchar_t) a);
+    return isspace((char) a);
 }
 
 
 static inline nat_char nat_toupper(nat_char a)
 {
-    return toupper((tchar_t) a);
+    return toupper((char) a);
 }
 
 

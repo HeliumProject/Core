@@ -100,7 +100,7 @@ namespace Helium
 		void Write( int32_t value );
 		void Write( int64_t value );
 
-		void Write( const tchar_t* str );
+		void Write( const char* str );
 		void WriteRaw( const void* bytes, uint32_t length );
 
 		void BeginArray( uint32_t length = NumericLimits< uint32_t >::Maximum );

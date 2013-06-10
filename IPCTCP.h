@@ -17,7 +17,7 @@ namespace Helium
         class HELIUM_FOUNDATION_API TCPConnection : public Connection
         {
         private:
-            tchar_t             m_IP[64];                       // ip of the server
+            char             m_IP[64];                       // ip of the server
 
             uint16_t            m_ReadPort;                     // port number for read operations
             Helium::Socket      m_ReadSocket;                   // socket used for read operations
@@ -30,7 +30,7 @@ namespace Helium
             virtual ~TCPConnection();
 
         public:
-            bool Initialize(bool server, const tchar_t* name, const tchar_t* server_ip, const uint16_t server_port_no);
+            bool Initialize(bool server, const char* name, const char* server_ip, const uint16_t server_port_no);
             void Close();
 
         protected:
