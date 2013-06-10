@@ -379,7 +379,6 @@ void ArchiveReaderJson::Read( Reflect::ObjectPtr& object )
 		{
 			ObjectPtr object;
 			ReadNext( object );
-			m_Objects.Push( object );
 
 			ArchiveStatus info( *this, ArchiveStates::ObjectProcessed );
 			info.m_Progress = (int)(((float)(m_Stream->Tell()) / (float)m_Size) * 100.0f);
@@ -459,6 +458,11 @@ bool Helium::Persist::ArchiveReaderJson::ReadNext( Reflect::ObjectPtr& object )
 {
 	bool success = false;
 
+	if (m_Next >= m_Document.Size())
+	{
+		return false;
+	}
+
 	rapidjson::Value& value = m_Document[ m_Next++ ];
 	if ( value.IsObject() )
 	{
@@ -488,6 +492,8 @@ bool Helium::Persist::ArchiveReaderJson::ReadNext( Reflect::ObjectPtr& object )
 			{
 				success = true;
 				DeserializeInstance( member->value, object, object->GetClass(), object );
+
+				m_Objects.Push( object );
 			}
 		}
 	}
