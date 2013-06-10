@@ -162,10 +162,14 @@ bool Thread::TryJoin()
     if ( IsValid() )
     {
         // zero signal here won't really send a signal, just poll for thread running state
+#if HELIUM_OS_LINUX
+        result = pthread_tryjoin_np( m_Handle, NULL ) == 0;
+#elif HELIUM_OS_MAC
         if ( pthread_kill( m_Handle, 0 ) == ESRCH )
         {
             result = pthread_join( m_Handle, NULL ) == 0;
         }
+#endif
     }
 
     if ( result )
