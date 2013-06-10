@@ -40,7 +40,7 @@ struct ThreadNameInfo
 Thread::Thread()
 	: m_Handle( 0 )
 {
-    m_Name[0] = tchar_t('\0');
+    m_Name[0] = char('\0');
 }
 
 /// Destructor.
@@ -58,12 +58,12 @@ Thread::~Thread()
 /// @return  True if the thread was started successfully, false if not.
 ///
 /// @see Join(), TryJoin()
-bool Thread::Start( const tchar_t* pName, ThreadPriority priority )
+bool Thread::Start( const char* pName, ThreadPriority priority )
 {
 	HELIUM_ASSERT( priority >= ThreadPriorities::Lowest && priority <= ThreadPriorities::Inherit );
 
 	// Cache the name
-	MemoryCopy( m_Name, pName, sizeof( m_Name ) / sizeof( tchar_t ) );
+	MemoryCopy( m_Name, pName, sizeof( m_Name ) / sizeof( char ) );
 
 	// Make sure a thread hasn't already been started.
 	HELIUM_ASSERT( m_Handle == 0 );

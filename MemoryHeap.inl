@@ -24,7 +24,7 @@ Helium::DynamicMemoryHeap* Helium::DynamicMemoryHeap::GetNextHeap() const
 /// Get the debugging name associated with this heap.
 ///
 /// @return  Heap name string.
-const tchar_t* Helium::DynamicMemoryHeap::GetName() const
+const char* Helium::DynamicMemoryHeap::GetName() const
 {
 	return m_pName;
 }

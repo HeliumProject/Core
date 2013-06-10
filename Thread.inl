@@ -3,7 +3,7 @@
 /// @return  Thread name.
 ///
 /// @see SetName()
-const tchar_t* Helium::Thread::GetName() const
+const char* Helium::Thread::GetName() const
 {
     return m_Name;
 }
@@ -25,7 +25,7 @@ void Helium::CallbackThread::EntryHelper( void* param )
 }
 
 // create and execute a thread with a separate args object
-bool Helium::CallbackThread::CreateWithArgs( Entry entry, void* obj, void* args, const tchar_t* name, ThreadPriority priority )
+bool Helium::CallbackThread::CreateWithArgs( Entry entry, void* obj, void* args, const char* name, ThreadPriority priority )
 {
     ThreadHelperArgs* threadHelperArgs = new ThreadHelperArgs( obj, args );
     return Create(entry, threadHelperArgs, name, priority);

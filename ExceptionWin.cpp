@@ -34,14 +34,14 @@ using namespace Helium;
 static bool g_Initialized = false;
 
 // Utility to print to a string
-static void PrintToString(tstring& str, const tchar_t* fmt, ...)
+static void PrintToString(std::string& str, const char* fmt, ...)
 {
 	va_list args;
 
 	va_start(args, fmt);
 
 	size_t needed = StringPrintArgs(NULL, 0, fmt, args) + 1;
-	tchar_t* buf = (tchar_t*)alloca( sizeof(tchar_t) * needed );
+	char* buf = (char*)alloca( sizeof(char) * needed );
 
 	StringPrintArgs(buf, sizeof(buf) * needed, fmt, args);
 	buf[ needed - 1] = 0; 
@@ -94,7 +94,7 @@ bool Helium::IsDebuggerPresent()
 	return ::IsDebuggerPresent() != 0;
 }
 
-bool Helium::InitializeSymbols(const tstring& path)
+bool Helium::InitializeSymbols(const std::string& path)
 {
 	if ( !g_Initialized )
 	{
@@ -143,7 +143,7 @@ bool Helium::GetSymbolsInitialized()
     return g_Initialized;
 }
 
-tstring Helium::GetSymbolInfo(uintptr_t adr, bool enumLoadedModules)
+std::string Helium::GetSymbolInfo(uintptr_t adr, bool enumLoadedModules)
 {
 	HELIUM_ASSERT( g_Initialized );
 
@@ -160,7 +160,7 @@ tstring Helium::GetSymbolInfo(uintptr_t adr, bool enumLoadedModules)
 	ZeroMemory(&extension, sizeof(extension));
 
 	// symbol name "Reflect::Class::AddSerializer + 0x16d"
-	tchar_t symbol[MAX_SYM_NAME+16];
+	char symbol[MAX_SYM_NAME+16];
 	ZeroMemory(&symbol, sizeof(symbol));
 
 	// source file name "typeinfo.cpp"
@@ -171,7 +171,7 @@ tstring Helium::GetSymbolInfo(uintptr_t adr, bool enumLoadedModules)
 	DWORD line = 0xFFFFFFFF;
 
 	// resulting line is worst case of all components
-	tchar_t result[sizeof(module) + sizeof(symbol) + sizeof(filename) + 64];
+	char result[sizeof(module) + sizeof(symbol) + sizeof(filename) + 64];
 	ZeroMemory(&result, sizeof(result));
 
 
@@ -297,7 +297,7 @@ bool Helium::GetStackTrace(std::vector<uintptr_t>& trace, unsigned omitFrames)
 
 	CONTEXT context;
 
-	volatile tchar_t *p = 0;
+	volatile char *p = 0;
 	__try
 	{
 		*p = 0;
@@ -389,7 +389,7 @@ bool Helium::GetStackTrace(LPCONTEXT context, std::vector<uintptr_t>& stack, uns
 	return !stack.empty();
 }
 
-void Helium::TranslateStackTrace(const std::vector<uintptr_t>& trace, tstring& buffer)
+void Helium::TranslateStackTrace(const std::vector<uintptr_t>& trace, std::string& buffer)
 {
 	std::vector<uintptr_t>::const_iterator itr = trace.begin();
 	std::vector<uintptr_t>::const_iterator end = trace.end();
@@ -399,9 +399,9 @@ void Helium::TranslateStackTrace(const std::vector<uintptr_t>& trace, tstring& b
 	}
 }
 
-const tchar_t* Helium::GetExceptionClass(uint32_t exceptionCode)
+const char* Helium::GetExceptionClass(uint32_t exceptionCode)
 {
-	const tchar_t* ex_name = NULL;
+	const char* ex_name = NULL;
 
 	switch (exceptionCode)
 	{
@@ -546,7 +546,7 @@ void Helium::GetExceptionDetails( LPEXCEPTION_POINTERS info, ExceptionArgs& args
 
 		args.m_Threads.push_back( TXT("") );
 		PrintToString( args.m_Threads.back(), TXT("Thread %d:\n"), id );
-		tstring::size_type size = args.m_Threads.back().size();
+		std::string::size_type size = args.m_Threads.back().size();
 
 		CONTEXT context;
 		memset(&context, 0, sizeof( context ));
@@ -695,12 +695,12 @@ void Helium::GetExceptionDetails( LPEXCEPTION_POINTERS info, ExceptionArgs& args
 	}
 }
 
-tstring Helium::GetExceptionInfo(LPEXCEPTION_POINTERS info)
+std::string Helium::GetExceptionInfo(LPEXCEPTION_POINTERS info)
 {
 	ExceptionArgs args ( ExceptionTypes::SEH, false );
 	GetExceptionDetails( info, args );
 
-	tstring buffer;
+	std::string buffer;
 	buffer += TXT("An exception has occurred\n");
 
 	switch ( args.m_Type )
@@ -754,8 +754,8 @@ tstring Helium::GetExceptionInfo(LPEXCEPTION_POINTERS info)
 		buffer += TXT("No call stack info\n");
 	}
 
-	std::vector< tstring >::const_iterator itr = args.m_Threads.begin();
-	std::vector< tstring >::const_iterator end = args.m_Threads.end();
+	std::vector< std::string >::const_iterator itr = args.m_Threads.begin();
+	std::vector< std::string >::const_iterator end = args.m_Threads.end();
 	for ( ; itr != end; ++itr )
 	{
 		PrintToString( buffer, TXT("\n%s"), itr->c_str() );
@@ -764,9 +764,9 @@ tstring Helium::GetExceptionInfo(LPEXCEPTION_POINTERS info)
 	return buffer;
 }
 
-tstring Helium::WriteDump(LPEXCEPTION_POINTERS info, bool full)
+std::string Helium::WriteDump(LPEXCEPTION_POINTERS info, bool full)
 {
-	tstring directory = GetDumpDirectory();
+	std::string directory = GetDumpDirectory();
 	if ( directory.empty() )
 	{
 		Print( TXT( "Could not determine crash dump directory, failed to generate dump." ) );
@@ -953,7 +953,7 @@ size_t Helium::GetStackTrace( void** ppStackTraceArray, size_t stackTraceArraySi
 /// @param[in]  pAddress  Address to translate.
 ///
 /// @return  True if the address was successfully resolved, false if not.
-void Helium::GetAddressSymbol( tstring& rSymbol, void* pAddress )
+void Helium::GetAddressSymbol( std::string& rSymbol, void* pAddress )
 {
 	HELIUM_ASSERT( pAddress );
 
@@ -991,7 +991,7 @@ void Helium::GetAddressSymbol( tstring& rSymbol, void* pAddress )
 	}
 
 	uint64_t symbolInfoBuffer[
-		( sizeof( SYMBOL_INFO ) + sizeof( tchar_t ) * ( MAX_SYM_NAME - 1 ) + sizeof( uint64_t ) - 1 ) /
+		( sizeof( SYMBOL_INFO ) + sizeof( char ) * ( MAX_SYM_NAME - 1 ) + sizeof( uint64_t ) - 1 ) /
 		sizeof( uint64_t ) ];
 	MemoryZero( symbolInfoBuffer, sizeof( symbolInfoBuffer ) );
 
@@ -1016,7 +1016,7 @@ void Helium::GetAddressSymbol( tstring& rSymbol, void* pAddress )
 	lineInfo.SizeOfStruct = sizeof( lineInfo );
 	if( SymGetLineFromAddr64( hProcess, reinterpret_cast< uintptr_t >( pAddress ), &displacement, &lineInfo ) )
 	{
-		tchar_t lineNumberBuffer[ 32 ];
+		char lineNumberBuffer[ 32 ];
 		StringPrint( lineNumberBuffer, HELIUM_ARRAY_COUNT( lineNumberBuffer ), TXT( "%u" ), lineInfo.LineNumber );
 		lineNumberBuffer[ HELIUM_ARRAY_COUNT( lineNumberBuffer ) - 1 ] = TXT( '\0' );
 
@@ -1036,7 +1036,7 @@ void Helium::GetAddressSymbol( tstring& rSymbol, void* pAddress )
 /// Write a string to any platform-specific debug log output.
 ///
 /// @param[in] pMessage  Message string to write to the debug log.
-void Helium::DebugLog( const tchar_t* pMessage )
+void Helium::DebugLog( const char* pMessage )
 {
 	HELIUM_ASSERT( pMessage );
 	HELIUM_TCHAR_TO_WIDE( pMessage, convertedMessage );

@@ -67,12 +67,12 @@ namespace Helium
 
         // These functions are invalid for connectionless protocols such as UDP
         bool Listen();
-        bool Connect(uint16_t port, const tchar_t* ip = NULL);
+        bool Connect(uint16_t port, const char* ip = NULL);
         bool Accept(Socket& server_socket, sockaddr_in* client_info);
 
         // Use the socket to communicate on a connection based protocol
         bool Read(void* buffer, uint32_t bytes, uint32_t& read, sockaddr_in* peer = NULL);
-        bool Write(void* buffer, uint32_t bytes, uint32_t& wrote, const tchar_t *ip = NULL, uint16_t port = 0);
+        bool Write(void* buffer, uint32_t bytes, uint32_t& wrote, const char *ip = NULL, uint16_t port = 0);
 
         // Poll the state of a socket
         static int Select( Handle range, fd_set* read_set, fd_set* write_set, struct timeval* timeout);

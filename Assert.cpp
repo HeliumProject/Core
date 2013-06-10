@@ -22,11 +22,11 @@ volatile int32_t Assert::sm_active = 0;
 /// @param[in] pFile        File in which the assertion occurred.
 /// @param[in] line         Line number at which the assertion occurred.
 AssertResult Assert::Trigger(
-	const tchar_t* pExpression,
-	const tchar_t* pFunction,
-	const tchar_t* pFile,
+	const char* pExpression,
+	const char* pFunction,
+	const char* pFile,
 	int line,
-	const tchar_t* pMessage,
+	const char* pMessage,
 	... )
 {
 	// Only allow one assert handler to be active at a time.
@@ -34,7 +34,7 @@ AssertResult Assert::Trigger(
 	{
 	}
 
-	tchar_t messageText[ 1024 ];
+	char messageText[ 1024 ];
 
 	if( pExpression )
 	{
@@ -42,7 +42,7 @@ AssertResult Assert::Trigger(
 		{
 			va_list args;
 			va_start(args, pMessage); 
-			tchar_t message[1024];
+			char message[1024];
 			StringPrint(message, pMessage, args);
 			va_end(args); 
 
@@ -72,7 +72,7 @@ AssertResult Assert::Trigger(
 		{
 			va_list args;
 			va_start(args, pMessage); 
-			tchar_t message[1024];
+			char message[1024];
 			StringPrint(message, pMessage, args);
 			va_end(args); 
 
@@ -104,18 +104,18 @@ AssertResult Assert::Trigger(
         std::vector<uintptr_t> trace;
         Helium::GetStackTrace( trace );
 
-        tstring str = TXT("Stack Trace:\n");
+        std::string str = TXT("Stack Trace:\n");
         Helium::TranslateStackTrace( trace, str );
 
         HELIUM_TRACE( TraceLevels::Error, str.c_str() );
     }
     else
     {
-        tstring str = TXT("Stack trace unavailable - symbols not loaded\n");
+        std::string str = TXT("Stack trace unavailable - symbols not loaded\n");
         HELIUM_TRACE( TraceLevels::Error, str.c_str() );
     }
 #else
-    tstring str = TXT("Stack trace unavailable - symbols not loaded\n");
+    std::string str = TXT("Stack trace unavailable - symbols not loaded\n");
     HELIUM_TRACE( TraceLevels::Error, str.c_str() );
 #endif
 #endif

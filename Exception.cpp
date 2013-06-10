@@ -8,12 +8,12 @@ Helium::Exception::Exception()
 
 }
 
-const tchar_t* Helium::Exception::What() const
+const char* Helium::Exception::What() const
 {
     return m_Message.c_str();
 }
 
-Exception::Exception( const tchar_t *msgFormat, ... )
+Exception::Exception( const char *msgFormat, ... )
 {
     va_list msgArgs;
     va_start( msgArgs, msgFormat );
@@ -21,7 +21,7 @@ Exception::Exception( const tchar_t *msgFormat, ... )
     va_end( msgArgs );
 }
 
-void Exception::SetMessage( const tchar_t* msgFormat, ... )
+void Exception::SetMessage( const char* msgFormat, ... )
 {
     va_list msgArgs;
     va_start( msgArgs, msgFormat );
@@ -29,9 +29,9 @@ void Exception::SetMessage( const tchar_t* msgFormat, ... )
     va_end( msgArgs );
 }
 
-void Exception::SetMessage( const tchar_t* msgFormat, va_list msgArgs )
+void Exception::SetMessage( const char* msgFormat, va_list msgArgs )
 {
-    tchar_t msgBuffer[ERROR_STRING_BUF_SIZE];
-    StringPrintArgs( msgBuffer, sizeof(msgBuffer) / sizeof( tchar_t ), msgFormat, msgArgs );
+    char msgBuffer[ERROR_STRING_BUF_SIZE];
+    StringPrintArgs( msgBuffer, sizeof(msgBuffer) / sizeof( char ), msgFormat, msgArgs );
     m_Message = msgBuffer;
 }

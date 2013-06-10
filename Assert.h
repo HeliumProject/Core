@@ -73,7 +73,7 @@ namespace Helium
 	public:
 		/// @name Static Utility Functions
 		//@{
-		static AssertResult Trigger( const tchar_t* pExpression, const tchar_t* pFunction, const tchar_t* pFile, int line, const tchar_t* pMessage, ... );
+		static AssertResult Trigger( const char* pExpression, const char* pFunction, const char* pFile, int line, const char* pMessage, ... );
 		//@}
 
 	private:
@@ -82,7 +82,7 @@ namespace Helium
 
 		/// @name Private Static Utility Functions
 		//@{
-		static AssertResult TriggerImplementation( const tchar_t* pMessageText );
+		static AssertResult TriggerImplementation( const char* pMessageText );
 		//@}
 	};
 }

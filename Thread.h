@@ -65,7 +65,7 @@ namespace Helium
 		bool m_Valid;
 #endif
 		/// Thread name.
-		tchar_t m_Name[ 128 ];
+		char m_Name[ 128 ];
 
 		/// @name Thread Callback
 		//@{
@@ -86,12 +86,12 @@ namespace Helium
 		/// @name Data Access
 		//@{
 		inline const Handle& GetHandle() const;
-		inline const tchar_t* GetName() const;
+		inline const char* GetName() const;
 		//@}
 
 		/// @name Caller Interface
 		//@{
-		bool Start( const tchar_t* pName, ThreadPriority priority = ThreadPriorities::Inherit );
+		bool Start( const char* pName, ThreadPriority priority = ThreadPriorities::Inherit );
 		bool Join( uint32_t timeOutMilliseconds = 0 );
 		bool TryJoin();
 		bool IsValid() const;
@@ -191,14 +191,14 @@ namespace Helium
 		/// @name Caller Interface
 		//@{
 		// create and execute a thread
-		bool Create( Entry entry, void* obj, const tchar_t* name, ThreadPriority priority = ThreadPriorities::Normal );
+		bool Create( Entry entry, void* obj, const char* name, ThreadPriority priority = ThreadPriorities::Normal );
 
 		// C++ helper (remember, it is valid to pass a member function pointer as a template parameter!)
 		template< class ObjectT, void (ObjectT::*method)() >
 		static void EntryHelper( void* param );
 
 		// create and execute a thread with a separate args object
-		inline bool CreateWithArgs( Entry entry, void* obj, void* args, const tchar_t* name, ThreadPriority priority = ThreadPriorities::Normal );
+		inline bool CreateWithArgs( Entry entry, void* obj, void* args, const char* name, ThreadPriority priority = ThreadPriorities::Normal );
 
 		// C++ helper (remember, it is valid to pass a member function pointer as a template parameter!)
 		template< class ObjectT, typename ArgsT, void (ObjectT::*method)( ArgsT& ) >

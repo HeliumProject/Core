@@ -182,7 +182,7 @@ void DynamicMemoryHeap::LogMemoryStats()
 
     for( DynamicMemoryHeap* pHeap = sm_pGlobalHeapListHead; pHeap != NULL; pHeap = pHeap->GetNextHeap() )
     {
-        const tchar_t* pName = NULL;
+        const char* pName = NULL;
 #if !HELIUM_RELEASE && !HELIUM_PROFILE
         pName = pHeap->GetName();
 #endif
@@ -216,7 +216,7 @@ void DynamicMemoryHeap::LogMemoryStats()
 
     for( DynamicMemoryHeap* pHeap = sm_pGlobalHeapListHead; pHeap != NULL; pHeap = pHeap->GetNextHeap() )
     {
-        const tchar_t* pHeapName = pHeap->GetName();
+        const char* pHeapName = pHeap->GetName();
 
         DynamicMemoryHeapVerboseTrackingData* pTrackingData = pHeap->m_pVerboseTrackingData;
         if( pTrackingData )
@@ -226,7 +226,7 @@ void DynamicMemoryHeap::LogMemoryStats()
 
 #pragma TODO( "HELIUM MERGE - Remove STL string usage here once String is merged over." )
 //            String symbol;
-            tstring symbol;
+            std::string symbol;
 
             stdext::hash_map< void*, AllocationBacktrace >::const_iterator iterEnd = rAllocationBacktraceMap.end();
             stdext::hash_map< void*, AllocationBacktrace >::const_iterator iter;
@@ -255,7 +255,7 @@ void DynamicMemoryHeap::LogMemoryStats()
 //                    Helium::GetAddressSymbol( symbol, pAddress );
 //                    HELIUM_TRACE( TraceLevels::Debug, TXT( "- 0x%p: %s\n" ), pAddress, *symbol );
                     Helium::GetAddressSymbol( symbol, pAddress );
-                    const tchar_t* pSymbol = symbol.c_str();
+                    const char* pSymbol = symbol.c_str();
                     HELIUM_TRACE( TraceLevels::Debug, TXT( "- 0x%p: %s\n" ), pAddress, ( pSymbol ? pSymbol : TXT( "" ) ) );
                 }
             }

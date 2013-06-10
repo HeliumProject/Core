@@ -17,17 +17,17 @@ namespace Helium
                 Count,
             };
 
-            static const tchar_t* Strings[] = 
+            static const char* Strings[] = 
             {
                 TXT("Windows"),
                 TXT("Posix"),
             };
 
-            HELIUM_COMPILE_ASSERT( Platform::Types::Count == sizeof(Strings) / sizeof(const tchar_t*) );
+            HELIUM_COMPILE_ASSERT( Platform::Types::Count == sizeof(Strings) / sizeof(const char*) );
         }
         typedef Types::Type Type;
 
-        inline const tchar_t* GetTypeName(Type t)
+        inline const char* GetTypeName(Type t)
         {
             if (t >= 0 && t<Types::Count)
             {

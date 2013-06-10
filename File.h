@@ -46,7 +46,7 @@ namespace Helium
 		~File();
 
 		bool IsOpen() const;
-		bool Open( const tchar_t* filename, FileMode mode, bool truncate = true );
+		bool Open( const char* filename, FileMode mode, bool truncate = true );
 		bool Close();
 		
 		bool Read( void* buffer, size_t numberOfBytesToRead, size_t* numberOfBytesRead = NULL );
@@ -92,7 +92,7 @@ namespace Helium
 	public:
 		Status();
 
-		bool Read( const tchar_t* path );
+		bool Read( const char* path );
 
 		uint32_t     m_Mode;
 		uint64_t     m_Size;
@@ -108,16 +108,16 @@ namespace Helium
 	class HELIUM_PLATFORM_API DirectoryEntry
 	{
 	public:
-		DirectoryEntry( const tstring& name = TXT( "" ) );
+		DirectoryEntry( const std::string& name = TXT( "" ) );
 
-		tstring	m_Name;
+		std::string	m_Name;
 		Status	m_Stat;
 	};
 
 	class HELIUM_PLATFORM_API Directory : NonCopyable
 	{
 	public:
-		Directory( const tstring& path = TXT( "" ) );
+		Directory( const std::string& path = TXT( "" ) );
 		~Directory();
 
 		bool IsOpen();
@@ -125,11 +125,11 @@ namespace Helium
 		bool FindNext( DirectoryEntry& entry );
 		bool Close();
 
-		inline const tstring& GetPath();
-		inline void SetPath( const tstring& path );
+		inline const std::string& GetPath();
+		inline void SetPath( const std::string& path );
 
 	private:
-		tstring	m_Path;
+		std::string	m_Path;
 
 #if HELIUM_OS_WIN
 		typedef void* Handle;
@@ -143,13 +143,13 @@ namespace Helium
 	// File system operations
 	//
 
-	HELIUM_PLATFORM_API extern const tchar_t PathSeparator;
-	HELIUM_PLATFORM_API void GetFullPath( const tchar_t* path, tstring& fullPath );
-	HELIUM_PLATFORM_API bool IsAbsolute( const tchar_t* path );
-	HELIUM_PLATFORM_API bool MakePath( const tchar_t* path );
-	HELIUM_PLATFORM_API bool Copy( const tchar_t* source, const tchar_t* dest, bool overwrite );
-	HELIUM_PLATFORM_API bool Move( const tchar_t* source, const tchar_t* dest );
-	HELIUM_PLATFORM_API bool Delete( const tchar_t* path );
+	HELIUM_PLATFORM_API extern const char PathSeparator;
+	HELIUM_PLATFORM_API void GetFullPath( const char* path, std::string& fullPath );
+	HELIUM_PLATFORM_API bool IsAbsolute( const char* path );
+	HELIUM_PLATFORM_API bool MakePath( const char* path );
+	HELIUM_PLATFORM_API bool Copy( const char* source, const char* dest, bool overwrite );
+	HELIUM_PLATFORM_API bool Move( const char* source, const char* dest );
+	HELIUM_PLATFORM_API bool Delete( const char* path );
 }
 
 #include "Platform/File.inl"

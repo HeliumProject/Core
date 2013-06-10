@@ -248,7 +248,7 @@ int PrintArgs(ConsoleColor color, FILE* stream, const T* fmt, va_list args)
 }
 
 template< class T >
-int PrintString(ConsoleColor color, FILE* stream, const std::basic_string< T >& tstring)
+int PrintString(ConsoleColor color, FILE* stream, const std::basic_string< T >& str)
 {
 	CONSOLE_SCREEN_BUFFER_INFO info;
 
@@ -264,7 +264,7 @@ int PrintString(ConsoleColor color, FILE* stream, const std::basic_string< T >& 
 		SetConsoleTextAttribute(GetStdHandle(STD_ERROR_HANDLE), color | FOREGROUND_INTENSITY | background);
 	}
 
-	int result = FilePrint(stream, TXT("%s"), tstring.c_str());
+	int result = FilePrint(stream, TXT("%s"), str.c_str());
 
 	fflush(stream);
 

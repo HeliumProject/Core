@@ -261,7 +261,7 @@ namespace Helium
 		//@{
 		DynamicMemoryHeap( size_t capacity = 0 );
 #if !HELIUM_RELEASE && !HELIUM_PROFILE
-		DynamicMemoryHeap( const tchar_t* pName, size_t capacity = 0 );
+		DynamicMemoryHeap( const char* pName, size_t capacity = 0 );
 #endif
 		virtual ~DynamicMemoryHeap();
 		//@}
@@ -284,7 +284,7 @@ namespace Helium
 		/// @name Debugging
 		//@{
 #if !HELIUM_RELEASE && !HELIUM_PROFILE
-		inline const tchar_t* GetName() const;
+		inline const char* GetName() const;
 #endif
 
 #if HELIUM_ENABLE_MEMORY_TRACKING
@@ -313,7 +313,7 @@ namespace Helium
 		void* m_pMspace;
 #if !HELIUM_RELEASE && !HELIUM_PROFILE
 		/// Heap name (for debugging).
-		const tchar_t* m_pName;
+		const char* m_pName;
 #endif
 
 		/// Previous dynamic memory heap in the global list.

@@ -51,17 +51,17 @@ namespace Helium
 
         }
 
-        void Open(const tchar_t* file);
+        void Open(const char* file);
         void Close();
-        void Write(const tchar_t* data, int size);
+        void Write(const char* data, int size);
 
-        static const tchar_t* GetFilePath();
+        static const char* GetFilePath();
     };
 
     HELIUM_PLATFORM_API uint64_t TimerGetClock();
     HELIUM_PLATFORM_API float CyclesToMillis(uint64_t cycles);
     HELIUM_PLATFORM_API float TimeTaken(uint64_t start_time);
-    HELIUM_PLATFORM_API void ReportTime(const tchar_t* segment, uint64_t start_time, double& total_millis);
+    HELIUM_PLATFORM_API void ReportTime(const char* segment, uint64_t start_time, double& total_millis);
 
     HELIUM_PLATFORM_API uint64_t GetTotalMemory();
 }

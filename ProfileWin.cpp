@@ -14,7 +14,7 @@
 using namespace Helium;
 using namespace Helium::Profile;
 
-void Helium::TraceFile::Open(const tchar_t* file)
+void Helium::TraceFile::Open(const char* file)
 {
 	HELIUM_TCHAR_TO_WIDE( file, convertedFile );
 
@@ -29,15 +29,15 @@ void Helium::TraceFile::Close()
 	}
 }
 
-void Helium::TraceFile::Write(const tchar_t* data, int size)
+void Helium::TraceFile::Write(const char* data, int size)
 {
 	if (m_FileHandle)
 	{
-		fwrite(data, sizeof(tchar_t), size, m_FileHandle);
+		fwrite(data, sizeof(char), size, m_FileHandle);
 	}
 }
 
-const tchar_t* Helium::TraceFile::GetFilePath()
+const char* Helium::TraceFile::GetFilePath()
 {
 	wchar_t buf[MAX_PATH];
 	GetModuleFileName( NULL, buf, MAX_PATH );
@@ -50,7 +50,7 @@ const tchar_t* Helium::TraceFile::GetFilePath()
 	wchar_t file[ MAX_PATH ];
 	_snwprintf( file, MAX_PATH, L"%s\\%s\\log\\profile_%s_%.5X_%.5X.bin", drive, dir, modulename, GetCurrentProcessId(), GetCurrentThreadId() );
 
-	static tchar_t convertedFile[ MAX_PATH ];
+	static char convertedFile[ MAX_PATH ];
 	ConvertString( file, convertedFile, MAX_PATH );
 	return convertedFile;
 }
@@ -116,7 +116,7 @@ float Helium::TimeTaken(uint64_t start_time)
 	return CyclesToMillis(time);
 }
 
-void Helium::ReportTime(const tchar_t* segment, uint64_t start_time, double& total_millis)
+void Helium::ReportTime(const char* segment, uint64_t start_time, double& total_millis)
 {
 	uint64_t time = TimerGetClock() - start_time;
 	double millis = CyclesToMillis(time);

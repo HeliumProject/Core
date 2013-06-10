@@ -1,9 +1,9 @@
-const tstring& Helium::Directory::GetPath()
+const std::string& Helium::Directory::GetPath()
 {
 	return m_Path;
 }
 
-void Helium::Directory::SetPath( const tstring& path )
+void Helium::Directory::SetPath( const std::string& path )
 {
 	Close();
 	m_Path = path;

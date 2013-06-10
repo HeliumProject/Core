@@ -9,7 +9,7 @@ uint32_t Helium::GetLastError()
 	return ::GetLastError();
 }
 
-tstring Helium::GetErrorString( uint32_t errorOverride )
+std::string Helium::GetErrorString( uint32_t errorOverride )
 {
 	// get the system error
 	DWORD error = ( errorOverride != 0 ) ? errorOverride : ::GetLastError();
@@ -36,7 +36,7 @@ tstring Helium::GetErrorString( uint32_t errorOverride )
 		result.resize( result.size() - 1 );
 	}
 
-	tstring str;
+	std::string str;
 	ConvertString( result, str );
 	return str;
 }

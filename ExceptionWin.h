@@ -53,7 +53,7 @@ namespace Helium
 			CPP
 		};
 
-		static const tchar_t* Strings[] =
+		static const char* Strings[] =
 		{
 			TXT("SEH"),
 			TXT("C++"),
@@ -65,20 +65,20 @@ namespace Helium
 	{
 		ExceptionType           m_Type;
 		bool                    m_Fatal;
-		tstring                 m_Message;
-		tstring                 m_Callstack;
-		std::vector< tstring >  m_Threads;
-		tstring                 m_State;
-		tstring                 m_Dump;
+		std::string                 m_Message;
+		std::string                 m_Callstack;
+		std::vector< std::string >  m_Threads;
+		std::string                 m_State;
+		std::string                 m_Dump;
 
 		// SEH-specific info
 		uint32_t                     m_SEHCode;
-		tstring                 m_SEHClass;
-		tstring                 m_SEHControlRegisters;
-		tstring                 m_SEHIntegerRegisters;
+		std::string                 m_SEHClass;
+		std::string                 m_SEHControlRegisters;
+		std::string                 m_SEHIntegerRegisters;
 
 		// CPP-specific info
-		tstring                 m_CPPClass;
+		std::string                 m_CPPClass;
 
 		ExceptionArgs( ExceptionType type, bool fatal )
 			: m_Type( type )
@@ -89,24 +89,24 @@ namespace Helium
 	};
 
 	// Init (need to specify the search paths to the pdbs if they aren't with the executables)
-	HELIUM_PLATFORM_API bool InitializeSymbols( const tstring& path );
+	HELIUM_PLATFORM_API bool InitializeSymbols( const std::string& path );
 	HELIUM_PLATFORM_API bool GetSymbolsInitialized();
 
 	// Query information from a bare address (should be pretty safe to call)
-	HELIUM_PLATFORM_API tstring GetSymbolInfo( uintptr_t adr, bool enumLoadedModules = true );
+	HELIUM_PLATFORM_API std::string GetSymbolInfo( uintptr_t adr, bool enumLoadedModules = true );
 	HELIUM_PLATFORM_API Helium::Exception* GetHeliumException( uintptr_t addr );
 	HELIUM_PLATFORM_API std::exception* GetStandardException( uintptr_t addr );
 
 	// Stack traces (capture with or without an explicit context, translate to string rep)
 	HELIUM_PLATFORM_API bool GetStackTrace( std::vector<uintptr_t>& trace, unsigned omitFrames = 0 );
 	HELIUM_PLATFORM_API bool GetStackTrace( LPCONTEXT context, std::vector<uintptr_t>& stack, unsigned omitFrames = 0 );
-	HELIUM_PLATFORM_API void TranslateStackTrace( const std::vector<uintptr_t>& trace, tstring& buffer );
+	HELIUM_PLATFORM_API void TranslateStackTrace( const std::vector<uintptr_t>& trace, std::string& buffer );
 
 	// Query SEH exception pointers for full report, abbreviated name, or more details
-	HELIUM_PLATFORM_API tstring GetExceptionInfo( LPEXCEPTION_POINTERS info );
-	HELIUM_PLATFORM_API const tchar_t* GetExceptionClass( uint32_t exceptionCode );
+	HELIUM_PLATFORM_API std::string GetExceptionInfo( LPEXCEPTION_POINTERS info );
+	HELIUM_PLATFORM_API const char* GetExceptionClass( uint32_t exceptionCode );
 	HELIUM_PLATFORM_API void GetExceptionDetails( LPEXCEPTION_POINTERS info, ExceptionArgs& args );
 
 	// Core dumps (full dumps include process heaps)
-	HELIUM_PLATFORM_API tstring WriteDump( LPEXCEPTION_POINTERS info, bool full );
+	HELIUM_PLATFORM_API std::string WriteDump( LPEXCEPTION_POINTERS info, bool full );
 }

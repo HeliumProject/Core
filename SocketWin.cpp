@@ -155,7 +155,7 @@ bool Socket::Listen()
     return true;
 }
 
-bool Socket::Connect( uint16_t port, const tchar_t* ip )
+bool Socket::Connect( uint16_t port, const char* ip )
 {
     HELIUM_ASSERT( m_Protocol == Helium::SocketProtocols::Tcp );
 
@@ -244,7 +244,7 @@ bool Socket::Read( void* buffer, uint32_t bytes, uint32_t& read, sockaddr_in* pe
     return true;
 }
 
-bool Socket::Write( void* buffer, uint32_t bytes, uint32_t& wrote, const tchar_t* ip, uint16_t port )
+bool Socket::Write( void* buffer, uint32_t bytes, uint32_t& wrote, const char* ip, uint16_t port )
 {
     if (bytes == 0)
     {

@@ -21,9 +21,9 @@ void Helium::FatalExit( int exitCode )
 /// Handle an assertion.
 ///
 /// @param[in] pMessageText  Assert message text.
-AssertResult Assert::TriggerImplementation( const tchar_t* pMessageText )
+AssertResult Assert::TriggerImplementation( const char* pMessageText )
 {
-	tchar_t messageBoxText[ 1024 ];
+	char messageBoxText[ 1024 ];
 	StringPrint(
 		messageBoxText,
 		( TXT( "%s\n\nChoose \"Abort\" to terminate the program, \"Retry\" to debug the program (if a debugger " )

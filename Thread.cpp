@@ -56,7 +56,7 @@ CallbackThread::~CallbackThread()
     Join();
 }
 
-bool CallbackThread::Create(Entry entry, void* obj, const tchar_t* name, ThreadPriority priority)
+bool CallbackThread::Create(Entry entry, void* obj, const char* name, ThreadPriority priority)
 {
     HELIUM_ASSERT( entry );
 

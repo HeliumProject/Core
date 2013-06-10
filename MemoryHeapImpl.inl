@@ -139,7 +139,7 @@ Helium::MEMORY_HEAP_CLASS_NAME::MEMORY_HEAP_CLASS_NAME( size_t capacity )
 ///                      onto the given pointer directly, so it must remain valid for the entire lifetime of the
 ///                      memory heap.  Using a hard-coded string literal is recommended.
 /// @param[in] capacity  Fixed size (in bytes) of the memory heap to create, or zero to create a growable heap.
-Helium::MEMORY_HEAP_CLASS_NAME::MEMORY_HEAP_CLASS_NAME( const tchar_t* pName, size_t capacity )
+Helium::MEMORY_HEAP_CLASS_NAME::MEMORY_HEAP_CLASS_NAME( const char* pName, size_t capacity )
     : m_pName( pName )
 #if HELIUM_ENABLE_MEMORY_TRACKING_VERBOSE
     , m_pVerboseTrackingData( NULL )

@@ -31,21 +31,21 @@ namespace Helium
 		Exception();
 
 	public:
-		Exception( const tchar_t *msgFormat, ... );
+		Exception( const char *msgFormat, ... );
 
 		// These accessors are thow that re-throw blocks can amend the exception message
-		inline tstring& Get();
-		inline const tstring& Get() const;
-		inline void Set(const tstring& message);
+		inline std::string& Get();
+		inline const std::string& Get() const;
+		inline void Set(const std::string& message);
 
 		// This allow operation with std::exception case statements
-		virtual const tchar_t* What() const;
+		virtual const char* What() const;
 
 	protected:
-		void SetMessage( const tchar_t* msgFormat, ... );
-		void SetMessage( const tchar_t* msgFormat, va_list msgArgs );
+		void SetMessage( const char* msgFormat, ... );
+		void SetMessage( const char* msgFormat, va_list msgArgs );
 
-		mutable tstring m_Message;
+		mutable std::string m_Message;
 	};
 
 	/// @defgroup debugutility Debug Utility Functions
@@ -54,11 +54,11 @@ namespace Helium
 	HELIUM_PLATFORM_API bool IsDebuggerPresent();
 
 #if !HELIUM_RELEASE && !HELIUM_PROFILE
-	HELIUM_PLATFORM_API bool InitializeSymbols( const tstring& path = TXT("") );
+	HELIUM_PLATFORM_API bool InitializeSymbols( const std::string& path = TXT("") );
 	HELIUM_PLATFORM_API bool GetSymbolsInitialized();
 	HELIUM_PLATFORM_API size_t GetStackTrace( void** ppStackTraceArray, size_t stackTraceArraySize, size_t skipCount = 1 );
-	HELIUM_PLATFORM_API void GetAddressSymbol( tstring& rSymbol, void* pAddress );
-	HELIUM_PLATFORM_API void DebugLog( const tchar_t* pMessage );
+	HELIUM_PLATFORM_API void GetAddressSymbol( std::string& rSymbol, void* pAddress );
+	HELIUM_PLATFORM_API void DebugLog( const char* pMessage );
 #endif
 	//@}
 }

@@ -52,8 +52,8 @@ namespace Helium
 		void SetLevel( TraceLevel level );
 		inline TraceLevel GetLevel() const;
 
-		void Output( TraceLevel level, const tchar_t* pFormat, ... );
-		void OutputVa( TraceLevel level, const tchar_t* pFormat, va_list argList );
+		void Output( TraceLevel level, const char* pFormat, ... );
+		void OutputVa( TraceLevel level, const char* pFormat, va_list argList );
 		//@}
 
 	protected:
@@ -71,12 +71,12 @@ namespace Helium
 
 		/// @name Logging Implementation
 		//@{
-		void OutputImplementation( const tchar_t* pMessage );
+		void OutputImplementation( const char* pMessage );
 		//@}
 
 		/// @name Static Utility Functions
 		//@{
-		static const tchar_t* GetLevelString( TraceLevel level );
+		static const char* GetLevelString( TraceLevel level );
 		//@}
 	};
 

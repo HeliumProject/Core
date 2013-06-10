@@ -42,7 +42,7 @@ void Helium::Trace::SetLevel( TraceLevel level )
 /// @param[in] level    Logging level.
 /// @param[in] pFormat  Format string.
 /// @param[in] ...      Format arguments.
-void Helium::Trace::Output( TraceLevel level, const tchar_t* pFormat, ... )
+void Helium::Trace::Output( TraceLevel level, const char* pFormat, ... )
 {
 	va_list argList;
 	va_start( argList, pFormat );
@@ -56,7 +56,7 @@ void Helium::Trace::Output( TraceLevel level, const tchar_t* pFormat, ... )
 /// @param[in] pFormat  Format string.
 /// @param[in] argList  Initialized variable argument list for the format arguments (va_start() should have already
 ///                     been called on this as necessary).
-void Helium::Trace::OutputVa( TraceLevel level, const tchar_t* pFormat, va_list argList )
+void Helium::Trace::OutputVa( TraceLevel level, const char* pFormat, va_list argList )
 {
 	HELIUM_ASSERT( pFormat );
 
@@ -75,7 +75,7 @@ void Helium::Trace::OutputVa( TraceLevel level, const tchar_t* pFormat, va_list 
 	m_bNewLine = false;
 	m_lastMessageLevel = level;
 
-	tchar_t buffer[ DEFAULT_MESSAGE_BUFFER_SIZE ];
+	char buffer[ DEFAULT_MESSAGE_BUFFER_SIZE ];
 
 #if !HELIUM_OS_WIN
     va_list argListTemp;
@@ -108,9 +108,9 @@ void Helium::Trace::OutputVa( TraceLevel level, const tchar_t* pFormat, va_list 
 
 #if HELIUM_HEAP
 	DefaultAllocator allocator;
-	tchar_t* pBuffer = static_cast< tchar_t* >( allocator.Allocate( sizeof( tchar_t ) * bufferSize ) );
+	char* pBuffer = static_cast< char* >( allocator.Allocate( sizeof( char ) * bufferSize ) );
 #else
-	tchar_t* pBuffer = static_cast< tchar_t* >( ::malloc( sizeof( tchar_t ) * bufferSize ) );
+	char* pBuffer = static_cast< char* >( ::malloc( sizeof( char ) * bufferSize ) );
 #endif
 	HELIUM_ASSERT( pBuffer );
 	if( pBuffer )
@@ -137,7 +137,7 @@ void Helium::Trace::OutputVa( TraceLevel level, const tchar_t* pFormat, va_list 
 /// Write out a message to this log.
 ///
 /// @param[in] pMessage  Message text.
-void Helium::Trace::OutputImplementation( const tchar_t* pMessage )
+void Helium::Trace::OutputImplementation( const char* pMessage )
 {
 	HELIUM_ASSERT( pMessage );
 
@@ -151,7 +151,7 @@ void Helium::Trace::OutputImplementation( const tchar_t* pMessage )
 /// @param[in] level  Logging level.
 ///
 /// @return  Logging level string.
-const tchar_t* Helium::Trace::GetLevelString( TraceLevel level )
+const char* Helium::Trace::GetLevelString( TraceLevel level )
 {
 	switch( level )
 	{

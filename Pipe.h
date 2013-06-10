@@ -18,8 +18,8 @@ namespace Helium
         Pipe();
 		~Pipe();
 
-		bool Create(const tchar_t* name);
-		bool Open(const tchar_t* name);
+		bool Create(const char* name);
+		bool Open(const char* name);
 		void Close();
 
 		bool Connect();

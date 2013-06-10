@@ -11,7 +11,7 @@
 
 using namespace Helium;
 
-static bool GetEnvVar( wchar_t* var, tstring& value )
+static bool GetEnvVar( wchar_t* var, std::string& value )
 {
 	DWORD count = ::GetEnvironmentVariable( var, NULL, 0 );
 	wchar_t* varValue = (wchar_t*)alloca( count * sizeof( wchar_t ) );
@@ -25,7 +25,7 @@ static bool GetEnvVar( wchar_t* var, tstring& value )
 	return false;
 }
 
-int Helium::Execute( const tstring& command )
+int Helium::Execute( const std::string& command )
 {
 	DWORD result = 0;
 
@@ -63,7 +63,7 @@ int Helium::Execute( const tstring& command )
 	return result;
 }
 
-int Helium::Execute( const tstring& command, tstring& output )
+int Helium::Execute( const std::string& command, std::string& output )
 {
 	HANDLE hReadPipe;
 	HANDLE hWritePipe;
@@ -109,9 +109,9 @@ int Helium::Execute( const tstring& command, tstring& output )
 	::CloseHandle( hWritePipe );
 
 	// read from the pipe until EOF condition reached
-	tchar_t buffer[80];
+	char buffer[80];
 	unsigned long count;
-	tstringstream stream;
+	std::stringstream stream;
 	BOOL success = TRUE;
 	do
 	{
@@ -153,14 +153,14 @@ int Helium::Execute( const tstring& command, tstring& output )
 	return result;
 }
 
-tstring Helium::GetProcessString()
+std::string Helium::GetProcessString()
 {
-	tostringstream result;
+	std::ostringstream result;
 	result << GetProcessName() << "_" << GetCurrentProcessId() << "_" << GetCurrentThreadId();
 	return result.str();
 }
 
-tstring Helium::GetProcessPath()
+std::string Helium::GetProcessPath()
 {
 	HMODULE moduleHandle = ::GetModuleHandle( NULL );
 
@@ -173,7 +173,7 @@ tstring Helium::GetProcessPath()
 	return convertedModule;
 }
 
-tstring Helium::GetProcessName()
+std::string Helium::GetProcessName()
 {
 	HMODULE moduleHandle = GetModuleHandle( NULL );
 
@@ -187,23 +187,23 @@ tstring Helium::GetProcessName()
 	return convertedFile;
 }
 
-tstring Helium::GetUserName()
+std::string Helium::GetUserName()
 {
-	tstring username;
+	std::string username;
 	HELIUM_VERIFY( GetEnvVar( L"USERNAME", username ) );
 	return username;
 }
 
-tstring Helium::GetMachineName()
+std::string Helium::GetMachineName()
 {
-	tstring computername;
+	std::string computername;
 	HELIUM_VERIFY( GetEnvVar( L"COMPUTERNAME", computername ) );
 	return computername;
 }
 
-tstring Helium::GetPreferencesDirectory()
+std::string Helium::GetPreferencesDirectory()
 {
-	tstring profileDirectory;
+	std::string profileDirectory;
 
 	wchar_t path[ MAX_PATH ];
 	HRESULT result = SHGetFolderPath( NULL, CSIDL_PROFILE, NULL, SHGFP_TYPE_CURRENT, path );
@@ -217,9 +217,9 @@ tstring Helium::GetPreferencesDirectory()
 	return profileDirectory;
 }
 
-tstring Helium::GetAppDataDirectory()
+std::string Helium::GetAppDataDirectory()
 {
-	tstring appDataDirectory;
+	std::string appDataDirectory;
 
 	wchar_t path[ MAX_PATH ];
 	HRESULT result = SHGetFolderPath( NULL, CSIDL_LOCAL_APPDATA, NULL, SHGFP_TYPE_CURRENT, path );
@@ -233,7 +233,7 @@ tstring Helium::GetAppDataDirectory()
 	return appDataDirectory;
 }
 
-tstring Helium::GetDumpDirectory()
+std::string Helium::GetDumpDirectory()
 {
 	wchar_t tempDir[ MAX_PATH ];
 	size_t result = ::GetTempPath( MAX_PATH, tempDir );

@@ -131,9 +131,9 @@
 
 #if defined(__GNUC__)
 /*these two are compiler defined */
-/// "tchar_t" string format macro for ptrdiff_t.
+/// "char" string format macro for ptrdiff_t.
 #define PRIdPD TXT( "td" )
-// "tchar_t" string format macro for size_t.
+// "char" string format macro for size_t.
 #define PRIuSZ TXT( "zu" )
 #endif
 
@@ -170,22 +170,5 @@ typedef double float64_t;
 # endif
 #endif
 
-/// Default character type.
-typedef char tchar_t;
-
 /// Prefix for declaring string and character literals of the default character type.
 #define TXT( X ) X
-
-typedef std::basic_string< tchar_t > tstring;
-
-typedef std::basic_istream< tchar_t, std::char_traits< tchar_t > > tistream;
-typedef std::basic_ostream< tchar_t, std::char_traits< tchar_t > > tostream;
-typedef std::basic_iostream< tchar_t, std::char_traits< tchar_t > > tiostream;
-
-typedef std::basic_ifstream< tchar_t, std::char_traits< tchar_t > > tifstream;
-typedef std::basic_ofstream< tchar_t, std::char_traits< tchar_t > > tofstream;
-typedef std::basic_fstream< tchar_t, std::char_traits< tchar_t > > tfstream;
-
-typedef std::basic_istringstream< tchar_t, std::char_traits< tchar_t >, std::allocator< tchar_t > > tistringstream;
-typedef std::basic_ostringstream< tchar_t, std::char_traits< tchar_t >, std::allocator< tchar_t > > tostringstream;
-typedef std::basic_stringstream< tchar_t, std::char_traits< tchar_t >, std::allocator< tchar_t > > tstringstream;

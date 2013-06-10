@@ -37,7 +37,7 @@ Pipe::~Pipe()
     ::CloseHandle( m_TerminateIo );
 }
 
-bool Pipe::Create(const tchar_t* name)
+bool Pipe::Create(const char* name)
 {
 	//
 	// We must retry here because quickly thrashing the pipe API can sometimes cause
@@ -84,7 +84,7 @@ bool Pipe::Create(const tchar_t* name)
 	return true;
 }
 
-bool Pipe::Open(const tchar_t* name)
+bool Pipe::Open(const char* name)
 {
 	HELIUM_TCHAR_TO_WIDE( name, convertedName );
 
