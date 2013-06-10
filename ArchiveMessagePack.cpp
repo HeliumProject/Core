@@ -433,8 +433,10 @@ void ArchiveReaderMessagePack::Start()
 	m_Reader.Advance();
 }
 
-void ArchiveReaderMessagePack::ReadNext( ObjectPtr& object )
+bool ArchiveReaderMessagePack::ReadNext( ObjectPtr& object )
 {
+	bool success = false;
+
 	if ( m_Reader.IsMap() )
 	{
 		uint32_t length = m_Reader.ReadMapLength();
@@ -470,6 +472,7 @@ void ArchiveReaderMessagePack::ReadNext( ObjectPtr& object )
 			if ( object.ReferencesObject() )
 			{
 				DeserializeInstance( object, object->GetClass(), object );
+				success = true;
 			}
 			else // object.ReferencesObject()
 			{
@@ -487,6 +490,8 @@ void ArchiveReaderMessagePack::ReadNext( ObjectPtr& object )
 	{
 		m_Reader.Skip();
 	}
+
+	return success;
 }
 
 void ArchiveReaderMessagePack::Resolve()

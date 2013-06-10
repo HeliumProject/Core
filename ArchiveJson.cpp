@@ -455,8 +455,10 @@ void Helium::Persist::ArchiveReaderJson::Start()
 	}
 }
 
-void Helium::Persist::ArchiveReaderJson::ReadNext( Reflect::ObjectPtr& object )
+bool Helium::Persist::ArchiveReaderJson::ReadNext( Reflect::ObjectPtr& object )
 {
+	bool success = false;
+
 	rapidjson::Value& value = m_Document[ m_Next++ ];
 	if ( value.IsObject() )
 	{
@@ -484,10 +486,13 @@ void Helium::Persist::ArchiveReaderJson::ReadNext( Reflect::ObjectPtr& object )
 
 			if ( object.ReferencesObject() )
 			{
+				success = true;
 				DeserializeInstance( member->value, object, object->GetClass(), object );
 			}
 		}
 	}
+
+	return success;
 }
 
 void Helium::Persist::ArchiveReaderJson::Resolve()
