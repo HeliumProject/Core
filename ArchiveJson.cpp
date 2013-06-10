@@ -535,6 +535,25 @@ void ArchiveReaderJson::DeserializeInstance( rapidjson::Value& value, void* inst
 
 				object->PostDeserialize( field );
 			}
+			else
+			{
+				if ( itr->name.IsString() )
+				{
+					HELIUM_TRACE(
+						TraceLevels::Warning, 
+						"ArchiveReaderJson::DeserializeInstance - Could not find field '%s' (crc=)\n", 
+						itr->name.GetString(), 
+						fieldCrc);
+				}
+				else
+				{
+					HELIUM_TRACE(
+						TraceLevels::Warning, 
+						"ArchiveReaderJson::DeserializeInstance - Could not find field (crc=)\n", 
+						fieldCrc);
+				}
+				
+			}
 		}
 	}
 
