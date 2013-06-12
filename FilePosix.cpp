@@ -8,6 +8,7 @@
 #include <vector>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/sendfile.h>
 #include <fcntl.h>
 #include <unistd.h>
 
@@ -310,13 +311,43 @@ bool Helium::MakePath( const tchar_t* path )
 
 bool Helium::Copy( const tchar_t* source, const tchar_t* dest, bool overwrite )
 {
-#define splice(a, b, c) splice(a, 0, b, 0, c, 0)
-	int p[2];
-	pipe(p);
-	int out = open(dest, O_WRONLY);
-	int in = open(source, O_RDONLY);
-	while(splice(p[0], out, splice(in, p[1], 4096))>0);
-#undef splice
+	struct stat status;
+	if ( stat( source, &status ) != 0 )
+	{
+		return false;
+	}
+
+	if ( overwrite )
+	{
+		struct stat destStatus;
+		if ( stat( dest, &destStatus ) == 0 )
+		{
+			if ( unlink( dest ) != 0 )
+			{
+				return false;
+			}
+		}
+	}
+
+	int input, output;
+
+	if( (input = open(source, O_RDONLY)) == -1)
+	{
+		return false;
+	}
+
+	if( (output = open(dest, O_WRONLY | O_CREAT)) == -1)
+	{
+		close(input);
+		return false;
+	}
+
+	bool result = sendfile(output, input, 0, status.st_size) != -1;
+
+	close(input);
+	close(output);
+
+	return result;
 }
 
 bool Helium::Move( const tchar_t* source, const tchar_t* dest )
