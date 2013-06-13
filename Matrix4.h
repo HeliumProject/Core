@@ -204,6 +204,7 @@ namespace Helium
 		static Matrix4        RotateZ (float32_t theta);
 
 		Matrix4&              RowScale( const Vector4& scaleVector );
+		float32_t *           GetArray1d();
 
 		friend struct HELIUM_MATH_API Matrix3;
 	};
@@ -543,5 +544,11 @@ namespace Helium
 			(m[0][0]*n[0]) + (m[1][0]*n[1]) + (m[2][0]*n[2]),
 			(m[0][1]*n[0]) + (m[1][1]*n[1]) + (m[2][1]*n[2]),
 			(m[0][2]*n[0]) + (m[1][2]*n[1]) + (m[2][2]*n[2]));
+	}
+
+	inline float32_t * Matrix4::GetArray1d()
+	{
+		typedef float array1d[16];
+		return reinterpret_cast<float32_t *>( &x );
 	}
 }
