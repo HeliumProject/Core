@@ -27,23 +27,9 @@ namespace Helium
 		REFLECT_DECLARE_BASE_STRUCTURE( Matrix3 );
 		static void PopulateStructure( Reflect::Structure& comp );
 
-		union
-		{
-			float32_t array1d[9];
-			float32_t array2d[3][3];
-			struct
-			{ 
-				Vector3 x;
-				Vector3 y;
-				Vector3 z;
-			};
-			struct
-			{
-				float32_t xx, xy, xz;
-				float32_t yx, yy, yz;
-				float32_t zx, zy, zz;
-			};
-		};
+		Vector3 x;
+		Vector3 y;
+		Vector3 z;
 
 		const static Matrix3 Identity;
 		const static Matrix3 Zero;
@@ -127,12 +113,16 @@ namespace Helium
 
 		float32_t&                  operator()(const uint32_t i, const uint32_t j)
 		{
-			return (array2d[j][i]);
+			typedef float array2d[3][3];
+			array2d& a = reinterpret_cast<array2d&>( x );
+			return a[j][i];
 		}
 
 		const float32_t&            operator()(const uint32_t i, const uint32_t j) const
 		{
-			return (array2d[j][i]);
+			typedef float array2d[3][3];
+			const array2d& a = reinterpret_cast<const array2d&>( x );
+			return a[j][i];
 		}
 
 		bool                  operator== (const Matrix3& v) const

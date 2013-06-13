@@ -29,25 +29,10 @@ namespace Helium
 		REFLECT_DECLARE_BASE_STRUCTURE( Matrix4 );
 		static void PopulateStructure( Reflect::Structure& comp );
 
-		union
-		{
-			float32_t array1d[16];
-			float32_t array2d[4][4];
-			struct
-			{
-				Vector4 x;
-				Vector4 y;
-				Vector4 z;
-				Vector4 t;
-			};
-			struct
-			{
-				float32_t xx, xy, xz, xw;
-				float32_t yx, yy, yz, yw;
-				float32_t zx, zy, zz, zw;
-				float32_t wx, wy, wz, ww;
-			};
-		};
+		Vector4 x;
+		Vector4 y;
+		Vector4 z;
+		Vector4 t;
 
 		const static Matrix4 Identity;
 		const static Matrix4 Zero;
@@ -71,10 +56,10 @@ namespace Helium
 		}
 
 		explicit Matrix4      (float32_t vxx, float32_t vxy, float32_t vxz, float32_t vxw, float32_t vyx, float32_t vyy, float32_t vyz, float32_t vyw, float32_t vzx, float32_t vzy, float32_t vzz, float32_t vzw, float32_t vwx, float32_t vwy, float32_t vwz, float32_t vww)
-			: xx(vxx), xy(vxy), xz(vxz), xw(vxw)
-			, yx(vyx), yy(vyy), yz(vyz), yw(vyw)
-			, zx(vzx), zy(vzy), zz(vzz), zw(vzw)
-			, wx(vwx), wy(vwy), wz(vwz), ww(vww)
+			: x(vxx, vxy, vxz, vxw)
+			, y(vyx, vyy, vyz, vyw)
+			, z(vzx, vzy, vzz, vzw)
+			, t(vwx, vwy, vwz, vww)
 		{
 
 		}
@@ -158,12 +143,16 @@ namespace Helium
 
 		float32_t&                  operator()(const uint32_t i, const uint32_t j)
 		{
-			return (array2d[j][i]);
+			typedef float array2d[4][4];
+			array2d& a = reinterpret_cast<array2d&>( x );
+			return a[j][i];
 		}
 
 		const float32_t&            operator()(const uint32_t i, const uint32_t j) const
 		{
-			return (array2d[j][i]);
+			typedef float array2d[4][4];
+			const array2d& a = reinterpret_cast<const array2d&>( x );
+			return a[j][i];
 		}
 
 		bool                  operator== (const Matrix4& v) const
@@ -298,21 +287,22 @@ namespace Helium
 
 	inline Matrix4& Matrix4::Invert()
 	{
-		Matrix4 &a = *this;
+		typedef float array1d[16];
+		array1d& a = reinterpret_cast<array1d&>( x );
 		Matrix4 result;
 
-		float32_t a0 = a.array1d[ 0]*a.array1d[ 5] - a.array1d[ 1]*a.array1d[ 4];
-		float32_t a1 = a.array1d[ 0]*a.array1d[ 6] - a.array1d[ 2]*a.array1d[ 4];
-		float32_t a2 = a.array1d[ 0]*a.array1d[ 7] - a.array1d[ 3]*a.array1d[ 4];
-		float32_t a3 = a.array1d[ 1]*a.array1d[ 6] - a.array1d[ 2]*a.array1d[ 5];
-		float32_t a4 = a.array1d[ 1]*a.array1d[ 7] - a.array1d[ 3]*a.array1d[ 5];
-		float32_t a5 = a.array1d[ 2]*a.array1d[ 7] - a.array1d[ 3]*a.array1d[ 6];
-		float32_t b0 = a.array1d[ 8]*a.array1d[13] - a.array1d[ 9]*a.array1d[12];
-		float32_t b1 = a.array1d[ 8]*a.array1d[14] - a.array1d[10]*a.array1d[12];
-		float32_t b2 = a.array1d[ 8]*a.array1d[15] - a.array1d[11]*a.array1d[12];
-		float32_t b3 = a.array1d[ 9]*a.array1d[14] - a.array1d[10]*a.array1d[13];
-		float32_t b4 = a.array1d[ 9]*a.array1d[15] - a.array1d[11]*a.array1d[13];
-		float32_t b5 = a.array1d[10]*a.array1d[15] - a.array1d[11]*a.array1d[14];
+		float32_t a0 = a[ 0]*a[ 5] - a[ 1]*a[ 4];
+		float32_t a1 = a[ 0]*a[ 6] - a[ 2]*a[ 4];
+		float32_t a2 = a[ 0]*a[ 7] - a[ 3]*a[ 4];
+		float32_t a3 = a[ 1]*a[ 6] - a[ 2]*a[ 5];
+		float32_t a4 = a[ 1]*a[ 7] - a[ 3]*a[ 5];
+		float32_t a5 = a[ 2]*a[ 7] - a[ 3]*a[ 6];
+		float32_t b0 = a[ 8]*a[13] - a[ 9]*a[12];
+		float32_t b1 = a[ 8]*a[14] - a[10]*a[12];
+		float32_t b2 = a[ 8]*a[15] - a[11]*a[12];
+		float32_t b3 = a[ 9]*a[14] - a[10]*a[13];
+		float32_t b4 = a[ 9]*a[15] - a[11]*a[13];
+		float32_t b5 = a[10]*a[15] - a[11]*a[14];
 
 		float32_t d = a0*b5-a1*b4+a2*b3+a3*b2-a4*b1+a5*b0;
 		if (fabs(d) <= 0.f)
@@ -320,22 +310,22 @@ namespace Helium
 			return *this = Zero;
 		}
 
-		result[0][0] = + a.array1d[ 5]*b5 - a.array1d[ 6]*b4 + a.array1d[ 7]*b3;
-		result[1][0] = - a.array1d[ 4]*b5 + a.array1d[ 6]*b2 - a.array1d[ 7]*b1;
-		result[2][0] = + a.array1d[ 4]*b4 - a.array1d[ 5]*b2 + a.array1d[ 7]*b0;
-		result[3][0] = - a.array1d[ 4]*b3 + a.array1d[ 5]*b1 - a.array1d[ 6]*b0;
-		result[0][1] = - a.array1d[ 1]*b5 + a.array1d[ 2]*b4 - a.array1d[ 3]*b3;
-		result[1][1] = + a.array1d[ 0]*b5 - a.array1d[ 2]*b2 + a.array1d[ 3]*b1;
-		result[2][1] = - a.array1d[ 0]*b4 + a.array1d[ 1]*b2 - a.array1d[ 3]*b0;
-		result[3][1] = + a.array1d[ 0]*b3 - a.array1d[ 1]*b1 + a.array1d[ 2]*b0;
-		result[0][2] = + a.array1d[13]*a5 - a.array1d[14]*a4 + a.array1d[15]*a3;
-		result[1][2] = - a.array1d[12]*a5 + a.array1d[14]*a2 - a.array1d[15]*a1;
-		result[2][2] = + a.array1d[12]*a4 - a.array1d[13]*a2 + a.array1d[15]*a0;
-		result[3][2] = - a.array1d[12]*a3 + a.array1d[13]*a1 - a.array1d[14]*a0;
-		result[0][3] = - a.array1d[ 9]*a5 + a.array1d[10]*a4 - a.array1d[11]*a3;
-		result[1][3] = + a.array1d[ 8]*a5 - a.array1d[10]*a2 + a.array1d[11]*a1;
-		result[2][3] = - a.array1d[ 8]*a4 + a.array1d[ 9]*a2 - a.array1d[11]*a0;
-		result[3][3] = + a.array1d[ 8]*a3 - a.array1d[ 9]*a1 + a.array1d[10]*a0;
+		result[0][0] = + a[ 5]*b5 - a[ 6]*b4 + a[ 7]*b3;
+		result[1][0] = - a[ 4]*b5 + a[ 6]*b2 - a[ 7]*b1;
+		result[2][0] = + a[ 4]*b4 - a[ 5]*b2 + a[ 7]*b0;
+		result[3][0] = - a[ 4]*b3 + a[ 5]*b1 - a[ 6]*b0;
+		result[0][1] = - a[ 1]*b5 + a[ 2]*b4 - a[ 3]*b3;
+		result[1][1] = + a[ 0]*b5 - a[ 2]*b2 + a[ 3]*b1;
+		result[2][1] = - a[ 0]*b4 + a[ 1]*b2 - a[ 3]*b0;
+		result[3][1] = + a[ 0]*b3 - a[ 1]*b1 + a[ 2]*b0;
+		result[0][2] = + a[13]*a5 - a[14]*a4 + a[15]*a3;
+		result[1][2] = - a[12]*a5 + a[14]*a2 - a[15]*a1;
+		result[2][2] = + a[12]*a4 - a[13]*a2 + a[15]*a0;
+		result[3][2] = - a[12]*a3 + a[13]*a1 - a[14]*a0;
+		result[0][3] = - a[ 9]*a5 + a[10]*a4 - a[11]*a3;
+		result[1][3] = + a[ 8]*a5 - a[10]*a2 + a[11]*a1;
+		result[2][3] = - a[ 8]*a4 + a[ 9]*a2 - a[11]*a0;
+		result[3][3] = + a[ 8]*a3 - a[ 9]*a1 + a[10]*a0;
 
 		float32_t d_inverse = ((float32_t)1.0)/d;
 
