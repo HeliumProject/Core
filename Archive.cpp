@@ -121,7 +121,16 @@ bool ArchiveReader::Resolve( const Name& identity, ObjectPtr& pointer, const Cla
 		String str ( identity.Get() );
 
 		Object* found = NULL;
-		if ( str.Parse( "%d", &index ) && index <= m_Objects.GetSize() )
+		int parseSuccessful = str.Parse( "%d", &index );
+
+		if ( !parseSuccessful )
+		{
+			HELIUM_TRACE(
+				TraceLevels::Warning,
+				"ArchiveReader::Resolve - Could not parse identity '%s' as a number.\n", 
+				*str);
+		}
+		else if (index <= m_Objects.GetSize() )
 		{
 			found = m_Objects.GetElement( index );
 		}
