@@ -8,9 +8,12 @@
 #include <vector>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <sys/sendfile.h>
 #include <fcntl.h>
 #include <unistd.h>
+
+#if HELIUM_OS_LINUX
+# include <sys/sendfile.h>
+#endif
 
 #if HELIUM_OS_MAC
 # include <copyfile.h>
