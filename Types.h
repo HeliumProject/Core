@@ -126,7 +126,10 @@
 
 #else  // HELIUM_CC_CL
 
-// Use inttypes.h where available; we simply try to provide relevant type definitions for platforms that don't provide it.
+#ifndef __STDC_FORMAT_MACROS
+#define __STDC_FORMAT_MACROS
+#endif
+
 #include <inttypes.h>
 
 #if defined(__GNUC__)
