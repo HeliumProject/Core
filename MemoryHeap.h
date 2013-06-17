@@ -114,7 +114,7 @@
 /// @return  Pointer to the newly created object, if successful.
 ///
 /// @see HELIUM_DELETE()
-#define HELIUM_NEW( ALLOCATOR, TYPE, ... ) new( ALLOCATOR ) TYPE( __VA_ARGS__ )
+#define HELIUM_NEW( ALLOCATOR, TYPE, ... ) Helium::NewHelper< TYPE >( ALLOCATOR )
 
 /// Create a new array of objects using a specific heap or allocator.
 ///
@@ -458,6 +458,7 @@ namespace Helium
 		virtual void* Reallocate( void* pMemory, size_t size );
 		virtual void* AllocateAligned( size_t alignment, size_t size );
 		virtual void Free( void* pMemory );
+		virtual void FreeAligned( void* pMemory );
 		virtual size_t GetMemorySize( void* pMemory );
 		//@}
 
@@ -556,6 +557,7 @@ namespace Helium
 	/// @defgroup newdeletehelper "new"/"delete" Helper Functions
 	/// Note: These are only intended to be used internally.  Do not call these functions directly.
 	//@{
+	template< typename T, typename Allocator > T* NewHelper( Allocator& rAllocator );
 	template< typename T, typename Allocator > void DeleteHelper( Allocator& rAllocator, T* pObject );
 
 	template< typename T, typename Allocator > T* NewArrayHelper( Allocator& rAllocator, size_t count );
