@@ -90,80 +90,81 @@
 
 namespace Helium
 {
-    /// @defgroup mathgeneral General Math Functions
-    //@{
-    template< typename T > T& Min( T& rA, T& rB );
-    template< typename T > const T& Min( const T& rA, const T& rB );
-    template< typename T > T& Max( T& rA, T& rB );
-    template< typename T > const T& Max( const T& rA, const T& rB );
-    template< typename T > T& Clamp( T& rValue, T& rMin, T& rMax );
-    template< typename T > const T& Clamp( const T& rValue, const T& rMin, const T& rMax );
+	/// @defgroup mathgeneral General Math Functions
+	//@{
+	template< typename T > T& Min( T& rA, T& rB );
+	template< typename T > const T& Min( const T& rA, const T& rB );
+	template< typename T > T& Max( T& rA, T& rB );
+	template< typename T > const T& Max( const T& rA, const T& rB );
+	template< typename T > T& Clamp( T& rValue, T& rMin, T& rMax );
+	template< typename T > const T& Clamp( const T& rValue, const T& rMin, const T& rMax );
 
-    template< typename T > T Abs( const T& rValue );
-    inline int64_t Abs( int64_t value );
-    inline float32_t Abs( float32_t value );
-    inline float64_t Abs( float64_t value );
+	template< typename T > T Abs( const T& rValue );
+	inline int64_t Abs( int64_t value );
+	inline float32_t Abs( float32_t value );
+	inline float64_t Abs( float64_t value );
 
-    template< typename T > T Square( const T& rValue );
+	template< typename T > T Square( const T& rValue );
 
-    inline float32_t Sqrt( float32_t value );
-    inline float64_t Sqrt( float64_t value );
+	inline float32_t Sqrt( float32_t value );
+	inline float64_t Sqrt( float64_t value );
 
-    template< typename T > bool IsPowerOfTwo( const T& rValue );
+	template< typename T > bool IsPowerOfTwo( const T& rValue );
 
-    inline size_t Log2( uint32_t value );
-    inline size_t Log2( uint64_t value );
+	inline size_t Log2( uint32_t value );
+	inline size_t Log2( uint64_t value );
 
-    inline float32_t Floor( float32_t value );
-    inline float64_t Floor( float64_t value );
-    inline float32_t Ceil( float32_t value );
-    inline float64_t Ceil( float64_t value );
+	inline float32_t Floor( float32_t value );
+	inline float64_t Floor( float64_t value );
+	inline float32_t Ceil( float32_t value );
+	inline float64_t Ceil( float64_t value );
 
-    inline float32_t Fmod( float32_t x, float32_t y );
-    inline float64_t Fmod( float64_t x, float64_t y );
-    inline float32_t Modf( float32_t value, float32_t& rInteger );
-    inline float64_t Modf( float64_t value, float64_t& rInteger );
-    //@}
+	inline float32_t Fmod( float32_t x, float32_t y );
+	inline float64_t Fmod( float64_t x, float64_t y );
+	inline float32_t Modf( float32_t value, float32_t& rInteger );
+	inline float64_t Modf( float64_t value, float64_t& rInteger );
+	//@}
 
-    /// @defgroup mathtrig Trigonometric Functions
-    //@{
-    inline float32_t Sin( float32_t radians );
-    inline float32_t Cos( float32_t radians );
-    inline float32_t Tan( float32_t radians );
-    inline float32_t Asin( float32_t value );
-    inline float32_t Acos( float32_t value );
-    inline float32_t Atan( float32_t value );
-    inline float32_t Atan2( float32_t y, float32_t x );
-    //@}
+	/// @defgroup mathtrig Trigonometric Functions
+	//@{
+	inline float32_t Sin( float32_t radians );
+	inline float32_t Cos( float32_t radians );
+	inline float32_t Tan( float32_t radians );
+	inline float32_t Asin( float32_t value );
+	inline float32_t Acos( float32_t value );
+	inline float32_t Atan( float32_t value );
+	inline float32_t Atan2( float32_t y, float32_t x );
+	//@}
 
-    //
-    // Valid
-    //
+	//
+	// Valid
+	//
 
-    inline bool IsFinite( float32_t val );
-    inline bool IsFinite( float64_t val );
+	inline bool IsFinite( float32_t val );
+	inline bool IsFinite( float64_t val );
 
-    inline int32_t Clamp( int32_t& val, int32_t min, int32_t max );
-    inline uint32_t Clamp( uint32_t& val, uint32_t min, uint32_t max );
-    inline float32_t Clamp( float32_t& val, float32_t min, float32_t max );
-    inline float64_t Clamp( float64_t& val, float64_t min, float64_t max );
-    inline float32_t ClampAngle( float32_t& v );
-    
-    inline int32_t Limit( int32_t min, int32_t val, int32_t max );
-    inline float32_t LimitAngle( float32_t v, float32_t low, float32_t high );
-    
-    inline float32_t Round( float32_t d );
-    inline float64_t Round( float64_t d );
-    
-    inline int32_t Ran( int32_t low, int32_t high );
-    inline float64_t Ran( float64_t low, float64_t high );
-    
-    inline float64_t LogBase2( float64_t v );
-    inline uint32_t NextPowerOfTwo( uint32_t in );
-    inline uint32_t PreviousPowerOfTwo( uint32_t in );
-    inline bool IsPowerOfTwo( uint32_t in );
-    inline bool IsWholeNumber( float64_t d, float64_t error );
-    inline bool Equal( float32_t a, float32_t b, float32_t err = HELIUM_VALUE_NEAR_ZERO );
+	inline int32_t Clamp( int32_t& val, int32_t min, int32_t max );
+	inline uint32_t Clamp( uint32_t& val, uint32_t min, uint32_t max );
+	inline float32_t Clamp( float32_t& val, float32_t min, float32_t max );
+	inline float64_t Clamp( float64_t& val, float64_t min, float64_t max );
+	inline float32_t ClampAngle( float32_t& v );
+	
+	inline int32_t Limit( int32_t min, int32_t val, int32_t max );
+	inline float32_t LimitAngle( float32_t v, float32_t low, float32_t high );
+	
+	inline float32_t Round( float32_t d );
+	inline float64_t Round( float64_t d );
+	
+	inline int32_t Ran( int32_t low, int32_t high );
+	inline float32_t Ran( float32_t low, float32_t high );
+	inline float64_t Ran( float64_t low, float64_t high );
+	
+	inline float64_t LogBase2( float64_t v );
+	inline uint32_t NextPowerOfTwo( uint32_t in );
+	inline uint32_t PreviousPowerOfTwo( uint32_t in );
+	inline bool IsPowerOfTwo( uint32_t in );
+	inline bool IsWholeNumber( float64_t d, float64_t error );
+	inline bool Equal( float32_t a, float32_t b, float32_t err = HELIUM_VALUE_NEAR_ZERO );
 }
 
 #include "Foundation/Math.inl"

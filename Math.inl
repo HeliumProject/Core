@@ -9,7 +9,7 @@
 template< typename T >
 T& Helium::Min( T& rA, T& rB )
 {
-    return( rA < rB ? rA : rB );
+	return( rA < rB ? rA : rB );
 }
 
 /// Get the minimum of two values.
@@ -23,7 +23,7 @@ T& Helium::Min( T& rA, T& rB )
 template< typename T >
 const T& Helium::Min( const T& rA, const T& rB )
 {
-    return( rA < rB ? rA : rB );
+	return( rA < rB ? rA : rB );
 }
 
 /// Get the maximum of two values.
@@ -37,7 +37,7 @@ const T& Helium::Min( const T& rA, const T& rB )
 template< typename T >
 T& Helium::Max( T& rA, T& rB )
 {
-    return( rA > rB ? rA : rB );
+	return( rA > rB ? rA : rB );
 }
 
 /// Get the maximum of two values.
@@ -51,7 +51,7 @@ T& Helium::Max( T& rA, T& rB )
 template< typename T >
 const T& Helium::Max( const T& rA, const T& rB )
 {
-    return( rA > rB ? rA : rB );
+	return( rA > rB ? rA : rB );
 }
 
 /// Clamp a value to a given range.
@@ -64,7 +64,7 @@ const T& Helium::Max( const T& rA, const T& rB )
 template< typename T >
 T& Helium::Clamp( T& rValue, T& rMin, T& rMax )
 {
-    return ( rValue < rMin ? rMin : ( rValue > rMax ? rMax : rValue ) );
+	return ( rValue < rMin ? rMin : ( rValue > rMax ? rMax : rValue ) );
 }
 
 /// Clamp a value to a given range.
@@ -77,7 +77,7 @@ T& Helium::Clamp( T& rValue, T& rMin, T& rMax )
 template< typename T >
 const T& Helium::Clamp( const T& rValue, const T& rMin, const T& rMax )
 {
-    return ( rValue < rMin ? rMin : ( rValue > rMax ? rMax : rValue ) );
+	return ( rValue < rMin ? rMin : ( rValue > rMax ? rMax : rValue ) );
 }
 
 /// Get the absolute value of a signed integer (other than int64_t).
@@ -88,7 +88,7 @@ const T& Helium::Clamp( const T& rValue, const T& rMin, const T& rMax )
 template< typename T >
 T Helium::Abs( const T& rValue )
 {
-    return ::abs( rValue );
+	return ::abs( rValue );
 }
 
 /// Get the absolute value of a signed 64-bit integer.
@@ -99,9 +99,9 @@ T Helium::Abs( const T& rValue )
 int64_t Helium::Abs( int64_t value )
 {
 #if HELIUM_OS_WIN && HELIUM_CC_CL
-    return ::_abs64( value );
+	return ::_abs64( value );
 #else
-    return llabs( value );
+	return llabs( value );
 #endif
 }
 
@@ -112,7 +112,7 @@ int64_t Helium::Abs( int64_t value )
 /// @return  Absolute value of the given value.
 float32_t Helium::Abs( float32_t value )
 {
-    return ::fabsf( value );
+	return ::fabsf( value );
 }
 
 /// Get the absolute value of a double-precision floating-point value.
@@ -122,7 +122,7 @@ float32_t Helium::Abs( float32_t value )
 /// @return  Absolute value of the given value.
 float64_t Helium::Abs( float64_t value )
 {
-    return ::fabs( value );
+	return ::fabs( value );
 }
 
 /// Compute the square of a value.
@@ -133,7 +133,7 @@ float64_t Helium::Abs( float64_t value )
 template< typename T >
 T Helium::Square( const T& rValue )
 {
-    return ( rValue * rValue );
+	return ( rValue * rValue );
 }
 
 /// Compute the square root of a single-precision floating-point value.
@@ -143,7 +143,7 @@ T Helium::Square( const T& rValue )
 /// @return  Square root of the given value.
 float32_t Helium::Sqrt( float32_t value )
 {
-    return ::sqrtf( value );
+	return ::sqrtf( value );
 }
 
 /// Compute the square root of a double-precision floating-point value.
@@ -153,7 +153,7 @@ float32_t Helium::Sqrt( float32_t value )
 /// @return  Square root of the given value.
 float64_t Helium::Sqrt( float64_t value )
 {
-    return ::sqrt( value );
+	return ::sqrt( value );
 }
 
 /// IsPowerOfTwo() implementation for signed integer types.
@@ -165,9 +165,9 @@ float64_t Helium::Sqrt( float64_t value )
 template< typename T >
 bool _IsPowerOfTwo( const T& rValue, const std::true_type& /*rIsSigned*/ )
 {
-    T absValue = Abs( rValue );
+	T absValue = Abs( rValue );
 
-    return ( ( absValue & ( absValue - 1 ) ) == 0 );
+	return ( ( absValue & ( absValue - 1 ) ) == 0 );
 }
 
 /// IsPowerOfTwo() implementation for unsigned integer types.
@@ -179,7 +179,7 @@ bool _IsPowerOfTwo( const T& rValue, const std::true_type& /*rIsSigned*/ )
 template< typename T >
 bool _IsPowerOfTwo( const T& rValue, const std::false_type& /*rIsSigned*/ )
 {
-    return ( ( rValue & ( rValue - 1 ) ) == 0 );
+	return ( ( rValue & ( rValue - 1 ) ) == 0 );
 }
 
 /// Test whether an integer value is a power of two.
@@ -190,7 +190,7 @@ bool _IsPowerOfTwo( const T& rValue, const std::false_type& /*rIsSigned*/ )
 template< typename T >
 bool Helium::IsPowerOfTwo( const T& rValue )
 {
-    return _IsPowerOfTwo( rValue, std::is_signed< T >() );
+	return _IsPowerOfTwo( rValue, std::is_signed< T >() );
 }
 
 /// Compute the base-2 logarithm of an unsigned 32-bit integer.
@@ -202,31 +202,31 @@ bool Helium::IsPowerOfTwo( const T& rValue )
 /// @see Log2( uint64_t )
 size_t Helium::Log2( uint32_t value )
 {
-    HELIUM_ASSERT( value != 0 );
+	HELIUM_ASSERT( value != 0 );
 
 #if HELIUM_CC_CL
-    unsigned long bitIndex = 0;
-    HELIUM_VERIFY( _BitScanReverse( &bitIndex, value ) );
+	unsigned long bitIndex = 0;
+	HELIUM_VERIFY( _BitScanReverse( &bitIndex, value ) );
 
-    return bitIndex;
+	return bitIndex;
 #elif HELIUM_CC_GCC || HELIUM_CC_CLANG
-    return ( 31 - __builtin_clz( value ) );
+	return ( 31 - __builtin_clz( value ) );
 #else
 #warning Compiling unoptimized Log2() implementation.  Please evaluate the availability of more optimal implementations for the current platform/compiler.
-    size_t bitIndex = sizeof( value ) * 8 - 1;
-    uint32_t mask = ( 1 << bitIndex );
-    while( !( value & mask ) )
-    {
-        if( bitIndex == 0 )
-        {
-            break;
-        }
+	size_t bitIndex = sizeof( value ) * 8 - 1;
+	uint32_t mask = ( 1 << bitIndex );
+	while( !( value & mask ) )
+	{
+		if( bitIndex == 0 )
+		{
+			break;
+		}
 
-        --bitIndex;
-        mask >>= 1;
-    }
+		--bitIndex;
+		mask >>= 1;
+	}
 
-    return bitIndex;
+	return bitIndex;
 #endif
 }
 
@@ -239,45 +239,45 @@ size_t Helium::Log2( uint32_t value )
 /// @see Log2( uint32_t )
 size_t Helium::Log2( uint64_t value )
 {
-    HELIUM_ASSERT( value );
+	HELIUM_ASSERT( value );
 
 #if HELIUM_CC_CL
-    unsigned long bitIndex = 0;
+	unsigned long bitIndex = 0;
 
 #if HELIUM_WORDSIZE == 64
-    HELIUM_VERIFY( _BitScanReverse64( &bitIndex, value ) );
+	HELIUM_VERIFY( _BitScanReverse64( &bitIndex, value ) );
 #else
-    if( _BitScanReverse( &bitIndex, static_cast< uint32_t >( value >> 32 ) ) )
-    {
-        bitIndex += 32;
-    }
-    else
-    {
-        HELIUM_VERIFY( _BitScanReverse( &bitIndex, static_cast< uint32_t >( value ) ) );
-    }
+	if( _BitScanReverse( &bitIndex, static_cast< uint32_t >( value >> 32 ) ) )
+	{
+		bitIndex += 32;
+	}
+	else
+	{
+		HELIUM_VERIFY( _BitScanReverse( &bitIndex, static_cast< uint32_t >( value ) ) );
+	}
 #endif
 
-    return bitIndex;
+	return bitIndex;
 #elif HELIUM_CC_GCC || HELIUM_CC_CLANG
-    HELIUM_COMPILE_ASSERT( sizeof( long long ) == 8 ); /* sizeof is in bytes. JWS 2-27-13 */
+	HELIUM_COMPILE_ASSERT( sizeof( long long ) == 8 ); /* sizeof is in bytes. JWS 2-27-13 */
 
-    return ( 63 - __builtin_clzll( static_cast< unsigned long long >( value ) ) );
+	return ( 63 - __builtin_clzll( static_cast< unsigned long long >( value ) ) );
 #else
 #warning Compiling unoptimized Log2() implementation.  Please evaluate the availability of more optimal implementations for the current platform/compiler.
-    size_t bitIndex = sizeof( value ) * 8 - 1;
-    uint64_t mask = ( 1 << bitIndex );
-    while( !( value & mask ) )
-    {
-        if( bitIndex == 0 )
-        {
-            break;
-        }
+	size_t bitIndex = sizeof( value ) * 8 - 1;
+	uint64_t mask = ( 1 << bitIndex );
+	while( !( value & mask ) )
+	{
+		if( bitIndex == 0 )
+		{
+			break;
+		}
 
-        --bitIndex;
-        mask >>= 1;
-    }
+		--bitIndex;
+		mask >>= 1;
+	}
 
-    return bitIndex;
+	return bitIndex;
 #endif
 }
 
@@ -290,7 +290,7 @@ size_t Helium::Log2( uint64_t value )
 /// @see Ceil()
 float32_t Helium::Floor( float32_t value )
 {
-    return floorf( value );
+	return floorf( value );
 }
 
 /// Round a floating-point value down to the largest integral value less than or equal to it.
@@ -302,7 +302,7 @@ float32_t Helium::Floor( float32_t value )
 /// @see Ceil()
 float64_t Helium::Floor( float64_t value )
 {
-    return floor( value );
+	return floor( value );
 }
 
 /// Round a floating-point value up to the smallest integral value greater than or equal to it.
@@ -314,7 +314,7 @@ float64_t Helium::Floor( float64_t value )
 /// @see Floor()
 float32_t Helium::Ceil( float32_t value )
 {
-    return ceilf( value );
+	return ceilf( value );
 }
 
 /// Round a floating-point value up to the smallest integral value greater than or equal to it.
@@ -326,7 +326,7 @@ float32_t Helium::Ceil( float32_t value )
 /// @see Floor()
 float64_t Helium::Ceil( float64_t value )
 {
-    return ceil( value );
+	return ceil( value );
 }
 
 /// Compute the remainder of a floating-point division operation.
@@ -339,7 +339,7 @@ float64_t Helium::Ceil( float64_t value )
 /// @see Modf()
 float32_t Helium::Fmod( float32_t x, float32_t y )
 {
-    return fmodf( x, y );
+	return fmodf( x, y );
 }
 
 /// Compute the remainder of a floating-point division operation.
@@ -352,7 +352,7 @@ float32_t Helium::Fmod( float32_t x, float32_t y )
 /// @see Modf()
 float64_t Helium::Fmod( float64_t x, float64_t y )
 {
-    return fmod( x, y );
+	return fmod( x, y );
 }
 
 /// Separate the integer and fractional parts of a floating-point value.
@@ -365,7 +365,7 @@ float64_t Helium::Fmod( float64_t x, float64_t y )
 /// @see Fmod()
 float32_t Helium::Modf( float32_t value, float32_t& rInteger )
 {
-    return modff( value, &rInteger );
+	return modff( value, &rInteger );
 }
 
 /// Separate the integer and fractional parts of a floating-point value.
@@ -378,7 +378,7 @@ float32_t Helium::Modf( float32_t value, float32_t& rInteger )
 /// @see Fmod()
 float64_t Helium::Modf( float64_t value, float64_t& rInteger )
 {
-    return modf( value, &rInteger );
+	return modf( value, &rInteger );
 }
 
 /// Compute the sine of an angle.
@@ -390,7 +390,7 @@ float64_t Helium::Modf( float64_t value, float64_t& rInteger )
 /// @see Cos(), Tan(), Asin(), Acos(), Atan(), Atan2()
 float32_t Helium::Sin( float32_t radians )
 {
-    return sinf( radians );
+	return sinf( radians );
 }
 
 /// Compute the cosine of an angle.
@@ -402,7 +402,7 @@ float32_t Helium::Sin( float32_t radians )
 /// @see Sin(), Tan(), Asin(), Acos(), Atan(), Atan2()
 float32_t Helium::Cos( float32_t radians )
 {
-    return cosf( radians );
+	return cosf( radians );
 }
 
 /// Compute the tangent of an angle.
@@ -414,7 +414,7 @@ float32_t Helium::Cos( float32_t radians )
 /// @see Sin(), Cos(), Asin(), Acos(), Atan(), Atan2()
 float32_t Helium::Tan( float32_t radians )
 {
-    return tanf( radians );
+	return tanf( radians );
 }
 
 /// Compute the arcsine of a value.
@@ -426,7 +426,7 @@ float32_t Helium::Tan( float32_t radians )
 /// @see Acos(), Atan(), Atan2(), Sin(), Cos(), Tan()
 float32_t Helium::Asin( float32_t value )
 {
-    return asinf( value );
+	return asinf( value );
 }
 
 /// Compute the arccosine of a value.
@@ -438,7 +438,7 @@ float32_t Helium::Asin( float32_t value )
 /// @see Asin(), Atan(), Atan2(), Sin(), Cos(), Tan()
 float32_t Helium::Acos( float32_t value )
 {
-    return acosf( value );
+	return acosf( value );
 }
 
 /// Compute the arctangent of a value.
@@ -450,7 +450,7 @@ float32_t Helium::Acos( float32_t value )
 /// @see Asin(), Acos(), Atan2(), Sin(), Cos(), Tan()
 float32_t Helium::Atan( float32_t value )
 {
-    return atanf( value );
+	return atanf( value );
 }
 
 /// Compute the arctangent of the specified slope.
@@ -461,7 +461,7 @@ float32_t Helium::Atan( float32_t value )
 /// @return  Arctangent of the given slope.
 float32_t Helium::Atan2( float32_t y, float32_t x )
 {
-    return atan2f( y, x );
+	return atan2f( y, x );
 }
 
 //
@@ -471,18 +471,18 @@ float32_t Helium::Atan2( float32_t y, float32_t x )
 inline bool Helium::IsFinite(float32_t val)
 {
 #if HELIUM_OS_WIN
-    return _finite(val) != 0;
+	return _finite(val) != 0;
 #else
-    return std::isfinite(val) != 0;
+	return std::isfinite(val) != 0;
 #endif
 }
 
 inline bool Helium::IsFinite(float64_t val)
 {
 #if HELIUM_OS_WIN
-    return _finite(val) != 0;
+	return _finite(val) != 0;
 #else
-    return std::isfinite(val) != 0;
+	return std::isfinite(val) != 0;
 #endif
 }
 
@@ -491,11 +491,11 @@ inline bool Helium::IsFinite(float64_t val)
 //
 inline int32_t Helium::Clamp(int32_t& val, int32_t min, int32_t max)
 {
-    if (val < min)
-        val = min;
-    else if (val > max)
-        val = max;
-    return val;
+	if (val < min)
+		val = min;
+	else if (val > max)
+		val = max;
+	return val;
 }
 
 //
@@ -503,11 +503,11 @@ inline int32_t Helium::Clamp(int32_t& val, int32_t min, int32_t max)
 //
 inline uint32_t Helium::Clamp(uint32_t& val, uint32_t min, uint32_t max)
 {
-    if (val < min)
-        val = min;
-    else if (val > max)
-        val = max;
-    return val;
+	if (val < min)
+		val = min;
+	else if (val > max)
+		val = max;
+	return val;
 }
 
 //
@@ -515,11 +515,11 @@ inline uint32_t Helium::Clamp(uint32_t& val, uint32_t min, uint32_t max)
 //
 inline float32_t Helium::Clamp(float32_t& val, float32_t min, float32_t max)
 {
-    if (val < min)
-        val = min;
-    else if (val > max)
-        val = max;
-    return val;
+	if (val < min)
+		val = min;
+	else if (val > max)
+		val = max;
+	return val;
 }
 
 //
@@ -527,11 +527,11 @@ inline float32_t Helium::Clamp(float32_t& val, float32_t min, float32_t max)
 //
 inline float64_t Helium::Clamp(float64_t& val, float64_t min, float64_t max)
 {
-    if (val < min)
-        val = min;
-    else if (val > max)
-        val = max;
-    return val;
+	if (val < min)
+		val = min;
+	else if (val > max)
+		val = max;
+	return val;
 }
 
 //
@@ -539,11 +539,11 @@ inline float64_t Helium::Clamp(float64_t& val, float64_t min, float64_t max)
 //
 inline float32_t Helium::ClampAngle(float32_t& v)
 {
-    while( v < -static_cast< float32_t >( HELIUM_PI ) )
-        v += static_cast< float32_t >( HELIUM_TWOPI );
-    while( v > static_cast< float32_t >( HELIUM_PI ) )
-        v -= static_cast< float32_t >( HELIUM_TWOPI );
-    return v;
+	while( v < -static_cast< float32_t >( HELIUM_PI ) )
+		v += static_cast< float32_t >( HELIUM_TWOPI );
+	while( v > static_cast< float32_t >( HELIUM_PI ) )
+		v -= static_cast< float32_t >( HELIUM_TWOPI );
+	return v;
 }
 
 //
@@ -551,11 +551,11 @@ inline float32_t Helium::ClampAngle(float32_t& v)
 //
 inline int32_t Helium::Limit(int32_t min, int32_t val, int32_t max)
 {
-    if (val < min)
-        val = min;
-    else if (val > max)
-        val = max;
-    return val;
+	if (val < min)
+		val = min;
+	else if (val > max)
+		val = max;
+	return val;
 }
 
 //
@@ -563,12 +563,12 @@ inline int32_t Helium::Limit(int32_t min, int32_t val, int32_t max)
 //
 inline float32_t Helium::LimitAngle(float32_t v, float32_t low, float32_t high)
 {
-    if (v < low)
-        v += (high - low);
-    else if (v > high)
-        v -= (high - low);
+	if (v < low)
+		v += (high - low);
+	else if (v > high)
+		v -= (high - low);
 
-    return v;
+	return v;
 }
 
 //
@@ -576,11 +576,11 @@ inline float32_t Helium::LimitAngle(float32_t v, float32_t low, float32_t high)
 //
 inline float32_t Helium::Round(float32_t d)
 {
-    return floor(d + 0.5f);
+	return floor(d + 0.5f);
 }
 inline float64_t Helium::Round(float64_t d)
 {
-    return floor(d + 0.5);
+	return floor(d + 0.5);
 }
 
 //
@@ -588,7 +588,15 @@ inline float64_t Helium::Round(float64_t d)
 //
 inline int32_t Helium::Ran(int32_t low, int32_t high)
 {
-    return (int32_t)Round((((float64_t)rand() / (float64_t) RAND_MAX) * (float64_t)(high - low)) + low);
+	return (int32_t)Round((((float64_t)rand() / (float64_t) RAND_MAX) * (float64_t)(high - low)) + low);
+}
+
+//
+// Ran
+//
+inline float32_t Helium::Ran(float32_t low, float32_t high)
+{
+	return (((float32_t)rand() / (float32_t) RAND_MAX) * (high - low)) + low;
 }
 
 //
@@ -596,7 +604,7 @@ inline int32_t Helium::Ran(int32_t low, int32_t high)
 //
 inline float64_t Helium::Ran(float64_t low, float64_t high)
 {
-    return (((float64_t)rand() / (float64_t) RAND_MAX) * (high - low)) + low;
+	return (((float64_t)rand() / (float64_t) RAND_MAX) * (high - low)) + low;
 }
 
 //
@@ -604,9 +612,9 @@ inline float64_t Helium::Ran(float64_t low, float64_t high)
 //
 inline float64_t Helium::LogBase2(float64_t v)
 {
-    v = log10(v);
-    v = v * 3.3219282;
-    return v;
+	v = log10(v);
+	v = v * 3.3219282;
+	return v;
 }
 
 //
@@ -617,15 +625,15 @@ inline float64_t Helium::LogBase2(float64_t v)
 //
 inline uint32_t Helium::NextPowerOfTwo(uint32_t in)
 {
-    in -= 1;
+	in -= 1;
 
-    in |= in >> 16;
-    in |= in >> 8;
-    in |= in >> 4;
-    in |= in >> 2;
-    in |= in >> 1;
+	in |= in >> 16;
+	in |= in >> 8;
+	in |= in >> 4;
+	in |= in >> 2;
+	in |= in >> 1;
 
-    return in + 1;
+	return in + 1;
 }
 
 //
@@ -636,7 +644,7 @@ inline uint32_t Helium::NextPowerOfTwo(uint32_t in)
 //
 inline uint32_t Helium::PreviousPowerOfTwo(uint32_t in)
 {
-    return 1<<Log2(in);
+	return 1<<Log2(in);
 }
 
 //
@@ -646,7 +654,7 @@ inline uint32_t Helium::PreviousPowerOfTwo(uint32_t in)
 //
 inline bool Helium::IsPowerOfTwo(uint32_t in)
 {
-    return (in & (in-1))==0;
+	return (in & (in-1))==0;
 }
 
 //
@@ -654,10 +662,10 @@ inline bool Helium::IsPowerOfTwo(uint32_t in)
 //
 inline bool Helium::IsWholeNumber(float64_t d, float64_t error)
 {
-    float64_t i = Round(d);
-    if (fabs(d - i) <= error)
-        return true;
-    return false;
+	float64_t i = Round(d);
+	if (fabs(d - i) <= error)
+		return true;
+	return false;
 }
 
 //
@@ -665,5 +673,5 @@ inline bool Helium::IsWholeNumber(float64_t d, float64_t error)
 // 
 inline bool Helium::Equal( float32_t a, float32_t b, float32_t err )
 {
-    return ( fabs( a - b ) <= err ); 
+	return ( fabs( a - b ) <= err ); 
 }
