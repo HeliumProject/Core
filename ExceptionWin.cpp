@@ -653,7 +653,7 @@ void Helium::GetExceptionDetails( LPEXCEPTION_POINTERS info, ExceptionArgs& args
 	}
 	else
 	{
-		args.m_Type = ExceptionTypes::SEH;
+		args.m_Type = ExceptionTypes::Structured;
 
 		if (args.m_SEHCode == EXCEPTION_ACCESS_VIOLATION)
 		{
@@ -697,7 +697,7 @@ void Helium::GetExceptionDetails( LPEXCEPTION_POINTERS info, ExceptionArgs& args
 
 std::string Helium::GetExceptionInfo(LPEXCEPTION_POINTERS info)
 {
-	ExceptionArgs args ( ExceptionTypes::SEH, false );
+	ExceptionArgs args ( ExceptionTypes::Structured, false );
 	GetExceptionDetails( info, args );
 
 	std::string buffer;
@@ -718,7 +718,7 @@ std::string Helium::GetExceptionInfo(LPEXCEPTION_POINTERS info)
 			break;
 		}
 
-	case ExceptionTypes::SEH:
+	case ExceptionTypes::Structured:
 		{
 			PrintToString( buffer, TXT("Type:    SEH Exception\n") );
 			PrintToString( buffer, TXT("Code:    0x%08X\n"), args.m_SEHCode );

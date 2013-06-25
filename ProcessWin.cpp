@@ -172,7 +172,7 @@ ProcessHandle Helium::Spawn( const std::string& cmd )
 
 	ProcessHandle handle = InvalidProcessHandle;
 
-	if ( ::CreateProcess( NULL, (LPTSTR) str.c_str(), NULL, NULL, FALSE, flags, NULL, NULL, &startupInfo, &procInfo ) )
+	if ( ::CreateProcess( NULL, (LPTSTR) cmd.c_str(), NULL, NULL, FALSE, flags, NULL, NULL, &startupInfo, &procInfo ) )
 	{
 		// save this for query later
 		handle = procInfo.hProcess;
@@ -187,14 +187,14 @@ ProcessHandle Helium::Spawn( const std::string& cmd )
 bool Helium::SpawnRunning( ProcessHandle handle )
 {
 	DWORD code = 0x0;
-	::GetExitCodeProcess( m_Handle, &code );
+	::GetExitCodeProcess( handle, &code );
 	return code == STILL_ACTIVE;
 }
 
 int Helium::SpawnResult( ProcessHandle handle )
 {
 	DWORD code = 0x0;
-	::WaitForSingleObject( handle );
+	::WaitForSingleObject( handle, INFINITE );
 	::GetExitCodeProcess( handle, &code );
 	::CloseHandle( handle );
 	return code;
@@ -202,7 +202,7 @@ int Helium::SpawnResult( ProcessHandle handle )
 
 void Helium::SpawnKill( ProcessHandle handle )
 {
-	::TerminateProcess( m_Handle, -1 );	
+	::TerminateProcess( handle, -1 );	
 }
 
 int Helium::GetProcessId( ProcessHandle handle )
@@ -213,7 +213,7 @@ int Helium::GetProcessId( ProcessHandle handle )
 	}
 	else
 	{
-		::GetProcessId( handle );
+		return ::GetProcessId( handle );
 	}
 }
 

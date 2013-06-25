@@ -4,6 +4,7 @@
 
 #include "Platform/API.h"
 #include "Platform/Types.h"
+#include "Platform/Exception.h"
 
 #if defined(_M_IX86)
 # define IMAGE_FILE_ARCH IMAGE_FILE_MACHINE_I386

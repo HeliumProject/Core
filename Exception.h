@@ -6,10 +6,6 @@
 #include <vector>
 #include <exception>
 
-#ifdef HELIUM_OS_WIN
-# include "Platform/ExceptionWin.h"
-#endif
-
 namespace Helium
 {
 	//
@@ -117,5 +113,9 @@ namespace Helium
 #endif
 	//@}
 }
+
+#ifdef HELIUM_OS_WIN
+# include "Platform/ExceptionWin.h"
+#endif
 
 #include "Platform/Exception.inl"
