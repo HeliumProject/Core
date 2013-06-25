@@ -1,10 +1,10 @@
 template< typename T >
 void Helium::Tokenize( const std::string& str, std::vector< T >& tokens, const std::string delimiters )
 {
-    tregex splitPattern(delimiters); 
+    std::regex splitPattern(delimiters); 
 
-    std::tr1::sregex_token_iterator i(str.begin(), str.end(), splitPattern, -1); 
-    std::tr1::sregex_token_iterator end; 
+    std::sregex_token_iterator i(str.begin(), str.end(), splitPattern, -1); 
+    std::sregex_token_iterator end; 
 
     for(; i != end; i++)
     {
@@ -22,10 +22,10 @@ void Helium::Tokenize( const std::string& str, std::vector< T >& tokens, const s
 template< typename T >
 void Helium::Tokenize( const std::string& str, std::set< T >& tokens, const std::string delimiters )
 {
-    std::tr1::regex splitPattern(delimiters); 
+    std::regex splitPattern(delimiters); 
 
-    std::tr1::sregex_token_iterator i(str.begin(), str.end(), splitPattern, -1); 
-    std::tr1::sregex_token_iterator end; 
+    std::sregex_token_iterator i(str.begin(), str.end(), splitPattern, -1); 
+    std::sregex_token_iterator end; 
 
     for(; i != end; i++)
     {
@@ -43,10 +43,10 @@ void Helium::Tokenize( const std::string& str, std::set< T >& tokens, const std:
 template<>
 inline void Helium::Tokenize( const std::string& str, std::vector< std::string >& tokens, const std::string delimiters )
 {
-    tregex splitPattern(delimiters); 
+    std::regex splitPattern(delimiters); 
 
-    tsregex_token_iterator i(str.begin(), str.end(), splitPattern, -1); 
-    tsregex_token_iterator end; 
+    std::sregex_token_iterator i(str.begin(), str.end(), splitPattern, -1); 
+    std::sregex_token_iterator end; 
 
     for(; i != end; i++)
     {
@@ -60,10 +60,10 @@ inline void Helium::Tokenize( const std::string& str, std::vector< std::string >
 template<>
 inline void Helium::Tokenize( const std::string& str, std::set< std::string >& tokens, const std::string delimiters )
 {
-    tregex splitPattern(delimiters); 
+    std::regex splitPattern(delimiters); 
 
-    tsregex_token_iterator i(str.begin(), str.end(), splitPattern, -1); 
-    tsregex_token_iterator end; 
+    std::sregex_token_iterator i(str.begin(), str.end(), splitPattern, -1); 
+    std::sregex_token_iterator end; 
 
     for(; i != end; i++)
     {
