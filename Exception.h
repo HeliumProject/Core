@@ -11,7 +11,6 @@
 
 namespace Helium
 {
-#if HELIUM_OS_WIN
     //
     // Filter exceptions via CRT
     //
@@ -25,6 +24,7 @@ namespace Helium
 
     struct BreakpointArgs
     {
+#if HELIUM_OS_WIN
         BreakpointArgs( LPEXCEPTION_POINTERS info, bool fatal )
             : m_Info( info )
             , m_Fatal( fatal )
@@ -32,8 +32,18 @@ namespace Helium
         {
 
         }
+#else
+        BreakpointArgs( bool fatal )
+            : m_Fatal( fatal )
+            , m_Result( 0 )
+        {
 
+        }
+#endif
+
+#if HELIUM_OS_WIN
         LPEXCEPTION_POINTERS    m_Info;
+#endif
         bool                    m_Fatal;
         mutable int             m_Result;
     };
@@ -69,6 +79,7 @@ namespace Helium
         bool print = false,
         bool fatal = false );
 
+#if HELIUM_OS_WIN
     // prepare and dispatch a report for an SEH exception such as divide by zero, page fault from a invalid memory access, or even breakpoint instructions
     HELIUM_FOUNDATION_API uint32_t ProcessException( LPEXCEPTION_POINTERS info,
         bool print = false,

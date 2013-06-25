@@ -17,30 +17,38 @@
 
 using namespace Helium;
 
-#if HELIUM_OS_WIN
-
 BreakpointSignature::Delegate   Helium::g_BreakpointOccurred;
 ExceptionSignature::Delegate    Helium::g_ExceptionOccurred;
 TerminateSignature::Event       Helium::g_Terminating;
 
 bool g_EnableExceptionFilter = false;
 
+#if HELIUM_OS_WIN
+
 static LONG __stdcall ProcessFilteredException( LPEXCEPTION_POINTERS info )
 {
     return Helium::ProcessException(info, true, true);
 }
 
+#endif
+
 void Helium::EnableExceptionFilter(bool enable)
 {
+#if HELIUM_OS_WIN
+
     g_EnableExceptionFilter = enable;
 
     // handles an exception occuring in the process not handled by a user exception handler
     SetUnhandledExceptionFilter( g_EnableExceptionFilter ? &ProcessFilteredException : NULL );
+
+#endif
 }
 
 void Helium::ProcessException(const Helium::Exception& exception, bool print, bool fatal)
 {
+#if HELIUM_OS_WIN
     SetUnhandledExceptionFilter( NULL );
+#endif
 
     ExceptionArgs args( ExceptionTypes::CPP, fatal );
 
@@ -79,13 +87,17 @@ void Helium::ProcessException(const Helium::Exception& exception, bool print, bo
     }
     else if ( g_EnableExceptionFilter )
     {
+#if HELIUM_OS_WIN
         SetUnhandledExceptionFilter( &ProcessFilteredException );
+#endif
     }
 }
 
 void Helium::ProcessException(const std::exception& exception, bool print, bool fatal)
 {
+#if HELIUM_OS_WIN
     SetUnhandledExceptionFilter( NULL );
+#endif
 
     ExceptionArgs args( ExceptionTypes::CPP, fatal );
 
@@ -124,9 +136,13 @@ void Helium::ProcessException(const std::exception& exception, bool print, bool 
     }
     else if ( g_EnableExceptionFilter )
     {
+#if HELIUM_OS_WIN
         SetUnhandledExceptionFilter( &ProcessFilteredException );
+#endif
     }
 }
+
+#if HELIUM_OS_WIN
 
 uint32_t Helium::ProcessException(LPEXCEPTION_POINTERS info, bool print, bool fatal)
 {

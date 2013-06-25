@@ -24,24 +24,16 @@
 // cmatch and smatch are not ambiguous at all. 
 // 
 
-typedef std::tr1::basic_regex<char, std::tr1::regex_traits<char> > tregex;
-typedef std::tr1::match_results<const char*> tcmatch;
-typedef std::tr1::match_results<std::string::const_iterator> tsmatch;
-typedef std::tr1::regex_token_iterator< const char*> tcregex_token_iterator;
-typedef std::tr1::regex_token_iterator< std::string::const_iterator> tsregex_token_iterator;
-typedef std::tr1::regex_iterator< const char* > tcregex_iterator;
-typedef std::tr1::regex_iterator< std::string::const_iterator > tsregex_iterator;
-
 namespace Helium
 {
     template <class MatchT>
-    inline std::string MatchResultAsString( const std::tr1::match_results<MatchT>& results, int i )
+    inline std::string MatchResultAsString( const std::match_results<MatchT>& results, int i )
     {
         return std::string ( results[i].first, results[i].second ); 
     }
 
     template <class T, class MatchT>
-    inline T MatchResult( const std::tr1::match_results<MatchT>& results, int i )
+    inline T MatchResult( const std::match_results<MatchT>& results, int i )
     {
         std::istringstream str ( MatchResultAsString<MatchT>(results, i) );
 
