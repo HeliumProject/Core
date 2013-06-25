@@ -159,7 +159,7 @@ uint32_t Helium::ProcessException(LPEXCEPTION_POINTERS info, bool print, bool fa
     }
     else
     {
-        ExceptionArgs args ( ExceptionTypes::SEH, fatal );
+        ExceptionArgs args ( ExceptionTypes::Structured, fatal );
 
         args.m_State = Log::GetOutlineState();
 
