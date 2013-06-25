@@ -408,6 +408,13 @@ void Helium::StackMemoryHeap< Allocator >::Free( void* pMemory )
 		TXT( "allocation)" ) );
 }
 
+// @copydoc Free()
+template< typename Allocator >
+void Helium::StackMemoryHeap< Allocator >::FreeAligned( void* pMemory )
+{
+	Free( pMemory );
+}
+
 // @copydoc GetMemorySize()
 template< typename Allocator >
 size_t Helium::StackMemoryHeap< Allocator >::GetMemorySize( void* /*pMemory*/ )
@@ -499,6 +506,26 @@ void Helium::StackMemoryHeap< Allocator >::Marker::Pop()
 	}
 }
 
+/// Construct a new array.
+///
+/// @param[in] rAllocator  Reference to an allocator or Helium::MemoryHeap to use for allocations.
+/// @param[in] count       Number of elements in the array to create.
+///
+/// @return  Pointer to the first element in the newly constructed array.
+template< typename T, typename Allocator >
+T* Helium::NewHelper( Allocator& rAllocator )
+{
+	// Cannot know in DeleteHelper if we SIMD align or not since pointer may not be of type T, 
+	// so for now, all non-array allocates are aligned
+	//void* pMemory = Helium::AllocateAlignmentHelper( rAllocator, sizeof( T ) );
+	void *pMemory = rAllocator.AllocateAligned( HELIUM_SIMD_ALIGNMENT, sizeof( T ) );
+	HELIUM_ASSERT( pMemory );
+
+	new( pMemory ) T();
+
+	return static_cast< T* >( pMemory );
+}
+
 /// Delete an object created from a specific allocator or heap.
 ///
 /// @param[in] rAllocator  Reference to an allocator or Helium::MemoryHeap to use for allocations.
@@ -509,7 +536,10 @@ void Helium::DeleteHelper( Allocator& rAllocator, T* pObject )
 	if( pObject )
 	{
 		pObject->~T();
-		rAllocator.Free( pObject );
+		rAllocator.FreeAligned( pObject );
+		// Cannot know in DeleteHelper if we SIMD align or not since pointer may not be of type T, 
+		// so for now, all non-array allocates are aligned
+		//FreeAlignmentHelper( rAllocator, pObject, sizeof(T) );
 	}
 }
 
