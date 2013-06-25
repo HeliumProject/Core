@@ -45,49 +45,6 @@ namespace Helium
 {
 	class Exception;
 
-	namespace ExceptionTypes
-	{
-		enum ExceptionType
-		{
-			SEH,
-			CPP
-		};
-
-		static const char* Strings[] =
-		{
-			TXT("SEH"),
-			TXT("C++"),
-		};
-	}
-	typedef ExceptionTypes::ExceptionType ExceptionType;
-
-	struct HELIUM_PLATFORM_API ExceptionArgs
-	{
-		ExceptionType           m_Type;
-		bool                    m_Fatal;
-		std::string                 m_Message;
-		std::string                 m_Callstack;
-		std::vector< std::string >  m_Threads;
-		std::string                 m_State;
-		std::string                 m_Dump;
-
-		// SEH-specific info
-		uint32_t                     m_SEHCode;
-		std::string                 m_SEHClass;
-		std::string                 m_SEHControlRegisters;
-		std::string                 m_SEHIntegerRegisters;
-
-		// CPP-specific info
-		std::string                 m_CPPClass;
-
-		ExceptionArgs( ExceptionType type, bool fatal )
-			: m_Type( type )
-			, m_Fatal( fatal )
-			, m_SEHCode( -1 )
-		{
-		};
-	};
-
 	// Init (need to specify the search paths to the pdbs if they aren't with the executables)
 	HELIUM_PLATFORM_API bool InitializeSymbols( const std::string& path );
 	HELIUM_PLATFORM_API bool GetSymbolsInitialized();

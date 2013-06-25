@@ -5,11 +5,35 @@
 
 namespace Helium
 {
+#if HELIUM_OS_WIN
+	typedef HANDLE ProcessHandle;
+	const static HANDLE InvalidProcessHandle = NULL;
+#else
+	typedef pid_t ProcessHandle;
+	const static pid_t InvalidProcessHandle = 0;
+#endif
+
 	/// Creates a new process with no window or output, use it for running scripts and file association apps
 	HELIUM_PLATFORM_API int Execute( const std::string& command );
 
 	/// Creates a new process and captures its standard out and standard error into the passed string
 	HELIUM_PLATFORM_API int Execute( const std::string& command, std::string& output );
+
+	/// Spawn another process and run it alongside the executing process
+	HELIUM_PLATFORM_API ProcessHandle Spawn( const std::string& command );
+
+	/// Test if the spawned process is running
+	HELIUM_PLATFORM_API bool SpawnRunning( ProcessHandle handle );
+
+	/// Get result of spawned process and release any behinds-the-scenes resources
+	///  (always call!, even for fire-and-forget child processes)
+	HELIUM_PLATFORM_API int SpawnResult( ProcessHandle handle );
+
+	/// Forcefully terminate spawn
+	HELIUM_PLATFORM_API void SpawnKill( ProcessHandle handle );
+
+	/// Get the process id
+	HELIUM_PLATFORM_API int GetProcessId( ProcessHandle handle = InvalidProcessHandle );
 
 	/// Get a unique string for this process
 	HELIUM_PLATFORM_API std::string GetProcessString();

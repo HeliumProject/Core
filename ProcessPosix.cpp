@@ -12,6 +12,8 @@
 #include <sys/types.h>
 #include <sys/syscall.h>
 #include <unistd.h>
+#include <signal.h>
+#include <spawn.h>
 
 using namespace Helium;
 
@@ -32,6 +34,54 @@ int Helium::Execute( const std::string& command, std::string& output )
 	}
 
 	return pclose( f );
+}
+
+ProcessHandle Helium::Spawn( const std::string& cmd )
+{
+	const char* spawnedArgs[] = { "/bin/bash", "-c", cmd.c_str(), NULL };
+
+	ProcessHandle pid;
+	if ( posix_spawn( &pid, spawnedArgs[0], NULL, NULL, const_cast< char* const* >( spawnedArgs ), NULL ) == 0 )
+	{
+		return pid;
+	}
+
+	return 0;
+}
+
+bool Helium::SpawnRunning( ProcessHandle handle )
+{
+	int status = 0;
+	HELIUM_VERIFY( handle == waitpid( handle, &status, WNOHANG | WUNTRACED ) );
+	if ( WIFEXITED( status ) )
+	{
+		return false;
+	}
+	else
+	{
+		return true;
+	}
+}
+
+int Helium::SpawnResult( ProcessHandle handle )
+{
+	int status = 0;
+	HELIUM_VERIFY( handle == waitpid( handle, &status, WUNTRACED ) );
+	if ( WIFEXITED( status ) )
+	{
+		return WEXITSTATUS( status );
+	}
+	return -1;
+}
+
+void Helium::SpawnKill( ProcessHandle handle )
+{
+	kill( handle, SIGTERM );	
+}
+
+int Helium::GetProcessId( ProcessHandle handle )
+{
+	return handle;
 }
 
 std::string Helium::GetProcessString()

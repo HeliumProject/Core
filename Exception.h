@@ -3,6 +3,7 @@
 #include "Platform/Error.h"
 #include "Platform/Console.h"
 
+#include <vector>
 #include <exception>
 
 #ifdef HELIUM_OS_WIN
@@ -46,6 +47,60 @@ namespace Helium
 		void SetMessage( const char* msgFormat, va_list msgArgs );
 
 		mutable std::string m_Message;
+	};
+
+	namespace ExceptionTypes
+	{
+		enum ExceptionType
+		{
+			CPP,
+#if HELIUM_OS_WIN
+			Structured,
+#else
+			Signal
+#endif
+		};
+
+		static const char* Strings[] =
+		{
+			TXT("C++"),
+#if HELIUM_OS_WIN
+			TXT("Structured"),
+#else
+			TXT("Signal"),
+#endif
+		};
+	}
+	typedef ExceptionTypes::ExceptionType ExceptionType;
+
+	struct HELIUM_PLATFORM_API ExceptionArgs
+	{
+		ExceptionType               m_Type;
+		bool                        m_Fatal;
+		std::string                 m_Message;
+		std::string                 m_Callstack;
+		std::vector< std::string >  m_Threads;
+		std::string                 m_State;
+		std::string                 m_Dump;
+
+		// CPP-specific info
+		std::string                 m_CPPClass;
+
+#if HELIUM_OS_WIN
+		// SEH-specific info
+		uint32_t                    m_SEHCode;
+		std::string                 m_SEHClass;
+		std::string                 m_SEHControlRegisters;
+		std::string                 m_SEHIntegerRegisters;
+#endif
+		ExceptionArgs( ExceptionType type, bool fatal )
+			: m_Type( type )
+			, m_Fatal( fatal )
+#if HELIUM_OS_WIN
+			, m_SEHCode( -1 )
+#endif
+		{
+		};
 	};
 
 	/// @defgroup debugutility Debug Utility Functions

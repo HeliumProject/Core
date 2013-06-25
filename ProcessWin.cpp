@@ -153,6 +153,70 @@ int Helium::Execute( const std::string& command, std::string& output )
 	return result;
 }
 
+ProcessHandle Helium::Spawn( const std::string& cmd )
+{
+	STARTUPINFO startupInfo;
+	memset( &startupInfo, 0, sizeof( startupInfo ) );
+	startupInfo.cb = sizeof( startupInfo );
+
+	PROCESS_INFORMATION procInfo;
+	memset( &procInfo, 0, sizeof( procInfo ) );
+
+	DWORD flags = 0;
+
+#ifdef _DEBUG
+	flags |= CREATE_NEW_CONSOLE;
+#else
+	flags |= CREATE_NO_WINDOW;
+#endif
+
+	ProcessHandle handle = InvalidProcessHandle;
+
+	if ( ::CreateProcess( NULL, (LPTSTR) str.c_str(), NULL, NULL, FALSE, flags, NULL, NULL, &startupInfo, &procInfo ) )
+	{
+		// save this for query later
+		handle = procInfo.hProcess;
+
+		// release handles to our new process
+		::CloseHandle( procInfo.hThread );
+	}
+
+	return handle;
+}
+
+bool Helium::SpawnRunning( ProcessHandle handle )
+{
+	DWORD code = 0x0;
+	::GetExitCodeProcess( m_Handle, &code );
+	return code == STILL_ACTIVE;
+}
+
+int Helium::SpawnResult( ProcessHandle handle )
+{
+	DWORD code = 0x0;
+	::WaitForSingleObject( handle );
+	::GetExitCodeProcess( handle, &code );
+	::CloseHandle( handle );
+	return code;
+}
+
+void Helium::SpawnKill( ProcessHandle handle )
+{
+	::TerminateProcess( m_Handle, -1 );	
+}
+
+int Helium::GetProcessId( ProcessHandle handle )
+{
+	if ( handle == InvalidProcessHandle )
+	{
+		return ::GetCurrentProcessId();
+	}
+	else
+	{
+		::GetProcessId( handle );
+	}
+}
+
 std::string Helium::GetProcessString()
 {
 	std::ostringstream result;
