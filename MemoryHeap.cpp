@@ -17,7 +17,7 @@ using namespace Helium;
 #pragma warning( disable : 4530 )  // C++ exception handler used, but unwind semantics are not enabled. Specify /EHsc
 #endif
 
-#include <hash_map>
+#include <map>
 
 #ifdef _MSC_VER
 #pragma warning( pop )
@@ -93,7 +93,7 @@ static Helium::Mutex& GetMallocGlobalMutex()
 struct Helium::DynamicMemoryHeapVerboseTrackingData
 {
     /// Allocation backtraces for this heap.
-    stdext::hash_map< void*, DynamicMemoryHeap::AllocationBacktrace > allocationBacktraceMap;
+    std::map< void*, DynamicMemoryHeap::AllocationBacktrace > allocationBacktraceMap;
 };
 
 static volatile Thread::id_t s_verboseTrackingCurrentThreadId = Thread::INVALID_ID;
@@ -221,15 +221,15 @@ void DynamicMemoryHeap::LogMemoryStats()
         DynamicMemoryHeapVerboseTrackingData* pTrackingData = pHeap->m_pVerboseTrackingData;
         if( pTrackingData )
         {
-            const stdext::hash_map< void*, AllocationBacktrace >& rAllocationBacktraceMap =
+            const std::map< void*, AllocationBacktrace >& rAllocationBacktraceMap =
                 pTrackingData->allocationBacktraceMap;
 
 #pragma TODO( "HELIUM MERGE - Remove STL string usage here once String is merged over." )
 //            String symbol;
             std::string symbol;
 
-            stdext::hash_map< void*, AllocationBacktrace >::const_iterator iterEnd = rAllocationBacktraceMap.end();
-            stdext::hash_map< void*, AllocationBacktrace >::const_iterator iter;
+            std::map< void*, AllocationBacktrace >::const_iterator iterEnd = rAllocationBacktraceMap.end();
+            std::map< void*, AllocationBacktrace >::const_iterator iter;
             for( iter = rAllocationBacktraceMap.begin(); iter != iterEnd; ++iter )
             {
                 HELIUM_TRACE(
