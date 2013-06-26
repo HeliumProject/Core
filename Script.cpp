@@ -95,10 +95,10 @@ bool Script::PreProcess(std::string& script)
   // Check for L code
   //
 
-  const tregex cfPattern ( TXT( ".*" ) LS_REGEX_DELIM_BEGIN TXT( ".*" ) LS_REGEX_DELIM_END TXT( ".*" ) );
+  const std::regex cfPattern ( TXT( ".*" ) LS_REGEX_DELIM_BEGIN TXT( ".*" ) LS_REGEX_DELIM_END TXT( ".*" ) );
 
-  tsmatch matchResult; 
-  if(!std::tr1::regex_search(script, matchResult, cfPattern))
+  std::smatch matchResult; 
+  if(!std::regex_search(script, matchResult, cfPattern))
   {
     return false; 
   }
@@ -110,14 +110,14 @@ bool Script::PreProcess(std::string& script)
   // the .* at the end of this secretly culls the rest of the string for you
   // including comments and additional UI[.[ (.*) ].] 
   // 
-  const tregex cfStartEndPattern ( TXT( ".*" ) LS_REGEX_DELIM_BEGIN TXT( "(.*)" ) LS_REGEX_DELIM_END TXT( ".*" ) ); 
+  const std::regex cfStartEndPattern ( TXT( ".*" ) LS_REGEX_DELIM_BEGIN TXT( "(.*)" ) LS_REGEX_DELIM_END TXT( ".*" ) ); 
   script = std::tr1::regex_replace(script, cfStartEndPattern, std::string (TXT( "$1" )) ); 
 
   //
   // Cull comments
   //
   
-  const tregex cfCommentPattern ( LC_COMMENT TXT( ".*\n" ) ); 
+  const std::regex cfCommentPattern ( LC_COMMENT TXT( ".*\n" ) ); 
   script = std::tr1::regex_replace(script, cfCommentPattern, std::string (TXT( "\n" )) ); 
 
   //

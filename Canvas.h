@@ -1,7 +1,5 @@
 #pragma once
 
-#include <hash_map>
-
 #include "Inspect/API.h"
 #include "Inspect/Container.h"
 
