@@ -114,7 +114,7 @@ _GENERATE_ATOMIC_WORKER(
         return originalValueNew;
     } )
 
-#if defined( HELIUM_CPU_X86 )
+#if defined( HELIUM_CPU_X86_32 )
 
 _GENERATE_ATOMIC_WORKER(
     template< typename T > T*,
