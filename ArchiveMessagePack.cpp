@@ -65,7 +65,7 @@ void ArchiveWriterMessagePack::Write( Reflect::Object* object )
 	m_Writer.BeginArray();
 
 	// objects can get changed during this iteration (in Identify), so use indices
-	for ( int index = 0; index < m_Objects.GetSize(); ++index )
+	for ( size_t index = 0; index < m_Objects.GetSize(); ++index )
 	{
 		Object* object = m_Objects.GetElement( index );
 		const Class* objectClass = object->GetClass();

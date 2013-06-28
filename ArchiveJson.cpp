@@ -423,7 +423,7 @@ void Helium::Persist::ArchiveReaderJson::Start()
 		size_t lineCount = 1;
 		size_t charCount = 0;
 
-		int i = 0;
+		size_t i = 0;
 		while ( true )
 		{
 			char c;
