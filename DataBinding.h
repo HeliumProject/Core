@@ -228,12 +228,6 @@ namespace Helium
 			};
 		}
 
-		template< typename T, DataBindingTypes::DataBindingType type >
-		T* CastDataBinding( DataBinding* data )
-		{
-			return data ? (data->HasType( type ) ? static_cast<T*>( data ) : NULL) : NULL;
-		}
-
 		class DataBinding : public Helium::RefCountBase< DataBinding >
 		{
 		public:
@@ -292,6 +286,12 @@ namespace Helium
 		};
 
 		typedef Helium::SmartPtr<DataBinding> DataBindingPtr;
+
+		template< typename T, DataBindingTypes::DataBindingType type >
+		T* CastDataBinding( DataBinding* data )
+		{
+			return data ? (data->HasType( type ) ? static_cast<T*>( data ) : NULL) : NULL;
+		}
 
 		//
 		// Base template for data, V is the value container, which may or may not be equal to T
@@ -464,7 +464,8 @@ namespace Helium
 				m_Changing.Raise( args );
 				if ( !args.m_Veto )
 				{
-					Extract< T >( std::stringstream ( s ), m_Data );
+					std::stringstream str ( s );
+					Extract< T >( str, m_Data );
 					m_Changed.RaiseWithEmitter( this, emitter );
 					result = true;
 				}
@@ -509,8 +510,8 @@ namespace Helium
 			{
 				if (m_Perishable)
 				{
-					std::vector<T*>::iterator itr = m_Data.begin();
-					std::vector<T*>::iterator end = m_Data.end();
+					typename std::vector<T*>::iterator itr = m_Data.begin();
+					typename std::vector<T*>::iterator end = m_Data.end();
 					for ( ; itr != end; ++itr )
 					{
 						delete (*itr);
@@ -528,11 +529,12 @@ namespace Helium
 				m_Changing.Raise( args );
 				if ( !args.m_Veto )
 				{
-					std::vector<T*>::iterator itr = m_Data.begin();
-					std::vector<T*>::iterator end = m_Data.end();
+					typename std::vector<T*>::iterator itr = m_Data.begin();
+					typename std::vector<T*>::iterator end = m_Data.end();
 					for ( ; itr != end; ++itr )
 					{
-						Extract<T>( std::stringstream( s ), *itr );
+						std::stringstream str ( s );
+						Extract<T>( str, *itr );
 						result = true;
 					}
 
@@ -558,7 +560,8 @@ namespace Helium
 						m_Changing.Raise( args );
 						if ( !args.m_Veto )
 						{
-							Extract<T>( std::stringstream ( *itr ), m_Data[ index ] );
+							std::stringstream str ( *itr );
+							Extract<T>( str, m_Data[ index ] );
 							result = true;
 						}
 					}
@@ -582,8 +585,8 @@ namespace Helium
 				// Scan for equality
 				//
 
-				std::vector<T*>::const_iterator itr = m_Data.begin();
-				std::vector<T*>::const_iterator end = m_Data.end();
+				typename std::vector<T*>::const_iterator itr = m_Data.begin();
+				typename std::vector<T*>::const_iterator end = m_Data.end();
 				for ( ; itr != end; ++itr )
 				{
 					// grab the first one if we don't have a value yet
@@ -634,8 +637,8 @@ namespace Helium
 			virtual void GetAll(std::vector< std::string >& s) const HELIUM_OVERRIDE
 			{
 				s.resize( m_Data.size() );
-				std::vector<T*>::const_iterator itr = m_Data.begin();
-				std::vector<T*>::const_iterator end = m_Data.end();
+				typename std::vector<T*>::const_iterator itr = m_Data.begin();
+				typename std::vector<T*>::const_iterator end = m_Data.end();
 				for ( size_t index = 0; itr != end; ++itr, ++index )
 				{
 					T* value = *itr;
@@ -682,7 +685,8 @@ namespace Helium
 				if ( !args.m_Veto )
 				{
 					T value;
-					Extract< T >( std::stringstream( s ), &value );
+					std::stringstream str ( s );
+					Extract< T >( str, &value );
 					m_Property->Set( value );
 					m_Changed.RaiseWithEmitter( this, emitter );
 					result = true;
@@ -729,19 +733,20 @@ namespace Helium
 			{
 				bool result = false;
 
-				Reflect::Data data = Reflect::AssertCast< Reflect::Data >( Reflect::Data::Create< std::string >( s ) );
+				AutoPtr< Reflect::Translator > translator( Reflect::AllocateTranslator< std::string >() );
+				Reflect::Data data ( Reflect::Pointer( const_cast< std::string* >( &s ) ), translator.Ptr() );
 				DataChangingArgs args ( this, data );
 				m_Changing.Raise( args );
 				if ( !args.m_Veto )
 				{
-					std::string newValue;
-					Reflect::Data::GetValue< std::string >( data, newValue );
 					T value;
-					std::vector< Helium::SmartPtr< Helium::Property<T> > >::iterator itr = m_Properties.begin();
-					std::vector< Helium::SmartPtr< Helium::Property<T> > >::iterator end = m_Properties.end();
+					std::stringstream str ( s );
+					Extract< T >( str, &value );
+
+					typename std::vector< Helium::SmartPtr< Helium::Property<T> > >::iterator itr = m_Properties.begin();
+					typename std::vector< Helium::SmartPtr< Helium::Property<T> > >::iterator end = m_Properties.end();
 					for ( ; itr != end; ++itr )
 					{
-						Extract<T>( std::stringstream ( newValue ), &value );
 						(*itr)->Set( value );
 						result = true;
 					}
@@ -769,7 +774,8 @@ namespace Helium
 						if ( !args.m_Veto )
 						{
 							T value;
-							Extract<T>( std::stringstream ( *itr ), &value );
+							std::stringstream str ( *itr );
+							Extract<T>( str, &value );
 							m_Properties[ index ]->Set(value);
 							result = true;
 						}
@@ -793,8 +799,8 @@ namespace Helium
 				// Scan for equality
 				//
 
-				std::vector< Helium::SmartPtr< Helium::Property<T> > >::const_iterator itr = m_Properties.begin();
-				std::vector< Helium::SmartPtr< Helium::Property<T> > >::const_iterator end = m_Properties.end();
+				typename std::vector< Helium::SmartPtr< Helium::Property<T> > >::const_iterator itr = m_Properties.begin();
+				typename std::vector< Helium::SmartPtr< Helium::Property<T> > >::const_iterator end = m_Properties.end();
 				for ( ; itr != end; ++itr )
 				{
 					// grab the first one if we don't have a value yet
@@ -842,8 +848,8 @@ namespace Helium
 			virtual void GetAll(std::vector< std::string >& s) const HELIUM_OVERRIDE
 			{
 				s.resize( m_Properties.size() );
-				std::vector< Helium::SmartPtr< Helium::Property<T> > >::const_iterator itr = m_Properties.begin();
-				std::vector< Helium::SmartPtr< Helium::Property<T> > >::const_iterator end = m_Properties.end();
+				typename std::vector< Helium::SmartPtr< Helium::Property<T> > >::const_iterator itr = m_Properties.begin();
+				typename std::vector< Helium::SmartPtr< Helium::Property<T> > >::const_iterator end = m_Properties.end();
 				for ( size_t index = 0 ; itr != end; ++itr, ++index )
 				{
 					T val = (*itr)->Get();
@@ -895,11 +901,11 @@ namespace Helium
 				AutoPtr< Reflect::Translator > translator( Reflect::AllocateTranslator< T >() );
 				Reflect::Data data ( Reflect::Pointer( const_cast< T* >( &value ) ), translator.Ptr() );
 				DataChangingArgs args ( this, data );
-				m_Changing.Raise( args );
+				this->m_Changing.Raise( args );
 				if ( !args.m_Veto )
 				{
 					m_Property->Set( value );
-					m_Changed.RaiseWithEmitter( this, emitter );
+					this->m_Changed.RaiseWithEmitter( this, emitter );
 					result = true;
 				}
 

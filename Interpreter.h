@@ -174,13 +174,13 @@ namespace Helium
                 Choice* control = AddChoice<T>( property );
 
                 std::vector< ChoiceItem > items;
-                Reflect::DynamicArray< EnumerationElement >::ConstIterator itr = enumInfo->m_Elements.begin();
-                Reflect::DynamicArray< EnumerationElement >::ConstIterator end = enumInfo->m_Elements.end();
+                DynamicArray< Reflect::EnumerationElement >::ConstIterator itr = enumInfo->m_Elements.Begin();
+                DynamicArray< Reflect::EnumerationElement >::ConstIterator end = enumInfo->m_Elements.End();
                 for ( ; itr != end; ++itr )
                 {
                     std::ostringstream str;
-                    str << (*itr)->m_Value;
-                    items.push_back( ChoiceItem ( (*itr)->m_Label, str.str() ) );
+                    str << itr->m_Value;
+                    items.push_back( ChoiceItem ( itr->m_Name, str.str() ) );
                 }
                 control->a_Items.Set(items);
                 control->a_IsDropDown.Set(true);

@@ -111,14 +111,14 @@ bool Script::PreProcess(std::string& script)
   // including comments and additional UI[.[ (.*) ].] 
   // 
   const std::regex cfStartEndPattern ( TXT( ".*" ) LS_REGEX_DELIM_BEGIN TXT( "(.*)" ) LS_REGEX_DELIM_END TXT( ".*" ) ); 
-  script = std::tr1::regex_replace(script, cfStartEndPattern, std::string (TXT( "$1" )) ); 
+  script = std::regex_replace(script, cfStartEndPattern, std::string (TXT( "$1" )) ); 
 
   //
   // Cull comments
   //
   
   const std::regex cfCommentPattern ( LC_COMMENT TXT( ".*\n" ) ); 
-  script = std::tr1::regex_replace(script, cfCommentPattern, std::string (TXT( "\n" )) ); 
+  script = std::regex_replace(script, cfCommentPattern, std::string (TXT( "\n" )) ); 
 
   //
   // Debug
@@ -271,7 +271,7 @@ bool Script::Parse(const std::string& script, Interpreter* interpreter, Canvas* 
     // Create control
     //
 
-	ControlPtr control = Reflect::SafeCast<Inspect::Control> ( i->second->m_Creator() );
+    ControlPtr control = Reflect::SafeCast<Inspect::Control> ( i->second->m_Creator() );
     if (!control.ReferencesObject())
     {
       Log::Warning( TXT( "Unable to construct control \"%s\"\n" ), symbol.c_str());
@@ -289,12 +289,12 @@ bool Script::Parse(const std::string& script, Interpreter* interpreter, Canvas* 
     pos = str.find_first_of('{', pos);
     end = str.find_first_of('}', pos);
 
-
     if (pos != std::string::npos && 
         end != std::string::npos &&
         pos < end && pos+1 != end)
     {
-      ParseAttributes(std::string (str.data() + pos + 1, end - pos - 1), control);
+      std::string s (str.data() + pos + 1, end - pos - 1);
+      ParseAttributes(s, control);
     }
 
 

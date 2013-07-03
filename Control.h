@@ -335,12 +335,6 @@ namespace Helium
 				}
 			}
 
-			template<>
-			inline void SetProperty( const std::string& key, const std::string& value )
-			{
-				m_Properties[key] = value;
-			}
-
 			template<class T>
 			inline bool GetProperty( const std::string& key, T& value ) const
 			{
@@ -352,19 +346,6 @@ namespace Helium
 					std::istringstream str( strValue );
 					str >> value;
 					return !str.fail();
-				}
-
-				return false;
-			}
-
-			template<>
-			inline bool GetProperty( const std::string& key, std::string& value ) const
-			{
-				std::map< std::string, std::string >::const_iterator found = m_Properties.find( key ); 
-				if ( found != m_Properties.end() )
-				{
-					value = found->second;
-					return true;
 				}
 
 				return false;
@@ -430,6 +411,25 @@ namespace Helium
 			}
 
 			HELIUM_BREAK(); // you should not call this, your control is using custom data
+			return false;
+		}
+
+		template<>
+		inline void Control::SetProperty( const std::string& key, const std::string& value )
+		{
+			m_Properties[key] = value;
+		}
+
+		template<>
+		inline bool Control::GetProperty( const std::string& key, std::string& value ) const
+		{
+			std::map< std::string, std::string >::const_iterator found = m_Properties.find( key ); 
+			if ( found != m_Properties.end() )
+			{
+				value = found->second;
+				return true;
+			}
+
 			return false;
 		}
 
