@@ -178,14 +178,14 @@ void ArchiveWriterMessagePack::SerializeField( void* instance, const Field* fiel
 
 		for ( uint32_t i=0; i<field->m_Count; ++i )
 		{
-			SerializeTranslator( Pointer ( field, object, i ), field->m_Translator, field, object );
+			SerializeTranslator( Pointer ( field, instance, object, i ), field->m_Translator, field, object );
 		}
 
 		m_Writer.EndArray();
 	}
 	else
 	{
-		SerializeTranslator( Pointer ( field, object ), field->m_Translator, field, object );
+		SerializeTranslator( Pointer ( field, instance, object ), field->m_Translator, field, object );
 	}
 }
 
@@ -194,6 +194,9 @@ void ArchiveWriterMessagePack::SerializeTranslator( Pointer pointer, Translator*
 	switch ( translator->GetReflectionType() )
 	{
 	case ReflectionTypes::ScalarTranslator:
+	case ReflectionTypes::EnumerationTranslator:
+	case ReflectionTypes::PointerTranslator:
+	case ReflectionTypes::TypeTranslator:
 		{
 			ScalarTranslator* scalar = static_cast< ScalarTranslator* >( translator );
 			switch ( scalar->m_Type )
@@ -324,6 +327,10 @@ void ArchiveWriterMessagePack::SerializeTranslator( Pointer pointer, Translator*
 
 			break;
 		}
+
+	default:
+		// Unhandled reflection type in ArchiveWriterMessagePack::SerializeTranslator
+		HELIUM_ASSERT_FALSE();
 	}
 }
 
@@ -394,7 +401,6 @@ void ArchiveReaderMessagePack::Read( Reflect::ObjectPtr& object )
 		{
 			ObjectPtr object;
 			ReadNext( object );
-			m_Objects.Push( object );
 
 			ArchiveStatus info( *this, ArchiveStates::ObjectProcessed );
 			info.m_Progress = (int)(((float)(m_Stream->Tell()) / (float)m_Size) * 100.0f);
@@ -408,6 +414,8 @@ void ArchiveReaderMessagePack::Read( Reflect::ObjectPtr& object )
 
 		m_Reader.EndArray();
 	}
+
+	Resolve();
 
 	object = m_Objects.GetFirst();
 }
@@ -576,7 +584,7 @@ void ArchiveReaderMessagePack::DeserializeField( void* instance, const Field* fi
 			{
 				if ( i < field->m_Count )
 				{
-					DeserializeTranslator( Pointer ( field, object, i ), field->m_Translator, field, object );
+					DeserializeTranslator( Pointer ( field, instance, object, i ), field->m_Translator, field, object );
 				}
 				else
 				{
@@ -587,12 +595,12 @@ void ArchiveReaderMessagePack::DeserializeField( void* instance, const Field* fi
 		}
 		else
 		{
-			DeserializeTranslator( Pointer ( field, object, 0 ), field->m_Translator, field, object );
+			DeserializeTranslator( Pointer ( field, instance, object, 0 ), field->m_Translator, field, object );
 		}
 	}
 	else
 	{
-		DeserializeTranslator( Pointer ( field, object ), field->m_Translator, field, object );
+		DeserializeTranslator( Pointer ( field, instance, object ), field->m_Translator, field, object );
 	}
 }
 
@@ -677,7 +685,7 @@ void ArchiveReaderMessagePack::DeserializeTranslator( Pointer pointer, Translato
 	}
 	else if ( m_Reader.IsRaw() )
 	{
-		if ( translator->GetReflectionType() == ReflectionTypes::ScalarTranslator )
+		if ( translator->HasReflectionType( ReflectionTypes::ScalarTranslator ) )
 		{
 			ScalarTranslator* scalar = static_cast< ScalarTranslator* >( translator );
 			if ( scalar->m_Type == ScalarTypes::String )
@@ -711,11 +719,11 @@ void ArchiveReaderMessagePack::DeserializeTranslator( Pointer pointer, Translato
 			SequenceTranslator* sequence = static_cast< SequenceTranslator* >( translator );
 			Translator* itemTranslator = sequence->GetItemTranslator();
 			uint32_t length = m_Reader.ReadArrayLength();
+			sequence->SetLength(pointer, length);
 			for ( uint32_t i=0; i<length; ++i )
 			{
-				Variable item ( itemTranslator );
+				Pointer item = sequence->GetItem( pointer, i );
 				DeserializeTranslator( item, itemTranslator, field, object );
-				sequence->SetItem( pointer, i, item );
 			}
 		}
 		else
