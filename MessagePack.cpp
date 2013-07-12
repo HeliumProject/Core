@@ -426,7 +426,7 @@ void MessagePackWriter::EndArray()
 
 	if ( state.container == MessagePackContainers::Array )
 	{
-		if ( state.lengthOffset == Invalid< int64_t >() )
+		if ( state.lengthOffset != Invalid< int64_t >() )
 		{
 			stream->Seek( state.lengthOffset, SeekOrigins::Begin );
 
@@ -499,6 +499,9 @@ void MessagePackWriter::BeginMap( uint32_t length )
 		{
 			throw Helium::Exception( "Map too large: %d", length );
 		}
+
+		// our state is going to bookkeep the number written, but we need to write TWICE as many due to key+value
+		state.length *= 2;
 	}
 
 	containerState.Push( state );
@@ -510,7 +513,7 @@ void MessagePackWriter::EndMap()
 
 	if ( state.container == MessagePackContainers::Map )
 	{
-		if ( state.lengthOffset == Invalid< int64_t >() )
+		if ( state.lengthOffset != Invalid< int64_t >() )
 		{
 			stream->Seek( state.lengthOffset, SeekOrigins::Begin );
 
