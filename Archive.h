@@ -38,6 +38,7 @@ namespace Helium
 		{
 			enum ArchiveType
 			{
+				Bson,
 				Json,
 				MessagePack,
 				Count,
