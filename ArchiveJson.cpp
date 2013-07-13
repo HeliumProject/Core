@@ -492,7 +492,6 @@ bool Helium::Persist::ArchiveReaderJson::ReadNext( Reflect::ObjectPtr& object )
 			{
 				success = true;
 				DeserializeInstance( member->value, object, object->GetClass(), object );
-
 				m_Objects.Push( object );
 			}
 		}

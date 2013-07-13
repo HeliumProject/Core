@@ -455,7 +455,7 @@ bool ArchiveReaderMessagePack::ReadNext( ObjectPtr& object )
 			uint32_t objectClassCrc = 0;
 			if ( m_Reader.IsNumber() )
 			{
-				m_Reader.Read( objectClassCrc );
+				m_Reader.Read( objectClassCrc, NULL );
 			}
 			else
 			{
@@ -463,8 +463,6 @@ bool ArchiveReaderMessagePack::ReadNext( ObjectPtr& object )
 				m_Reader.Read( typeStr );
 				objectClassCrc = Helium::Crc32( typeStr.GetData() );
 			}
-
-			m_Reader.Advance();
 
 			const Class* objectClass = NULL;
 			if ( objectClassCrc != 0 )
@@ -480,6 +478,7 @@ bool ArchiveReaderMessagePack::ReadNext( ObjectPtr& object )
 			if ( object.ReferencesObject() )
 			{
 				DeserializeInstance( object, object->GetClass(), object );
+				m_Objects.Push( object );
 				success = true;
 			}
 			else // object.ReferencesObject()
@@ -529,12 +528,14 @@ void ArchiveReaderMessagePack::DeserializeInstance( void* instance, const Struct
 	if ( m_Reader.IsMap() )
 	{
 		uint32_t length = m_Reader.ReadMapLength();
+		m_Reader.BeginMap( length );
+
 		for (uint32_t i=0; i<length; i++)
 		{
 			uint32_t fieldCrc = 0;
 			if ( m_Reader.IsNumber() )
 			{
-				m_Reader.Read( fieldCrc );
+				m_Reader.Read( fieldCrc, NULL );
 			}
 			else
 			{
@@ -542,8 +543,6 @@ void ArchiveReaderMessagePack::DeserializeInstance( void* instance, const Struct
 				m_Reader.Read( fieldStr );
 				fieldCrc = Helium::Crc32( fieldStr.GetData() );
 			}
-
-			m_Reader.Advance();
 
 			const Field* field = structure->FindFieldByName( fieldCrc );
 			if ( field )
@@ -558,7 +557,9 @@ void ArchiveReaderMessagePack::DeserializeInstance( void* instance, const Struct
 			{
 				m_Reader.Skip();
 			}
-		} // for
+		}
+
+		m_Reader.EndMap();
 	}
 	else // IsMap()
 	{
@@ -613,7 +614,7 @@ void ArchiveReaderMessagePack::DeserializeTranslator( Pointer pointer, Translato
 			ScalarTranslator* scalar = static_cast< ScalarTranslator* >( translator );
 			if ( scalar->m_Type == ScalarTypes::Boolean )
 			{
-				m_Reader.Read( pointer.As<bool>() );
+				m_Reader.Read( pointer.As<bool>(), NULL );
 			}
 			else
 			{
@@ -634,43 +635,43 @@ void ArchiveReaderMessagePack::DeserializeTranslator( Pointer pointer, Translato
 			switch ( scalar->m_Type )
 			{
 			case ScalarTypes::Unsigned8:
-				m_Reader.ReadNumber( pointer.As<uint8_t>(), clamp );
+				m_Reader.ReadNumber( pointer.As<uint8_t>(), clamp, NULL );
 				break;
 
 			case ScalarTypes::Unsigned16:
-				m_Reader.ReadNumber( pointer.As<uint16_t>(), clamp );
+				m_Reader.ReadNumber( pointer.As<uint16_t>(), clamp, NULL );
 				break;
 
 			case ScalarTypes::Unsigned32:
-				m_Reader.ReadNumber( pointer.As<uint32_t>(), clamp );
+				m_Reader.ReadNumber( pointer.As<uint32_t>(), clamp, NULL );
 				break;
 
 			case ScalarTypes::Unsigned64:
-				m_Reader.ReadNumber( pointer.As<uint64_t>(), clamp );
+				m_Reader.ReadNumber( pointer.As<uint64_t>(), clamp, NULL );
 				break;
 
 			case ScalarTypes::Signed8:
-				m_Reader.ReadNumber( pointer.As<int8_t>(), clamp );
+				m_Reader.ReadNumber( pointer.As<int8_t>(), clamp, NULL );
 				break;
 
 			case ScalarTypes::Signed16:
-				m_Reader.ReadNumber( pointer.As<int16_t>(), clamp );
+				m_Reader.ReadNumber( pointer.As<int16_t>(), clamp, NULL );
 				break;
 
 			case ScalarTypes::Signed32:
-				m_Reader.ReadNumber( pointer.As<int32_t>(), clamp );
+				m_Reader.ReadNumber( pointer.As<int32_t>(), clamp, NULL );
 				break;
 
 			case ScalarTypes::Signed64:
-				m_Reader.ReadNumber( pointer.As<int64_t>(), clamp );
+				m_Reader.ReadNumber( pointer.As<int64_t>(), clamp, NULL );
 				break;
 
 			case ScalarTypes::Float32:
-				m_Reader.ReadNumber( pointer.As<float32_t>(), clamp );
+				m_Reader.ReadNumber( pointer.As<float32_t>(), clamp, NULL );
 				break;
 
 			case ScalarTypes::Float64:
-				m_Reader.ReadNumber( pointer.As<float64_t>(), clamp );
+				m_Reader.ReadNumber( pointer.As<float64_t>(), clamp, NULL );
 				break;
 
 			default:
@@ -707,12 +708,14 @@ void ArchiveReaderMessagePack::DeserializeTranslator( Pointer pointer, Translato
 			SetTranslator* set = static_cast< SetTranslator* >( translator );
 			Translator* itemTranslator = set->GetItemTranslator();
 			uint32_t length = m_Reader.ReadArrayLength();
+			m_Reader.BeginArray( length );
 			for ( uint32_t i=0; i<length; ++i )
 			{
 				Variable item ( itemTranslator );
 				DeserializeTranslator( item, itemTranslator, field, object );
 				set->InsertItem( pointer, item );
 			}
+			m_Reader.EndArray();
 		}
 		else if ( translator->GetReflectionType() == ReflectionTypes::SequenceTranslator )
 		{
@@ -720,11 +723,13 @@ void ArchiveReaderMessagePack::DeserializeTranslator( Pointer pointer, Translato
 			Translator* itemTranslator = sequence->GetItemTranslator();
 			uint32_t length = m_Reader.ReadArrayLength();
 			sequence->SetLength(pointer, length);
+			m_Reader.BeginArray( length );
 			for ( uint32_t i=0; i<length; ++i )
 			{
 				Pointer item = sequence->GetItem( pointer, i );
 				DeserializeTranslator( item, itemTranslator, field, object );
 			}
+			m_Reader.EndArray();
 		}
 		else
 		{
@@ -746,12 +751,14 @@ void ArchiveReaderMessagePack::DeserializeTranslator( Pointer pointer, Translato
 			Variable key ( keyTranslator );
 			Variable value ( valueTranslator );
 			uint32_t length = m_Reader.ReadMapLength();
+			m_Reader.BeginMap( length );
 			for ( uint32_t i=0; i<length; ++i )
 			{
 				DeserializeTranslator( key, keyTranslator, field, object );
 				DeserializeTranslator( value, valueTranslator, field, object );
 				assocation->SetItem( pointer, key, value );
 			}
+			m_Reader.EndMap();
 		}
 		else
 		{
