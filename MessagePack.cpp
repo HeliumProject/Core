@@ -475,7 +475,7 @@ void MessagePackWriter::BeginMap( uint32_t length )
 
 		if ( length <= 15 )
 		{
-			stream->Write< uint8_t >( MessagePackTypes::FixArray | static_cast< uint8_t >( length ) );
+			stream->Write< uint8_t >( MessagePackTypes::FixMap | static_cast< uint8_t >( length ) );
 		}
 		else if ( length <= 65535 )
 		{
@@ -650,9 +650,11 @@ void MessagePackReader::Skip()
 	{
 		stream->Seek( length, SeekOrigins::Current );
 	}
+
+	Advance();
 }
 
-bool MessagePackReader::Read( bool& value )
+void MessagePackReader::Read( bool& value, bool* succeeded )
 {
 	bool result = false;
 
@@ -673,15 +675,27 @@ bool MessagePackReader::Read( bool& value )
 		}
 	}
 
-	if ( result && !containerState.IsEmpty() )
+	if ( result )
 	{
-		containerState.GetLast().length--;
+		Advance();
+
+		if ( !containerState.IsEmpty() )
+		{
+			containerState.GetLast().length--;
+		}
 	}
 
-	return result;
+	if ( succeeded )
+	{
+		*succeeded = result;
+	}
+	else if ( !result )
+	{
+		throw Helium::Exception( "Type mismatch on unhandled Read" );
+	}
 }
 
-bool MessagePackReader::Read( float32_t& value )
+void MessagePackReader::Read( float32_t& value, bool* succeeded )
 {
 	bool result = false;
 
@@ -698,15 +712,27 @@ bool MessagePackReader::Read( float32_t& value )
 		result = true;
 	}
 
-	if ( result && !containerState.IsEmpty() )
+	if ( result )
 	{
-		containerState.GetLast().length--;
+		Advance();
+
+		if ( !containerState.IsEmpty() )
+		{
+			containerState.GetLast().length--;
+		}
 	}
 
-	return result;
+	if ( succeeded )
+	{
+		*succeeded = result;
+	}
+	else if ( !result )
+	{
+		throw Helium::Exception( "Type mismatch on unhandled Read" );
+	}
 }
 
-bool MessagePackReader::Read( float64_t& value )
+void MessagePackReader::Read( float64_t& value, bool* succeeded )
 {
 	bool result = false;
 
@@ -739,19 +765,31 @@ bool MessagePackReader::Read( float64_t& value )
 		}
 	}
 
-	if ( result && !containerState.IsEmpty() )
+	if ( result )
 	{
-		containerState.GetLast().length--;
+		Advance();
+
+		if ( !containerState.IsEmpty() )
+		{
+			containerState.GetLast().length--;
+		}
 	}
 
-	return result;
+	if ( succeeded )
+	{
+		*succeeded = result;
+	}
+	else if ( !result )
+	{
+		throw Helium::Exception( "Type mismatch on unhandled Read" );
+	}
 }
 
-bool MessagePackReader::Read( uint8_t& value )
+void MessagePackReader::Read( uint8_t& value, bool* succeeded )
 {
 	bool result = false;
 
-	if ( type & MessagePackMasks::FixNumPositiveType )
+	if ( ( type & MessagePackMasks::FixNumPositiveType ) == MessagePackTypes::FixNumPositive )
 	{
 		value = type;
 		result = true;
@@ -765,19 +803,31 @@ bool MessagePackReader::Read( uint8_t& value )
 		}
 	}
 
-	if ( result && !containerState.IsEmpty() )
+	if ( result )
 	{
-		containerState.GetLast().length--;
+		Advance();
+
+		if ( !containerState.IsEmpty() )
+		{
+			containerState.GetLast().length--;
+		}
 	}
 
-	return result;
+	if ( succeeded )
+	{
+		*succeeded = result;
+	}
+	else if ( !result )
+	{
+		throw Helium::Exception( "Type mismatch on unhandled Read" );
+	}
 }
 
-bool MessagePackReader::Read( uint16_t& value )
+void MessagePackReader::Read( uint16_t& value, bool* succeeded )
 {
 	bool result = false;
 
-	if ( type & MessagePackMasks::FixNumPositiveType )
+	if ( ( type & MessagePackMasks::FixNumPositiveType ) == MessagePackTypes::FixNumNegative )
 	{
 		value = type;
 		result = true;
@@ -808,19 +858,31 @@ bool MessagePackReader::Read( uint16_t& value )
 		}
 	}
 
-	if ( result && !containerState.IsEmpty() )
+	if ( result )
 	{
-		containerState.GetLast().length--;
+		Advance();
+
+		if ( !containerState.IsEmpty() )
+		{
+			containerState.GetLast().length--;
+		}
 	}
 
-	return result;
+	if ( succeeded )
+	{
+		*succeeded = result;
+	}
+	else if ( !result )
+	{
+		throw Helium::Exception( "Type mismatch on unhandled Read" );
+	}
 }
 
-bool MessagePackReader::Read( uint32_t& value )
+void MessagePackReader::Read( uint32_t& value, bool* succeeded )
 {
 	bool result = false;
 
-	if ( type & MessagePackMasks::FixNumPositiveType )
+	if ( ( type & MessagePackMasks::FixNumPositiveType ) == MessagePackTypes::FixNumPositive )
 	{
 		value = type;
 		result = true;
@@ -864,19 +926,31 @@ bool MessagePackReader::Read( uint32_t& value )
 		}
 	}
 
-	if ( result && !containerState.IsEmpty() )
+	if ( result )
 	{
-		containerState.GetLast().length--;
+		Advance();
+
+		if ( !containerState.IsEmpty() )
+		{
+			containerState.GetLast().length--;
+		}
 	}
 
-	return result;
+	if ( succeeded )
+	{
+		*succeeded = result;
+	}
+	else if ( !result )
+	{
+		throw Helium::Exception( "Type mismatch on unhandled Read" );
+	}
 }
 
-bool MessagePackReader::Read( uint64_t& value )
+void MessagePackReader::Read( uint64_t& value, bool* succeeded )
 {
 	bool result = false;
 
-	if ( type & MessagePackMasks::FixNumPositiveType )
+	if ( ( type & MessagePackMasks::FixNumPositiveType ) == MessagePackTypes::FixNumPositive )
 	{
 		value = type;
 		result = true;
@@ -933,26 +1007,38 @@ bool MessagePackReader::Read( uint64_t& value )
 		}
 	}
 
-	if ( result && !containerState.IsEmpty() )
+	if ( result )
 	{
-		containerState.GetLast().length--;
+		Advance();
+
+		if ( !containerState.IsEmpty() )
+		{
+			containerState.GetLast().length--;
+		}
 	}
 
-	return result;
+	if ( succeeded )
+	{
+		*succeeded = result;
+	}
+	else if ( !result )
+	{
+		throw Helium::Exception( "Type mismatch on unhandled Read" );
+	}
 }
 
-bool MessagePackReader::Read( int8_t& value )
+void MessagePackReader::Read( int8_t& value, bool* succeeded )
 {
 	bool result = false;
 
-	if ( type & MessagePackMasks::FixNumPositiveType )
+	if ( ( type & MessagePackMasks::FixNumPositiveType ) == MessagePackTypes::FixNumPositive )
 	{
 		value = type;
 		result = true;
 	}
 	else
 	{
-		if ( type & MessagePackMasks::FixNumNegativeType )
+		if ( ( type & MessagePackMasks::FixNumNegativeType ) == MessagePackTypes::FixNumNegative )
 		{
 			value = type;
 			result = true;
@@ -967,26 +1053,38 @@ bool MessagePackReader::Read( int8_t& value )
 		}
 	}
 
-	if ( result && !containerState.IsEmpty() )
+	if ( result )
 	{
-		containerState.GetLast().length--;
+		Advance();
+
+		if ( !containerState.IsEmpty() )
+		{
+			containerState.GetLast().length--;
+		}
 	}
 
-	return result;
+	if ( succeeded )
+	{
+		*succeeded = result;
+	}
+	else if ( !result )
+	{
+		throw Helium::Exception( "Type mismatch on unhandled Read" );
+	}
 }
 
-bool MessagePackReader::Read( int16_t& value )
+void MessagePackReader::Read( int16_t& value, bool* succeeded )
 {
 	bool result = false;
 
-	if ( type & MessagePackMasks::FixNumPositiveType )
+	if ( ( type & MessagePackMasks::FixNumPositiveType ) == MessagePackTypes::FixNumPositive )
 	{
 		value = type;
 		result = true;
 	}
 	else
 	{
-		if ( type & MessagePackMasks::FixNumNegativeType )
+		if ( ( type & MessagePackMasks::FixNumNegativeType ) == MessagePackTypes::FixNumNegative )
 		{
 			value = type;
 			result = true;
@@ -1018,26 +1116,38 @@ bool MessagePackReader::Read( int16_t& value )
 		}
 	}
 
-	if ( result && !containerState.IsEmpty() )
+	if ( result )
 	{
-		containerState.GetLast().length--;
+		Advance();
+
+		if ( !containerState.IsEmpty() )
+		{
+			containerState.GetLast().length--;
+		}
 	}
 
-	return result;
+	if ( succeeded )
+	{
+		*succeeded = result;
+	}
+	else if ( !result )
+	{
+		throw Helium::Exception( "Type mismatch on unhandled Read" );
+	}
 }
 
-bool MessagePackReader::Read( int32_t& value )
+void MessagePackReader::Read( int32_t& value, bool* succeeded )
 {
 	bool result = false;
 
-	if ( type & MessagePackMasks::FixNumPositiveType )
+	if ( ( type & MessagePackMasks::FixNumPositiveType ) == MessagePackTypes::FixNumPositive )
 	{
 		value = type;
 		result = true;
 	}
 	else
 	{
-		if ( type & MessagePackMasks::FixNumNegativeType )
+		if ( ( type & MessagePackMasks::FixNumNegativeType ) == MessagePackTypes::FixNumNegative )
 		{
 			value = type;
 			result = true;
@@ -1082,26 +1192,38 @@ bool MessagePackReader::Read( int32_t& value )
 		}
 	}
 
-	if ( result && !containerState.IsEmpty() )
+	if ( result )
 	{
-		containerState.GetLast().length--;
+		Advance();
+
+		if ( !containerState.IsEmpty() )
+		{
+			containerState.GetLast().length--;
+		}
 	}
 
-	return result;
+	if ( succeeded )
+	{
+		*succeeded = result;
+	}
+	else if ( !result )
+	{
+		throw Helium::Exception( "Type mismatch on unhandled Read" );
+	}
 }
 
-bool MessagePackReader::Read( int64_t& value )
+void MessagePackReader::Read( int64_t& value, bool* succeeded )
 {
 	bool result = false;
 
-	if ( type & MessagePackMasks::FixNumPositiveType )
+	if ( ( type & MessagePackMasks::FixNumPositiveType ) == MessagePackTypes::FixNumPositive )
 	{
 		value = type;
 		result = true;
 	}
 	else
 	{
-		if ( type & MessagePackMasks::FixNumNegativeType )
+		if ( ( type & MessagePackMasks::FixNumNegativeType ) == MessagePackTypes::FixNumNegative )
 		{
 			value = type;
 			result = true;
@@ -1159,26 +1281,39 @@ bool MessagePackReader::Read( int64_t& value )
 		}
 	}
 
-	if ( result && !containerState.IsEmpty() )
+	if ( result )
 	{
-		containerState.GetLast().length--;
+		Advance();
+
+		if ( !containerState.IsEmpty() )
+		{
+			containerState.GetLast().length--;
+		}
 	}
 
-	return result;
+	if ( succeeded )
+	{
+		*succeeded = result;
+	}
+	else if ( !result )
+	{
+		throw Helium::Exception( "Type mismatch on unhandled Read" );
+	}
 }
 
 void MessagePackReader::Read( String& value )
 {
 	uint32_t length = ReadRawLength();
-	value.Resize( length );
+	value.Resize( length + 1 );
 	ReadRaw( &value.GetFirst(), length );
+	value += '\0';
 }
 
 uint32_t MessagePackReader::ReadRawLength()
 {
 	uint32_t length = 0;
 
-	if ( type & MessagePackMasks::FixRawType )
+	if ( ( type & MessagePackMasks::FixRawType ) == MessagePackTypes::FixRaw )
 	{
 		length = type & MessagePackMasks::FixRawCount;
 	}
@@ -1215,19 +1350,28 @@ uint32_t MessagePackReader::ReadRawLength()
 		}
 	}
 
+	// do not Advance() since the next byte is not a type byte
+
 	return length;
 }
 
 void MessagePackReader::ReadRaw( void* bytes, uint32_t length )
 {
 	stream->Read( bytes, length, 1 );
+
+	Advance();
+
+	if ( !containerState.IsEmpty() )
+	{
+		containerState.GetLast().length--;
+	}
 }
 
 uint32_t MessagePackReader::ReadArrayLength()
 {
 	uint32_t length = 0;
 
-	if ( type & MessagePackMasks::FixArrayType )
+	if ( ( type & MessagePackMasks::FixArrayType ) == MessagePackTypes::FixArray )
 	{
 		length = type & MessagePackMasks::FixArrayCount;
 	}
@@ -1263,6 +1407,8 @@ uint32_t MessagePackReader::ReadArrayLength()
 			}
 		}
 	}
+
+	Advance();
 
 	return length;
 }
@@ -1301,7 +1447,7 @@ uint32_t MessagePackReader::ReadMapLength()
 {
 	uint32_t length = 0;
 
-	if ( type & MessagePackMasks::FixMapType )
+	if ( ( type & MessagePackMasks::FixMapType ) == MessagePackTypes::FixMap )
 	{
 		length = type & MessagePackMasks::FixMapCount;
 	}
@@ -1338,6 +1484,8 @@ uint32_t MessagePackReader::ReadMapLength()
 		}
 	}
 
+	Advance();
+
 	return length;
 }
 
@@ -1345,7 +1493,7 @@ void MessagePackReader::BeginMap( uint32_t length )
 {
 	ContainerState state;
 	state.container = MessagePackContainers::Map;
-	state.length = length;
+	state.length = length * 2;
 	containerState.Push( state );
 }
 
@@ -1357,7 +1505,7 @@ void MessagePackReader::EndMap()
 	{
 		if ( state.length != 0 )
 		{
-			throw Helium::Exception( "Incorrent number of objects read from map, off by %d", state.length );
+			throw Helium::Exception( "Incorrent number of objects read from map, off by %d", state.length / 2 );
 		}
 	}
 	else
@@ -1403,6 +1551,13 @@ void MessagePackReader::ReadFloat( float64_t& value )
 		{
 			throw Helium::Exception( "Object type is not a float" );
 		}
+	}
+
+	Advance();
+
+	if ( !containerState.IsEmpty() )
+	{
+		containerState.GetLast().length--;
 	}
 }
 
@@ -1457,6 +1612,13 @@ void MessagePackReader::ReadUnsigned( uint64_t& value )
 			throw Helium::Exception( "Object type is not an unsigned integer" );
 		}
 	}
+
+	Advance();
+
+	if ( !containerState.IsEmpty() )
+	{
+		containerState.GetLast().length--;
+	}
 }
 
 void MessagePackReader::ReadSigned( int64_t& value )
@@ -1509,5 +1671,12 @@ void MessagePackReader::ReadSigned( int64_t& value )
 		{
 			throw Helium::Exception( "Object type is not a signed integer" );
 		}
+	}
+
+	Advance();
+
+	if ( !containerState.IsEmpty() )
+	{
+		containerState.GetLast().length--;
 	}
 }

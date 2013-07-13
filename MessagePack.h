@@ -135,20 +135,21 @@ namespace Helium
 		inline bool IsMap();
 		void Skip();
 
-		bool Read( bool& value );
-		bool Read( float32_t& value );
-		bool Read( float64_t& value );
-		bool Read( uint8_t& value );
-		bool Read( uint16_t& value );
-		bool Read( uint32_t& value );
-		bool Read( uint64_t& value );
-		bool Read( int8_t& value );
-		bool Read( int16_t& value );
-		bool Read( int32_t& value );
-		bool Read( int64_t& value );
+		// NULL succeeded pointer will throw on failure
+		void Read( bool& value, bool* succeeded );
+		void Read( float32_t& value, bool* succeeded );
+		void Read( float64_t& value, bool* succeeded );
+		void Read( uint8_t& value, bool* succeeded );
+		void Read( uint16_t& value, bool* succeeded );
+		void Read( uint32_t& value, bool* succeeded );
+		void Read( uint64_t& value, bool* succeeded );
+		void Read( int8_t& value, bool* succeeded );
+		void Read( int16_t& value, bool* succeeded );
+		void Read( int32_t& value, bool* succeeded );
+		void Read( int64_t& value, bool* succeeded );
 
 		template< class T >
-		bool ReadNumber( T& value, bool clamp );
+		void ReadNumber( T& value, bool clamp, bool* succeeeded );
 
 		void Read( String& value );
 		uint32_t ReadRawLength();

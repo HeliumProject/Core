@@ -47,12 +47,12 @@ bool Helium::MessagePackReader::IsBoolean()
 
 bool Helium::MessagePackReader::IsNumber()
 {
-	if ( type & MessagePackMasks::FixNumPositiveType )
+	if ( ( type & MessagePackMasks::FixNumPositiveType ) == MessagePackTypes::FixNumPositive )
 	{
 		return true;
 	}
 
-	if ( type & MessagePackMasks::FixNumNegativeType )
+	if ( ( type & MessagePackMasks::FixNumNegativeType ) == MessagePackTypes::FixNumNegative )
 	{
 		return true;
 	}
@@ -80,7 +80,7 @@ bool Helium::MessagePackReader::IsNumber()
 
 bool Helium::MessagePackReader::IsRaw()
 {
-	if ( type & MessagePackMasks::FixRawType )
+	if ( ( type & MessagePackMasks::FixRawType ) == MessagePackTypes::FixRaw )
 	{
 		return true;
 	}
@@ -99,7 +99,7 @@ bool Helium::MessagePackReader::IsRaw()
 
 bool Helium::MessagePackReader::IsArray()
 {
-	if ( type & MessagePackMasks::FixArrayType )
+	if ( ( type & MessagePackMasks::FixArrayType ) == MessagePackTypes::FixArray )
 	{
 		return true;
 	}
@@ -118,7 +118,7 @@ bool Helium::MessagePackReader::IsArray()
 
 bool Helium::MessagePackReader::IsMap()
 {
-	if ( type & MessagePackMasks::FixMapType )
+	if ( ( type & MessagePackMasks::FixMapType ) == MessagePackTypes::FixMap )
 	{
 		return true;
 	}
@@ -136,53 +136,80 @@ bool Helium::MessagePackReader::IsMap()
 }
 
 template< class T >
-bool Helium::MessagePackReader::ReadNumber( T& value, bool clamp )
+void Helium::MessagePackReader::ReadNumber( T& value, bool clamp, bool* succeeded )
 {
-	if ( type & MessagePackMasks::FixNumPositiveType )
+	bool result = false;
+
+	if ( ( type & MessagePackMasks::FixNumPositiveType ) == MessagePackTypes::FixNumPositive )
 	{
 		value = type;
-		return true;
+		result = true;
+
+		if ( !containerState.IsEmpty() )
+		{
+			containerState.GetLast().length--;
+		}
+	}
+	else
+	{
+		if ( ( type & MessagePackMasks::FixNumNegativeType ) == MessagePackTypes::FixNumNegative )
+		{
+			value = static_cast< int8_t >( type );
+			result = true;
+
+			if ( !containerState.IsEmpty() )
+			{
+				containerState.GetLast().length--;
+			}
+		}
 	}
 
-	if ( type & MessagePackMasks::FixNumNegativeType )
+	if ( !result )
 	{
-		value = static_cast< int8_t >( type );
-		return true;
+		switch ( type )
+		{
+		case MessagePackTypes::Float32:
+		case MessagePackTypes::Float64:
+			{
+				float64_t temp = 0.0;
+				ReadFloat( temp );
+				result = RangeCast( temp, value, clamp );
+				break;
+			}
+
+		case MessagePackTypes::UInt8:
+		case MessagePackTypes::UInt16:
+		case MessagePackTypes::UInt32:
+		case MessagePackTypes::UInt64:
+			{
+				uint64_t temp = 0;
+				ReadUnsigned( temp );
+				result = RangeCast( temp, value, clamp );
+				break;
+			}
+
+		case MessagePackTypes::Int8:
+		case MessagePackTypes::Int16:
+		case MessagePackTypes::Int32:
+		case MessagePackTypes::Int64:
+			{
+				int64_t temp = 0;
+				ReadSigned( temp );
+				result = RangeCast( temp, value, clamp );
+				break;
+			}
+
+		default:
+			break;
+		}
 	}
 
-	switch ( type )
+	if ( succeeded )
 	{
-	case MessagePackTypes::Float32:
-	case MessagePackTypes::Float64:
-		{
-			float64_t temp = 0.0;
-			ReadFloat( temp );
-			return RangeCast( temp, value, clamp );
-		}
-
-	case MessagePackTypes::UInt8:
-	case MessagePackTypes::UInt16:
-	case MessagePackTypes::UInt32:
-	case MessagePackTypes::UInt64:
-		{
-			uint64_t temp = 0;
-			ReadUnsigned( temp );
-			return RangeCast( temp, value, clamp );
-		}
-
-	case MessagePackTypes::Int8:
-	case MessagePackTypes::Int16:
-	case MessagePackTypes::Int32:
-	case MessagePackTypes::Int64:
-		{
-			int64_t temp = 0;
-			ReadSigned( temp );
-			return RangeCast( temp, value, clamp );
-		}
-
-	default:
-		{
-			return false;
-		}
+		*succeeded = result;
+	}
+	else if ( !result )
+	{
+		throw Helium::Exception( "Type mismatch on unhandled Read" );
 	}
 }
