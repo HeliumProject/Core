@@ -25,6 +25,7 @@ using namespace Helium::Persist;
 
 const char* Persist::ArchiveExtensions[] =
 {
+	"bson",
 	"json",
 	"msgpack"
 };
