@@ -10,10 +10,6 @@
 #include "Reflect/Registry.h"
 #include "Reflect/TranslatorDeduction.h"
 
-#if 0
-
-#include <bson/bson.h>
-
 using namespace Helium;
 using namespace Helium::Reflect;
 using namespace Helium::Persist;
@@ -64,7 +60,9 @@ void ArchiveWriterBson::Write( Object* object )
 	// the master object
 	m_Objects.Push( object );
 
-	mongo::BSONArrayBuilder arrayBuilder;
+	bson b[1];
+	bson_init( b );
+	bson_append_start_array( b, "BSON" );
 
 	// objects can get changed during this iteration (in Identify), so use indices
 	for ( size_t index = 0; index < m_Objects.GetSize(); ++index )
@@ -72,21 +70,27 @@ void ArchiveWriterBson::Write( Object* object )
 		Object* object = m_Objects.GetElement( index );
 		const Class* objectClass = object->GetClass();
 
-		mongo::BSONObjBuilder objBuilder;
-		SerializeInstance( objBuilder, object, objectClass, object );
-		arrayBuilder.append( BSON( objectClass->m_Name << objBuilder.obj() ) );
+		char num[16];
+		Helium::StringPrint( num, "%d", index );
+		bson_append_start_object( b, num );
+		SerializeInstance( b, objectClass->m_Name, object, objectClass, object );
+		bson_append_finish_object( b );
 
 		info.m_State = ArchiveStates::ObjectProcessed;
 		info.m_Progress = (int)(((float)(index) / (float)m_Objects.GetSize()) * 100.0f);
 		e_Status.Raise( info );
 	}
 
-	m_Stream->Write( arrayBuilder.arr().objdata(), arrayBuilder.arr().objsize(), 1 );
+	bson_append_finish_array( b );
 
 	// notify completion of last object processed
 	info.m_State = ArchiveStates::ObjectProcessed;
 	info.m_Progress = 100;
 	e_Status.Raise( info );
+
+	HELIUM_VERIFY( bson_finish( b ) );
+	m_Stream->Write( bson_data( b ), bson_size( b ), 1 );
+	bson_destroy( b );
 
 	// do cleanup
 	m_Stream->Flush();
@@ -96,7 +100,7 @@ void ArchiveWriterBson::Write( Object* object )
 	e_Status.Raise( info );
 }
 
-void ArchiveWriterBson::SerializeInstance( mongo::BSONObjBuilder& builder, void* instance, const Structure* structure, Object* object )
+void ArchiveWriterBson::SerializeInstance( bson* b, const char* name, void* instance, const Structure* structure, Object* object )
 {
 #if PERSIST_ARCHIVE_VERBOSE
 	Log::Print( TXT( "Serializing %s\n" ), structure->m_Name );
@@ -126,6 +130,7 @@ void ArchiveWriterBson::SerializeInstance( mongo::BSONObjBuilder& builder, void*
 		}
 	}
 
+	bson_append_start_object( b, name );
 	object->PreSerialize( NULL );
 
 	DynamicArray< const Field* >::ConstIterator itr = fields.Begin();
@@ -136,15 +141,16 @@ void ArchiveWriterBson::SerializeInstance( mongo::BSONObjBuilder& builder, void*
 
 		object->PreSerialize( field );
 
-		SerializeField( builder, instance, field, object );
+		SerializeField( b, instance, field, object );
 
 		object->PostSerialize( field );
 	}
 
 	object->PostSerialize( NULL );
+	bson_append_finish_object( b );
 }
 
-void ArchiveWriterBson::SerializeField( mongo::BSONObjBuilder& builder, void* instance, const Field* field, Object* object )
+void ArchiveWriterBson::SerializeField( bson* b, void* instance, const Field* field, Object* object )
 {
 #if PERSIST_ARCHIVE_VERBOSE
 	Log::Print(TXT("Serializing field %s\n"), field->m_Name);
@@ -152,26 +158,24 @@ void ArchiveWriterBson::SerializeField( mongo::BSONObjBuilder& builder, void* in
 
 	if ( field->m_Count > 1 )
 	{
-		mongo::BSONArrayBuilder arrayBuilder;
+		bson_append_start_array( b, field->m_Name );
 
 		for ( uint32_t i=0; i<field->m_Count; ++i )
 		{
-			mongo::BSONObjBuilder objBuilder;
-			SerializeTranslator( objBuilder, Pointer ( field, instance, object, i ), field->m_Translator, field, object );
-			arrayBuilder.appendAs( objBuilder.obj().firstElement(), mongo::BSONObjBuilder::numStr( arrayBuilder.arrSize() ) );
+			char num[16];
+			Helium::StringPrint( num, "%d", i );
+			SerializeTranslator( b, num, Pointer ( field, instance, object, i ), field->m_Translator, field, object );
 		}
 
-		builder.append( field->m_Name, arrayBuilder.arr() );
+		bson_append_finish_array( b );
 	}
 	else
 	{
-		mongo::BSONObjBuilder objBuilder;
-		SerializeTranslator( objBuilder, Pointer ( field, instance, object ), field->m_Translator, field, object );
-		builder.appendAs( objBuilder.obj().firstElement(), field->m_Name );
+		SerializeTranslator( b, field->m_Name, Pointer ( field, instance, object ), field->m_Translator, field, object );
 	}
 }
 
-void ArchiveWriterBson::SerializeTranslator( mongo::BSONObjBuilder& builder, Pointer pointer, Translator* translator, const Field* field, Object* object )
+void ArchiveWriterBson::SerializeTranslator( bson* b, const char* name, Pointer pointer, Translator* translator, const Field* field, Object* object )
 {
 	switch ( translator->GetReflectionType() )
 	{
@@ -184,53 +188,53 @@ void ArchiveWriterBson::SerializeTranslator( mongo::BSONObjBuilder& builder, Poi
 			switch ( scalar->m_Type )
 			{
 			case ScalarTypes::Boolean:
-				builder.append( "temp", pointer.As<bool>() );
+				bson_append_bool( b, name, pointer.As<bool>() );
 				break;
 
 			case ScalarTypes::Unsigned8:
-				builder.append( "temp", pointer.As<uint8_t>() );
+				bson_append_int( b, name, pointer.As<uint8_t>() );
 				break;
 
 			case ScalarTypes::Unsigned16:
-				builder.append( "temp", pointer.As<uint16_t>() );
+				bson_append_int( b, name, pointer.As<uint16_t>() );
 				break;
 
 			case ScalarTypes::Unsigned32:
-				builder.append( "temp", pointer.As<uint32_t>() );
+				bson_append_int( b, name, pointer.As<uint32_t>() );
 				break;
 
 			case ScalarTypes::Unsigned64:
-				builder.append( "temp", pointer.As<int64_t>() ); // uint64_t isn't supported, just hope for the best
+				bson_append_long( b, name, pointer.As<int64_t>() ); // uint64_t isn't supported, just hope for the best
 				break;
 
 			case ScalarTypes::Signed8:
-				builder.append( "temp", pointer.As<int8_t>() );
+				bson_append_int( b, name, pointer.As<int8_t>() );
 				break;
 
 			case ScalarTypes::Signed16:
-				builder.append( "temp", pointer.As<int16_t>() );
+				bson_append_int( b, name, pointer.As<int16_t>() );
 				break;
 
 			case ScalarTypes::Signed32:
-				builder.append( "temp", pointer.As<int32_t>() );
+				bson_append_int( b, name, pointer.As<int32_t>() );
 				break;
 
 			case ScalarTypes::Signed64:
-				builder.append( "temp", pointer.As<int64_t>() );
+				bson_append_long( b, name, pointer.As<int64_t>() );
 				break;
 
 			case ScalarTypes::Float32:
-				builder.append( "temp", pointer.As<float32_t>() );
+				bson_append_double( b, name, pointer.As<float32_t>() );
 				break;
 
 			case ScalarTypes::Float64:
-				builder.append( "temp", pointer.As<float64_t>() );
+				bson_append_double( b, name, pointer.As<float64_t>() );
 				break;
 
 			case ScalarTypes::String:
 				String str;
 				scalar->Print( pointer, str, this );
-				builder.append( "temp", str.GetData() );
+				bson_append_string( b, name, str.GetData() );
 				break;
 			}
 			break;
@@ -239,7 +243,7 @@ void ArchiveWriterBson::SerializeTranslator( mongo::BSONObjBuilder& builder, Poi
 	case ReflectionTypes::StructureTranslator:
 		{
 			StructureTranslator* structure = static_cast< StructureTranslator* >( translator );
-			SerializeInstance( builder, pointer.m_Address, structure->GetStructure(), object );
+			SerializeInstance( b, name, pointer.m_Address, structure->GetStructure(), object );
 			break;
 		}
 
@@ -251,15 +255,17 @@ void ArchiveWriterBson::SerializeTranslator( mongo::BSONObjBuilder& builder, Poi
 			DynamicArray< Pointer > items;
 			set->GetItems( pointer, items );
 
-			mongo::BSONArrayBuilder arrayBuilder;
-			for ( DynamicArray< Pointer >::Iterator itr = items.Begin(), end = items.End(); itr != end; ++itr )
+			bson_append_start_array( b, name );
+
+			uint32_t index = 0;
+			for ( DynamicArray< Pointer >::Iterator itr = items.Begin(), end = items.End(); itr != end; ++itr, ++index )
 			{
-				mongo::BSONObjBuilder objBuilder;
-				SerializeTranslator( objBuilder, *itr, itemTranslator, field, object );
-				arrayBuilder.appendAs( objBuilder.obj().firstElement(), mongo::BSONObjBuilder::numStr( arrayBuilder.arrSize() ) );
+				char num[16];
+				Helium::StringPrint( num, "%d", index );
+				SerializeTranslator( b, num, *itr, itemTranslator, field, object );
 			}
 
-			builder.append( "temp", arrayBuilder.arr() );
+			bson_append_finish_array( b );
 			break;
 		}
 
@@ -271,15 +277,17 @@ void ArchiveWriterBson::SerializeTranslator( mongo::BSONObjBuilder& builder, Poi
 			DynamicArray< Pointer > items;
 			sequence->GetItems( pointer, items );
 
-			mongo::BSONArrayBuilder arrayBuilder;
-			for ( DynamicArray< Pointer >::Iterator itr = items.Begin(), end = items.End(); itr != end; ++itr )
+			bson_append_start_array( b, name );
+
+			uint32_t index = 0;
+			for ( DynamicArray< Pointer >::Iterator itr = items.Begin(), end = items.End(); itr != end; ++itr, ++index )
 			{
-				mongo::BSONObjBuilder objBuilder;
-				SerializeTranslator( objBuilder, *itr, itemTranslator, field, object );
-				arrayBuilder.appendAs( objBuilder.obj().firstElement(), mongo::BSONObjBuilder::numStr( arrayBuilder.arrSize() ) );
+				char num[16];
+				Helium::StringPrint( num, "%d", index );
+				SerializeTranslator( b, num, *itr, itemTranslator, field, object );
 			}
 
-			builder.append( "temp", arrayBuilder.arr() );
+			bson_append_finish_array( b );
 			break;
 		}
 
@@ -292,21 +300,18 @@ void ArchiveWriterBson::SerializeTranslator( mongo::BSONObjBuilder& builder, Poi
 			DynamicArray< Pointer > keys, values;
 			association->GetItems( pointer, keys, values );
 
-			mongo::BSONObjBuilder objBuilder;
+			bson_append_start_object( b, name );
+
 			for ( DynamicArray< Pointer >::Iterator keyItr = keys.Begin(), valueItr = values.Begin(), keyEnd = keys.End(), valueEnd = values.End();
 				keyItr != keyEnd && valueItr != valueEnd;
 				++keyItr, ++valueItr )
 			{
-				mongo::BSONObjBuilder keyObjBuilder;
-				SerializeTranslator( keyObjBuilder, *keyItr, keyTranslator, field, object );
-
-				mongo::BSONObjBuilder valueObjBuilder;
-				SerializeTranslator( valueObjBuilder, *valueItr, valueTranslator, field, object );
-
-				objBuilder.appendAs( valueObjBuilder.obj().firstElement(), keyObjBuilder.obj().firstElement().toString( false ) );
+				String name;
+				association->GetKeyTranslator()->Print( *keyItr, name, m_Identifier );
+				SerializeTranslator( b, name.GetData(), *valueItr, valueTranslator, field, object );
 			}
 
-			builder.append( "temp", objBuilder.obj() );
+			bson_append_finish_object( b );
 			break;
 		}
 
@@ -370,15 +375,20 @@ void ArchiveReaderBson::Read( Reflect::ObjectPtr& object )
 
 	Start();
 
-#if 0
-	if ( m_Document.IsArray() )
+	bson_iterator i[1];
+	bson_iterator_init( i, m_Bson );
+
+	if ( bson_iterator_type( i ) == BSON_ARRAY )
 	{
-		uint32_t length = m_Document.Size();
-		m_Objects.Reserve( length );
-		for ( uint32_t i=0; i<length; i++ )
+		bson_iterator_subiterator( i, m_Next );
+
+		while ( bson_iterator_more( m_Next ) )
 		{
-			ObjectPtr object;
-			ReadNext( object );
+			if ( bson_iterator_type( m_Next ) == BSON_OBJECT )
+			{
+				ObjectPtr object;
+				ReadNext( object );
+			}
 
 			ArchiveStatus info( *this, ArchiveStates::ObjectProcessed );
 			info.m_Progress = (int)(((float)(m_Stream->Tell()) / (float)m_Size) * 100.0f);
@@ -390,16 +400,16 @@ void ArchiveReaderBson::Read( Reflect::ObjectPtr& object )
 			}
 		}
 	}
-#endif
 
 	Resolve();
 
 	object = m_Objects.GetFirst();
+
+	bson_destroy( m_Bson );
 }
 
 void Helium::Persist::ArchiveReaderBson::Start()
 {
-#if 0
 	ArchiveStatus info( *this, ArchiveStates::Starting );
 	e_Status.Raise( info );
 	m_Abort = false;
@@ -419,88 +429,54 @@ void Helium::Persist::ArchiveReaderBson::Start()
 	m_Buffer.Resize( static_cast< size_t >( m_Size + 1 ) );
 	m_Stream->Read( m_Buffer.GetData(),  static_cast< size_t >( m_Size ), 1 );
 	m_Buffer[ static_cast< size_t >( m_Size ) ] = '\0';
-	if ( m_Document.ParseInsitu< 0 >( reinterpret_cast< char* >( m_Buffer.GetData() ) ).HasParseError() )
-	{
-		m_Stream->Seek( 0, SeekOrigins::Begin );
-		size_t lineCount = 1;
-		size_t charCount = 0;
 
-		size_t i = 0;
-		while ( true )
-		{
-			char c;
-			if ( m_Stream->Read( &c, 1, 1 ) && i < m_Document.GetErrorOffset() )
-			{
-				if (c == '\n')
-				{
-					++lineCount;
-					charCount = 0;
-				}
-				else
-				{
-					if (c != '\r')
-					{
-						++charCount;
-					}
-				}
-			}
-			else
-			{
-				break;
-			}
-			
-			++i;
-		}
-
-		throw Persist::Exception( "Error parsing JSON (%d,%d): %s", lineCount, charCount, m_Document.GetParseError() );
-	}
-#endif
+	bson_init_finished_data( m_Bson, reinterpret_cast< char* >( m_Buffer.GetData() ), false );
 }
 
 bool Helium::Persist::ArchiveReaderBson::ReadNext( Reflect::ObjectPtr& object )
 {
 	bool success = false;
-#if 0
-	if (m_Next >= m_Document.Size())
+
+	if ( !bson_iterator_more( m_Next ) || bson_iterator_type( m_Next ) != BSON_OBJECT )
 	{
 		return false;
 	}
 
-	rapidjson::Value& value = m_Document[ m_Next++ ];
-	if ( value.IsObject() )
+	bson_iterator i[1];
+	bson_iterator_subiterator( m_Next, i );
+
+	if ( bson_iterator_type( i ) == BSON_OBJECT )
 	{
-		rapidjson::Value::Member* member = value.MemberBegin();
-		if ( member != value.MemberEnd() )
+		const char* key = bson_iterator_key( i );
+
+		uint32_t objectClassCrc = 0;
+		if ( key )
 		{
-			uint32_t objectClassCrc = 0;
-			if ( member->name.IsString() )
-			{
-				String typeStr;
-				typeStr = member->name.GetString();
-				objectClassCrc = Helium::Crc32( typeStr.GetData() );
-			}
+			objectClassCrc = Helium::Crc32( key );
+		}
 
-			const Class* objectClass = NULL;
-			if ( objectClassCrc != 0 )
-			{
-				objectClass = Registry::GetInstance()->GetClass( objectClassCrc );
-			}
+		const Class* objectClass = NULL;
+		if ( objectClassCrc != 0 )
+		{
+			objectClass = Registry::GetInstance()->GetClass( objectClassCrc );
+		}
 			
-			if ( !object && objectClass )
-			{
-				object = objectClass->m_Creator();
-			}
+		if ( !object && objectClass )
+		{
+			object = objectClass->m_Creator();
+		}
 
-			if ( object.ReferencesObject() )
-			{
-				success = true;
-				DeserializeInstance( member->value, object, object->GetClass(), object );
+		if ( object.ReferencesObject() )
+		{
+			success = true;
+			DeserializeInstance( i, object, object->GetClass(), object );
 
-				m_Objects.Push( object );
-			}
+			m_Objects.Push( object );
 		}
 	}
-#endif
+
+	bson_iterator_next( m_Next );
+
 	return success;
 }
 
@@ -520,24 +496,26 @@ void Helium::Persist::ArchiveReaderBson::Resolve()
 	e_Status.Raise( info );
 }
 
-void ArchiveReaderBson::DeserializeInstance( mongo::BSONElement& value, void* instance, const Structure* structure, Object* object )
+void ArchiveReaderBson::DeserializeInstance( bson_iterator* i, void* instance, const Structure* structure, Object* object )
 {
-#if 0
 #if PERSIST_ARCHIVE_VERBOSE
 	Log::Print(TXT("Deserializing %s\n"), structure->m_Name);
 #endif
 	object->PreDeserialize( NULL );
 
-	if ( value.IsObject() )
+	if ( bson_iterator_type( i ) == BSON_OBJECT )
 	{
-		for ( rapidjson::Value::MemberIterator itr = value.MemberBegin(), end = value.MemberEnd(); itr != end; ++itr )
+		bson_iterator obj[1];
+		bson_iterator_subiterator( i, obj );
+
+		while( bson_iterator_next( obj ) )
 		{
+			const char* key = bson_iterator_key( obj );
+
 			uint32_t fieldCrc = 0;
-			if ( itr->name.IsString() )
+			if ( key )
 			{
-				String fieldStr;
-				fieldStr = itr->name.GetString();
-				fieldCrc = Helium::Crc32( fieldStr.GetData() );
+				fieldCrc = Helium::Crc32( key );
 			}
 
 			const Field* field = structure->FindFieldByName( fieldCrc );
@@ -545,18 +523,18 @@ void ArchiveReaderBson::DeserializeInstance( mongo::BSONElement& value, void* in
 			{
 				object->PreDeserialize( field );
 
-				DeserializeField( itr->value, instance, field, object );
+				DeserializeField( obj, instance, field, object );
 
 				object->PostDeserialize( field );
 			}
 			else
 			{
-				if ( itr->name.IsString() )
+				if ( key )
 				{
 					HELIUM_TRACE(
 						TraceLevels::Warning, 
 						"ArchiveReaderBson::DeserializeInstance - Could not find field '%s' (crc=)\n", 
-						itr->name.GetString(), 
+						key, 
 						fieldCrc);
 				}
 				else
@@ -572,170 +550,304 @@ void ArchiveReaderBson::DeserializeInstance( mongo::BSONElement& value, void* in
 	}
 
 	object->PostDeserialize( NULL );
-#endif
 }
 
-void ArchiveReaderBson::DeserializeField( mongo::BSONElement& value, void* instance, const Field* field, Object* object )
+void ArchiveReaderBson::DeserializeField( bson_iterator* i, void* instance, const Field* field, Object* object )
 {
-#if 0
 #if PERSIST_ARCHIVE_VERBOSE
 	Log::Print(TXT("Deserializing field %s\n"), field->m_Name);
 #endif
 	
 	if ( field->m_Count > 1 )
 	{
-		if ( value.IsArray() )
+		if ( bson_iterator_type( i ) == BSON_ARRAY )
 		{
-			for ( uint32_t i=0; i<value.Size(); ++i )
+			bson_iterator elem[1];
+			bson_iterator_subiterator( i, elem );
+
+			uint32_t index = 0;
+			while( bson_iterator_next( elem ) )
 			{
-				if ( i < field->m_Count )
+				if ( index++ < field->m_Count )
 				{
-					DeserializeTranslator( value[ i ], Pointer ( field, instance, object, i ), field->m_Translator, field, object );
+					DeserializeTranslator( elem, Pointer ( field, instance, object, index ), field->m_Translator, field, object );
 				}
 			}
 		}
 		else
 		{
-			DeserializeTranslator( value, Pointer ( field, instance, object, 0 ), field->m_Translator, field, object );
+			DeserializeTranslator( i, Pointer ( field, instance, object, 0 ), field->m_Translator, field, object );
 		}
 	}
 	else
 	{
-		DeserializeTranslator( value, Pointer ( field, instance, object ), field->m_Translator, field, object );
+		DeserializeTranslator( i, Pointer ( field, instance, object ), field->m_Translator, field, object );
 	}
-#endif
 }
 
-void ArchiveReaderBson::DeserializeTranslator( mongo::BSONElement& value, Pointer pointer, Translator* translator, const Field* field, Object* object )
+void ArchiveReaderBson::DeserializeTranslator( bson_iterator* i, Pointer pointer, Translator* translator, const Field* field, Object* object )
 {
-#if 0
-	if ( value.IsBool() )
+	switch ( bson_iterator_type( i ) )
 	{
-		if ( translator->GetReflectionType() == ReflectionTypes::ScalarTranslator )
+	case BSON_BOOL:
 		{
-			ScalarTranslator* scalar = static_cast< ScalarTranslator* >( translator );
-			if ( scalar->m_Type == ScalarTypes::Boolean )
+			if ( translator->GetReflectionType() == ReflectionTypes::ScalarTranslator )
 			{
-				pointer.As<bool>() = value.IsTrue();
+				ScalarTranslator* scalar = static_cast< ScalarTranslator* >( translator );
+				if ( scalar->m_Type == ScalarTypes::Boolean )
+				{
+					pointer.As<bool>() = bson_iterator_bool( i ) != 0;
+				}
 			}
+			break;
 		}
-	}
-	else if ( value.IsNumber() )
-	{
-		if ( translator->GetReflectionType() == ReflectionTypes::ScalarTranslator )
+
+	case BSON_INT:
 		{
-			ScalarTranslator* scalar = static_cast< ScalarTranslator* >( translator );
-			bool clamp = true;
-			switch ( scalar->m_Type )
+			if ( translator->GetReflectionType() == ReflectionTypes::ScalarTranslator )
 			{
-			case ScalarTypes::Boolean:
-			case ScalarTypes::String:
-				break;
+				ScalarTranslator* scalar = static_cast< ScalarTranslator* >( translator );
+				bool clamp = true;
+				switch ( scalar->m_Type )
+				{
+				case ScalarTypes::Boolean:
+				case ScalarTypes::String:
+					break;
 				
-			case ScalarTypes::Unsigned8:
-				RangeCastInteger( value.GetUint(), pointer.As<uint8_t>(), clamp );
-				break;
+				case ScalarTypes::Unsigned8:
+					RangeCastInteger( bson_iterator_int( i ), pointer.As<uint8_t>(), clamp );
+					break;
 
-			case ScalarTypes::Unsigned16:
-				RangeCastInteger( value.GetUint(), pointer.As<uint16_t>(), clamp );
-				break;
+				case ScalarTypes::Unsigned16:
+					RangeCastInteger( bson_iterator_int( i ), pointer.As<uint16_t>(), clamp );
+					break;
 
-			case ScalarTypes::Unsigned32:
-				RangeCastInteger( value.GetUint(), pointer.As<uint32_t>(), clamp );
-				break;
+				case ScalarTypes::Unsigned32:
+					RangeCastInteger( bson_iterator_int( i ), pointer.As<uint32_t>(), clamp );
+					break;
 
-			case ScalarTypes::Unsigned64:
-				RangeCastInteger( value.GetUint64(), pointer.As<uint64_t>(), clamp );
-				break;
+				case ScalarTypes::Unsigned64:
+					RangeCastInteger( bson_iterator_int( i ), pointer.As<uint64_t>(), clamp );
+					break;
 
-			case ScalarTypes::Signed8:
-				RangeCastInteger( value.GetInt(), pointer.As<int8_t>(), clamp );
-				break;
+				case ScalarTypes::Signed8:
+					RangeCastInteger( bson_iterator_int( i ), pointer.As<int8_t>(), clamp );
+					break;
 
-			case ScalarTypes::Signed16:
-				RangeCastInteger( value.GetInt(), pointer.As<int16_t>(), clamp );
-				break;
+				case ScalarTypes::Signed16:
+					RangeCastInteger( bson_iterator_int( i ), pointer.As<int16_t>(), clamp );
+					break;
 
-			case ScalarTypes::Signed32:
-				RangeCastInteger( value.GetInt(), pointer.As<int32_t>(), clamp );
-				break;
+				case ScalarTypes::Signed32:
+					RangeCastInteger( bson_iterator_int( i ), pointer.As<int32_t>(), clamp );
+					break;
 
-			case ScalarTypes::Signed64:
-				RangeCastInteger( value.GetInt64(), pointer.As<int64_t>(), clamp );
-				break;
+				case ScalarTypes::Signed64:
+					RangeCastInteger( bson_iterator_int( i ), pointer.As<int64_t>(), clamp );
+					break;
 
-			case ScalarTypes::Float32:
-				RangeCastFloat( value.GetDouble(), pointer.As<float32_t>(), clamp );
-				break;
+				case ScalarTypes::Float32:
+					RangeCastFloat( bson_iterator_int( i ), pointer.As<float32_t>(), clamp );
+					break;
 
-			case ScalarTypes::Float64:
-				RangeCastFloat( value.GetDouble(), pointer.As<float64_t>(), clamp );
-				break;
+				case ScalarTypes::Float64:
+					RangeCastFloat( bson_iterator_int( i ), pointer.As<float64_t>(), clamp );
+					break;
+				}
 			}
+			break;
+		}
+
+	case BSON_LONG:
+		{
+			if ( translator->GetReflectionType() == ReflectionTypes::ScalarTranslator )
+			{
+				ScalarTranslator* scalar = static_cast< ScalarTranslator* >( translator );
+				bool clamp = true;
+				switch ( scalar->m_Type )
+				{
+				case ScalarTypes::Boolean:
+				case ScalarTypes::String:
+					break;
+				
+				case ScalarTypes::Unsigned8:
+					RangeCastInteger( bson_iterator_long( i ), pointer.As<uint8_t>(), clamp );
+					break;
+
+				case ScalarTypes::Unsigned16:
+					RangeCastInteger( bson_iterator_long( i ), pointer.As<uint16_t>(), clamp );
+					break;
+
+				case ScalarTypes::Unsigned32:
+					RangeCastInteger( bson_iterator_long( i ), pointer.As<uint32_t>(), clamp );
+					break;
+
+				case ScalarTypes::Unsigned64:
+					RangeCastInteger( bson_iterator_long( i ), pointer.As<uint64_t>(), clamp );
+					break;
+
+				case ScalarTypes::Signed8:
+					RangeCastInteger( bson_iterator_long( i ), pointer.As<int8_t>(), clamp );
+					break;
+
+				case ScalarTypes::Signed16:
+					RangeCastInteger( bson_iterator_long( i ), pointer.As<int16_t>(), clamp );
+					break;
+
+				case ScalarTypes::Signed32:
+					RangeCastInteger( bson_iterator_long( i ), pointer.As<int32_t>(), clamp );
+					break;
+
+				case ScalarTypes::Signed64:
+					RangeCastInteger( bson_iterator_long( i ), pointer.As<int64_t>(), clamp );
+					break;
+
+				case ScalarTypes::Float32:
+					RangeCastFloat( bson_iterator_long( i ), pointer.As<float32_t>(), clamp );
+					break;
+
+				case ScalarTypes::Float64:
+					RangeCastFloat( bson_iterator_long( i ), pointer.As<float64_t>(), clamp );
+					break;
+				}
+			}
+			break;
+		}
+
+	case BSON_DOUBLE:
+		{
+			if ( translator->GetReflectionType() == ReflectionTypes::ScalarTranslator )
+			{
+				ScalarTranslator* scalar = static_cast< ScalarTranslator* >( translator );
+				bool clamp = true;
+				switch ( scalar->m_Type )
+				{
+				case ScalarTypes::Boolean:
+				case ScalarTypes::String:
+					break;
+				
+				case ScalarTypes::Unsigned8:
+					RangeCastInteger( bson_iterator_double( i ), pointer.As<uint8_t>(), clamp );
+					break;
+
+				case ScalarTypes::Unsigned16:
+					RangeCastInteger( bson_iterator_double( i ), pointer.As<uint16_t>(), clamp );
+					break;
+
+				case ScalarTypes::Unsigned32:
+					RangeCastInteger( bson_iterator_double( i ), pointer.As<uint32_t>(), clamp );
+					break;
+
+				case ScalarTypes::Unsigned64:
+					RangeCastInteger( bson_iterator_double( i ), pointer.As<uint64_t>(), clamp );
+					break;
+
+				case ScalarTypes::Signed8:
+					RangeCastInteger( bson_iterator_double( i ), pointer.As<int8_t>(), clamp );
+					break;
+
+				case ScalarTypes::Signed16:
+					RangeCastInteger( bson_iterator_double( i ), pointer.As<int16_t>(), clamp );
+					break;
+
+				case ScalarTypes::Signed32:
+					RangeCastInteger( bson_iterator_double( i ), pointer.As<int32_t>(), clamp );
+					break;
+
+				case ScalarTypes::Signed64:
+					RangeCastInteger( bson_iterator_double( i ), pointer.As<int64_t>(), clamp );
+					break;
+
+				case ScalarTypes::Float32:
+					RangeCastFloat( bson_iterator_double( i ), pointer.As<float32_t>(), clamp );
+					break;
+
+				case ScalarTypes::Float64:
+					RangeCastFloat( bson_iterator_double( i ), pointer.As<float64_t>(), clamp );
+					break;
+				}
+			}
+			break;
+		}
+
+	case BSON_STRING:
+		{
+			if ( translator->HasReflectionType( ReflectionTypes::ScalarTranslator ) )
+			{
+				ScalarTranslator* scalar = static_cast< ScalarTranslator* >( translator );
+				if ( scalar->m_Type == ScalarTypes::String )
+				{
+					String str ( bson_iterator_string( i ) );
+					scalar->Parse( str, pointer, this, m_Flags | ArchiveFlags::Notify ? true : false );
+				}
+			}
+			break;
+		}
+
+	case BSON_ARRAY:
+		{
+			if ( translator->GetReflectionType() == ReflectionTypes::SetTranslator )
+			{
+				SetTranslator* set = static_cast< SetTranslator* >( translator );
+				Translator* itemTranslator = set->GetItemTranslator();
+
+				bson_iterator elem[1];
+				bson_iterator_subiterator( i, elem );
+
+				while( bson_iterator_next( elem ) )
+				{
+					Variable item ( itemTranslator );
+					DeserializeTranslator( elem, item, itemTranslator, field, object );
+					set->InsertItem( pointer, item );
+				}
+			}
+			else if ( translator->GetReflectionType() == ReflectionTypes::SequenceTranslator )
+			{
+				SequenceTranslator* sequence = static_cast< SequenceTranslator* >( translator );
+				Translator* itemTranslator = sequence->GetItemTranslator();
+
+				bson_iterator elem[1];
+				bson_iterator_subiterator( i, elem );
+
+				while( bson_iterator_next( elem ) )
+				{
+					Variable item ( itemTranslator );
+					DeserializeTranslator( elem, item, itemTranslator, field, object );
+					sequence->Insert( pointer, sequence->GetLength( pointer ), item );
+				}
+			}
+			break;
+		}
+
+	case BSON_OBJECT:
+		{
+			if ( translator->GetReflectionType() == ReflectionTypes::StructureTranslator )
+			{
+				StructureTranslator* structure = static_cast< StructureTranslator* >( translator );
+				DeserializeInstance( i, pointer.m_Address,  structure->GetStructure(), object );
+			}
+			else if ( translator->GetReflectionType() == ReflectionTypes::AssociationTranslator )
+			{
+				AssociationTranslator* assocation = static_cast< AssociationTranslator* >( translator );
+				ScalarTranslator* keyTranslator = assocation->GetKeyTranslator();
+				Translator* valueTranslator = assocation->GetValueTranslator();
+				Variable keyVariable ( keyTranslator );
+				Variable valueVariable ( valueTranslator );
+
+				bson_iterator elem[1];
+				bson_iterator_subiterator( i, elem );
+
+				while( bson_iterator_next( elem ) )
+				{
+					String key ( bson_iterator_key( elem ) );
+					keyTranslator->Parse( key, keyVariable, m_Resolver );
+					DeserializeTranslator( elem, valueVariable, valueTranslator, field, object );
+					assocation->SetItem( pointer, keyVariable, valueVariable );
+				}
+			}
+			break;
 		}
 	}
-	else if ( value.IsString() )
-	{
-		if ( translator->HasReflectionType( ReflectionTypes::ScalarTranslator ) )
-		{
-			ScalarTranslator* scalar = static_cast< ScalarTranslator* >( translator );
-			if ( scalar->m_Type == ScalarTypes::String )
-			{
-				String str ( value.GetString() );
-				scalar->Parse( str, pointer, this, m_Flags | ArchiveFlags::Notify ? true : false );
-			}
-		}
-	}
-	else if ( value.IsArray() )
-	{
-		if ( translator->GetReflectionType() == ReflectionTypes::SetTranslator )
-		{
-			SetTranslator* set = static_cast< SetTranslator* >( translator );
-			Translator* itemTranslator = set->GetItemTranslator();
-			uint32_t length = value.Size();
-			for ( uint32_t i=0; i<length; ++i )
-			{
-				Variable item ( itemTranslator );
-				DeserializeTranslator( value[ i ], item, itemTranslator, field, object );
-				set->InsertItem( pointer, item );
-			}
-		}
-		else if ( translator->GetReflectionType() == ReflectionTypes::SequenceTranslator )
-		{
-			SequenceTranslator* sequence = static_cast< SequenceTranslator* >( translator );
-			Translator* itemTranslator = sequence->GetItemTranslator();
-			uint32_t length = value.Size();
-			sequence->SetLength(pointer, length);
-			for ( uint32_t i=0; i<length; ++i )
-			{
-				Pointer item = sequence->GetItem( pointer, i );
-				DeserializeTranslator( value[ i ], item, itemTranslator, field, object );
-			}
-		}
-	}
-	else if ( value.IsObject() )
-	{
-		if ( translator->GetReflectionType() == ReflectionTypes::StructureTranslator )
-		{
-			StructureTranslator* structure = static_cast< StructureTranslator* >( translator );
-			DeserializeInstance( value, pointer.m_Address,  structure->GetStructure(), object );
-		}
-		else if ( translator->GetReflectionType() == ReflectionTypes::AssociationTranslator )
-		{
-			AssociationTranslator* assocation = static_cast< AssociationTranslator* >( translator );
-			Translator* keyTranslator = assocation->GetKeyTranslator();
-			Translator* valueTranslator = assocation->GetValueTranslator();
-			Variable keyVariable ( keyTranslator );
-			Variable valueVariable ( valueTranslator );
-			for ( rapidjson::Value::MemberIterator itr = value.MemberBegin(), end = value.MemberEnd(); itr != end; ++itr )
-			{
-				DeserializeTranslator( itr->name, keyVariable, keyTranslator, field, object );
-				DeserializeTranslator( itr->value, valueVariable, valueTranslator, field, object );
-				assocation->SetItem( pointer, keyVariable, valueVariable );
-			}
-		}
-	}
-#endif
 }
 
 ObjectPtr ArchiveReaderBson::FromStream( Stream& stream, ObjectResolver* resolver, uint32_t flags )
@@ -747,5 +859,3 @@ ObjectPtr ArchiveReaderBson::FromStream( Stream& stream, ObjectResolver* resolve
 	archive.Close();
 	return object;
 }
-
-#endif
