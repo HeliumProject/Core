@@ -20,7 +20,7 @@ namespace Helium
         public:
             ReflectSequenceInterpreter (Container* container);
 
-            virtual void InterpretField(const Reflect::Field* field, const std::vector<Reflect::Object*>& instances, Container* parent) override;
+            virtual void InterpretField(const Reflect::Field* field, const std::vector<Reflect::Object*>& instances, Container* parent) HELIUM_OVERRIDE;
 
         protected:
             virtual ButtonPtr AddAddButton( List* list );

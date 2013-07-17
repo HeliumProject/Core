@@ -13,8 +13,6 @@
 #include "Foundation/Log.h"
 #include "Foundation/Regex.h"
 
-#include <regex> 
-
 using namespace Helium;
 using namespace Helium::Inspect;
 
@@ -94,7 +92,7 @@ bool Script::PreProcess(std::string& script)
   //
   // Check for L code
   //
-
+#if HELIUM_OS_WIN
   const std::regex cfPattern ( TXT( ".*" ) LS_REGEX_DELIM_BEGIN TXT( ".*" ) LS_REGEX_DELIM_END TXT( ".*" ) );
 
   std::smatch matchResult; 
@@ -119,7 +117,10 @@ bool Script::PreProcess(std::string& script)
   
   const std::regex cfCommentPattern ( LC_COMMENT TXT( ".*\n" ) ); 
   script = std::regex_replace(script, cfCommentPattern, std::string (TXT( "\n" )) ); 
-
+#else
+  HELIUM_ASSERT( false )
+#endif
+  
   //
   // Debug
   //
