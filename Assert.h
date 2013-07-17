@@ -189,7 +189,7 @@ namespace Helium
 /// @param[in] EXP  Expression to evaluate.
 ///
 /// @see HELIUM_ASSERT(), HELIUM_ASSERT_MSG(), HELIUM_ASSERT_FALSE(), HELIUM_ASSERT_MSG_FALSE(), HELIUM_VERIFY_MSG()
-#define HELIUM_VERIFY( EXP ) EXP
+#define HELIUM_VERIFY( EXP ) if( EXP ) {}
 
 /// Trigger a debug breakpoint with a customized message if the result of an expression is false in non-release builds
 /// while still evaluating the expression in release builds.
