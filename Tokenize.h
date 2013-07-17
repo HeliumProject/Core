@@ -3,7 +3,6 @@
 #include <string>
 #include <vector>
 #include <set>
-#include <regex>
 
 #include "Foundation/Regex.h"
 

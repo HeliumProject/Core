@@ -40,36 +40,39 @@ void Helium::Tokenize( const std::string& str, std::set< T >& tokens, const std:
     }
 }
 
-template<>
-inline void Helium::Tokenize( const std::string& str, std::vector< std::string >& tokens, const std::string delimiters )
+namespace Helium
 {
-    std::regex splitPattern(delimiters); 
-
-    std::sregex_token_iterator i(str.begin(), str.end(), splitPattern, -1); 
-    std::sregex_token_iterator end; 
-
-    for(; i != end; i++)
+    template<>
+    inline void Tokenize( const std::string& str, std::vector< std::string >& tokens, const std::string delimiters )
     {
-        if( (*i).matched)
+        std::regex splitPattern(delimiters); 
+
+        std::sregex_token_iterator i(str.begin(), str.end(), splitPattern, -1); 
+        std::sregex_token_iterator end; 
+
+        for(; i != end; i++)
         {
-            tokens.push_back(*i); 
+            if( (*i).matched)
+            {
+                tokens.push_back(*i); 
+            }
         }
     }
-}
 
-template<>
-inline void Helium::Tokenize( const std::string& str, std::set< std::string >& tokens, const std::string delimiters )
-{
-    std::regex splitPattern(delimiters); 
-
-    std::sregex_token_iterator i(str.begin(), str.end(), splitPattern, -1); 
-    std::sregex_token_iterator end; 
-
-    for(; i != end; i++)
+    template<>
+    inline void Tokenize( const std::string& str, std::set< std::string >& tokens, const std::string delimiters )
     {
-        if( (*i).matched )
+        std::regex splitPattern(delimiters); 
+
+        std::sregex_token_iterator i(str.begin(), str.end(), splitPattern, -1); 
+        std::sregex_token_iterator end; 
+
+        for(; i != end; i++)
         {
-            tokens.insert( *i ); 
+            if( (*i).matched )
+            {
+                tokens.insert( *i ); 
+            }
         }
     }
 }

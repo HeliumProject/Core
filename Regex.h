@@ -4,7 +4,22 @@
 
 #include <string> 
 #include <sstream>
+
+#if HELIUM_CC_GCC
+
+#include <tr1/regex>
+
+namespace std
+{
+    using std::tr1::regex;
+    using std::tr1::smatch;
+    using std::tr1::match_results;
+    using std::tr1::sregex_token_iterator;
+}
+
+#else
 #include <regex>
+#endif
 
 //--------------------------------------------------------------
 // helper functions for using std::tr1::regex
