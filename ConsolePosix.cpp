@@ -42,13 +42,18 @@ static inline const char* LookupColor( ConsoleColor color )
 int Helium::Scan(const char* fmt, ...)
 {
 	char buf[1024];
-	fgets( buf, sizeof( buf ), stdin );
-
-	va_list args;
-	va_start(args, fmt);
-	int result = vsscanf( buf, fmt, args );
-	va_end(args);
-	return result;
+	if ( fgets( buf, sizeof( buf ), stdin ) )
+	{
+		va_list args;
+		va_start(args, fmt);
+		int result = vsscanf( buf, fmt, args );
+		va_end(args);
+		return result;
+	}
+	else
+	{
+		return 0;
+	}
 }
 
 int Helium::Scan(const wchar_t* fmt, ...)
@@ -60,8 +65,14 @@ int Helium::Scan(const wchar_t* fmt, ...)
 int Helium::ScanArgs(const char* fmt, va_list args)
 {
 	char buf[1024];
-	fgets( buf, sizeof( buf ), stdin );
-	return vsscanf( buf, fmt, args );
+	if ( fgets( buf, sizeof( buf ), stdin ) )
+	{
+		return vsscanf( buf, fmt, args );
+	}
+	else
+	{
+		return 0;
+	}
 }
 
 int Helium::ScanArgs(const wchar_t* fmt, va_list args)
@@ -73,13 +84,18 @@ int Helium::ScanArgs(const wchar_t* fmt, va_list args)
 int Helium::FileScan(FILE* f, const char* fmt, ...)
 {
 	char buf[1024];
-	fgets( buf, sizeof( buf ), f );
-
-	va_list args;
-	va_start(args, fmt);
-	int result = vsscanf( buf, fmt, args );
-	va_end(args);
-	return result;
+	if ( fgets( buf, sizeof( buf ), f ) )
+	{
+		va_list args;
+		va_start(args, fmt);
+		int result = vsscanf( buf, fmt, args );
+		va_end(args);
+		return result;
+	}
+	else
+	{
+		return 0;
+	}
 }
 
 int Helium::FileScan(FILE* f, const wchar_t* fmt, ...)
@@ -91,8 +107,14 @@ int Helium::FileScan(FILE* f, const wchar_t* fmt, ...)
 int Helium::FileScanArgs(FILE* f, const char* fmt, va_list args)
 {
 	char buf[1024];
-	fgets( buf, sizeof( buf ), f );
-	return vsscanf( buf, fmt, args );
+	if ( fgets( buf, sizeof( buf ), f ) )
+	{
+		return vsscanf( buf, fmt, args );
+	}
+	else
+	{
+		return 0;
+	}
 }
 
 int Helium::FileScanArgs(FILE* f, const wchar_t* fmt, va_list args)
