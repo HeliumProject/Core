@@ -62,7 +62,7 @@ void ArchiveWriterBson::Write( Object* object )
 
 	bson b[1];
 	bson_init( b );
-	bson_append_start_array( b, "BSON" );
+	HELIUM_VERIFY( BSON_OK == bson_append_start_array( b, "BSON" ) );
 
 	// objects can get changed during this iteration (in Identify), so use indices
 	for ( size_t index = 0; index < m_Objects.GetSize(); ++index )
@@ -72,9 +72,9 @@ void ArchiveWriterBson::Write( Object* object )
 
 		char num[16];
 		Helium::StringPrint( num, "%d", index );
-		bson_append_start_object( b, num );
+		HELIUM_VERIFY( BSON_OK == bson_append_start_object( b, num ) );
 		SerializeInstance( b, objectClass->m_Name, object, objectClass, object );
-		bson_append_finish_object( b );
+		HELIUM_VERIFY( BSON_OK == bson_append_finish_object( b ) );
 
 		info.m_State = ArchiveStates::ObjectProcessed;
 		info.m_Progress = (int)(((float)(index) / (float)m_Objects.GetSize()) * 100.0f);
@@ -88,7 +88,7 @@ void ArchiveWriterBson::Write( Object* object )
 	info.m_Progress = 100;
 	e_Status.Raise( info );
 
-	HELIUM_VERIFY( bson_finish( b ) );
+	HELIUM_VERIFY( BSON_OK == bson_finish( b ) );
 	m_Stream->Write( bson_data( b ), bson_size( b ), 1 );
 	bson_destroy( b );
 
@@ -130,7 +130,7 @@ void ArchiveWriterBson::SerializeInstance( bson* b, const char* name, void* inst
 		}
 	}
 
-	bson_append_start_object( b, name );
+	HELIUM_VERIFY( BSON_OK == bson_append_start_object( b, name ) );
 	object->PreSerialize( NULL );
 
 	DynamicArray< const Field* >::ConstIterator itr = fields.Begin();
@@ -147,7 +147,7 @@ void ArchiveWriterBson::SerializeInstance( bson* b, const char* name, void* inst
 	}
 
 	object->PostSerialize( NULL );
-	bson_append_finish_object( b );
+	HELIUM_VERIFY( BSON_OK == bson_append_finish_object( b ) );
 }
 
 void ArchiveWriterBson::SerializeField( bson* b, void* instance, const Field* field, Object* object )
@@ -158,7 +158,7 @@ void ArchiveWriterBson::SerializeField( bson* b, void* instance, const Field* fi
 
 	if ( field->m_Count > 1 )
 	{
-		bson_append_start_array( b, field->m_Name );
+		HELIUM_VERIFY( BSON_OK == bson_append_start_array( b, field->m_Name ) );
 
 		for ( uint32_t i=0; i<field->m_Count; ++i )
 		{
@@ -167,7 +167,7 @@ void ArchiveWriterBson::SerializeField( bson* b, void* instance, const Field* fi
 			SerializeTranslator( b, num, Pointer ( field, instance, object, i ), field->m_Translator, field, object );
 		}
 
-		bson_append_finish_array( b );
+		HELIUM_VERIFY( BSON_OK == bson_append_finish_array( b ) );
 	}
 	else
 	{
@@ -188,53 +188,53 @@ void ArchiveWriterBson::SerializeTranslator( bson* b, const char* name, Pointer 
 			switch ( scalar->m_Type )
 			{
 			case ScalarTypes::Boolean:
-				bson_append_bool( b, name, pointer.As<bool>() );
+				HELIUM_VERIFY( BSON_OK == bson_append_bool( b, name, pointer.As<bool>() ) );
 				break;
 
 			case ScalarTypes::Unsigned8:
-				bson_append_int( b, name, pointer.As<uint8_t>() );
+				HELIUM_VERIFY( BSON_OK == bson_append_int( b, name, pointer.As<uint8_t>() ) );
 				break;
 
 			case ScalarTypes::Unsigned16:
-				bson_append_int( b, name, pointer.As<uint16_t>() );
+				HELIUM_VERIFY( BSON_OK == bson_append_int( b, name, pointer.As<uint16_t>() ) );
 				break;
 
 			case ScalarTypes::Unsigned32:
-				bson_append_int( b, name, pointer.As<uint32_t>() );
+				HELIUM_VERIFY( BSON_OK == bson_append_int( b, name, pointer.As<uint32_t>() ) );
 				break;
 
 			case ScalarTypes::Unsigned64:
-				bson_append_long( b, name, pointer.As<int64_t>() ); // uint64_t isn't supported, just hope for the best
+				HELIUM_VERIFY( BSON_OK == bson_append_long( b, name, pointer.As<int64_t>() ) ); // uint64_t isn't supported, just hope for the best
 				break;
 
 			case ScalarTypes::Signed8:
-				bson_append_int( b, name, pointer.As<int8_t>() );
+				HELIUM_VERIFY( BSON_OK == bson_append_int( b, name, pointer.As<int8_t>() ) );
 				break;
 
 			case ScalarTypes::Signed16:
-				bson_append_int( b, name, pointer.As<int16_t>() );
+				HELIUM_VERIFY( BSON_OK == bson_append_int( b, name, pointer.As<int16_t>() ) );
 				break;
 
 			case ScalarTypes::Signed32:
-				bson_append_int( b, name, pointer.As<int32_t>() );
+				HELIUM_VERIFY( BSON_OK == bson_append_int( b, name, pointer.As<int32_t>() ) );
 				break;
 
 			case ScalarTypes::Signed64:
-				bson_append_long( b, name, pointer.As<int64_t>() );
+				HELIUM_VERIFY( BSON_OK == bson_append_long( b, name, pointer.As<int64_t>() ) );
 				break;
 
 			case ScalarTypes::Float32:
-				bson_append_double( b, name, pointer.As<float32_t>() );
+				HELIUM_VERIFY( BSON_OK == bson_append_double( b, name, pointer.As<float32_t>() ) );
 				break;
 
 			case ScalarTypes::Float64:
-				bson_append_double( b, name, pointer.As<float64_t>() );
+				HELIUM_VERIFY( BSON_OK == bson_append_double( b, name, pointer.As<float64_t>() ) );
 				break;
 
 			case ScalarTypes::String:
 				String str;
 				scalar->Print( pointer, str, this );
-				bson_append_string( b, name, str.GetData() );
+				HELIUM_VERIFY( BSON_OK == bson_append_string( b, name, str.GetData() ) );
 				break;
 			}
 			break;
@@ -255,7 +255,7 @@ void ArchiveWriterBson::SerializeTranslator( bson* b, const char* name, Pointer 
 			DynamicArray< Pointer > items;
 			set->GetItems( pointer, items );
 
-			bson_append_start_array( b, name );
+			HELIUM_VERIFY( BSON_OK == bson_append_start_array( b, name ) );
 
 			uint32_t index = 0;
 			for ( DynamicArray< Pointer >::Iterator itr = items.Begin(), end = items.End(); itr != end; ++itr, ++index )
@@ -265,7 +265,7 @@ void ArchiveWriterBson::SerializeTranslator( bson* b, const char* name, Pointer 
 				SerializeTranslator( b, num, *itr, itemTranslator, field, object );
 			}
 
-			bson_append_finish_array( b );
+			HELIUM_VERIFY( BSON_OK == bson_append_finish_array( b ) );
 			break;
 		}
 
@@ -277,7 +277,7 @@ void ArchiveWriterBson::SerializeTranslator( bson* b, const char* name, Pointer 
 			DynamicArray< Pointer > items;
 			sequence->GetItems( pointer, items );
 
-			bson_append_start_array( b, name );
+			HELIUM_VERIFY( BSON_OK == bson_append_start_array( b, name ) );
 
 			uint32_t index = 0;
 			for ( DynamicArray< Pointer >::Iterator itr = items.Begin(), end = items.End(); itr != end; ++itr, ++index )
@@ -287,7 +287,7 @@ void ArchiveWriterBson::SerializeTranslator( bson* b, const char* name, Pointer 
 				SerializeTranslator( b, num, *itr, itemTranslator, field, object );
 			}
 
-			bson_append_finish_array( b );
+			HELIUM_VERIFY( BSON_OK == bson_append_finish_array( b ) );
 			break;
 		}
 
@@ -300,7 +300,7 @@ void ArchiveWriterBson::SerializeTranslator( bson* b, const char* name, Pointer 
 			DynamicArray< Pointer > keys, values;
 			association->GetItems( pointer, keys, values );
 
-			bson_append_start_object( b, name );
+			HELIUM_VERIFY( BSON_OK == bson_append_start_object( b, name ) );
 
 			for ( DynamicArray< Pointer >::Iterator keyItr = keys.Begin(), valueItr = values.Begin(), keyEnd = keys.End(), valueEnd = values.End();
 				keyItr != keyEnd && valueItr != valueEnd;
@@ -311,7 +311,7 @@ void ArchiveWriterBson::SerializeTranslator( bson* b, const char* name, Pointer 
 				SerializeTranslator( b, name.GetData(), *valueItr, valueTranslator, field, object );
 			}
 
-			bson_append_finish_object( b );
+			HELIUM_VERIFY( BSON_OK == bson_append_finish_object( b ) );
 			break;
 		}
 
@@ -430,7 +430,7 @@ void Helium::Persist::ArchiveReaderBson::Start()
 	m_Stream->Read( m_Buffer.GetData(),  static_cast< size_t >( m_Size ), 1 );
 	m_Buffer[ static_cast< size_t >( m_Size ) ] = '\0';
 
-	bson_init_finished_data( m_Bson, reinterpret_cast< char* >( m_Buffer.GetData() ), false );
+	HELIUM_VERIFY( BSON_OK == bson_init_finished_data( m_Bson, reinterpret_cast< char* >( m_Buffer.GetData() ), false ) );
 }
 
 bool Helium::Persist::ArchiveReaderBson::ReadNext( Reflect::ObjectPtr& object )
