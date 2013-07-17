@@ -344,7 +344,7 @@ bool Helium::Copy( const char* source, const char* dest, bool overwrite )
 		return false;
 	}
 
-	if( (output = open(dest, O_WRONLY | O_CREAT)) == -1)
+	if( (output = open(dest, O_WRONLY | O_CREAT, 0666)) == -1)
 	{
 		close(input);
 		return false;
