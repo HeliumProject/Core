@@ -847,6 +847,9 @@ void ArchiveReaderBson::DeserializeTranslator( bson_iterator* i, Pointer pointer
 			}
 			break;
 		}
+
+	default:
+		break;
 	}
 }
 
