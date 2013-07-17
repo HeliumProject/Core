@@ -14,8 +14,8 @@
 # error Unknown endianness!
 #endif
 
-#define RAPIDJSON_ASSERT HELIUM_ASSERT
-#define RAPIDJSON_STATIC_ASSERT HELIUM_COMPILE_ASSERT
+//#define RAPIDJSON_ASSERT HELIUM_ASSERT
+//#define RAPIDJSON_STATIC_ASSERT HELIUM_COMPILE_ASSERT
 
 #include "rapidjson/include/rapidjson/writer.h"
 #include "rapidjson/include/rapidjson/document.h"
