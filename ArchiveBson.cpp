@@ -295,7 +295,7 @@ void ArchiveWriterBson::SerializeTranslator( bson* b, const char* name, Pointer 
 		{
 			AssociationTranslator* association = static_cast< AssociationTranslator* >( translator );
 
-			Translator* keyTranslator = association->GetKeyTranslator();
+			ScalarTranslator* keyTranslator = association->GetKeyTranslator();
 			Translator* valueTranslator = association->GetValueTranslator();
 			DynamicArray< Pointer > keys, values;
 			association->GetItems( pointer, keys, values );
@@ -307,7 +307,7 @@ void ArchiveWriterBson::SerializeTranslator( bson* b, const char* name, Pointer 
 				++keyItr, ++valueItr )
 			{
 				String name;
-				association->GetKeyTranslator()->Print( *keyItr, name, m_Identifier );
+				keyTranslator->Print( *keyItr, name, m_Identifier );
 				SerializeTranslator( b, name.GetData(), *valueItr, valueTranslator, field, object );
 			}
 
@@ -384,11 +384,8 @@ void ArchiveReaderBson::Read( Reflect::ObjectPtr& object )
 
 		while ( bson_iterator_more( m_Next ) )
 		{
-			if ( bson_iterator_type( m_Next ) == BSON_OBJECT )
-			{
-				ObjectPtr object;
-				ReadNext( object );
-			}
+			ObjectPtr object;
+			ReadNext( object );
 
 			ArchiveStatus info( *this, ArchiveStates::ObjectProcessed );
 			info.m_Progress = (int)(((float)(m_Stream->Tell()) / (float)m_Size) * 100.0f);
