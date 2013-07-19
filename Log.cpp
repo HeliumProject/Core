@@ -466,7 +466,7 @@ void Log::PrintString(const char* string, Stream stream, Level level, ConsoleCol
 				}
 
 				// print the statement to the window
-				Helium::PrintString((Helium::ConsoleColor)color, stream == Streams::Error ? stderr : stdout, statement.m_String);
+				Helium::PrintString(color, stream == Streams::Error ? stderr : stdout, statement.m_String);
 
 				// raise the printed event
 				PrintedArgs pa(statement);
@@ -643,7 +643,7 @@ void Log::Warning(const char *fmt,...)
 	va_list args;
 	va_start(args, fmt); 
 	static char string[MAX_PRINT_SIZE];
-	int size = StringPrint(string, format, args);
+	int size = StringPrintArgs(string, format, args);
 	string[ sizeof(string)/sizeof(string[0]) - 1] = 0; 
 	HELIUM_ASSERT(size >= 0);
 
@@ -669,7 +669,7 @@ void Log::Warning(Level level, const char *fmt,...)
 	va_list args;
 	va_start(args, fmt); 
 	static char string[MAX_PRINT_SIZE];
-	int size = StringPrint(string, format, args);
+	int size = StringPrintArgs(string, format, args);
 	string[ sizeof(string)/sizeof(string[0]) - 1] = 0; 
 	HELIUM_ASSERT(size >= 0);
 
@@ -688,7 +688,7 @@ void Log::Error(const char *fmt,...)
 	va_list args;
 	va_start(args, fmt); 
 	static char string[MAX_PRINT_SIZE];
-	int size = StringPrint(string, format, args);
+	int size = StringPrintArgs(string, format, args);
 	string[ sizeof(string)/sizeof(string[0]) - 1] = 0; 
 	HELIUM_ASSERT(size >= 0);
 
@@ -714,7 +714,7 @@ void Log::Error(Level level, const char *fmt,...)
 	va_list args;
 	va_start(args, fmt); 
 	static char string[MAX_PRINT_SIZE];
-	int size = StringPrint(string, format, args);
+	int size = StringPrintArgs(string, format, args);
 	string[ sizeof(string)/sizeof(string[0]) - 1] = 0; 
 	HELIUM_ASSERT(size >= 0);
 
@@ -848,7 +848,7 @@ void Log::Bullet::CreateBullet(const char *fmt, va_list args)
 
 	// format the bullet string
 	static char string[MAX_PRINT_SIZE];
-	int size = StringPrint(string, format, args);
+	int size = StringPrintArgs(string, format, args);
 	string[ sizeof(string)/sizeof(string[0]) - 1] = 0; 
 	HELIUM_ASSERT(size >= 0);
 
