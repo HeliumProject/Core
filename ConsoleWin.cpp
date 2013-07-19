@@ -231,7 +231,7 @@ int PrintArgs(ConsoleColor color, FILE* stream, const T* fmt, va_list args)
 		int background = info.wAttributes & ~(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY);
 
 		// reset forground only to our desired color
-		SetConsoleTextAttribute(GetStdHandle(STD_ERROR_HANDLE), color | FOREGROUND_INTENSITY | background);
+		SetConsoleTextAttribute(GetStdHandle(STD_ERROR_HANDLE), LookupColor( color ) | FOREGROUND_INTENSITY | background);
 	}
 
 	int result = FilePrint(stream, fmt, args);
@@ -261,7 +261,7 @@ int PrintString(ConsoleColor color, FILE* stream, const std::basic_string< T >& 
 		int background = info.wAttributes & ~(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY);
 
 		// reset forground only to our desired color
-		SetConsoleTextAttribute(GetStdHandle(STD_ERROR_HANDLE), color | FOREGROUND_INTENSITY | background);
+		SetConsoleTextAttribute(GetStdHandle(STD_ERROR_HANDLE), LookupColor( color ) | FOREGROUND_INTENSITY | background);
 	}
 
 	int result = FilePrint(stream, TXT("%s"), str.c_str());
