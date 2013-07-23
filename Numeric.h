@@ -26,36 +26,6 @@ namespace Helium
         const static T Maximum;
     };
 
-    template<> const int8_t NumericLimits<int8_t>::Minimum;
-    template<> const int8_t NumericLimits<int8_t>::Maximum;
-
-    template<> const uint8_t NumericLimits<uint8_t>::Minimum;
-    template<> const uint8_t NumericLimits<uint8_t>::Maximum;
-
-    template<> const int16_t NumericLimits<int16_t>::Minimum;
-    template<> const int16_t NumericLimits<int16_t>::Maximum;
-
-    template<> const uint16_t NumericLimits<uint16_t>::Minimum;
-    template<> const uint16_t NumericLimits<uint16_t>::Maximum;
-
-    template<> const int32_t NumericLimits<int32_t>::Minimum;
-    template<> const int32_t NumericLimits<int32_t>::Maximum;
-
-    template<> const uint32_t NumericLimits<uint32_t>::Minimum;
-    template<> const uint32_t NumericLimits<uint32_t>::Maximum;
-
-    template<> const int64_t NumericLimits<int64_t>::Minimum;
-    template<> const int64_t NumericLimits<int64_t>::Maximum;
-
-    template<> const uint64_t NumericLimits<uint64_t>::Minimum;
-    template<> const uint64_t NumericLimits<uint64_t>::Maximum;
-
-    template<> const float32_t NumericLimits<float32_t>::Minimum;
-    template<> const float32_t NumericLimits<float32_t>::Maximum;
-
-    template<> const float64_t NumericLimits<float64_t>::Minimum;
-    template<> const float64_t NumericLimits<float64_t>::Maximum;
-
     template< class S, class D >
     inline bool RangeCastInteger( const S source, D& dest, bool clamp = false )
     {
