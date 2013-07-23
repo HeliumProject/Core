@@ -12,6 +12,7 @@
 #include "Reflect/TranslatorDeduction.h"
 #include "Reflect/Registry.h"
 
+#include "Persist/ArchiveBson.h"
 #include "Persist/ArchiveJson.h"
 #include "Persist/ArchiveMessagePack.h"
 
@@ -162,16 +163,23 @@ ArchiveWriterPtr Persist::GetWriter( const FilePath& path, ObjectIdentifier* ide
 	{
 	case ArchiveTypes::Auto:
 		{
-			if ( CaseInsensitiveCompareString( path.Extension().c_str(), ArchiveExtensions[ ArchiveTypes::Json ] ) )
+			if ( CaseInsensitiveCompareString( path.Extension().c_str(), ArchiveExtensions[ ArchiveTypes::Bson ] ) == 0 )
+			{
+				return new ArchiveWriterBson( path, identifier );
+			}
+			else if ( CaseInsensitiveCompareString( path.Extension().c_str(), ArchiveExtensions[ ArchiveTypes::Json ] ) == 0 )
 			{
 				return new ArchiveWriterJson( path, identifier );
 			}
-			else if ( CaseInsensitiveCompareString( path.Extension().c_str(), ArchiveExtensions[ ArchiveTypes::MessagePack ] ) )
+			else if ( CaseInsensitiveCompareString( path.Extension().c_str(), ArchiveExtensions[ ArchiveTypes::MessagePack ] ) == 0 )
 			{
 				return new ArchiveWriterMessagePack( path, identifier );
 			}
 			break;
 		}
+
+	case ArchiveTypes::Bson:
+		return new ArchiveWriterBson( path, identifier );
 
 	case ArchiveTypes::Json:
 		return new ArchiveWriterJson( path, identifier );
@@ -193,16 +201,23 @@ ArchiveReaderPtr Persist::GetReader( const FilePath& path, ObjectResolver* resol
 	{
 	case ArchiveTypes::Auto:
 		{
-			if ( CaseInsensitiveCompareString( path.Extension().c_str(), ArchiveExtensions[ ArchiveTypes::Json ] ) )
+			if ( CaseInsensitiveCompareString( path.Extension().c_str(), ArchiveExtensions[ ArchiveTypes::Bson ] ) == 0 )
+			{
+				return new ArchiveReaderBson( path, resolver );
+			}
+			else if ( CaseInsensitiveCompareString( path.Extension().c_str(), ArchiveExtensions[ ArchiveTypes::Json ] ) == 0 )
 			{
 				return new ArchiveReaderJson( path, resolver );
 			}
-			else if ( CaseInsensitiveCompareString( path.Extension().c_str(), ArchiveExtensions[ ArchiveTypes::MessagePack ] ) )
+			else if ( CaseInsensitiveCompareString( path.Extension().c_str(), ArchiveExtensions[ ArchiveTypes::MessagePack ] ) == 0 )
 			{
 				return new ArchiveReaderMessagePack( path, resolver );
 			}
 			break;
 		}
+
+	case ArchiveTypes::Bson:
+		return new ArchiveReaderBson( path, resolver );
 
 	case ArchiveTypes::Json:
 		return new ArchiveReaderJson( path, resolver );

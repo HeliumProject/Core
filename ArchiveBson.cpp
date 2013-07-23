@@ -400,7 +400,10 @@ void ArchiveReaderBson::Read( Reflect::ObjectPtr& object )
 
 	Resolve();
 
-	object = m_Objects.GetFirst();
+	if ( !m_Objects.IsEmpty() )
+	{
+		object = m_Objects.GetFirst();
+	}
 
 	bson_destroy( m_Bson );
 }

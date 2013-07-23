@@ -393,7 +393,10 @@ void ArchiveReaderJson::Read( Reflect::ObjectPtr& object )
 
 	Resolve();
 
-	object = m_Objects.GetFirst();
+	if ( !m_Objects.IsEmpty() )
+	{
+		object = m_Objects.GetFirst();
+	}
 }
 
 void Helium::Persist::ArchiveReaderJson::Start()
