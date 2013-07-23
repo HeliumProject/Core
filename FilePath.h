@@ -61,6 +61,7 @@ namespace Helium
 		std::string Basename() const;
 		std::string Filename() const;
 		std::string Directory() const;
+		std::string Parent() const;
 		std::vector< std::string > DirectoryAsVector() const;
 
 		std::string Extension() const;

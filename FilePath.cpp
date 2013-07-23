@@ -35,7 +35,7 @@ FilePath::FilePath( const FilePath& path )
 
 const char* FilePath::operator*() const
 {
-	static const char emptyString[] = { TXT( '\0' ) };
+	static const char emptyString[] = { '\0' };
 
 	const char* pString = m_Path.c_str();
 
@@ -241,7 +241,7 @@ void FilePath::Set( const String& path )
 
 void FilePath::Clear()
 {
-	Set( TXT( "" ) );
+	Set( "" );
 }
 
 void FilePath::TrimToExisting()
@@ -279,7 +279,7 @@ void FilePath::Split( std::string& directory, std::string& filename, std::string
 std::string FilePath::Basename() const
 {
 	std::string basename = Filename();
-	size_t pos = basename.rfind( TXT( '.' ) );
+	size_t pos = basename.rfind( '.' );
 
 	if ( pos != std::string::npos )
 	{
@@ -308,7 +308,42 @@ std::string FilePath::Directory() const
 		return m_Path.substr( 0, pos + 1 );
 	}
 
-	return TXT( "" );
+	return "";
+}
+
+std::string FilePath::Parent() const
+{
+	std::string path = m_Path;
+	if ( !path.empty() )
+	{
+		if ( *path.rbegin() == s_InternalPathSeparator )
+		{
+			path.resize( path.size() - 1 );
+		}
+	}
+
+	if ( !path.empty() )
+	{
+		// strip the final slash and subsequent chars
+		size_t pos = path.rfind( s_InternalPathSeparator );
+		if ( pos != std::string::npos )
+		{
+			return path.substr( 0, pos + 1 );
+		}
+
+#if HELIUM_OS_WIN
+		if ( path.length() == 2 )
+		{
+			if ( path[1] == ':' )
+			{
+				// root dir path
+				return "";
+			}
+		}
+#endif
+	}
+
+	return "";
 }
 
 std::vector< std::string > FilePath::DirectoryAsVector() const
@@ -332,31 +367,31 @@ std::vector< std::string > FilePath::DirectoryAsVector() const
 std::string FilePath::Extension() const
 {
 	std::string filename = Filename();
-	size_t pos = filename.rfind( TXT( '.' ) );
+	size_t pos = filename.rfind( '.' );
 	if ( pos != std::string::npos )
 	{
 		return filename.substr( pos + 1 );
 	}
 
-	return TXT( "" );
+	return "";
 }
 
 std::string FilePath::FullExtension() const
 {
 	std::string filename = Filename();
-	size_t pos = filename.find_first_of( TXT( '.' ) );
+	size_t pos = filename.find_first_of( '.' );
 	if ( pos != std::string::npos )
 	{
 		return filename.substr( pos + 1 );
 	}
 
-	return TXT( "" );
+	return "";
 }
 
 void FilePath::RemoveExtension()
 {
 	size_t slash = m_Path.find_last_of( s_InternalPathSeparator );
-	size_t pos = m_Path.find_last_of( TXT( '.' ), slash == std::string::npos ? 0 : slash );
+	size_t pos = m_Path.find_last_of( '.', slash == std::string::npos ? 0 : slash );
 	if ( pos != std::string::npos )
 	{
 		m_Path.erase( pos );
@@ -366,7 +401,7 @@ void FilePath::RemoveExtension()
 void FilePath::RemoveFullExtension()
 {
 	size_t slash = m_Path.find_last_of( s_InternalPathSeparator );
-	size_t pos = m_Path.find_first_of( TXT( '.' ), slash == std::string::npos ? 0 : slash );
+	size_t pos = m_Path.find_first_of( '.', slash == std::string::npos ? 0 : slash );
 	if ( pos != std::string::npos )
 	{
 		m_Path.erase( pos );
@@ -376,28 +411,28 @@ void FilePath::RemoveFullExtension()
 void FilePath::ReplaceExtension( const std::string& newExtension )
 {
 	size_t slash = m_Path.find_last_of( s_InternalPathSeparator );
-	size_t offset = m_Path.rfind( TXT( '.' ) );
+	size_t offset = m_Path.rfind( '.' );
 	if ( offset != std::string::npos && ( offset > ( slash != std::string::npos ? slash : 0 ) ) )
 	{
 		m_Path.replace( offset + 1, newExtension.length(), newExtension );
 	}
 	else
 	{
-		m_Path += TXT( '.' ) + newExtension;
+		m_Path += '.' + newExtension;
 	}
 }
 
 void FilePath::ReplaceFullExtension( const std::string& newExtension )
 {
 	size_t slash = m_Path.find_last_of( s_InternalPathSeparator );
-	size_t offset = m_Path.find_first_of( TXT( '.' ), slash == std::string::npos ? 0 : slash );
+	size_t offset = m_Path.find_first_of( '.', slash == std::string::npos ? 0 : slash );
 	if ( offset != std::string::npos )
 	{
 		m_Path.replace( offset + 1, newExtension.length(), newExtension );
 	}
 	else
 	{
-		m_Path += TXT( '.' ) + newExtension;
+		m_Path += '.' + newExtension;
 	}
 }
 
@@ -469,7 +504,7 @@ Helium::FilePath FilePath::GetRelativePath( const Helium::FilePath& basisPath ) 
 	std::string newPathtstring;
 	for ( size_t j = 0; j < ( baseDirectories.size() - i ); ++j )
 	{
-		newPathtstring += std::string( TXT( ".." ) ) + s_InternalPathSeparator;
+		newPathtstring += std::string( ".." ) + s_InternalPathSeparator;
 	}
 
 	for ( size_t j = i; j < targetDirectories.size(); ++j )
