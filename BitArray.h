@@ -2,6 +2,7 @@
 
 #include "Platform/Assert.h"
 #include "Platform/Types.h"
+#include "Platform/MemoryHeap.h"
 
 #include "Foundation/API.h"
 #include "Foundation/Math.h"
