@@ -115,7 +115,7 @@ ArchiveMode ArchiveReader::GetMode() const
 	return ArchiveModes::Read;
 }
 
-bool ArchiveReader::Resolve( const Name& identity, ObjectPtr& pointer, const Class* pointerClass )
+bool ArchiveReader::Resolve( const Name& identity, ObjectPtr& pointer, const MetaClass* pointerClass )
 {
 	if ( !m_Resolver || !m_Resolver->Resolve( identity, pointer, pointerClass ) )
 	{
@@ -139,9 +139,9 @@ bool ArchiveReader::Resolve( const Name& identity, ObjectPtr& pointer, const Cla
 
 		if ( found )
 		{
-			if ( !found->IsClass( pointerClass ) )
+			if ( !found->IsA( pointerClass ) )
 			{
-				Log::Warning( TXT( "Object of type '%s' is not valid for pointer type '%s'" ), pointer->GetClass()->m_Name, pointerClass->m_Name );
+				Log::Warning( TXT( "Object of type '%s' is not valid for pointer type '%s'" ), pointer->GetMetaClass()->m_Name, pointerClass->m_Name );
 			}
 			else
 			{

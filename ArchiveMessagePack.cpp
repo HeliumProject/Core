@@ -5,7 +5,7 @@
 #include "Foundation/FileStream.h"
 
 #include "Reflect/Object.h"
-#include "Reflect/Structure.h"
+#include "Reflect/MetaStruct.h"
 #include "Reflect/Registry.h"
 #include "Reflect/TranslatorDeduction.h"
 
@@ -68,7 +68,7 @@ void ArchiveWriterMessagePack::Write( Reflect::Object* object )
 	for ( size_t index = 0; index < m_Objects.GetSize(); ++index )
 	{
 		Object* object = m_Objects.GetElement( index );
-		const Class* objectClass = object->GetClass();
+		const MetaClass* objectClass = object->GetMetaClass();
 
 		m_Writer.BeginMap( 1 );
 
@@ -107,15 +107,15 @@ void ArchiveWriterMessagePack::Write( Reflect::Object* object )
 	e_Status.Raise( info );
 }
 
-void ArchiveWriterMessagePack::SerializeInstance( void* instance, const Structure* structure, Object* object )
+void ArchiveWriterMessagePack::SerializeInstance( void* instance, const MetaStruct* structure, Object* object )
 {
 #if PERSIST_ARCHIVE_VERBOSE
 	Log::Print( TXT( "Serializing %s\n" ), structure->m_Name );
 #endif
 
 #pragma TODO("Declare a max depth for inheritance to save heap allocs -geoff")
-	DynamicArray< const Structure* > bases;
-	for ( const Structure* current = structure; current != NULL; current = current->m_Base )
+	DynamicArray< const MetaStruct* > bases;
+	for ( const MetaStruct* current = structure; current != NULL; current = current->m_Base )
 	{
 		bases.Push( current );
 	}
@@ -124,7 +124,7 @@ void ArchiveWriterMessagePack::SerializeInstance( void* instance, const Structur
 	DynamicArray< const Field* > fields;
 	while ( !bases.IsEmpty() )
 	{
-		const Structure* current = bases.Pop();
+		const MetaStruct* current = bases.Pop();
 		DynamicArray< Field >::ConstIterator itr = current->m_Fields.Begin();
 		DynamicArray< Field >::ConstIterator end = current->m_Fields.End();
 		for ( ; itr != end; ++itr )
@@ -193,10 +193,10 @@ void ArchiveWriterMessagePack::SerializeTranslator( Pointer pointer, Translator*
 {
 	switch ( translator->GetReflectionType() )
 	{
-	case ReflectionTypes::ScalarTranslator:
-	case ReflectionTypes::EnumerationTranslator:
-	case ReflectionTypes::PointerTranslator:
-	case ReflectionTypes::TypeTranslator:
+	case MetaIds::ScalarTranslator:
+	case MetaIds::EnumerationTranslator:
+	case MetaIds::PointerTranslator:
+	case MetaIds::TypeTranslator:
 		{
 			ScalarTranslator* scalar = static_cast< ScalarTranslator* >( translator );
 			switch ( scalar->m_Type )
@@ -254,14 +254,14 @@ void ArchiveWriterMessagePack::SerializeTranslator( Pointer pointer, Translator*
 			break;
 		}
 
-	case ReflectionTypes::StructureTranslator:
+	case MetaIds::StructureTranslator:
 		{
 			StructureTranslator* structure = static_cast< StructureTranslator* >( translator );
 			SerializeInstance( pointer.m_Address, structure->GetStructure(), object );
 			break;
 		}
 
-	case ReflectionTypes::SetTranslator:
+	case MetaIds::SetTranslator:
 		{
 			SetTranslator* set = static_cast< SetTranslator* >( translator );
 
@@ -282,7 +282,7 @@ void ArchiveWriterMessagePack::SerializeTranslator( Pointer pointer, Translator*
 			break;
 		}
 
-	case ReflectionTypes::SequenceTranslator:
+	case MetaIds::SequenceTranslator:
 		{
 			SequenceTranslator* sequence = static_cast< SequenceTranslator* >( translator );
 
@@ -303,7 +303,7 @@ void ArchiveWriterMessagePack::SerializeTranslator( Pointer pointer, Translator*
 			break;
 		}
 
-	case ReflectionTypes::AssociationTranslator:
+	case MetaIds::AssociationTranslator:
 		{
 			AssociationTranslator* association = static_cast< AssociationTranslator* >( translator );
 
@@ -467,10 +467,10 @@ bool ArchiveReaderMessagePack::ReadNext( ObjectPtr& object )
 				objectClassCrc = Helium::Crc32( typeStr.GetData() );
 			}
 
-			const Class* objectClass = NULL;
+			const MetaClass* objectClass = NULL;
 			if ( objectClassCrc != 0 )
 			{
-				objectClass = Registry::GetInstance()->GetClass( objectClassCrc );
+				objectClass = Registry::GetInstance()->GetMetaClass( objectClassCrc );
 			}
 
 			if ( !object && objectClass )
@@ -480,7 +480,7 @@ bool ArchiveReaderMessagePack::ReadNext( ObjectPtr& object )
 
 			if ( object.ReferencesObject() )
 			{
-				DeserializeInstance( object, object->GetClass(), object );
+				DeserializeInstance( object, object->GetMetaClass(), object );
 				m_Objects.Push( object );
 				success = true;
 			}
@@ -520,7 +520,7 @@ void ArchiveReaderMessagePack::Resolve()
 	e_Status.Raise( info );
 }
 
-void ArchiveReaderMessagePack::DeserializeInstance( void* instance, const Structure* structure, Object* object )
+void ArchiveReaderMessagePack::DeserializeInstance( void* instance, const MetaStruct* structure, Object* object )
 {
 #if PERSIST_ARCHIVE_VERBOSE
 	Log::Print(TXT("Deserializing %s\n"), structure->m_Name);
@@ -612,7 +612,7 @@ void ArchiveReaderMessagePack::DeserializeTranslator( Pointer pointer, Translato
 {
 	if ( m_Reader.IsBoolean() )
 	{
-		if ( translator->GetReflectionType() == ReflectionTypes::ScalarTranslator )
+		if ( translator->GetReflectionType() == MetaIds::ScalarTranslator )
 		{
 			ScalarTranslator* scalar = static_cast< ScalarTranslator* >( translator );
 			if ( scalar->m_Type == ScalarTypes::Boolean )
@@ -631,7 +631,7 @@ void ArchiveReaderMessagePack::DeserializeTranslator( Pointer pointer, Translato
 	}
 	else if ( m_Reader.IsNumber() )
 	{
-		if ( translator->GetReflectionType() == ReflectionTypes::ScalarTranslator )
+		if ( translator->GetReflectionType() == MetaIds::ScalarTranslator )
 		{
 			ScalarTranslator* scalar = static_cast< ScalarTranslator* >( translator );
 			bool clamp = true;
@@ -689,7 +689,7 @@ void ArchiveReaderMessagePack::DeserializeTranslator( Pointer pointer, Translato
 	}
 	else if ( m_Reader.IsRaw() )
 	{
-		if ( translator->HasReflectionType( ReflectionTypes::ScalarTranslator ) )
+		if ( translator->HasReflectionType( MetaIds::ScalarTranslator ) )
 		{
 			ScalarTranslator* scalar = static_cast< ScalarTranslator* >( translator );
 			if ( scalar->m_Type == ScalarTypes::String )
@@ -706,7 +706,7 @@ void ArchiveReaderMessagePack::DeserializeTranslator( Pointer pointer, Translato
 	}
 	else if ( m_Reader.IsArray() )
 	{
-		if ( translator->GetReflectionType() == ReflectionTypes::SetTranslator )
+		if ( translator->GetReflectionType() == MetaIds::SetTranslator )
 		{
 			SetTranslator* set = static_cast< SetTranslator* >( translator );
 			Translator* itemTranslator = set->GetItemTranslator();
@@ -720,7 +720,7 @@ void ArchiveReaderMessagePack::DeserializeTranslator( Pointer pointer, Translato
 			}
 			m_Reader.EndArray();
 		}
-		else if ( translator->GetReflectionType() == ReflectionTypes::SequenceTranslator )
+		else if ( translator->GetReflectionType() == MetaIds::SequenceTranslator )
 		{
 			SequenceTranslator* sequence = static_cast< SequenceTranslator* >( translator );
 			Translator* itemTranslator = sequence->GetItemTranslator();
@@ -741,12 +741,12 @@ void ArchiveReaderMessagePack::DeserializeTranslator( Pointer pointer, Translato
 	}
 	else if ( m_Reader.IsMap() )
 	{
-		if ( translator->GetReflectionType() == ReflectionTypes::StructureTranslator )
+		if ( translator->GetReflectionType() == MetaIds::StructureTranslator )
 		{
 			StructureTranslator* structure = static_cast< StructureTranslator* >( translator );
 			DeserializeInstance( pointer.m_Address,  structure->GetStructure(), object );
 		}
-		else if ( translator->GetReflectionType() == ReflectionTypes::AssociationTranslator )
+		else if ( translator->GetReflectionType() == MetaIds::AssociationTranslator )
 		{
 			AssociationTranslator* assocation = static_cast< AssociationTranslator* >( translator );
 			Translator* keyTranslator = assocation->GetKeyTranslator();
