@@ -98,7 +98,7 @@ void ReflectSetInterpreter::InterpretField( const Reflect::Field* field, const s
 void ReflectSetInterpreter::OnAdd( const ButtonClickedArgs& args )
 {
     Reflect::ObjectPtr clientData = args.m_Control->GetClientData();
-    if ( clientData.ReferencesObject() && clientData->IsClass( Reflect::GetClass<ClientData>() ) )
+    if ( clientData.ReferencesObject() && clientData->IsA( Reflect::GetMetaClass<ClientData>() ) )
     {
         ClientData* data = static_cast< ClientData* >( clientData.Ptr() );
         List* list = static_cast< List* >( data->GetControl() );
@@ -114,7 +114,7 @@ void ReflectSetInterpreter::OnAdd( const ButtonClickedArgs& args )
 void ReflectSetInterpreter::OnRemove( const ButtonClickedArgs& args )
 {
     Reflect::ObjectPtr clientData = args.m_Control->GetClientData();
-    if ( clientData.ReferencesObject() && clientData->IsClass( Reflect::GetClass<ClientData>() ) )
+    if ( clientData.ReferencesObject() && clientData->IsA( Reflect::GetMetaClass<ClientData>() ) )
     {
         ClientData* data = static_cast< ClientData* >( clientData.Ptr() );
         List* list = static_cast< List* >( data->GetControl() );

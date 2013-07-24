@@ -127,7 +127,7 @@ void ReflectColorInterpreter::InterpretField( const Field* field, const std::vec
                 value->Bind( data );
             }
 
-            if ( field->m_DataClass == Reflect::GetClass<HDRColor3Data>() || field->m_DataClass == Reflect::GetClass<HDRColor4Data>() )
+            if ( field->m_DataClass == Reflect::GetMetaClass<HDRColor3Data>() || field->m_DataClass == Reflect::GetMetaClass<HDRColor4Data>() )
             {
                 SliderPtr slider = CreateControl<Slider>();
                 container->AddChild( slider );

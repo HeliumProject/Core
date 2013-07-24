@@ -4,7 +4,7 @@
 #include "Math/Color4.h"
 #include "Math/HDRColor3.h"
 #include "Math/HDRColor4.h"
-#include "Reflect/Class.h"
+#include "Reflect/MetaClass.h"
 
 #include "Inspect/API.h"
 #include "Inspect/Control.h"
@@ -16,7 +16,7 @@ namespace Helium
         class HELIUM_INSPECT_API ColorPicker : public Control
         {
         public:
-            REFLECT_DECLARE_OBJECT( ColorPicker, Control );
+            REFLECT_DECLARE_CLASS( ColorPicker, Control );
 
             ColorPicker();
 

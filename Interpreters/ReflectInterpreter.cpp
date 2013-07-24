@@ -28,7 +28,7 @@ void ReflectInterpreter::Interpret(const std::vector<Reflect::Object*>& instance
 void ReflectInterpreter::InterpretType(const std::vector<Reflect::Object*>& instances, Container* parent, int32_t includeFlags, int32_t excludeFlags, bool expandPanel)
 {
 #if REFLECT_REFACTOR
-    const Composite* composite = instances[0]->GetClass();
+    const Composite* composite = instances[0]->GetMetaClass();
 
     // create a container
     ContainerPtr container = CreateControl<Container>();
@@ -181,7 +181,7 @@ void ReflectInterpreter::InterpretType(const std::vector<Reflect::Object*>& inst
                 // Pointer support
                 //
 
-                if (field->m_DataClass == Reflect::GetClass<Reflect::PointerData>())
+                if (field->m_DataClass == Reflect::GetMetaClass<Reflect::PointerData>())
                 {
                     if (hidden)
                     {
@@ -219,9 +219,9 @@ void ReflectInterpreter::InterpretType(const std::vector<Reflect::Object*>& inst
 
                 ReflectFieldInterpreterPtr fieldInterpreter;
 
-                for ( const Reflect::Class* type = field->m_DataClass;
-                    type != Reflect::GetClass<Reflect::Object>() && !fieldInterpreter;
-                    type = Reflect::ReflectionCast< const Class >( type->m_Base ) )
+                for ( const Reflect::MetaClass* type = field->m_DataClass;
+                    type != Reflect::GetMetaClass<Reflect::Object>() && !fieldInterpreter;
+                    type = Reflect::ReflectionCast< const MetaClass >( type->m_Base ) )
                 {
                     fieldInterpreter = ReflectFieldInterpreterFactory::Create( type, field->m_Flags, m_Container );
                 }
@@ -240,7 +240,7 @@ void ReflectInterpreter::InterpretType(const std::vector<Reflect::Object*>& inst
                 //
 
 #pragma TODO("Move this out to an interpreter")
-                if (field->m_DataClass == Reflect::GetClass<ObjectStlVectorData>())
+                if (field->m_DataClass == Reflect::GetMetaClass<ObjectStlVectorData>())
                 {
                     if (hidden)
                     {
@@ -288,8 +288,8 @@ void ReflectInterpreter::InterpretType(const std::vector<Reflect::Object*>& inst
                 // Lastly fall back to the value interpreter
                 //
 
-                const Reflect::Class* type = field->m_DataClass;
-                if ( !type->IsType( Reflect::GetClass<Reflect::ContainerData>() ) )
+                const Reflect::MetaClass* type = field->m_DataClass;
+                if ( !type->IsType( Reflect::GetMetaClass<Reflect::ContainerData>() ) )
                 {
                     fieldInterpreter = CreateInterpreter< ReflectValueInterpreter >( m_Container );
                     fieldInterpreter->InterpretField( field, instances, container );
@@ -311,12 +311,12 @@ void ReflectInterpreter::InterpretType(const std::vector<Reflect::Object*>& inst
 }
 
 
-void ReflectFieldInterpreterFactory::Register(const Reflect::Class* type, uint32_t mask, Creator creator)
+void ReflectFieldInterpreterFactory::Register(const Reflect::MetaClass* type, uint32_t mask, Creator creator)
 {
     m_Map[ type ].push_back( std::make_pair(mask, creator) );
 }
 
-void ReflectFieldInterpreterFactory::Unregister(const Reflect::Class* type, uint32_t mask, Creator creator)
+void ReflectFieldInterpreterFactory::Unregister(const Reflect::MetaClass* type, uint32_t mask, Creator creator)
 {
     M_Creator::iterator found = m_Map.find( type );
     if ( found != m_Map.end() )
@@ -325,7 +325,7 @@ void ReflectFieldInterpreterFactory::Unregister(const Reflect::Class* type, uint
     }
 }
 
-ReflectFieldInterpreterPtr ReflectFieldInterpreterFactory::Create(const Reflect::Class* type, uint32_t flags, Container* container)
+ReflectFieldInterpreterPtr ReflectFieldInterpreterFactory::Create(const Reflect::MetaClass* type, uint32_t flags, Container* container)
 {
     Creator creator = NULL;
 

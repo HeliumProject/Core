@@ -2,7 +2,7 @@
 #include "Inspect/Controls/CheckBoxControl.h"
 #include "Inspect/Container.h"
 
-REFLECT_DEFINE_OBJECT( Helium::Inspect::CheckBox );
+REFLECT_DEFINE_CLASS( Helium::Inspect::CheckBox );
 
 using namespace Helium;
 using namespace Helium::Inspect;

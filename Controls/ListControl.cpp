@@ -4,7 +4,7 @@
 
 #include "Foundation/Tokenize.h"
 
-REFLECT_DEFINE_OBJECT( Helium::Inspect::List );
+REFLECT_DEFINE_CLASS( Helium::Inspect::List );
 
 using namespace Helium;
 using namespace Helium::Inspect;

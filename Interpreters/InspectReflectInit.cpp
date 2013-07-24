@@ -28,21 +28,21 @@ void InspectReflect::Initialize()
 
 #if REFLECT_REFACTOR
         // scalars
-        ReflectFieldInterpreterFactory::Register<ReflectBitfieldInterpreter>( Reflect::GetClass<Reflect::BitfieldData>() );
-        ReflectFieldInterpreterFactory::Register<ReflectVectorInterpreter>( Reflect::GetClass<Reflect::Vector2Data>() );
-        ReflectFieldInterpreterFactory::Register<ReflectVectorInterpreter>( Reflect::GetClass<Reflect::Vector3Data>() );
-        ReflectFieldInterpreterFactory::Register<ReflectVectorInterpreter>( Reflect::GetClass<Reflect::Vector4Data>() );
-        ReflectFieldInterpreterFactory::Register<ReflectColorInterpreter>( Reflect::GetClass<Reflect::Color3Data>() );
-        ReflectFieldInterpreterFactory::Register<ReflectColorInterpreter>( Reflect::GetClass<Reflect::HDRColor3Data>() );
-        ReflectFieldInterpreterFactory::Register<ReflectColorInterpreter>( Reflect::GetClass<Reflect::Color4Data>() );
-        ReflectFieldInterpreterFactory::Register<ReflectColorInterpreter>( Reflect::GetClass<Reflect::HDRColor4Data>() );
+        ReflectFieldInterpreterFactory::Register<ReflectBitfieldInterpreter>( Reflect::GetMetaClass<Reflect::BitfieldData>() );
+        ReflectFieldInterpreterFactory::Register<ReflectVectorInterpreter>( Reflect::GetMetaClass<Reflect::Vector2Data>() );
+        ReflectFieldInterpreterFactory::Register<ReflectVectorInterpreter>( Reflect::GetMetaClass<Reflect::Vector3Data>() );
+        ReflectFieldInterpreterFactory::Register<ReflectVectorInterpreter>( Reflect::GetMetaClass<Reflect::Vector4Data>() );
+        ReflectFieldInterpreterFactory::Register<ReflectColorInterpreter>( Reflect::GetMetaClass<Reflect::Color3Data>() );
+        ReflectFieldInterpreterFactory::Register<ReflectColorInterpreter>( Reflect::GetMetaClass<Reflect::HDRColor3Data>() );
+        ReflectFieldInterpreterFactory::Register<ReflectColorInterpreter>( Reflect::GetMetaClass<Reflect::Color4Data>() );
+        ReflectFieldInterpreterFactory::Register<ReflectColorInterpreter>( Reflect::GetMetaClass<Reflect::HDRColor4Data>() );
 
         // containers
-        ReflectFieldInterpreterFactory::Register<ReflectSequenceInterpreter>( Reflect::GetClass<Reflect::StlVectorData>() );
-        ReflectFieldInterpreterFactory::Register<ReflectSetInterpreter>( Reflect::GetClass<Reflect::StlSetData>() );
+        ReflectFieldInterpreterFactory::Register<ReflectSequenceInterpreter>( Reflect::GetMetaClass<Reflect::StlVectorData>() );
+        ReflectFieldInterpreterFactory::Register<ReflectSetInterpreter>( Reflect::GetMetaClass<Reflect::StlSetData>() );
 
         // paths
-        ReflectFieldInterpreterFactory::Register<PathInterpreter>( Reflect::GetClass<Reflect::PathData>() );
+        ReflectFieldInterpreterFactory::Register<PathInterpreter>( Reflect::GetMetaClass<Reflect::PathData>() );
 #endif
     }
 }

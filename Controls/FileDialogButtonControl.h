@@ -48,7 +48,7 @@ namespace Helium
         class HELIUM_INSPECT_API FileDialogButton : public Inspect::Button
         {
         public:
-            REFLECT_DECLARE_OBJECT( FileDialogButton, Inspect::Button );
+            REFLECT_DECLARE_CLASS( FileDialogButton, Inspect::Button );
 
             FileDialogButton( const FileDialogType& type = FileDialogTypes::OpenFile, const std::string& caption = TXT( "Open" ), const std::string& filter = TXT( "All files (*.*)|*.*" ) )
             {

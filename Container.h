@@ -29,7 +29,7 @@ namespace Helium
         class HELIUM_INSPECT_API Container : public Control
         {
         public:
-            REFLECT_DECLARE_OBJECT( Container, Control );
+            REFLECT_DECLARE_CLASS( Container, Control );
 
             Container();
             ~Container();

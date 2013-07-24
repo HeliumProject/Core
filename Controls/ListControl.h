@@ -30,7 +30,7 @@ namespace Helium
         class HELIUM_INSPECT_API List : public Control
         {
         public:
-            REFLECT_DECLARE_OBJECT( List, Control );
+            REFLECT_DECLARE_CLASS( List, Control );
 
             List();
 

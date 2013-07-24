@@ -1,7 +1,7 @@
 #include "InspectPch.h"
 #include "ReflectValueInterpreter.h"
 
-#include "Reflect/Enumeration.h"
+#include "Reflect/MetaEnum.h"
 
 #include "Inspect/Inspect.h"
 #include "Inspect/DataBinding.h"
@@ -46,17 +46,17 @@ void ReflectValueInterpreter::InterpretField(const Field* field, const std::vect
 
 	if (!result)
 	{
-		if ( field->m_ValueType->HasReflectionType( ReflectionTypes::Enumeration ) )
+		if ( field->m_ValueType->HasReflectionType( MetaIds::MetaEnum ) )
 		{
-			const Reflect::Enumeration* enumeration = Reflect::ReflectionCast< Enumeration >( field->m_ValueType );
+			const Reflect::MetaEnum* enumeration = Reflect::ReflectionCast< MetaEnum >( field->m_ValueType );
 
 			ChoicePtr choice = CreateControl<Choice>();
 
 			std::vector< ChoiceItem > items;
 			items.resize( enumeration->m_Elements.GetSize() );
 
-			DynamicArray< EnumerationElement >::ConstIterator itr = enumeration->m_Elements.Begin();
-			DynamicArray< EnumerationElement >::ConstIterator end = enumeration->m_Elements.End();
+			DynamicArray< MetaEnum::Element >::ConstIterator itr = enumeration->m_Elements.Begin();
+			DynamicArray< MetaEnum::Element >::ConstIterator end = enumeration->m_Elements.End();
 			for ( size_t index=0; itr != end; ++itr, ++index )
 			{
 				ChoiceItem& item = items[index];

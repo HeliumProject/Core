@@ -13,7 +13,7 @@ namespace Helium
         class HELIUM_INSPECT_API Slider : public Control
         {
         public:
-            REFLECT_DECLARE_OBJECT( Slider, Control );
+            REFLECT_DECLARE_CLASS( Slider, Control );
 
             Slider();
 

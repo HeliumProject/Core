@@ -39,7 +39,7 @@ void PathInterpreter::InterpretField(const Field* field, const std::vector<Refle
     ContainerPtr container = CreateControl<Container>();
     groups.push_back( container );
 
-    bool pathField = field->m_DataClass == Reflect::GetClass< PathData >();
+    bool pathField = field->m_DataClass == Reflect::GetMetaClass< PathData >();
     bool readOnly = ( field->m_Flags & FieldFlags::ReadOnly ) == FieldFlags::ReadOnly;
 
     DataChangingSignature::Delegate changingDelegate;
@@ -55,7 +55,7 @@ void PathInterpreter::InterpretField(const Field* field, const std::vector<Refle
 
     if (!result)
     {
-        if ( pathField || field->m_DataClass == Reflect::GetClass<StlStringData>() )
+        if ( pathField || field->m_DataClass == Reflect::GetMetaClass<StlStringData>() )
         {
             ContainerPtr valueContainer = CreateControl<Container>();
             ValuePtr value = CreateControl< Value >();
@@ -154,7 +154,7 @@ void PathInterpreter::InterpretField(const Field* field, const std::vector<Refle
         {
             Data s = field->CreateData();
 
-            if (s->IsClass(Reflect::GetClass<ContainerData>()))
+            if (s->IsA(Reflect::GetMetaClass<ContainerData>()))
             {
                 return;
             }

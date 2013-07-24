@@ -31,7 +31,7 @@ using namespace Helium::Inspect;
 // Control Registry
 //
 
-typedef std::map<std::string, const Reflect::Class*> M_ControlType;
+typedef std::map<std::string, const Reflect::MetaClass*> M_ControlType;
 
 M_ControlType g_ControlTypeMap;
 
@@ -50,19 +50,19 @@ void Script::Initialize()
   struct ControlEntry
   {
     const char*          name;
-    const Reflect::Class*   type;
+    const Reflect::MetaClass*   type;
   };
 
   const ControlEntry controls[] =
   {
-    { TXT( "label" ),       Reflect::GetClass<Label>()},
-    { TXT( "value" ),       Reflect::GetClass<Value>()},
-    { TXT( "slider" ),      Reflect::GetClass<Slider>()},
-    { TXT( "check" ),       Reflect::GetClass<CheckBox>()},
-    { TXT( "color" ),       Reflect::GetClass<ColorPicker>()},
-    { TXT( "choice" ),      Reflect::GetClass<Choice>()},
-    { TXT( "combo" ),       Reflect::GetClass<Choice>()},
-    { TXT( "list" ),        Reflect::GetClass<List>()},
+    { TXT( "label" ),       Reflect::GetMetaClass<Label>()},
+    { TXT( "value" ),       Reflect::GetMetaClass<Value>()},
+    { TXT( "slider" ),      Reflect::GetMetaClass<Slider>()},
+    { TXT( "check" ),       Reflect::GetMetaClass<CheckBox>()},
+    { TXT( "color" ),       Reflect::GetMetaClass<ColorPicker>()},
+    { TXT( "choice" ),      Reflect::GetMetaClass<Choice>()},
+    { TXT( "combo" ),       Reflect::GetMetaClass<Choice>()},
+    { TXT( "list" ),        Reflect::GetMetaClass<List>()},
   };
 
   int size = sizeof(controls)/sizeof(controls[0]);

@@ -169,13 +169,13 @@ namespace Helium
             }
 
             template <class T>
-            Choice* AddChoice( const Reflect::Enumeration* enumInfo, const Helium::SmartPtr< Helium::Property<T> >& property )
+            Choice* AddChoice( const Reflect::MetaEnum* enumInfo, const Helium::SmartPtr< Helium::Property<T> >& property )
             {
                 Choice* control = AddChoice<T>( property );
 
                 std::vector< ChoiceItem > items;
-                DynamicArray< Reflect::EnumerationElement >::ConstIterator itr = enumInfo->m_Elements.Begin();
-                DynamicArray< Reflect::EnumerationElement >::ConstIterator end = enumInfo->m_Elements.End();
+                DynamicArray< Reflect::MetaEnum::Element >::ConstIterator itr = enumInfo->m_Elements.Begin();
+                DynamicArray< Reflect::MetaEnum::Element >::ConstIterator end = enumInfo->m_Elements.End();
                 for ( ; itr != end; ++itr )
                 {
                     std::ostringstream str;

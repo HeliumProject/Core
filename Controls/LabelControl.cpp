@@ -3,7 +3,7 @@
 #include "Inspect/Container.h"
 #include "Inspect/DataBinding.h"
 
-REFLECT_DEFINE_OBJECT( Helium::Inspect::Label );
+REFLECT_DEFINE_CLASS( Helium::Inspect::Label );
 
 using namespace Helium;
 using namespace Helium::Inspect;

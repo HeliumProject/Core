@@ -10,7 +10,7 @@ namespace Helium
         class HELIUM_INSPECT_API CheckBox : public Control
         {
         public:
-            REFLECT_DECLARE_OBJECT( CheckBox, Control );
+            REFLECT_DECLARE_CLASS( CheckBox, Control );
 
             CheckBox();
 

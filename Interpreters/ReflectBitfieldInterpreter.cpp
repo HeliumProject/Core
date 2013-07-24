@@ -1,7 +1,7 @@
 #include "InspectPch.h"
 #include "ReflectBitfieldInterpreter.h"
 
-#include "Reflect/Enumeration.h"
+#include "Reflect/MetaEnum.h"
 
 #include "Inspect/Controls/LabelControl.h"
 #include "Inspect/Container.h"
@@ -14,7 +14,7 @@ using namespace Helium::Inspect;
 class MultiBitfieldStringFormatter : public MultiStringFormatter<Data>
 {
 public:
-	MultiBitfieldStringFormatter( const Reflect::EnumerationElement* element, const std::vector<Data*>& data )
+	MultiBitfieldStringFormatter( const Reflect::MetaEnum::Element* element, const std::vector<Data*>& data )
 		: MultiStringFormatter<Data>( data, false )
 		, m_EnumerationElement( element )
 	{
@@ -83,7 +83,7 @@ public:
 	}
 
 private:
-	const Reflect::EnumerationElement* m_EnumerationElement;
+	const Reflect::MetaEnum::Element* m_EnumerationElement;
 };
 
 ReflectBitfieldInterpreter::ReflectBitfieldInterpreter (Container* container)
@@ -94,7 +94,7 @@ ReflectBitfieldInterpreter::ReflectBitfieldInterpreter (Container* container)
 
 void ReflectBitfieldInterpreter::InterpretField(const Field* field, const std::vector<Reflect::Object*>& instances, Container* parent)
 {
-	bool isEnumeration = field->m_Translator->HasReflectionType( Reflect::ReflectionTypes::EnumerationTranslator );
+	bool isEnumeration = field->m_Translator->HasReflectionType( Reflect::MetaIds::EnumerationTranslator );
 
 	// If you hit this, you are misusing this interpreter
 	HELIUM_ASSERT( isEnumeration );
@@ -140,12 +140,12 @@ void ReflectBitfieldInterpreter::InterpretField(const Field* field, const std::v
 		scalar->Print( defaultPtr, defaultStr );
 	}
 
-	const Reflect::Enumeration* enumeration = Reflect::ReflectionCast< Enumeration >( field->m_ValueType );
+	const Reflect::MetaEnum* enumeration = Reflect::ReflectionCast< MetaEnum >( field->m_ValueType );
 
 	// build the child gui elements
 	bool readOnly = ( field->m_Flags & FieldFlags::ReadOnly ) == FieldFlags::ReadOnly;
-	DynamicArray< Reflect::EnumerationElement >::ConstIterator enumItr = enumeration->m_Elements.Begin();
-	DynamicArray< Reflect::EnumerationElement >::ConstIterator enumEnd = enumeration->m_Elements.End();
+	DynamicArray< Reflect::MetaEnum::Element >::ConstIterator enumItr = enumeration->m_Elements.Begin();
+	DynamicArray< Reflect::MetaEnum::Element >::ConstIterator enumEnd = enumeration->m_Elements.End();
 	for ( ; enumItr != enumEnd; ++enumItr )
 	{
 		ContainerPtr row = CreateControl< Container >();

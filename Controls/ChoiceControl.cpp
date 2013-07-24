@@ -2,7 +2,7 @@
 #include "Inspect/Controls/ChoiceControl.h"
 #include "Inspect/Container.h"
 
-REFLECT_DEFINE_OBJECT( Helium::Inspect::Choice );
+REFLECT_DEFINE_CLASS( Helium::Inspect::Choice );
 
 using namespace Helium;
 using namespace Helium::Inspect;

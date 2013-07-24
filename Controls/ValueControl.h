@@ -25,7 +25,7 @@ namespace Helium
         class HELIUM_INSPECT_API Value : public Control
         {
         public:
-            REFLECT_DECLARE_OBJECT( Value, Control );
+            REFLECT_DECLARE_CLASS( Value, Control );
 
             Value();
 

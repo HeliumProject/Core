@@ -12,7 +12,7 @@ namespace Helium
         class HELIUM_INSPECT_API Label : public Control
         {
         public:
-            REFLECT_DECLARE_OBJECT( Label, Control );
+            REFLECT_DECLARE_CLASS( Label, Control );
 
             Label();
 
