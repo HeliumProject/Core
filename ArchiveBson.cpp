@@ -10,9 +10,24 @@
 #include "Reflect/Registry.h"
 #include "Reflect/TranslatorDeduction.h"
 
+REFLECT_DEFINE_BASE_STRUCTURE( Helium::Persist::BsonDate );
+REFLECT_DEFINE_BASE_STRUCTURE( Helium::Persist::BsonObjectId );
+
 using namespace Helium;
 using namespace Helium::Reflect;
 using namespace Helium::Persist;
+
+BsonObjectId BsonObjectId::Null;
+
+void BsonDate::PopulateStructure( Reflect::Structure& structure )
+{
+	structure.AddField( &BsonDate::millis, "millis" );
+}
+
+void BsonObjectId::PopulateStructure( Reflect::Structure& structure )
+{
+	structure.AddField( &BsonObjectId::bytes, "bytes" );
+}
 
 ArchiveWriterBson::ArchiveWriterBson( const FilePath& path, ObjectIdentifier* identifier )
 	: ArchiveWriter( path, identifier )

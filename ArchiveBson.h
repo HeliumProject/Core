@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Platform/Utility.h"
+
 #include "Foundation/DynamicArray.h"
 #include "Foundation/FilePath.h"
 #include "Foundation/Stream.h"
@@ -14,6 +16,33 @@ namespace Helium
 {
 	namespace Persist
 	{
+		struct BsonDate : Helium::Reflect::StructureBase
+		{
+			int64_t millis; // milliseconds since epoch UTC
+
+			inline BsonDate();
+			REFLECT_DECLARE_BASE_STRUCTURE( BsonDate );
+			static void PopulateStructure( Helium::Reflect::Structure& structure );
+		};
+
+		struct BsonObjectId : Helium::Reflect::StructureBase
+		{
+			uint8_t bytes[12]; // uint32_t timestamp, uint8_t machine[3], uint8_t process[2], uint8_t counter[3]
+
+			inline BsonObjectId();
+			inline BsonObjectId( const BsonObjectId& rhs );
+			inline BsonObjectId& operator=( const BsonObjectId& rhs );
+			inline bool operator==( const BsonObjectId& rhs ) const;
+			inline bool operator!=( const BsonObjectId& rhs ) const;
+			inline bool operator<( const BsonObjectId& rhs ) const;
+			inline bool operator>( const BsonObjectId& rhs ) const;
+
+			static BsonObjectId Null;
+
+			REFLECT_DECLARE_BASE_STRUCTURE( BsonObjectId );
+			static void PopulateStructure( Helium::Reflect::Structure& structure );
+		};
+
 		class HELIUM_PERSIST_API ArchiveWriterBson : public ArchiveWriter
 		{
 		public:
@@ -69,3 +98,5 @@ namespace Helium
 		};
 	}
 }
+
+#include "Persist/ArchiveBson.inl"
