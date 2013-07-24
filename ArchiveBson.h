@@ -16,16 +16,16 @@ namespace Helium
 {
 	namespace Persist
 	{
-		struct BsonDate : Helium::Reflect::StructureBase
+		struct BsonDate : Helium::Reflect::Struct
 		{
 			int64_t millis; // milliseconds since epoch UTC
 
 			inline BsonDate();
-			REFLECT_DECLARE_BASE_STRUCTURE( BsonDate );
-			static void PopulateStructure( Helium::Reflect::Structure& structure );
+			REFLECT_DECLARE_BASE_STRUCT( BsonDate );
+			static void PopulateMetaType( Helium::Reflect::MetaStruct& structure );
 		};
 
-		struct BsonObjectId : Helium::Reflect::StructureBase
+		struct BsonObjectId : Helium::Reflect::Struct
 		{
 			uint8_t bytes[12]; // uint32_t timestamp, uint8_t machine[3], uint8_t process[2], uint8_t counter[3]
 
@@ -39,8 +39,8 @@ namespace Helium
 
 			static BsonObjectId Null;
 
-			REFLECT_DECLARE_BASE_STRUCTURE( BsonObjectId );
-			static void PopulateStructure( Helium::Reflect::Structure& structure );
+			REFLECT_DECLARE_BASE_STRUCT( BsonObjectId );
+			static void PopulateMetaType( Helium::Reflect::MetaStruct& structure );
 		};
 
 		class HELIUM_PERSIST_API ArchiveWriterBson : public ArchiveWriter
