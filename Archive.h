@@ -7,7 +7,7 @@
 #include "Foundation/Log.h" 
 #include "Foundation/SmartPtr.h"
 
-#include "Reflect/Class.h"
+#include "Reflect/MetaClass.h"
 #include "Reflect/Exceptions.h"
 #include "Reflect/Object.h"
 #include "Reflect/Translator.h"
@@ -152,7 +152,7 @@ namespace Helium
 
 			virtual ArchiveMode GetMode() const HELIUM_OVERRIDE;
 			virtual void Read( Reflect::ObjectPtr& object ) = 0;
-			virtual bool Resolve( const Name& identity, Reflect::ObjectPtr& pointer, const Reflect::Class* pointerClass ) HELIUM_OVERRIDE;
+			virtual bool Resolve( const Name& identity, Reflect::ObjectPtr& pointer, const Reflect::MetaClass* pointerClass ) HELIUM_OVERRIDE;
 
 		protected:
 			struct Fixup
@@ -163,7 +163,7 @@ namespace Helium
 					, m_PointerClass( rhs.m_PointerClass )
 				{}
 
-				Fixup( const Name& identity, Reflect::ObjectPtr& pointer, const Reflect::Class* pointerClass )
+				Fixup( const Name& identity, Reflect::ObjectPtr& pointer, const Reflect::MetaClass* pointerClass )
 					: m_Identity( identity )
 					, m_Pointer( pointer )
 					, m_PointerClass( pointerClass )
@@ -171,7 +171,7 @@ namespace Helium
 
 				Name                  m_Identity;
 				Reflect::ObjectPtr&   m_Pointer;
-				const Reflect::Class* m_PointerClass;
+				const Reflect::MetaClass* m_PointerClass;
 			};
 			DynamicArray< Fixup >              m_Fixups;
 			DynamicArray< Reflect::ObjectPtr > m_Objects;

@@ -23,7 +23,7 @@ namespace Helium
 			virtual void Write( Reflect::Object* object ) HELIUM_OVERRIDE;
 
 		private:
-			void SerializeInstance( void* instance, const Reflect::Structure* structure, Reflect::Object* object );
+			void SerializeInstance( void* instance, const Reflect::MetaStruct* structure, Reflect::Object* object );
 			void SerializeField( void* instance, const Reflect::Field* field, Reflect::Object* object );
 			void SerializeTranslator( Reflect::Pointer pointer, Reflect::Translator* translator, const Reflect::Field* field, Reflect::Object* object );
 
@@ -51,7 +51,7 @@ namespace Helium
 			void Resolve();
 
 		private:
-			void DeserializeInstance( void* instance, const Reflect::Structure* composite, Reflect::Object* object );
+			void DeserializeInstance( void* instance, const Reflect::MetaStruct* composite, Reflect::Object* object );
 			void DeserializeField( void* instance, const Reflect::Field* field, Reflect::Object* object );
 			void DeserializeTranslator( Reflect::Pointer pointer, Reflect::Translator* translator, const Reflect::Field* field, Reflect::Object* object );
 

@@ -6,7 +6,7 @@
 #include "Foundation/Numeric.h"
 
 #include "Reflect/Object.h"
-#include "Reflect/Structure.h"
+#include "Reflect/MetaStruct.h"
 #include "Reflect/Registry.h"
 #include "Reflect/TranslatorDeduction.h"
 
@@ -72,7 +72,7 @@ void ArchiveWriterJson::Write( Object* object )
 	for ( size_t index = 0; index < m_Objects.GetSize(); ++index )
 	{
 		Object* object = m_Objects.GetElement( index );
-		const Class* objectClass = object->GetClass();
+		const MetaClass* objectClass = object->GetMetaClass();
 
 		m_Writer.StartObject();
 		m_Writer.String( objectClass->m_Name );
@@ -100,15 +100,15 @@ void ArchiveWriterJson::Write( Object* object )
 	e_Status.Raise( info );
 }
 
-void ArchiveWriterJson::SerializeInstance( void* instance, const Structure* structure, Object* object )
+void ArchiveWriterJson::SerializeInstance( void* instance, const MetaStruct* structure, Object* object )
 {
 #if PERSIST_ARCHIVE_VERBOSE
 	Log::Print( TXT( "Serializing %s\n" ), structure->m_Name );
 #endif
 
 #pragma TODO("Declare a max depth for inheritance to save heap allocs -geoff")
-	DynamicArray< const Structure* > bases;
-	for ( const Structure* current = structure; current != NULL; current = current->m_Base )
+	DynamicArray< const MetaStruct* > bases;
+	for ( const MetaStruct* current = structure; current != NULL; current = current->m_Base )
 	{
 		bases.Push( current );
 	}
@@ -117,7 +117,7 @@ void ArchiveWriterJson::SerializeInstance( void* instance, const Structure* stru
 	DynamicArray< const Field* > fields;
 	while ( !bases.IsEmpty() )
 	{
-		const Structure* current = bases.Pop();
+		const MetaStruct* current = bases.Pop();
 		DynamicArray< Field >::ConstIterator itr = current->m_Fields.Begin();
 		DynamicArray< Field >::ConstIterator end = current->m_Fields.End();
 		for ( ; itr != end; ++itr )
@@ -177,10 +177,10 @@ void ArchiveWriterJson::SerializeTranslator( Pointer pointer, Translator* transl
 {
 	switch ( translator->GetReflectionType() )
 	{
-	case ReflectionTypes::ScalarTranslator:
-	case ReflectionTypes::EnumerationTranslator:
-	case ReflectionTypes::PointerTranslator:
-	case ReflectionTypes::TypeTranslator:
+	case MetaIds::ScalarTranslator:
+	case MetaIds::EnumerationTranslator:
+	case MetaIds::PointerTranslator:
+	case MetaIds::TypeTranslator:
 		{
 			ScalarTranslator* scalar = static_cast< ScalarTranslator* >( translator );
 			switch ( scalar->m_Type )
@@ -238,14 +238,14 @@ void ArchiveWriterJson::SerializeTranslator( Pointer pointer, Translator* transl
 			break;
 		}
 
-	case ReflectionTypes::StructureTranslator:
+	case MetaIds::StructureTranslator:
 		{
 			StructureTranslator* structure = static_cast< StructureTranslator* >( translator );
 			SerializeInstance( pointer.m_Address, structure->GetStructure(), object );
 			break;
 		}
 
-	case ReflectionTypes::SetTranslator:
+	case MetaIds::SetTranslator:
 		{
 			SetTranslator* set = static_cast< SetTranslator* >( translator );
 
@@ -265,7 +265,7 @@ void ArchiveWriterJson::SerializeTranslator( Pointer pointer, Translator* transl
 			break;
 		}
 
-	case ReflectionTypes::SequenceTranslator:
+	case MetaIds::SequenceTranslator:
 		{
 			SequenceTranslator* sequence = static_cast< SequenceTranslator* >( translator );
 
@@ -285,7 +285,7 @@ void ArchiveWriterJson::SerializeTranslator( Pointer pointer, Translator* transl
 			break;
 		}
 
-	case ReflectionTypes::AssociationTranslator:
+	case MetaIds::AssociationTranslator:
 		{
 			AssociationTranslator* association = static_cast< AssociationTranslator* >( translator );
 
@@ -480,10 +480,10 @@ bool Helium::Persist::ArchiveReaderJson::ReadNext( Reflect::ObjectPtr& object )
 				objectClassCrc = Helium::Crc32( typeStr.GetData() );
 			}
 
-			const Class* objectClass = NULL;
+			const MetaClass* objectClass = NULL;
 			if ( objectClassCrc != 0 )
 			{
-				objectClass = Registry::GetInstance()->GetClass( objectClassCrc );
+				objectClass = Registry::GetInstance()->GetMetaClass( objectClassCrc );
 			}
 			
 			if ( !object && objectClass )
@@ -494,7 +494,7 @@ bool Helium::Persist::ArchiveReaderJson::ReadNext( Reflect::ObjectPtr& object )
 			if ( object.ReferencesObject() )
 			{
 				success = true;
-				DeserializeInstance( member->value, object, object->GetClass(), object );
+				DeserializeInstance( member->value, object, object->GetMetaClass(), object );
 				m_Objects.Push( object );
 			}
 		}
@@ -519,7 +519,7 @@ void Helium::Persist::ArchiveReaderJson::Resolve()
 	e_Status.Raise( info );
 }
 
-void ArchiveReaderJson::DeserializeInstance( rapidjson::Value& value, void* instance, const Structure* structure, Object* object )
+void ArchiveReaderJson::DeserializeInstance( rapidjson::Value& value, void* instance, const MetaStruct* structure, Object* object )
 {
 #if PERSIST_ARCHIVE_VERBOSE
 	Log::Print(TXT("Deserializing %s\n"), structure->m_Name);
@@ -606,7 +606,7 @@ void ArchiveReaderJson::DeserializeTranslator( rapidjson::Value& value, Pointer 
 {
 	if ( value.IsBool() )
 	{
-		if ( translator->GetReflectionType() == ReflectionTypes::ScalarTranslator )
+		if ( translator->GetReflectionType() == MetaIds::ScalarTranslator )
 		{
 			ScalarTranslator* scalar = static_cast< ScalarTranslator* >( translator );
 			if ( scalar->m_Type == ScalarTypes::Boolean )
@@ -617,7 +617,7 @@ void ArchiveReaderJson::DeserializeTranslator( rapidjson::Value& value, Pointer 
 	}
 	else if ( value.IsNumber() )
 	{
-		if ( translator->GetReflectionType() == ReflectionTypes::ScalarTranslator )
+		if ( translator->GetReflectionType() == MetaIds::ScalarTranslator )
 		{
 			ScalarTranslator* scalar = static_cast< ScalarTranslator* >( translator );
 			bool clamp = true;
@@ -671,7 +671,7 @@ void ArchiveReaderJson::DeserializeTranslator( rapidjson::Value& value, Pointer 
 	}
 	else if ( value.IsString() )
 	{
-		if ( translator->HasReflectionType( ReflectionTypes::ScalarTranslator ) )
+		if ( translator->HasReflectionType( MetaIds::ScalarTranslator ) )
 		{
 			ScalarTranslator* scalar = static_cast< ScalarTranslator* >( translator );
 			if ( scalar->m_Type == ScalarTypes::String )
@@ -683,7 +683,7 @@ void ArchiveReaderJson::DeserializeTranslator( rapidjson::Value& value, Pointer 
 	}
 	else if ( value.IsArray() )
 	{
-		if ( translator->GetReflectionType() == ReflectionTypes::SetTranslator )
+		if ( translator->GetReflectionType() == MetaIds::SetTranslator )
 		{
 			SetTranslator* set = static_cast< SetTranslator* >( translator );
 			Translator* itemTranslator = set->GetItemTranslator();
@@ -695,7 +695,7 @@ void ArchiveReaderJson::DeserializeTranslator( rapidjson::Value& value, Pointer 
 				set->InsertItem( pointer, item );
 			}
 		}
-		else if ( translator->GetReflectionType() == ReflectionTypes::SequenceTranslator )
+		else if ( translator->GetReflectionType() == MetaIds::SequenceTranslator )
 		{
 			SequenceTranslator* sequence = static_cast< SequenceTranslator* >( translator );
 			Translator* itemTranslator = sequence->GetItemTranslator();
@@ -710,12 +710,12 @@ void ArchiveReaderJson::DeserializeTranslator( rapidjson::Value& value, Pointer 
 	}
 	else if ( value.IsObject() )
 	{
-		if ( translator->GetReflectionType() == ReflectionTypes::StructureTranslator )
+		if ( translator->GetReflectionType() == MetaIds::StructureTranslator )
 		{
 			StructureTranslator* structure = static_cast< StructureTranslator* >( translator );
 			DeserializeInstance( value, pointer.m_Address,  structure->GetStructure(), object );
 		}
-		else if ( translator->GetReflectionType() == ReflectionTypes::AssociationTranslator )
+		else if ( translator->GetReflectionType() == MetaIds::AssociationTranslator )
 		{
 			AssociationTranslator* assocation = static_cast< AssociationTranslator* >( translator );
 			Translator* keyTranslator = assocation->GetKeyTranslator();
