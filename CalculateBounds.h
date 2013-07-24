@@ -45,7 +45,7 @@ namespace Helium
 
         ////////////////////////////////////////////////////////////////////////////////////////////////
         //
-        //  Orientated Bounding Box Structure
+        //  Orientated Bounding Box MetaStruct
         //  The Axis vectors are the direction and Length of the box, like the AABB the axis are the half
         //  space Lengths from the center point.
         //
@@ -58,7 +58,7 @@ namespace Helium
 
         ////////////////////////////////////////////////////////////////////////////////////////////////
         //
-        //  Bounding Sphere Structure
+        //  Bounding Sphere MetaStruct
         //
         ////////////////////////////////////////////////////////////////////////////////////////////////
         struct BSphere

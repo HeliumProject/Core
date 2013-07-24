@@ -11,11 +11,11 @@ namespace Helium
 {
 	struct HELIUM_MATH_API Matrix4;
 
-	struct HELIUM_MATH_API Vector4 : Reflect::StructureBase
+	struct HELIUM_MATH_API Vector4 : Reflect::Struct
 	{
 	public:
-		REFLECT_DECLARE_BASE_STRUCTURE( Vector4 );
-		static void PopulateStructure( Reflect::Structure& comp );
+		REFLECT_DECLARE_BASE_STRUCT( Vector4 );
+		static void PopulateMetaType( Reflect::MetaStruct& comp );
 
 		float32_t x, y, z, w;
 

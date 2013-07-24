@@ -3,7 +3,7 @@
 #include "Math/Scale.h"
 #include "Reflect/TranslatorDeduction.h"
 
-REFLECT_DEFINE_BASE_STRUCTURE( Helium::Vector3 );
+REFLECT_DEFINE_BASE_STRUCT( Helium::Vector3 );
 
 using namespace Helium;
 
@@ -13,7 +13,7 @@ const Vector3 Vector3::BasisX (1.0, 0.0, 0.0);
 const Vector3 Vector3::BasisY (0.0, 1.0, 0.0);
 const Vector3 Vector3::BasisZ (0.0, 0.0, 1.0);
 
-void Vector3::PopulateStructure( Reflect::Structure& comp )
+void Vector3::PopulateMetaType( Reflect::MetaStruct& comp )
 {
 	comp.AddField( &Vector3::x, "x" );
 	comp.AddField( &Vector3::y, "y" );

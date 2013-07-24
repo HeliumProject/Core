@@ -6,18 +6,18 @@
 
 #include "Foundation/Math.h"
 
-#include "Reflect/Structure.h"
+#include "Reflect/MetaStruct.h"
 
 #include "Math/API.h"
 #include "Math/Color3.h"
 
 namespace Helium
 {
-	struct HELIUM_MATH_API Color4 : Reflect::StructureBase
+	struct HELIUM_MATH_API Color4 : Reflect::Struct
 	{
 	public:
-		REFLECT_DECLARE_BASE_STRUCTURE( Color4 );
-		static void PopulateStructure( Reflect::Structure& comp );
+		REFLECT_DECLARE_BASE_STRUCT( Color4 );
+		static void PopulateMetaType( Reflect::MetaStruct& comp );
 
 		uint8_t r, g, b, a;
 

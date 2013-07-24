@@ -5,14 +5,14 @@
 #include "Math/EulerAngles.h"
 #include "Reflect/TranslatorDeduction.h"
 
-REFLECT_DEFINE_BASE_STRUCTURE( Helium::Matrix4 );
+REFLECT_DEFINE_BASE_STRUCT( Helium::Matrix4 );
 
 using namespace Helium;
 
 const Matrix4 Matrix4::Identity (Vector4 (1, 0, 0, 0), Vector4 (0, 1, 0, 0), Vector4 (0, 0, 1, 0), Vector4 (0, 0, 0, 1));
 const Matrix4 Matrix4::Zero (Vector4 (0, 0, 0, 0), Vector4 (0, 0, 0, 0), Vector4 (0, 0, 0, 0), Vector4 (0, 0, 0, 0));
 
-void Matrix4::PopulateStructure( Reflect::Structure& comp )
+void Matrix4::PopulateMetaType( Reflect::MetaStruct& comp )
 {
 	comp.AddField( &Matrix4::x, "x" );
 	comp.AddField( &Matrix4::y, "y" );

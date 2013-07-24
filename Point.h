@@ -3,15 +3,15 @@
 #include "Math/API.h"
 #include "Math/Axes.h"
 #include "Foundation/Math.h"
-#include "Reflect/Structure.h"
+#include "Reflect/MetaStruct.h"
 
 namespace Helium
 {
-    class HELIUM_MATH_API Point : public Reflect::StructureBase
+    class HELIUM_MATH_API Point : public Reflect::Struct
     {
     public:
-        REFLECT_DECLARE_BASE_STRUCTURE( Helium::Point );
-        static void PopulateStructure( Reflect::Structure& comp );
+        REFLECT_DECLARE_BASE_STRUCT( Helium::Point );
+        static void PopulateMetaType( Reflect::MetaStruct& comp );
 
         int32_t x, y;
 

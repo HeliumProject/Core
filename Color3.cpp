@@ -3,11 +3,11 @@
 #include "Math/Color4.h"
 #include "Reflect/TranslatorDeduction.h"
 
-REFLECT_DEFINE_BASE_STRUCTURE( Helium::Color3 );
+REFLECT_DEFINE_BASE_STRUCT( Helium::Color3 );
 
 using namespace Helium;
 
-void Color3::PopulateStructure( Reflect::Structure& comp )
+void Color3::PopulateMetaType( Reflect::MetaStruct& comp )
 {
 	comp.AddField( &Color3::r, "r" );
 	comp.AddField( &Color3::g, "g" );

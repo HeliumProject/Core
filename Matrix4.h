@@ -5,7 +5,7 @@
 
 #include "Foundation/Math.h"
 
-#include "Reflect/Structure.h"
+#include "Reflect/MetaStruct.h"
 
 #include "Math/API.h"
 #include "Math/Axes.h"
@@ -23,11 +23,11 @@ namespace Helium
 	class EulerAngles;
 	class AngleAxis;
 
-	struct HELIUM_MATH_API Matrix4 : Reflect::StructureBase
+	struct HELIUM_MATH_API Matrix4 : Reflect::Struct
 	{
 	public: 
-		REFLECT_DECLARE_BASE_STRUCTURE( Matrix4 );
-		static void PopulateStructure( Reflect::Structure& comp );
+		REFLECT_DECLARE_BASE_STRUCT( Matrix4 );
+		static void PopulateMetaType( Reflect::MetaStruct& comp );
 
 		Vector4 x;
 		Vector4 y;
