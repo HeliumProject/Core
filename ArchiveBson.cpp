@@ -266,7 +266,7 @@ void ArchiveWriterBson::SerializeTranslator( bson* b, const char* name, Pointer 
 			else if ( metaStruct == Reflect::GetMetaStruct< BsonObjectId >() )
 			{
 				bson_oid_t oid;
-				MemoryCopy( oid.bytes, pointer.As< BsonObjectId >().bytes, 12 );
+				MemoryCopy( oid.bytes, pointer.As< BsonObjectId >().bytes, sizeof( bson_oid_t ) );
 				bson_append_oid( b, name, &oid );
 			}
 			else
@@ -899,7 +899,7 @@ void ArchiveReaderBson::DeserializeTranslator( bson_iterator* i, Pointer pointer
 				const MetaStruct* metaStruct = structure->GetMetaStruct();
 				if ( metaStruct == Reflect::GetMetaStruct< BsonObjectId >() )
 				{
-					MemoryCopy( pointer.As< BsonObjectId >().bytes, bson_iterator_oid( i ), 12 );
+					MemoryCopy( pointer.As< BsonObjectId >().bytes, bson_iterator_oid( i ), sizeof( bson_oid_t ) );
 				}
 			}
 			break;
