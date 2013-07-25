@@ -192,7 +192,7 @@ void ArchiveWriterBson::SerializeField( bson* b, void* instance, const Field* fi
 
 void ArchiveWriterBson::SerializeTranslator( bson* b, const char* name, Pointer pointer, Translator* translator, const Field* field, Object* object )
 {
-	switch ( translator->GetReflectionType() )
+	switch ( translator->GetMetaId() )
 	{
 	case MetaIds::ScalarTranslator:
 	case MetaIds::EnumerationTranslator:
@@ -620,7 +620,7 @@ void ArchiveReaderBson::DeserializeTranslator( bson_iterator* i, Pointer pointer
 	{
 	case BSON_BOOL:
 		{
-			if ( translator->GetReflectionType() == MetaIds::ScalarTranslator )
+			if ( translator->GetMetaId() == MetaIds::ScalarTranslator )
 			{
 				ScalarTranslator* scalar = static_cast< ScalarTranslator* >( translator );
 				if ( scalar->m_Type == ScalarTypes::Boolean )
@@ -633,7 +633,7 @@ void ArchiveReaderBson::DeserializeTranslator( bson_iterator* i, Pointer pointer
 
 	case BSON_INT:
 		{
-			if ( translator->GetReflectionType() == MetaIds::ScalarTranslator )
+			if ( translator->GetMetaId() == MetaIds::ScalarTranslator )
 			{
 				ScalarTranslator* scalar = static_cast< ScalarTranslator* >( translator );
 				bool clamp = true;
@@ -689,7 +689,7 @@ void ArchiveReaderBson::DeserializeTranslator( bson_iterator* i, Pointer pointer
 
 	case BSON_LONG:
 		{
-			if ( translator->GetReflectionType() == MetaIds::ScalarTranslator )
+			if ( translator->GetMetaId() == MetaIds::ScalarTranslator )
 			{
 				ScalarTranslator* scalar = static_cast< ScalarTranslator* >( translator );
 				bool clamp = true;
@@ -745,7 +745,7 @@ void ArchiveReaderBson::DeserializeTranslator( bson_iterator* i, Pointer pointer
 
 	case BSON_DOUBLE:
 		{
-			if ( translator->GetReflectionType() == MetaIds::ScalarTranslator )
+			if ( translator->GetMetaId() == MetaIds::ScalarTranslator )
 			{
 				ScalarTranslator* scalar = static_cast< ScalarTranslator* >( translator );
 				bool clamp = true;
@@ -801,7 +801,7 @@ void ArchiveReaderBson::DeserializeTranslator( bson_iterator* i, Pointer pointer
 
 	case BSON_STRING:
 		{
-			if ( translator->HasReflectionType( MetaIds::ScalarTranslator ) )
+			if ( translator->IsA( MetaIds::ScalarTranslator ) )
 			{
 				ScalarTranslator* scalar = static_cast< ScalarTranslator* >( translator );
 				if ( scalar->m_Type == ScalarTypes::String )
@@ -815,7 +815,7 @@ void ArchiveReaderBson::DeserializeTranslator( bson_iterator* i, Pointer pointer
 
 	case BSON_ARRAY:
 		{
-			if ( translator->GetReflectionType() == MetaIds::SetTranslator )
+			if ( translator->GetMetaId() == MetaIds::SetTranslator )
 			{
 				SetTranslator* set = static_cast< SetTranslator* >( translator );
 				Translator* itemTranslator = set->GetItemTranslator();
@@ -830,7 +830,7 @@ void ArchiveReaderBson::DeserializeTranslator( bson_iterator* i, Pointer pointer
 					set->InsertItem( pointer, item );
 				}
 			}
-			else if ( translator->GetReflectionType() == MetaIds::SequenceTranslator )
+			else if ( translator->GetMetaId() == MetaIds::SequenceTranslator )
 			{
 				SequenceTranslator* sequence = static_cast< SequenceTranslator* >( translator );
 				Translator* itemTranslator = sequence->GetItemTranslator();
@@ -850,12 +850,12 @@ void ArchiveReaderBson::DeserializeTranslator( bson_iterator* i, Pointer pointer
 
 	case BSON_OBJECT:
 		{
-			if ( translator->GetReflectionType() == MetaIds::StructureTranslator )
+			if ( translator->GetMetaId() == MetaIds::StructureTranslator )
 			{
 				StructureTranslator* structure = static_cast< StructureTranslator* >( translator );
 				DeserializeInstance( i, pointer.m_Address,  structure->GetMetaStruct(), object );
 			}
-			else if ( translator->GetReflectionType() == MetaIds::AssociationTranslator )
+			else if ( translator->GetMetaId() == MetaIds::AssociationTranslator )
 			{
 				AssociationTranslator* assocation = static_cast< AssociationTranslator* >( translator );
 				ScalarTranslator* keyTranslator = assocation->GetKeyTranslator();
@@ -879,7 +879,7 @@ void ArchiveReaderBson::DeserializeTranslator( bson_iterator* i, Pointer pointer
 
 	case BSON_DATE:
 		{
-			if ( translator->GetReflectionType() == MetaIds::StructureTranslator )
+			if ( translator->GetMetaId() == MetaIds::StructureTranslator )
 			{
 				StructureTranslator* structure = static_cast< StructureTranslator* >( translator );
 				const MetaStruct* metaStruct = structure->GetMetaStruct();
@@ -893,7 +893,7 @@ void ArchiveReaderBson::DeserializeTranslator( bson_iterator* i, Pointer pointer
 
 	case BSON_OID:
 		{
-			if ( translator->GetReflectionType() == MetaIds::StructureTranslator )
+			if ( translator->GetMetaId() == MetaIds::StructureTranslator )
 			{
 				StructureTranslator* structure = static_cast< StructureTranslator* >( translator );
 				const MetaStruct* metaStruct = structure->GetMetaStruct();

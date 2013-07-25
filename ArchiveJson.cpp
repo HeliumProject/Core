@@ -175,7 +175,7 @@ void ArchiveWriterJson::SerializeField( void* instance, const Field* field, Obje
 
 void ArchiveWriterJson::SerializeTranslator( Pointer pointer, Translator* translator, const Field* field, Object* object )
 {
-	switch ( translator->GetReflectionType() )
+	switch ( translator->GetMetaId() )
 	{
 	case MetaIds::ScalarTranslator:
 	case MetaIds::EnumerationTranslator:
@@ -606,7 +606,7 @@ void ArchiveReaderJson::DeserializeTranslator( rapidjson::Value& value, Pointer 
 {
 	if ( value.IsBool() )
 	{
-		if ( translator->GetReflectionType() == MetaIds::ScalarTranslator )
+		if ( translator->GetMetaId() == MetaIds::ScalarTranslator )
 		{
 			ScalarTranslator* scalar = static_cast< ScalarTranslator* >( translator );
 			if ( scalar->m_Type == ScalarTypes::Boolean )
@@ -617,7 +617,7 @@ void ArchiveReaderJson::DeserializeTranslator( rapidjson::Value& value, Pointer 
 	}
 	else if ( value.IsNumber() )
 	{
-		if ( translator->GetReflectionType() == MetaIds::ScalarTranslator )
+		if ( translator->GetMetaId() == MetaIds::ScalarTranslator )
 		{
 			ScalarTranslator* scalar = static_cast< ScalarTranslator* >( translator );
 			bool clamp = true;
@@ -671,7 +671,7 @@ void ArchiveReaderJson::DeserializeTranslator( rapidjson::Value& value, Pointer 
 	}
 	else if ( value.IsString() )
 	{
-		if ( translator->HasReflectionType( MetaIds::ScalarTranslator ) )
+		if ( translator->IsA( MetaIds::ScalarTranslator ) )
 		{
 			ScalarTranslator* scalar = static_cast< ScalarTranslator* >( translator );
 			if ( scalar->m_Type == ScalarTypes::String )
@@ -683,7 +683,7 @@ void ArchiveReaderJson::DeserializeTranslator( rapidjson::Value& value, Pointer 
 	}
 	else if ( value.IsArray() )
 	{
-		if ( translator->GetReflectionType() == MetaIds::SetTranslator )
+		if ( translator->GetMetaId() == MetaIds::SetTranslator )
 		{
 			SetTranslator* set = static_cast< SetTranslator* >( translator );
 			Translator* itemTranslator = set->GetItemTranslator();
@@ -695,7 +695,7 @@ void ArchiveReaderJson::DeserializeTranslator( rapidjson::Value& value, Pointer 
 				set->InsertItem( pointer, item );
 			}
 		}
-		else if ( translator->GetReflectionType() == MetaIds::SequenceTranslator )
+		else if ( translator->GetMetaId() == MetaIds::SequenceTranslator )
 		{
 			SequenceTranslator* sequence = static_cast< SequenceTranslator* >( translator );
 			Translator* itemTranslator = sequence->GetItemTranslator();
@@ -710,12 +710,12 @@ void ArchiveReaderJson::DeserializeTranslator( rapidjson::Value& value, Pointer 
 	}
 	else if ( value.IsObject() )
 	{
-		if ( translator->GetReflectionType() == MetaIds::StructureTranslator )
+		if ( translator->GetMetaId() == MetaIds::StructureTranslator )
 		{
 			StructureTranslator* structure = static_cast< StructureTranslator* >( translator );
 			DeserializeInstance( value, pointer.m_Address,  structure->GetMetaStruct(), object );
 		}
-		else if ( translator->GetReflectionType() == MetaIds::AssociationTranslator )
+		else if ( translator->GetMetaId() == MetaIds::AssociationTranslator )
 		{
 			AssociationTranslator* assocation = static_cast< AssociationTranslator* >( translator );
 			Translator* keyTranslator = assocation->GetKeyTranslator();

@@ -191,7 +191,7 @@ void ArchiveWriterMessagePack::SerializeField( void* instance, const Field* fiel
 
 void ArchiveWriterMessagePack::SerializeTranslator( Pointer pointer, Translator* translator, const Field* field, Object* object )
 {
-	switch ( translator->GetReflectionType() )
+	switch ( translator->GetMetaId() )
 	{
 	case MetaIds::ScalarTranslator:
 	case MetaIds::EnumerationTranslator:
@@ -612,7 +612,7 @@ void ArchiveReaderMessagePack::DeserializeTranslator( Pointer pointer, Translato
 {
 	if ( m_Reader.IsBoolean() )
 	{
-		if ( translator->GetReflectionType() == MetaIds::ScalarTranslator )
+		if ( translator->GetMetaId() == MetaIds::ScalarTranslator )
 		{
 			ScalarTranslator* scalar = static_cast< ScalarTranslator* >( translator );
 			if ( scalar->m_Type == ScalarTypes::Boolean )
@@ -631,7 +631,7 @@ void ArchiveReaderMessagePack::DeserializeTranslator( Pointer pointer, Translato
 	}
 	else if ( m_Reader.IsNumber() )
 	{
-		if ( translator->GetReflectionType() == MetaIds::ScalarTranslator )
+		if ( translator->GetMetaId() == MetaIds::ScalarTranslator )
 		{
 			ScalarTranslator* scalar = static_cast< ScalarTranslator* >( translator );
 			bool clamp = true;
@@ -689,7 +689,7 @@ void ArchiveReaderMessagePack::DeserializeTranslator( Pointer pointer, Translato
 	}
 	else if ( m_Reader.IsRaw() )
 	{
-		if ( translator->HasReflectionType( MetaIds::ScalarTranslator ) )
+		if ( translator->IsA( MetaIds::ScalarTranslator ) )
 		{
 			ScalarTranslator* scalar = static_cast< ScalarTranslator* >( translator );
 			if ( scalar->m_Type == ScalarTypes::String )
@@ -706,7 +706,7 @@ void ArchiveReaderMessagePack::DeserializeTranslator( Pointer pointer, Translato
 	}
 	else if ( m_Reader.IsArray() )
 	{
-		if ( translator->GetReflectionType() == MetaIds::SetTranslator )
+		if ( translator->GetMetaId() == MetaIds::SetTranslator )
 		{
 			SetTranslator* set = static_cast< SetTranslator* >( translator );
 			Translator* itemTranslator = set->GetItemTranslator();
@@ -720,7 +720,7 @@ void ArchiveReaderMessagePack::DeserializeTranslator( Pointer pointer, Translato
 			}
 			m_Reader.EndArray();
 		}
-		else if ( translator->GetReflectionType() == MetaIds::SequenceTranslator )
+		else if ( translator->GetMetaId() == MetaIds::SequenceTranslator )
 		{
 			SequenceTranslator* sequence = static_cast< SequenceTranslator* >( translator );
 			Translator* itemTranslator = sequence->GetItemTranslator();
@@ -741,12 +741,12 @@ void ArchiveReaderMessagePack::DeserializeTranslator( Pointer pointer, Translato
 	}
 	else if ( m_Reader.IsMap() )
 	{
-		if ( translator->GetReflectionType() == MetaIds::StructureTranslator )
+		if ( translator->GetMetaId() == MetaIds::StructureTranslator )
 		{
 			StructureTranslator* structure = static_cast< StructureTranslator* >( translator );
 			DeserializeInstance( pointer.m_Address,  structure->GetMetaStruct(), object );
 		}
-		else if ( translator->GetReflectionType() == MetaIds::AssociationTranslator )
+		else if ( translator->GetMetaId() == MetaIds::AssociationTranslator )
 		{
 			AssociationTranslator* assocation = static_cast< AssociationTranslator* >( translator );
 			Translator* keyTranslator = assocation->GetKeyTranslator();
