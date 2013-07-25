@@ -39,8 +39,8 @@ void ReflectColorInterpreter::InterpretField( const Field* field, const std::vec
 
     container->AddChild( label );
 
-    bool color3 = field->m_ValueType == Reflect::GetStructure<Color3>() || field->m_ValueType == Reflect::GetStructure<HDRColor3>();
-    bool color4 = field->m_ValueType == Reflect::GetStructure<Color4>() || field->m_ValueType == Reflect::GetStructure<HDRColor4>();
+    bool color3 = field->m_ValueType == Reflect::GetMetaStruct<Color3>() || field->m_ValueType == Reflect::GetMetaStruct<HDRColor3>();
+    bool color4 = field->m_ValueType == Reflect::GetMetaStruct<Color4>() || field->m_ValueType == Reflect::GetMetaStruct<HDRColor4>();
     HELIUM_ASSERT( !(color3 && color4) ); // we shouldn't ever have both!
 
     if ( color3 || color4 )
