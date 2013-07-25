@@ -257,7 +257,7 @@ void ArchiveWriterMessagePack::SerializeTranslator( Pointer pointer, Translator*
 	case MetaIds::StructureTranslator:
 		{
 			StructureTranslator* structure = static_cast< StructureTranslator* >( translator );
-			SerializeInstance( pointer.m_Address, structure->GetStructure(), object );
+			SerializeInstance( pointer.m_Address, structure->GetMetaStruct(), object );
 			break;
 		}
 
@@ -744,7 +744,7 @@ void ArchiveReaderMessagePack::DeserializeTranslator( Pointer pointer, Translato
 		if ( translator->GetReflectionType() == MetaIds::StructureTranslator )
 		{
 			StructureTranslator* structure = static_cast< StructureTranslator* >( translator );
-			DeserializeInstance( pointer.m_Address,  structure->GetStructure(), object );
+			DeserializeInstance( pointer.m_Address,  structure->GetMetaStruct(), object );
 		}
 		else if ( translator->GetReflectionType() == MetaIds::AssociationTranslator )
 		{

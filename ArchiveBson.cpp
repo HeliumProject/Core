@@ -258,7 +258,7 @@ void ArchiveWriterBson::SerializeTranslator( bson* b, const char* name, Pointer 
 	case MetaIds::StructureTranslator:
 		{
 			StructureTranslator* structure = static_cast< StructureTranslator* >( translator );
-			SerializeInstance( b, name, pointer.m_Address, structure->GetStructure(), object );
+			SerializeInstance( b, name, pointer.m_Address, structure->GetMetaStruct(), object );
 			break;
 		}
 
@@ -839,7 +839,7 @@ void ArchiveReaderBson::DeserializeTranslator( bson_iterator* i, Pointer pointer
 			if ( translator->GetReflectionType() == MetaIds::StructureTranslator )
 			{
 				StructureTranslator* structure = static_cast< StructureTranslator* >( translator );
-				DeserializeInstance( i, pointer.m_Address,  structure->GetStructure(), object );
+				DeserializeInstance( i, pointer.m_Address,  structure->GetMetaStruct(), object );
 			}
 			else if ( translator->GetReflectionType() == MetaIds::AssociationTranslator )
 			{

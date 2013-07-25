@@ -241,7 +241,7 @@ void ArchiveWriterJson::SerializeTranslator( Pointer pointer, Translator* transl
 	case MetaIds::StructureTranslator:
 		{
 			StructureTranslator* structure = static_cast< StructureTranslator* >( translator );
-			SerializeInstance( pointer.m_Address, structure->GetStructure(), object );
+			SerializeInstance( pointer.m_Address, structure->GetMetaStruct(), object );
 			break;
 		}
 
@@ -713,7 +713,7 @@ void ArchiveReaderJson::DeserializeTranslator( rapidjson::Value& value, Pointer 
 		if ( translator->GetReflectionType() == MetaIds::StructureTranslator )
 		{
 			StructureTranslator* structure = static_cast< StructureTranslator* >( translator );
-			DeserializeInstance( value, pointer.m_Address,  structure->GetStructure(), object );
+			DeserializeInstance( value, pointer.m_Address,  structure->GetMetaStruct(), object );
 		}
 		else if ( translator->GetReflectionType() == MetaIds::AssociationTranslator )
 		{
