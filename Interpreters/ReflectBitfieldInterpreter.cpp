@@ -94,7 +94,7 @@ ReflectBitfieldInterpreter::ReflectBitfieldInterpreter (Container* container)
 
 void ReflectBitfieldInterpreter::InterpretField(const Field* field, const std::vector<Reflect::Object*>& instances, Container* parent)
 {
-	bool isEnumeration = field->m_Translator->HasReflectionType( Reflect::MetaIds::EnumerationTranslator );
+	bool isEnumeration = field->m_Translator->IsA( Reflect::MetaIds::EnumerationTranslator );
 
 	// If you hit this, you are misusing this interpreter
 	HELIUM_ASSERT( isEnumeration );
