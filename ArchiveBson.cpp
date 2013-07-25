@@ -258,7 +258,21 @@ void ArchiveWriterBson::SerializeTranslator( bson* b, const char* name, Pointer 
 	case MetaIds::StructureTranslator:
 		{
 			StructureTranslator* structure = static_cast< StructureTranslator* >( translator );
-			SerializeInstance( b, name, pointer.m_Address, structure->GetMetaStruct(), object );
+			const MetaStruct* metaStruct = structure->GetMetaStruct();
+			if ( metaStruct == Reflect::GetMetaStruct< BsonDate >() )
+			{
+				bson_append_date( b, name, pointer.As< BsonDate >().millis );
+			}
+			else if ( metaStruct == Reflect::GetMetaStruct< BsonObjectId >() )
+			{
+				bson_oid_t oid;
+				MemoryCopy( oid.bytes, pointer.As< BsonObjectId >().bytes, 12 );
+				bson_append_oid( b, name, &oid );
+			}
+			else
+			{
+				SerializeInstance( b, name, pointer.m_Address, structure->GetMetaStruct(), object );
+			}
 			break;
 		}
 
@@ -858,6 +872,34 @@ void ArchiveReaderBson::DeserializeTranslator( bson_iterator* i, Pointer pointer
 					keyTranslator->Parse( key, keyVariable, m_Resolver );
 					DeserializeTranslator( elem, valueVariable, valueTranslator, field, object );
 					assocation->SetItem( pointer, keyVariable, valueVariable );
+				}
+			}
+			break;
+		}
+
+	case BSON_DATE:
+		{
+			if ( translator->GetReflectionType() == MetaIds::StructureTranslator )
+			{
+				StructureTranslator* structure = static_cast< StructureTranslator* >( translator );
+				const MetaStruct* metaStruct = structure->GetMetaStruct();
+				if ( metaStruct == Reflect::GetMetaStruct< BsonDate >() )
+				{
+					pointer.As< BsonDate >().millis = bson_iterator_date( i );
+				}
+			}
+			break;
+		}
+
+	case BSON_OID:
+		{
+			if ( translator->GetReflectionType() == MetaIds::StructureTranslator )
+			{
+				StructureTranslator* structure = static_cast< StructureTranslator* >( translator );
+				const MetaStruct* metaStruct = structure->GetMetaStruct();
+				if ( metaStruct == Reflect::GetMetaStruct< BsonObjectId >() )
+				{
+					MemoryCopy( pointer.As< BsonObjectId >().bytes, bson_iterator_oid( i ), 12 );
 				}
 			}
 			break;

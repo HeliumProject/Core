@@ -24,6 +24,7 @@ namespace Helium
 			REFLECT_DECLARE_BASE_STRUCT( BsonDate );
 			static void PopulateMetaType( Helium::Reflect::MetaStruct& structure );
 		};
+		HELIUM_COMPILE_ASSERT( sizeof( bson_date_t ) == 8 );
 
 		struct BsonObjectId : Helium::Reflect::Struct
 		{
@@ -42,6 +43,7 @@ namespace Helium
 			REFLECT_DECLARE_BASE_STRUCT( BsonObjectId );
 			static void PopulateMetaType( Helium::Reflect::MetaStruct& structure );
 		};
+		HELIUM_COMPILE_ASSERT( sizeof( bson_oid_t ) == 12 );
 
 		class HELIUM_PERSIST_API ArchiveWriterBson : public ArchiveWriter
 		{
