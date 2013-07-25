@@ -43,7 +43,7 @@ ArchiveWriterBson::ArchiveWriterBson( Stream *stream, ObjectIdentifier* identifi
 
 ArchiveType ArchiveWriterBson::GetType() const
 {
-	return ArchiveTypes::Json;
+	return ArchiveTypes::Bson;
 }
 
 void ArchiveWriterBson::Open()
@@ -66,7 +66,7 @@ void ArchiveWriterBson::Close()
 
 void ArchiveWriterBson::Write( Object* object )
 {
-	PERSIST_SCOPE_TIMER( ("Reflect - Json Write") );
+	PERSIST_SCOPE_TIMER( ("Reflect - Bson Write") );
 
 	// notify starting
 	ArchiveStatus info( *this, ArchiveStates::Starting );
@@ -386,7 +386,7 @@ void ArchiveReaderBson::Close()
 
 void ArchiveReaderBson::Read( Reflect::ObjectPtr& object )
 {
-	PERSIST_SCOPE_TIMER( ("Reflect - Json Read") );
+	PERSIST_SCOPE_TIMER( ("Reflect - Bson Read") );
 
 	Start();
 
