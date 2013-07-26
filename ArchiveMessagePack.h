@@ -14,8 +14,8 @@ namespace Helium
 		class HELIUM_PERSIST_API ArchiveWriterMessagePack : public ArchiveWriter
 		{
 		public:
-			ArchiveWriterMessagePack( const FilePath& path, Reflect::ObjectIdentifier* identifier = NULL );
-			ArchiveWriterMessagePack( Stream *stream, Reflect::ObjectIdentifier* identifier = NULL );
+			ArchiveWriterMessagePack( const FilePath& path, Reflect::ObjectIdentifier* identifier = NULL, uint32_t flags = 0x0 );
+			ArchiveWriterMessagePack( Stream *stream, Reflect::ObjectIdentifier* identifier = NULL, uint32_t flags = 0x0 );
 			
 			virtual ArchiveType GetType() const HELIUM_OVERRIDE;
 			virtual void Open() HELIUM_OVERRIDE;
@@ -38,8 +38,8 @@ namespace Helium
 		class HELIUM_PERSIST_API ArchiveReaderMessagePack : public ArchiveReader
 		{
 		public:
-			ArchiveReaderMessagePack( const FilePath& path, Reflect::ObjectResolver* resolver = NULL );
-			ArchiveReaderMessagePack( Stream *stream, Reflect::ObjectResolver* resolver = NULL );
+			ArchiveReaderMessagePack( const FilePath& path, Reflect::ObjectResolver* resolver = NULL, uint32_t flags = 0x0 );
+			ArchiveReaderMessagePack( Stream *stream, Reflect::ObjectResolver* resolver = NULL, uint32_t flags = 0x0 );
 			
 			virtual ArchiveType GetType() const HELIUM_OVERRIDE;
 			virtual void Open() HELIUM_OVERRIDE;

@@ -29,13 +29,13 @@ void BsonObjectId::PopulateMetaType( Reflect::MetaStruct& type )
 	type.AddField( &BsonObjectId::bytes, "bytes" );
 }
 
-ArchiveWriterBson::ArchiveWriterBson( const FilePath& path, ObjectIdentifier* identifier )
-	: ArchiveWriter( path, identifier )
+ArchiveWriterBson::ArchiveWriterBson( const FilePath& path, ObjectIdentifier* identifier, uint32_t flags )
+	: ArchiveWriter( path, identifier, flags )
 {
 }
 
-ArchiveWriterBson::ArchiveWriterBson( Stream *stream, ObjectIdentifier* identifier )
-	: ArchiveWriter( identifier )
+ArchiveWriterBson::ArchiveWriterBson( Stream *stream, ObjectIdentifier* identifier, uint32_t flags )
+	: ArchiveWriter( identifier, flags )
 {
 	m_Stream.Reset( stream );
 	m_Stream.Orphan( true );
@@ -77,26 +77,35 @@ void ArchiveWriterBson::Write( Object* object )
 
 	bson b[1];
 	bson_init( b );
-	HELIUM_VERIFY( BSON_OK == bson_append_start_array( b, "BSON" ) );
 
-	// objects can get changed during this iteration (in Identify), so use indices
-	for ( size_t index = 0; index < m_Objects.GetSize(); ++index )
+	if ( m_Flags & ArchiveFlags::Typeless )
 	{
-		Object* object = m_Objects.GetElement( index );
 		const MetaClass* objectClass = object->GetMetaClass();
-
-		char num[16];
-		Helium::StringPrint( num, "%d", index );
-		HELIUM_VERIFY( BSON_OK == bson_append_start_object( b, num ) );
-		SerializeInstance( b, objectClass->m_Name, object, objectClass, object );
-		HELIUM_VERIFY( BSON_OK == bson_append_finish_object( b ) );
-
-		info.m_State = ArchiveStates::ObjectProcessed;
-		info.m_Progress = (int)(((float)(index) / (float)m_Objects.GetSize()) * 100.0f);
-		e_Status.Raise( info );
+		SerializeInstance( b, NULL, object, objectClass, object );
 	}
+	else
+	{
+		HELIUM_VERIFY( BSON_OK == bson_append_start_array( b, "BSON" ) );
 
-	bson_append_finish_array( b );
+		// objects can get changed during this iteration (in Identify), so use indices
+		for ( size_t index = 0; index < m_Objects.GetSize(); ++index )
+		{
+			Object* object = m_Objects.GetElement( index );
+			const MetaClass* objectClass = object->GetMetaClass();
+
+			char num[16];
+			Helium::StringPrint( num, "%d", index );
+			HELIUM_VERIFY( BSON_OK == bson_append_start_object( b, num ) );
+			SerializeInstance( b, objectClass->m_Name, object, objectClass, object );
+			HELIUM_VERIFY( BSON_OK == bson_append_finish_object( b ) );
+
+			info.m_State = ArchiveStates::ObjectProcessed;
+			info.m_Progress = (int)(((float)(index) / (float)m_Objects.GetSize()) * 100.0f);
+			e_Status.Raise( info );
+		}
+
+		bson_append_finish_array( b );
+	}
 
 	// notify completion of last object processed
 	info.m_State = ArchiveStates::ObjectProcessed;
@@ -145,7 +154,11 @@ void ArchiveWriterBson::SerializeInstance( bson* b, const char* name, void* inst
 		}
 	}
 
-	HELIUM_VERIFY( BSON_OK == bson_append_start_object( b, name ) );
+	if ( !( m_Flags & ArchiveFlags::Typeless ) )
+	{
+		HELIUM_VERIFY( BSON_OK == bson_append_start_object( b, name ) );
+	}
+
 	object->PreSerialize( NULL );
 
 	DynamicArray< const Field* >::ConstIterator itr = fields.Begin();
@@ -162,7 +175,11 @@ void ArchiveWriterBson::SerializeInstance( bson* b, const char* name, void* inst
 	}
 
 	object->PostSerialize( NULL );
-	HELIUM_VERIFY( BSON_OK == bson_append_finish_object( b ) );
+
+	if ( !( m_Flags & ArchiveFlags::Typeless ) )
+	{
+		HELIUM_VERIFY( BSON_OK == bson_append_finish_object( b ) );
+	}
 }
 
 void ArchiveWriterBson::SerializeField( bson* b, void* instance, const Field* field, Object* object )
@@ -352,22 +369,21 @@ void ArchiveWriterBson::SerializeTranslator( bson* b, const char* name, Pointer 
 
 void ArchiveWriterBson::ToStream( Object* object, Stream& stream, ObjectIdentifier* identifier, uint32_t flags )
 {
-	ArchiveWriterBson archive ( &stream, identifier );
-	archive.m_Flags = flags;
+	ArchiveWriterBson archive ( &stream, identifier, flags );
 	archive.Write( object );
 	archive.Close();
 }
 
-ArchiveReaderBson::ArchiveReaderBson( const FilePath& path, ObjectResolver* resolver )
-	: ArchiveReader( path, resolver )
+ArchiveReaderBson::ArchiveReaderBson( const FilePath& path, ObjectResolver* resolver, uint32_t flags )
+	: ArchiveReader( path, resolver, flags )
 	, m_Stream( NULL )
 	, m_Size( 0 )
 {
 
 }
 
-ArchiveReaderBson::ArchiveReaderBson( Stream *stream, ObjectResolver* resolver )
-	: ArchiveReader( resolver )
+ArchiveReaderBson::ArchiveReaderBson( Stream *stream, ObjectResolver* resolver, uint32_t flags )
+	: ArchiveReader( resolver, flags )
 	, m_Stream( NULL )
 	, m_Size( 0 )
 {
@@ -407,10 +423,15 @@ void ArchiveReaderBson::Read( Reflect::ObjectPtr& object )
 	bson_iterator i[1];
 	bson_iterator_init( i, m_Bson );
 
-	if ( bson_iterator_type( i ) == BSON_ARRAY )
+	if ( m_Flags & ArchiveFlags::Typeless )
 	{
+		MemoryCopy( &m_Next, i, sizeof( bson_iterator ) );
+		ReadNext( object );
+	}
+	else
+	{
+		HELIUM_ASSERT( bson_iterator_type( i ) == BSON_ARRAY )
 		bson_iterator_subiterator( i, m_Next );
-
 		while ( bson_iterator_more( m_Next ) )
 		{
 			ObjectPtr object;
@@ -466,41 +487,49 @@ bool Helium::Persist::ArchiveReaderBson::ReadNext( Reflect::ObjectPtr& object )
 {
 	bool success = false;
 
-	if ( !bson_iterator_more( m_Next ) || bson_iterator_type( m_Next ) != BSON_OBJECT )
+	if ( !bson_iterator_more( m_Next ) )
 	{
 		return false;
 	}
 
-	bson_iterator i[1];
-	bson_iterator_subiterator( m_Next, i );
-
-	if ( bson_iterator_type( i ) == BSON_OBJECT )
+	if ( m_Flags & ArchiveFlags::Typeless )
 	{
-		const char* key = bson_iterator_key( i );
+		HELIUM_ASSERT( object.ReferencesObject() );
+		DeserializeInstance( m_Next, object, object->GetMetaClass(), object );
+	}
+	else
+	{
+		bson_iterator i[1];
+		bson_iterator_subiterator( m_Next, i );
 
-		uint32_t objectClassCrc = 0;
-		if ( key )
+		if ( bson_iterator_type( i ) == BSON_OBJECT )
 		{
-			objectClassCrc = Helium::Crc32( key );
-		}
+			const char* key = bson_iterator_key( i );
 
-		const MetaClass* objectClass = NULL;
-		if ( objectClassCrc != 0 )
-		{
-			objectClass = Registry::GetInstance()->GetMetaClass( objectClassCrc );
-		}
+			uint32_t objectClassCrc = 0;
+			if ( key )
+			{
+				objectClassCrc = Helium::Crc32( key );
+			}
+
+			const MetaClass* objectClass = NULL;
+			if ( objectClassCrc != 0 )
+			{
+				objectClass = Registry::GetInstance()->GetMetaClass( objectClassCrc );
+			}
 			
-		if ( !object && objectClass )
-		{
-			object = objectClass->m_Creator();
-		}
+			if ( !object && objectClass )
+			{
+				object = objectClass->m_Creator();
+			}
 
-		if ( object.ReferencesObject() )
-		{
-			success = true;
-			DeserializeInstance( i, object, object->GetMetaClass(), object );
+			if ( object.ReferencesObject() )
+			{
+				success = true;
+				DeserializeInstance( i, object, object->GetMetaClass(), object );
 
-			m_Objects.Push( object );
+				m_Objects.Push( object );
+			}
 		}
 	}
 
@@ -532,49 +561,51 @@ void ArchiveReaderBson::DeserializeInstance( bson_iterator* i, void* instance, c
 #endif
 	object->PreDeserialize( NULL );
 
-	if ( bson_iterator_type( i ) == BSON_OBJECT )
+	bson_iterator obj[1];
+	if ( !( m_Flags & ArchiveFlags::Typeless ) )
 	{
-		bson_iterator obj[1];
+		HELIUM_ASSERT( bson_iterator_type( i ) == BSON_OBJECT )
 		bson_iterator_subiterator( i, obj );
+		i = obj;
+	}
 
-		while( bson_iterator_next( obj ) )
+	while( bson_iterator_next( i ) )
+	{
+		const char* key = bson_iterator_key( i );
+
+		uint32_t fieldCrc = 0;
+		if ( key )
 		{
-			const char* key = bson_iterator_key( obj );
+			fieldCrc = Helium::Crc32( key );
+		}
 
-			uint32_t fieldCrc = 0;
+		const Field* field = structure->FindFieldByName( fieldCrc );
+		if ( field )
+		{
+			object->PreDeserialize( field );
+
+			DeserializeField( i, instance, field, object );
+
+			object->PostDeserialize( field );
+		}
+		else
+		{
 			if ( key )
 			{
-				fieldCrc = Helium::Crc32( key );
-			}
-
-			const Field* field = structure->FindFieldByName( fieldCrc );
-			if ( field )
-			{
-				object->PreDeserialize( field );
-
-				DeserializeField( obj, instance, field, object );
-
-				object->PostDeserialize( field );
+				HELIUM_TRACE(
+					TraceLevels::Warning, 
+					"ArchiveReaderBson::DeserializeInstance - Could not find field '%s' (crc=)\n", 
+					key, 
+					fieldCrc);
 			}
 			else
 			{
-				if ( key )
-				{
-					HELIUM_TRACE(
-						TraceLevels::Warning, 
-						"ArchiveReaderBson::DeserializeInstance - Could not find field '%s' (crc=)\n", 
-						key, 
-						fieldCrc);
-				}
-				else
-				{
-					HELIUM_TRACE(
-						TraceLevels::Warning, 
-						"ArchiveReaderBson::DeserializeInstance - Could not find field (crc=)\n", 
-						fieldCrc);
-				}
-				
+				HELIUM_TRACE(
+					TraceLevels::Warning, 
+					"ArchiveReaderBson::DeserializeInstance - Could not find field (crc=)\n", 
+					fieldCrc);
 			}
+				
 		}
 	}
 
@@ -912,8 +943,7 @@ void ArchiveReaderBson::DeserializeTranslator( bson_iterator* i, Pointer pointer
 
 ObjectPtr ArchiveReaderBson::FromStream( Stream& stream, ObjectResolver* resolver, uint32_t flags )
 {
-	ArchiveReaderBson archive( &stream, resolver );
-	archive.m_Flags = flags;
+	ArchiveReaderBson archive( &stream, resolver, flags );
 	ObjectPtr object;
 	archive.Read( object );
 	archive.Close();

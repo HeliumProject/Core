@@ -31,18 +31,18 @@ const char* Persist::ArchiveExtensions[] =
 	"msgpack"
 };
 
-Archive::Archive()
+Archive::Archive( uint32_t flags )
 	: m_Progress( 0 )
 	, m_Abort( false )
-	, m_Flags( 0x0 )
+	, m_Flags( flags )
 {
 }
 
-Archive::Archive( const FilePath& path )
+Archive::Archive( const FilePath& path, uint32_t flags )
 	: m_Path( path )
 	, m_Progress( 0 )
 	, m_Abort( false )
-	, m_Flags( 0x0 )
+	, m_Flags( flags )
 {
 	HELIUM_ASSERT( !m_Path.empty() );
 }
@@ -51,14 +51,15 @@ Archive::~Archive()
 {
 }
 
-ArchiveWriter::ArchiveWriter( ObjectIdentifier* identifier )
-	: m_Identifier( identifier )
+ArchiveWriter::ArchiveWriter( ObjectIdentifier* identifier, uint32_t flags )
+	: Archive( flags )
+	, m_Identifier( identifier )
 {
 
 }
 
-ArchiveWriter::ArchiveWriter( const FilePath& filePath, ObjectIdentifier* identifier )
-	: Archive( filePath )
+ArchiveWriter::ArchiveWriter( const FilePath& filePath, ObjectIdentifier* identifier, uint32_t flags )
+	: Archive( filePath, flags )
 	, m_Identifier( identifier )
 {
 }
@@ -98,14 +99,15 @@ bool ArchiveWriter::Identify( Object* object, Name& identity )
 	return true;
 }
 
-ArchiveReader::ArchiveReader( ObjectResolver* resolver )
-	: m_Resolver( resolver )
+ArchiveReader::ArchiveReader( ObjectResolver* resolver, uint32_t flags )
+	: Archive( flags )
+	, m_Resolver( resolver )
 {
 
 }
 
-ArchiveReader::ArchiveReader( const FilePath& filePath, ObjectResolver* resolver )
-	: Archive ( filePath )
+ArchiveReader::ArchiveReader( const FilePath& filePath, ObjectResolver* resolver, uint32_t flags )
+	: Archive ( filePath, flags )
 	, m_Resolver( resolver )
 {
 }

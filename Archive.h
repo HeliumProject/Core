@@ -29,8 +29,8 @@ namespace Helium
 			enum ArchiveFlag
 			{
 				Notify      = 1 << 0, // Notify objects of changes
-				StringCrc   = 1 << 1, // Using strings where sensible for portability (instead of CRC-32)
-				SparseArray = 1 << 2, // Allow sparse array populations for failed objects
+				Typeless    = 1 << 1, // Omit type header on both read and write (breaks factory alloc on read and builtin multi-object support)
+				StringCrc   = 1 << 2, // Using string CRC-32 values for meta-data instead of full strings (for brevity)
 			};
 		}
 
@@ -88,7 +88,7 @@ namespace Helium
 			const Archive&  m_Archive;
 			ArchiveState    m_State;
 			int             m_Progress;
-			std::string         m_Info;
+			std::string     m_Info;
 			mutable bool    m_Abort; // flag this if you want to give up
 		};
 		typedef Helium::Signature< const ArchiveStatus& > ArchiveStatusSignature;
@@ -98,8 +98,8 @@ namespace Helium
 		protected:
 			friend class RefCountBase< Archive >;
 
-			Archive();
-			Archive( const FilePath& path );
+			Archive( uint32_t flags );
+			Archive( const FilePath& path, uint32_t flags );
 			~Archive();
 
 		public:
@@ -115,7 +115,7 @@ namespace Helium
 		protected:
 			uint32_t           m_Progress; // in bytes
 			bool               m_Abort;
-			uint8_t            m_Flags;
+			const uint8_t      m_Flags;
 			FilePath           m_Path;
 		};
 		typedef Helium::SmartPtr< Archive > ArchivePtr;
@@ -127,8 +127,8 @@ namespace Helium
 		class HELIUM_PERSIST_API ArchiveWriter : public Archive, public Reflect::ObjectIdentifier
 		{
 		public:
-			ArchiveWriter( Reflect::ObjectIdentifier* identifier = NULL );
-			ArchiveWriter( const FilePath& path, Reflect::ObjectIdentifier* identifier = NULL );
+			ArchiveWriter( Reflect::ObjectIdentifier* identifier, uint32_t flags );
+			ArchiveWriter( const FilePath& path, Reflect::ObjectIdentifier* identifier, uint32_t flags );
 
 			virtual ArchiveMode GetMode() const HELIUM_OVERRIDE;
 			virtual void Write( Reflect::Object* object ) = 0;
@@ -147,8 +147,8 @@ namespace Helium
 		class HELIUM_PERSIST_API ArchiveReader : public Archive, public Reflect::ObjectResolver
 		{
 		public:
-			ArchiveReader( Reflect::ObjectResolver* resolver = NULL );
-			ArchiveReader( const FilePath& path, Reflect::ObjectResolver* resolver = NULL );
+			ArchiveReader( Reflect::ObjectResolver* resolver, uint32_t flags );
+			ArchiveReader( const FilePath& path, Reflect::ObjectResolver* resolver, uint32_t flags );
 
 			virtual ArchiveMode GetMode() const HELIUM_OVERRIDE;
 			virtual void Read( Reflect::ObjectPtr& object ) = 0;

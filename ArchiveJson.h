@@ -43,8 +43,8 @@ namespace Helium
 		class HELIUM_PERSIST_API ArchiveWriterJson : public ArchiveWriter
 		{
 		public:
-			ArchiveWriterJson( const FilePath& path, Reflect::ObjectIdentifier* identifier = NULL );
-			ArchiveWriterJson( Stream *stream, Reflect::ObjectIdentifier* identifier = NULL );
+			ArchiveWriterJson( const FilePath& path, Reflect::ObjectIdentifier* identifier = NULL, uint32_t flags = 0x0 );
+			ArchiveWriterJson( Stream *stream, Reflect::ObjectIdentifier* identifier = NULL, uint32_t flags = 0x0 );
 			
 			virtual ArchiveType GetType() const HELIUM_OVERRIDE;
 			virtual void Open() HELIUM_OVERRIDE;
@@ -68,8 +68,8 @@ namespace Helium
 		class HELIUM_PERSIST_API ArchiveReaderJson : public ArchiveReader
 		{
 		public:
-			ArchiveReaderJson( const FilePath& path, Reflect::ObjectResolver* resolver = NULL );
-			ArchiveReaderJson( Stream *stream, Reflect::ObjectResolver* resolver = NULL );
+			ArchiveReaderJson( const FilePath& path, Reflect::ObjectResolver* resolver = NULL, uint32_t flags = 0x0 );
+			ArchiveReaderJson( Stream *stream, Reflect::ObjectResolver* resolver = NULL, uint32_t flags = 0x0 );
 			
 			virtual ArchiveType GetType() const HELIUM_OVERRIDE;
 			virtual void Open() HELIUM_OVERRIDE;

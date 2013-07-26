@@ -14,14 +14,14 @@ using namespace Helium;
 using namespace Helium::Reflect;
 using namespace Helium::Persist;
 
-ArchiveWriterJson::ArchiveWriterJson( const FilePath& path, ObjectIdentifier* identifier )
-	: ArchiveWriter( path, identifier )
+ArchiveWriterJson::ArchiveWriterJson( const FilePath& path, ObjectIdentifier* identifier, uint32_t flags )
+	: ArchiveWriter( path, identifier, flags )
 	, m_Writer( m_Output )
 {
 }
 
-ArchiveWriterJson::ArchiveWriterJson( Stream *stream, ObjectIdentifier* identifier )
-	: ArchiveWriter( identifier )
+ArchiveWriterJson::ArchiveWriterJson( Stream *stream, ObjectIdentifier* identifier, uint32_t flags )
+	: ArchiveWriter( identifier, flags )
 	, m_Writer( m_Output )
 {
 	m_Stream.Reset( stream );
@@ -65,27 +65,35 @@ void ArchiveWriterJson::Write( Object* object )
 	// the master object
 	m_Objects.Push( object );
 
-	// begin top level array of objects
-	m_Writer.StartArray();
-
-	// objects can get changed during this iteration (in Identify), so use indices
-	for ( size_t index = 0; index < m_Objects.GetSize(); ++index )
+	if ( m_Flags & ArchiveFlags::Typeless )
 	{
-		Object* object = m_Objects.GetElement( index );
 		const MetaClass* objectClass = object->GetMetaClass();
-
-		m_Writer.StartObject();
-		m_Writer.String( objectClass->m_Name );
 		SerializeInstance( object, objectClass, object );
-		m_Writer.EndObject();
-
-		info.m_State = ArchiveStates::ObjectProcessed;
-		info.m_Progress = (int)(((float)(index) / (float)m_Objects.GetSize()) * 100.0f);
-		e_Status.Raise( info );
 	}
+	else
+	{
+		// begin top level array of objects
+		m_Writer.StartArray();
 
-	// end top level array
-	m_Writer.EndArray();
+		// objects can get changed during this iteration (in Identify), so use indices
+		for ( size_t index = 0; index < m_Objects.GetSize(); ++index )
+		{
+			Object* object = m_Objects.GetElement( index );
+			const MetaClass* objectClass = object->GetMetaClass();
+
+			m_Writer.StartObject();
+			m_Writer.String( objectClass->m_Name );
+			SerializeInstance( object, objectClass, object );
+			m_Writer.EndObject();
+
+			info.m_State = ArchiveStates::ObjectProcessed;
+			info.m_Progress = (int)(((float)(index) / (float)m_Objects.GetSize()) * 100.0f);
+			e_Status.Raise( info );
+		}
+
+		// end top level array
+		m_Writer.EndArray();
+	}
 
 	// notify completion of last object processed
 	info.m_State = ArchiveStates::ObjectProcessed;
@@ -317,14 +325,13 @@ void ArchiveWriterJson::SerializeTranslator( Pointer pointer, Translator* transl
 
 void ArchiveWriterJson::ToStream( Object* object, Stream& stream, ObjectIdentifier* identifier, uint32_t flags )
 {
-	ArchiveWriterJson archive ( &stream, identifier );
-	archive.m_Flags = flags;
+	ArchiveWriterJson archive ( &stream, identifier, flags );
 	archive.Write( object );
 	archive.Close();
 }
 
-ArchiveReaderJson::ArchiveReaderJson( const FilePath& path, ObjectResolver* resolver )
-	: ArchiveReader( path, resolver )
+ArchiveReaderJson::ArchiveReaderJson( const FilePath& path, ObjectResolver* resolver, uint32_t flags )
+	: ArchiveReader( path, resolver, flags )
 	, m_Stream( NULL )
 	, m_Next( 0 )
 	, m_Size( 0 )
@@ -332,8 +339,8 @@ ArchiveReaderJson::ArchiveReaderJson( const FilePath& path, ObjectResolver* reso
 
 }
 
-ArchiveReaderJson::ArchiveReaderJson( Stream *stream, ObjectResolver* resolver )
-	: ArchiveReader( resolver )
+ArchiveReaderJson::ArchiveReaderJson( Stream *stream, ObjectResolver* resolver, uint32_t flags )
+	: ArchiveReader( resolver, flags )
 	, m_Stream( NULL )
 	, m_Next( 0 )
 	, m_Size( 0 )
@@ -371,8 +378,14 @@ void ArchiveReaderJson::Read( Reflect::ObjectPtr& object )
 
 	Start();
 
-	if ( m_Document.IsArray() )
+	if ( m_Flags & ArchiveFlags::Typeless )
 	{
+		ReadNext( object );
+	}
+	else
+	{
+		HELIUM_ASSERT( m_Document.IsArray() );
+
 		uint32_t length = m_Document.Size();
 		m_Objects.Reserve( length );
 		for ( uint32_t i=0; i<length; i++ )
@@ -467,36 +480,41 @@ bool Helium::Persist::ArchiveReaderJson::ReadNext( Reflect::ObjectPtr& object )
 	}
 
 	rapidjson::Value& value = m_Document[ m_Next++ ];
-	if ( value.IsObject() )
+	
+	if ( m_Flags & ArchiveFlags::Typeless )
 	{
+		DeserializeInstance( value, object, object->GetMetaClass(), object );
+	}
+	else
+	{
+		HELIUM_ASSERT( value.IsObject() );
 		rapidjson::Value::Member* member = value.MemberBegin();
-		if ( member != value.MemberEnd() )
+		HELIUM_ASSERT( member != value.MemberEnd() )
+
+		uint32_t objectClassCrc = 0;
+		if ( member->name.IsString() )
 		{
-			uint32_t objectClassCrc = 0;
-			if ( member->name.IsString() )
-			{
-				String typeStr;
-				typeStr = member->name.GetString();
-				objectClassCrc = Helium::Crc32( typeStr.GetData() );
-			}
+			String typeStr;
+			typeStr = member->name.GetString();
+			objectClassCrc = Helium::Crc32( typeStr.GetData() );
+		}
 
-			const MetaClass* objectClass = NULL;
-			if ( objectClassCrc != 0 )
-			{
-				objectClass = Registry::GetInstance()->GetMetaClass( objectClassCrc );
-			}
+		const MetaClass* objectClass = NULL;
+		if ( objectClassCrc != 0 )
+		{
+			objectClass = Registry::GetInstance()->GetMetaClass( objectClassCrc );
+		}
 			
-			if ( !object && objectClass )
-			{
-				object = objectClass->m_Creator();
-			}
+		if ( !object && objectClass )
+		{
+			object = objectClass->m_Creator();
+		}
 
-			if ( object.ReferencesObject() )
-			{
-				success = true;
-				DeserializeInstance( member->value, object, object->GetMetaClass(), object );
-				m_Objects.Push( object );
-			}
+		if ( object.ReferencesObject() )
+		{
+			success = true;
+			DeserializeInstance( member->value, object, object->GetMetaClass(), object );
+			m_Objects.Push( object );
 		}
 	}
 
@@ -734,8 +752,7 @@ void ArchiveReaderJson::DeserializeTranslator( rapidjson::Value& value, Pointer 
 
 ObjectPtr ArchiveReaderJson::FromStream( Stream& stream, ObjectResolver* resolver, uint32_t flags )
 {
-	ArchiveReaderJson archive( &stream, resolver );
-	archive.m_Flags = flags;
+	ArchiveReaderJson archive( &stream, resolver, flags );
 	ObjectPtr object;
 	archive.Read( object );
 	archive.Close();
