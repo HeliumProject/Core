@@ -21,4 +21,4 @@ Note that Platform is designed to utilize UTF-8 strings in memory, even on Windo
 
 Location
 ========
-https://github.com/HeliumProject/Persist
+https://github.com/HeliumProject/Platform
