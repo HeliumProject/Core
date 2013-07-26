@@ -14,6 +14,13 @@ Design
 
 Platform is designed to provide minimal functional wrappers, and not designed to go to a lot of effort to create convenience to the user.  This is designed to make Platform easier to port since it is the most fundamental component of the Helium stack.
 
+Platform currently supports:
+* Windows
+* MacOSX
+* Linux
+
+However, Platform trys to consume POSIX APIs wherever possible (and reasonable), so porting to other POSIX platforms isn't a ground-up implementation.
+
 Implementation
 ==============
 
