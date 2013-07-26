@@ -5,6 +5,7 @@ Foundation is a platform agnostic container and utility library that provides:
 * Streams (file, memory, byte-swapping)
 * Delegates and events (similar to C#'s implementation)
 * Interprocess communication
+* MessagePack implementation
 * Natural sorting
 * Numeric limits
 * Reference counting
