@@ -2,6 +2,7 @@
 
 #include "Platform/Condition.h"
 #include "Platform/Types.h"
+#include "Utility.h"
 
 #if HELIUM_OS_WIN
 typedef int socklen_t;
@@ -42,7 +43,7 @@ namespace Helium
     }
     typedef SocketProtocols::SocketProtocol SocketProtocol;
 
-    class HELIUM_PLATFORM_API Socket
+    class HELIUM_PLATFORM_API Socket : NonCopyable
     {
     public:
 #if HELIUM_OS_WIN
