@@ -47,7 +47,7 @@ namespace Helium
 			virtual void Read( Reflect::ObjectPtr& object ) HELIUM_OVERRIDE;
 
 			void Start();
-			bool ReadNext( Reflect::ObjectPtr &object );
+			void ReadNext( Reflect::ObjectPtr &object );
 			void Resolve();
 
 		private:
@@ -56,7 +56,7 @@ namespace Helium
 			void DeserializeTranslator( Reflect::Pointer pointer, Reflect::Translator* translator, const Reflect::Field* field, Reflect::Object* object );
 
 		public:
-			static Reflect::ObjectPtr FromStream( Stream& stream, Reflect::ObjectResolver* resolver = NULL, uint32_t flags = 0 );
+			static void FromStream( Stream& stream, Reflect::ObjectPtr& object, Reflect::ObjectResolver* resolver = NULL, uint32_t flags = 0 );
 
 		private:
 			AutoPtr< Stream > m_Stream;

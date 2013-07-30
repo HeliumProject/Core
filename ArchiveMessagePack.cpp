@@ -338,7 +338,7 @@ void ArchiveWriterMessagePack::SerializeTranslator( Pointer pointer, Translator*
 
 	default:
 		// Unhandled reflection type in ArchiveWriterMessagePack::SerializeTranslator
-		HELIUM_ASSERT_FALSE();
+		HELIUM_BREAK();
 	}
 }
 
@@ -456,10 +456,8 @@ void ArchiveReaderMessagePack::Start()
 	m_Reader.Advance();
 }
 
-bool ArchiveReaderMessagePack::ReadNext( ObjectPtr& object )
+void ArchiveReaderMessagePack::ReadNext( ObjectPtr& object )
 {
-	bool success = false;
-
 	if ( m_Flags & ArchiveFlags::Typeless )
 	{
 		DeserializeInstance( object, object->GetMetaClass(), object );
@@ -498,7 +496,6 @@ bool ArchiveReaderMessagePack::ReadNext( ObjectPtr& object )
 		{
 			DeserializeInstance( object, object->GetMetaClass(), object );
 			m_Objects.Push( object );
-			success = true;
 		}
 		else // object.ReferencesObject()
 		{
@@ -507,8 +504,6 @@ bool ArchiveReaderMessagePack::ReadNext( ObjectPtr& object )
 
 		m_Reader.EndMap();
 	}
-
-	return success;
 }
 
 void ArchiveReaderMessagePack::Resolve()
@@ -781,11 +776,9 @@ void ArchiveReaderMessagePack::DeserializeTranslator( Pointer pointer, Translato
 	}
 }
 
-ObjectPtr ArchiveReaderMessagePack::FromStream( Stream& stream, ObjectResolver* resolver, uint32_t flags )
+void ArchiveReaderMessagePack::FromStream( Stream& stream, ObjectPtr& object, ObjectResolver* resolver, uint32_t flags )
 {
 	ArchiveReaderMessagePack archive( &stream, resolver, flags );
-	ObjectPtr object;
 	archive.Read( object );
 	archive.Close();
-	return object;
 }

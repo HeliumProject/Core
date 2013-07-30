@@ -154,7 +154,7 @@ void ArchiveWriterBson::SerializeInstance( bson* b, const char* name, void* inst
 		}
 	}
 
-	if ( !( m_Flags & ArchiveFlags::Typeless ) )
+	if ( name )
 	{
 		HELIUM_VERIFY( BSON_OK == bson_append_start_object( b, name ) );
 	}
@@ -176,7 +176,7 @@ void ArchiveWriterBson::SerializeInstance( bson* b, const char* name, void* inst
 
 	object->PostSerialize( NULL );
 
-	if ( !( m_Flags & ArchiveFlags::Typeless ) )
+	if ( name )
 	{
 		HELIUM_VERIFY( BSON_OK == bson_append_finish_object( b ) );
 	}
@@ -363,7 +363,7 @@ void ArchiveWriterBson::SerializeTranslator( bson* b, const char* name, Pointer 
 
 	default:
 		// Unhandled reflection type in ArchiveWriterBson::SerializeTranslator
-		HELIUM_ASSERT_FALSE();
+		HELIUM_BREAK();
 	}
 }
 
@@ -372,6 +372,12 @@ void ArchiveWriterBson::ToStream( Object* object, Stream& stream, ObjectIdentifi
 	ArchiveWriterBson archive ( &stream, identifier, flags );
 	archive.Write( object );
 	archive.Close();
+}
+
+void ArchiveWriterBson::ToBson( Reflect::Object* object, bson* b, const char* name, Reflect::ObjectIdentifier* identifier, uint32_t flags )
+{
+	ArchiveWriterBson archive ( NULL, identifier, flags );
+	archive.SerializeInstance( b, name, object, object->GetMetaClass(), object );
 }
 
 ArchiveReaderBson::ArchiveReaderBson( const FilePath& path, ObjectResolver* resolver, uint32_t flags )
@@ -425,17 +431,18 @@ void ArchiveReaderBson::Read( Reflect::ObjectPtr& object )
 
 	if ( m_Flags & ArchiveFlags::Typeless )
 	{
-		MemoryCopy( &m_Next, i, sizeof( bson_iterator ) );
-		ReadNext( object );
+		ReadNext( i, object );
 	}
 	else
 	{
-		HELIUM_ASSERT( bson_iterator_type( i ) == BSON_ARRAY )
-		bson_iterator_subiterator( i, m_Next );
-		while ( bson_iterator_more( m_Next ) )
+		HELIUM_ASSERT( bson_iterator_type( i ) == BSON_ARRAY );
+
+		bson_iterator sub[1];
+		bson_iterator_subiterator( i, sub );
+		while ( bson_iterator_more( sub ) )
 		{
 			ObjectPtr object;
-			ReadNext( object );
+			ReadNext( sub, object );
 
 			ArchiveStatus info( *this, ArchiveStates::ObjectProcessed );
 			info.m_Progress = (int)(((float)(m_Stream->Tell()) / (float)m_Size) * 100.0f);
@@ -483,28 +490,22 @@ void Helium::Persist::ArchiveReaderBson::Start()
 	HELIUM_VERIFY( BSON_OK == bson_init_finished_data( m_Bson, reinterpret_cast< char* >( m_Buffer.GetData() ), false ) );
 }
 
-bool Helium::Persist::ArchiveReaderBson::ReadNext( Reflect::ObjectPtr& object )
+void Helium::Persist::ArchiveReaderBson::ReadNext( bson_iterator* i, Reflect::ObjectPtr& object )
 {
-	bool success = false;
-
-	if ( !bson_iterator_more( m_Next ) )
-	{
-		return false;
-	}
+	HELIUM_ASSERT( bson_iterator_more( i ) );
 
 	if ( m_Flags & ArchiveFlags::Typeless )
 	{
 		HELIUM_ASSERT( object.ReferencesObject() );
-		DeserializeInstance( m_Next, object, object->GetMetaClass(), object );
+		DeserializeInstance( i, object, object->GetMetaClass(), object );
 	}
 	else
 	{
-		bson_iterator i[1];
-		bson_iterator_subiterator( m_Next, i );
-
-		if ( bson_iterator_type( i ) == BSON_OBJECT )
+		bson_iterator sub[1];
+		bson_iterator_subiterator( i, sub );
+		if ( bson_iterator_type( sub ) == BSON_OBJECT )
 		{
-			const char* key = bson_iterator_key( i );
+			const char* key = bson_iterator_key( sub );
 
 			uint32_t objectClassCrc = 0;
 			if ( key )
@@ -525,17 +526,13 @@ bool Helium::Persist::ArchiveReaderBson::ReadNext( Reflect::ObjectPtr& object )
 
 			if ( object.ReferencesObject() )
 			{
-				success = true;
-				DeserializeInstance( i, object, object->GetMetaClass(), object );
-
+				DeserializeInstance( sub, object, object->GetMetaClass(), object );
 				m_Objects.Push( object );
 			}
 		}
 	}
 
-	bson_iterator_next( m_Next );
-
-	return success;
+	bson_iterator_next( i );
 }
 
 void Helium::Persist::ArchiveReaderBson::Resolve()
@@ -941,11 +938,15 @@ void ArchiveReaderBson::DeserializeTranslator( bson_iterator* i, Pointer pointer
 	}
 }
 
-ObjectPtr ArchiveReaderBson::FromStream( Stream& stream, ObjectResolver* resolver, uint32_t flags )
+void ArchiveReaderBson::FromStream( Stream& stream, ObjectPtr& object, ObjectResolver* resolver, uint32_t flags )
 {
 	ArchiveReaderBson archive( &stream, resolver, flags );
-	ObjectPtr object;
 	archive.Read( object );
 	archive.Close();
-	return object;
+}
+
+void ArchiveReaderBson::FromBson( bson_iterator* i, ObjectPtr& object, ObjectResolver* resolver, uint32_t flags )
+{
+	ArchiveReaderBson archive( NULL, resolver, flags );
+	archive.DeserializeInstance( i, object.Ptr(), object->GetMetaClass(), object );
 }
