@@ -63,6 +63,7 @@ namespace Helium
 
 		public:
 			static void ToStream( Reflect::Object* object, Stream& stream, Reflect::ObjectIdentifier* identifier = NULL, uint32_t flags = 0 );
+			static void ToBson( Reflect::Object* object, bson* b, const char* name = NULL, Reflect::ObjectIdentifier* identifier = NULL, uint32_t flags = ArchiveFlags::Typeless );
 
 		private:
 			AutoPtr< Stream >     m_Stream;
@@ -80,7 +81,7 @@ namespace Helium
 			virtual void Read( Reflect::ObjectPtr& object ) HELIUM_OVERRIDE;
 
 			void Start();
-			bool ReadNext( Reflect::ObjectPtr &object );
+			void ReadNext( bson_iterator* i, Reflect::ObjectPtr &object );
 			void Resolve();
 
 		private:
@@ -89,14 +90,14 @@ namespace Helium
 			void DeserializeTranslator( bson_iterator* i, Reflect::Pointer pointer, Reflect::Translator* translator, const Reflect::Field* field, Reflect::Object* object );
 
 		public:
-			static Reflect::ObjectPtr FromStream( Stream& stream, Reflect::ObjectResolver* resolver = NULL, uint32_t flags = 0 );
+			static void FromStream( Stream& stream, Reflect::ObjectPtr& object, Reflect::ObjectResolver* resolver = NULL, uint32_t flags = 0 );
+			static void FromBson( bson_iterator* i, Reflect::ObjectPtr& object, Reflect::ObjectResolver* resolver = NULL, uint32_t flags = ArchiveFlags::Typeless );
 
 		private:
 			DynamicArray< uint8_t > m_Buffer;
 			AutoPtr< Stream >       m_Stream;
 			int64_t                 m_Size;
 			bson                    m_Bson[1];
-			bson_iterator           m_Next[1];
 		};
 	}
 }

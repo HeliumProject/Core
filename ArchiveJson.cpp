@@ -319,7 +319,7 @@ void ArchiveWriterJson::SerializeTranslator( Pointer pointer, Translator* transl
 
 	default:
 		// Unhandled reflection type in ArchiveWriterJson::SerializeTranslator
-		HELIUM_ASSERT_FALSE();
+		HELIUM_BREAK();
 	}
 }
 
@@ -333,7 +333,6 @@ void ArchiveWriterJson::ToStream( Object* object, Stream& stream, ObjectIdentifi
 ArchiveReaderJson::ArchiveReaderJson( const FilePath& path, ObjectResolver* resolver, uint32_t flags )
 	: ArchiveReader( path, resolver, flags )
 	, m_Stream( NULL )
-	, m_Next( 0 )
 	, m_Size( 0 )
 {
 
@@ -342,7 +341,6 @@ ArchiveReaderJson::ArchiveReaderJson( const FilePath& path, ObjectResolver* reso
 ArchiveReaderJson::ArchiveReaderJson( Stream *stream, ObjectResolver* resolver, uint32_t flags )
 	: ArchiveReader( resolver, flags )
 	, m_Stream( NULL )
-	, m_Next( 0 )
 	, m_Size( 0 )
 {
 	m_Stream.Reset( stream );
@@ -380,7 +378,7 @@ void ArchiveReaderJson::Read( Reflect::ObjectPtr& object )
 
 	if ( m_Flags & ArchiveFlags::Typeless )
 	{
-		ReadNext( object );
+		ReadNext( 0, object );
 	}
 	else
 	{
@@ -391,7 +389,7 @@ void ArchiveReaderJson::Read( Reflect::ObjectPtr& object )
 		for ( uint32_t i=0; i<length; i++ )
 		{
 			ObjectPtr object;
-			ReadNext( object );
+			ReadNext( i, object );
 
 			ArchiveStatus info( *this, ArchiveStates::ObjectProcessed );
 			info.m_Progress = (int)(((float)(m_Stream->Tell()) / (float)m_Size) * 100.0f);
@@ -470,16 +468,14 @@ void Helium::Persist::ArchiveReaderJson::Start()
 	}
 }
 
-bool Helium::Persist::ArchiveReaderJson::ReadNext( Reflect::ObjectPtr& object )
+void Helium::Persist::ArchiveReaderJson::ReadNext( rapidjson::SizeType next, Reflect::ObjectPtr& object )
 {
-	bool success = false;
-
-	if (m_Next >= m_Document.Size())
+	if ( !HELIUM_VERIFY( next < m_Document.Size() ) )
 	{
-		return false;
+		return;
 	}
 
-	rapidjson::Value& value = m_Document[ m_Next++ ];
+	rapidjson::Value& value = m_Document[ next ];
 	
 	if ( m_Flags & ArchiveFlags::Typeless )
 	{
@@ -512,13 +508,10 @@ bool Helium::Persist::ArchiveReaderJson::ReadNext( Reflect::ObjectPtr& object )
 
 		if ( object.ReferencesObject() )
 		{
-			success = true;
 			DeserializeInstance( member->value, object, object->GetMetaClass(), object );
 			m_Objects.Push( object );
 		}
 	}
-
-	return success;
 }
 
 void Helium::Persist::ArchiveReaderJson::Resolve()
@@ -750,11 +743,9 @@ void ArchiveReaderJson::DeserializeTranslator( rapidjson::Value& value, Pointer 
 	}
 }
 
-ObjectPtr ArchiveReaderJson::FromStream( Stream& stream, ObjectResolver* resolver, uint32_t flags )
+void ArchiveReaderJson::FromStream( Stream& stream, ObjectPtr& object, ObjectResolver* resolver, uint32_t flags )
 {
 	ArchiveReaderJson archive( &stream, resolver, flags );
-	ObjectPtr object;
 	archive.Read( object );
 	archive.Close();
-	return object;
 }
