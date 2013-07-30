@@ -20,8 +20,6 @@
 // Define the main macros
 //
 
-#define HELIUM_DISABLEABLE_CODE_BLOCK(x) { static bool code_block_enabled = true; if (code_block_enabled) {x} }
-
 #if HELIUM_CC_CL
 # ifdef _MANAGED
 #  define HELIUM_ISSUE_BREAK() System::Diagnostics::Debugger::Break()
@@ -44,8 +42,6 @@
 # define HELIUM_FUNCTION_NAME __PRETTY_FUNCTION__
 #endif
 
-#define HELIUM_BREAK() HELIUM_DISABLEABLE_CODE_BLOCK( HELIUM_ISSUE_BREAK(); )
-
 namespace Helium
 {
 	HELIUM_PLATFORM_API void FatalExit( int exitCode );
@@ -55,25 +51,13 @@ namespace Helium
 
 namespace Helium
 {
-	namespace AssertResults
-	{
-		/// Assertion handler result.
-		enum Type
-		{
-			Break,		///< Break execution.
-			Abort,		///< Terminate the program.
-			Continue,	///< Continue execution.
-		};
-	}
-	typedef AssertResults::Type AssertResult;
-
 	/// Assert utility functions.
 	class HELIUM_PLATFORM_API Assert
 	{
 	public:
 		/// @name Static Utility Functions
 		//@{
-		static AssertResult Trigger( const char* pExpression, const char* pFunction, const char* pFile, int line, const char* pMessage, ... );
+		static bool Trigger( const char* pExpression, const char* pFunction, const char* pFile, int line, const char* pMessage, ... );
 		//@}
 
 	private:
@@ -82,85 +66,83 @@ namespace Helium
 
 		/// @name Private Static Utility Functions
 		//@{
-		static AssertResult TriggerImplementation( const char* pMessageText );
+		static bool TriggerImplementation( const char* pMessageText );
 		//@}
 	};
 }
 
-/// Trigger and handle a Helium::AssertResult code.
+/// Trigger the assert handler function and trigger a break if necessary
 ///
 /// @param[in] EXP      Expression string.
 /// @param[in] MESSAGE  Message string.
 #define HELIUM_TRIGGER_ASSERT_HANDLER( EXP, ... ) \
-	{ \
-		HELIUM_DISABLEABLE_CODE_BLOCK( \
-			Helium::AssertResult _result = Helium::Assert::Trigger( \
-				EXP, \
-				TXT(HELIUM_FUNCTION_NAME), \
-				TXT(__FILE__), \
-				__LINE__, \
-				__VA_ARGS__ ); \
-			if( _result == Helium::AssertResults::Break ) \
-			{ \
-				HELIUM_ISSUE_BREAK(); \
-			} \
-			else if( _result == Helium::AssertResults::Abort ) \
-			{ \
-				Helium::FatalExit( -1 ); \
-			} ) \
-	}
+	( Helium::Assert::Trigger( EXP, TXT(HELIUM_FUNCTION_NAME), TXT(__FILE__), __LINE__, __VA_ARGS__ ) ? ( HELIUM_ISSUE_BREAK(), true ) : false )
+
+/// Trigger a debug breakpoint unconditionally in non-release builds.
+///
+/// @see HELIUM_ASSERT(), HELIUM_ASSERT_MSG(), HELIUM_BREAK_MSG(), HELIUM_VERIFY(), HELIUM_VERIFY_MSG()
+#define HELIUM_BREAK() HELIUM_TRIGGER_ASSERT_HANDLER( NULL, NULL );
+
+/// Trigger a debug breakpoint with a customized message unconditionally in non-release builds.
+///
+/// @param[in] ...  Message to display if the assertion is triggered.
+///
+/// @see HELIUM_ASSERT(), HELIUM_ASSERT_MSG(), HELIUM_BREAK(), HELIUM_VERIFY(), HELIUM_VERIFY_MSG()
+#define HELIUM_BREAK_MSG( ... ) HELIUM_TRIGGER_ASSERT_HANDLER( NULL, __VA_ARGS__ );
 
 /// Trigger a debug breakpoint if the result of an expression is false in non-release builds.
 ///
 /// @param[in] EXP  Expression to evaluate.
 ///
-/// @see HELIUM_ASSERT_MSG(), HELIUM_ASSERT_FALSE(), HELIUM_ASSERT_MSG_FALSE(), HELIUM_VERIFY(), HELIUM_VERIFY_MSG()
-#define HELIUM_ASSERT( EXP ) { if( !( EXP ) ) HELIUM_TRIGGER_ASSERT_HANDLER( TXT( #EXP ), NULL ) }
+/// @see HELIUM_ASSERT_MSG(), HELIUM_BREAK(), HELIUM_BREAK_MSG(), HELIUM_VERIFY(), HELIUM_VERIFY_MSG()
+#define HELIUM_ASSERT( EXP ) { if( !( EXP ) ) HELIUM_TRIGGER_ASSERT_HANDLER( TXT( #EXP ), NULL ); }
 
 /// Trigger a debug breakpoint with a customized message if the result of an expression is false in non-release builds.
 ///
 /// @param[in] EXP      Expression to evaluate.
 /// @param[in] ...      Message to display if the assertion is triggered.
 ///
-/// @see HELIUM_ASSERT(), HELIUM_ASSERT_FALSE(), HELIUM_ASSERT_MSG_FALSE() HELIUM_VERIFY(), HELIUM_VERIFY_MSG()
-#define HELIUM_ASSERT_MSG( EXP, ... ) { if( !( EXP ) ) HELIUM_TRIGGER_ASSERT_HANDLER( TXT( #EXP ), __VA_ARGS__ ) }
+/// @see HELIUM_ASSERT(), HELIUM_BREAK(), HELIUM_BREAK_MSG() HELIUM_VERIFY(), HELIUM_VERIFY_MSG()
+#define HELIUM_ASSERT_MSG( EXP, ... ) { if( !( EXP ) ) HELIUM_TRIGGER_ASSERT_HANDLER( TXT( #EXP ), __VA_ARGS__ ); }
 
-/// Trigger a debug breakpoint unconditionally in non-release builds.
+/// Trigger a debug breakpoint if the result of an expression is false in non-release builds while still evaluating the
+/// expression in release builds, and evaluating to the result of the expression.
 ///
-/// @see HELIUM_ASSERT(), HELIUM_ASSERT_MSG(), HELIUM_ASSERT_MSG_FALSE(), HELIUM_VERIFY(), HELIUM_VERIFY_MSG()
-#define HELIUM_ASSERT_FALSE() HELIUM_TRIGGER_ASSERT_HANDLER( NULL, NULL )
+/// @param[in] EXP  Expression to evaluate.
+///
+/// @see HELIUM_ASSERT(), HELIUM_ASSERT_MSG(), HELIUM_BREAK(), HELIUM_BREAK_MSG(), HELIUM_VERIFY_MSG()
+#define HELIUM_VERIFY( EXP ) ( ( EXP ) ? true : ( HELIUM_TRIGGER_ASSERT_HANDLER( TXT( #EXP ), NULL ), false ) )
+
+/// Trigger a debug breakpoint with a customized message if the result of an expression is false in non-release builds
+/// while still evaluating the expression in release builds, and evaluating to the result of the expression.
+///
+/// @param[in] EXP      Expression to evaluate.
+/// @param[in] ...      Message to display if the assertion is triggered.
+///
+/// @see HELIUM_ASSERT(), HELIUM_ASSERT_MSG(), HELIUM_BREAK(), HELIUM_BREAK_MSG(), HELIUM_VERIFY()
+#define HELIUM_VERIFY_MSG( EXP, ... ) ( ( EXP ) ? true : ( HELIUM_TRIGGER_ASSERT_HANDLER( TXT( #EXP ), NULL ), false ) )
+
+#else  // HELIUM_ASSERT_ENABLED
 
 /// Trigger a debug breakpoint with a customized message unconditionally in non-release builds.
 ///
 /// @param[in] ...  Message to display if the assertion is triggered.
 ///
-/// @see HELIUM_ASSERT(), HELIUM_ASSERT_MSG(), HELIUM_ASSERT_FALSE(), HELIUM_VERIFY(), HELIUM_VERIFY_MSG()
-#define HELIUM_ASSERT_MSG_FALSE( ... ) HELIUM_TRIGGER_ASSERT_HANDLER( NULL, __VA_ARGS__ )
+/// @see HELIUM_ASSERT(), HELIUM_ASSERT_MSG(), HELIUM_BREAK(), HELIUM_VERIFY(), HELIUM_VERIFY_MSG()
+#define HELIUM_BREAK()
 
-/// Trigger a debug breakpoint if the result of an expression is false in non-release builds while still evaluating the
-/// expression in release builds.
+/// Trigger a debug breakpoint with a customized message unconditionally in non-release builds.
 ///
-/// @param[in] EXP  Expression to evaluate.
+/// @param[in] ...  Message to display if the assertion is triggered.
 ///
-/// @see HELIUM_ASSERT(), HELIUM_ASSERT_MSG(), HELIUM_ASSERT_FALSE(), HELIUM_ASSERT_MSG_FALSE(), HELIUM_VERIFY_MSG()
-#define HELIUM_VERIFY( EXP ) HELIUM_ASSERT( EXP )
-
-/// Trigger a debug breakpoint with a customized message if the result of an expression is false in non-release builds
-/// while still evaluating the expression in release builds.
-///
-/// @param[in] EXP      Expression to evaluate.
-/// @param[in] ...      Message to display if the assertion is triggered.
-///
-/// @see HELIUM_ASSERT(), HELIUM_ASSERT_MSG(), HELIUM_ASSERT_FALSE(), HELIUM_ASSERT_MSG_FALSE(), HELIUM_VERIFY()
-#define HELIUM_VERIFY_MSG( EXP, ... ) HELIUM_ASSERT_MSG( EXP, __VA_ARGS__ )
-
-#else  // HELIUM_ASSERT_ENABLED
+/// @see HELIUM_ASSERT(), HELIUM_ASSERT_MSG(), HELIUM_BREAK(), HELIUM_VERIFY(), HELIUM_VERIFY_MSG()
+#define HELIUM_BREAK_MSG( ... )
 
 /// Trigger a debug breakpoint if the result of an expression is false in non-release builds.
 ///
 /// @param[in] EXP  Expression to evaluate.
 ///
-/// @see HELIUM_ASSERT_MSG(), HELIUM_ASSERT_FALSE(), HELIUM_ASSERT_MSG_FALSE(), HELIUM_VERIFY(), HELIUM_VERIFY_MSG()
+/// @see HELIUM_ASSERT_MSG(), HELIUM_BREAK(), HELIUM_BREAK_MSG(), HELIUM_VERIFY(), HELIUM_VERIFY_MSG()
 #define HELIUM_ASSERT( EXP )
 
 /// Trigger a debug breakpoint with a customized message if the result of an expression is false in non-release builds.
@@ -168,37 +150,25 @@ namespace Helium
 /// @param[in] EXP      Expression to evaluate.
 /// @param[in] ...      Message to display if the assertion is triggered.
 ///
-/// @see HELIUM_ASSERT(), HELIUM_ASSERT_FALSE(), HELIUM_ASSERT_MSG_FALSE() HELIUM_VERIFY(), HELIUM_VERIFY_MSG()
+/// @see HELIUM_ASSERT(), HELIUM_BREAK(), HELIUM_BREAK_MSG() HELIUM_VERIFY(), HELIUM_VERIFY_MSG()
 #define HELIUM_ASSERT_MSG( EXP, ... )
 
-/// Trigger a debug breakpoint unconditionally in non-release builds.
-///
-/// @see HELIUM_ASSERT(), HELIUM_ASSERT_MSG(), HELIUM_ASSERT_MSG_FALSE(), HELIUM_VERIFY(), HELIUM_VERIFY_MSG()
-#define HELIUM_ASSERT_FALSE()
-
-/// Trigger a debug breakpoint with a customized message unconditionally in non-release builds.
-///
-/// @param[in] ...  Message to display if the assertion is triggered.
-///
-/// @see HELIUM_ASSERT(), HELIUM_ASSERT_MSG(), HELIUM_ASSERT_FALSE(), HELIUM_VERIFY(), HELIUM_VERIFY_MSG()
-#define HELIUM_ASSERT_MSG_FALSE( ... )
-
 /// Trigger a debug breakpoint if the result of an expression is false in non-release builds while still evaluating the
-/// expression in release builds.
-///
-/// @param[in] EXP  Expression to evaluate.
-///
-/// @see HELIUM_ASSERT(), HELIUM_ASSERT_MSG(), HELIUM_ASSERT_FALSE(), HELIUM_ASSERT_MSG_FALSE(), HELIUM_VERIFY_MSG()
-#define HELIUM_VERIFY( EXP ) if( EXP ) {}
-
-/// Trigger a debug breakpoint with a customized message if the result of an expression is false in non-release builds
-/// while still evaluating the expression in release builds.
+/// expression in release builds, and evaluating to the result of the expression.
 ///
 /// @param[in] EXP      Expression to evaluate.
-/// @param[in] ...  Message to display if the assertion is triggered.
 ///
-/// @see HELIUM_ASSERT(), HELIUM_ASSERT_MSG(), HELIUM_ASSERT_FALSE(), HELIUM_ASSERT_MSG_FALSE(), HELIUM_VERIFY()
-#define HELIUM_VERIFY_MSG( EXP, ... ) EXP
+/// @see HELIUM_ASSERT(), HELIUM_ASSERT_MSG(), HELIUM_BREAK(), HELIUM_BREAK_MSG(), HELIUM_VERIFY_MSG()
+#define HELIUM_VERIFY( EXP ) ( ( EXP ) ? true : false )
+
+/// Trigger a debug breakpoint if the result of an expression is false in non-release builds while still evaluating the
+/// expression in release builds, and evaluating to the result of the expression.
+///
+/// @param[in] EXP      Expression to evaluate.
+/// @param[in] ...      Message to display if the assertion is triggered.
+///
+/// @see HELIUM_ASSERT(), HELIUM_ASSERT_MSG(), HELIUM_BREAK(), HELIUM_BREAK_MSG(), HELIUM_VERIFY()
+#define HELIUM_VERIFY_MSG( EXP, ... ) ( ( EXP ) ? true : false )
 
 #endif
 

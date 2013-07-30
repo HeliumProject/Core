@@ -21,7 +21,7 @@ void Helium::FatalExit( int exitCode )
 /// Handle an assertion.
 ///
 /// @param[in] pMessageText  Assert message text.
-AssertResult Assert::TriggerImplementation( const char* pMessageText )
+bool Assert::TriggerImplementation( const char* pMessageText )
 {
 	char messageBoxText[ 1024 ];
 	StringPrint(
@@ -31,9 +31,17 @@ AssertResult Assert::TriggerImplementation( const char* pMessageText )
 		pMessageText );
 
 	HELIUM_TCHAR_TO_WIDE( messageBoxText, wideMessageBoxText );
-	int result = MessageBoxW( NULL, wideMessageBoxText, L"Assert", MB_ABORTRETRYIGNORE );
+	switch( MessageBoxW( NULL, wideMessageBoxText, L"Assert", MB_ABORTRETRYIGNORE ) )
+	{
+	case IDABORT:
+		Helium::FatalExit( -1 );
 
-	return ( result == IDABORT ? AssertResults::Abort : ( result == IDIGNORE ? AssertResults::Continue : AssertResults::Break ) );
+	case IDIGNORE:
+		return false;
+
+	default:
+		return true;
+	}
 }
 
 #endif  // HELIUM_OS_WIN

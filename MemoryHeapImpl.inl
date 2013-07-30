@@ -68,8 +68,8 @@ static void PrintfWrapper( const char* pFormat, ... )
 #define REALLOC_ZERO_BYTES_FREES 1
 #define FOOTERS 1
 
-#define CORRUPTION_ERROR_ACTION( m ) HELIUM_ASSERT_MSG_FALSE( TXT( "Memory corruption detected!" ) )
-#define USAGE_ERROR_ACTION( m, p ) HELIUM_ASSERT_MSG_FALSE( TXT( "Incorrect realloc()/free() usage detected!" ) )
+#define CORRUPTION_ERROR_ACTION( m ) HELIUM_BREAK_MSG( TXT( "Memory corruption detected!" ) )
+#define USAGE_ERROR_ACTION( m, p ) HELIUM_BREAK_MSG( TXT( "Incorrect realloc()/free() usage detected!" ) )
 
 #if HELIUM_RELEASE || HELIUM_PROFILE
 #define INSECURE 1
