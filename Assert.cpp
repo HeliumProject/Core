@@ -21,7 +21,7 @@ volatile int32_t Assert::sm_active = 0;
 /// @param[in] pFunction    Function in which the assertion occurred.
 /// @param[in] pFile        File in which the assertion occurred.
 /// @param[in] line         Line number at which the assertion occurred.
-AssertResult Assert::Trigger(
+bool Assert::Trigger(
 	const char* pExpression,
 	const char* pFunction,
 	const char* pFile,
@@ -121,7 +121,7 @@ AssertResult Assert::Trigger(
 #endif
 
 	// Present the assert message and get how we should proceed.
-	AssertResult result = TriggerImplementation( messageText );
+	bool result = TriggerImplementation( messageText );
 
 	AtomicExchangeRelease( sm_active, 0 );
 
