@@ -117,7 +117,7 @@ int64_t FileStream::Seek( int64_t offset, SeekOrigin origin )
 {
 	if( !m_File.IsOpen() )
 	{
-		HELIUM_ASSERT_MSG_FALSE( TXT( "File not open" ) );
+		HELIUM_BREAK_MSG( TXT( "File not open" ) );
 		return -1;
 	}
 
@@ -129,7 +129,7 @@ int64_t FileStream::Tell() const
 {
 	if( !m_File.IsOpen() )
 	{
-		HELIUM_ASSERT_MSG_FALSE( TXT( "File not open" ) );
+		HELIUM_BREAK_MSG( TXT( "File not open" ) );
 		return -1;
 	}
 
@@ -141,7 +141,7 @@ int64_t FileStream::GetSize() const
 {
 	if( !m_File.IsOpen() )
 	{
-		HELIUM_ASSERT_MSG_FALSE( TXT( "File not open" ) );
+		HELIUM_BREAK_MSG( TXT( "File not open" ) );
 		return -1;
 	}
 
@@ -156,7 +156,7 @@ bool FileStream::Open( const char* pPath, uint32_t modeFlags, bool bTruncate )
 	// Verify that at least one mode flag is given.
 	if( !( modeFlags & ( MODE_READ | MODE_WRITE ) ) )
 	{
-		HELIUM_ASSERT_MSG_FALSE( TXT( "At least one FileStream::EMode flag must be set" ) );
+		HELIUM_BREAK_MSG( TXT( "At least one FileStream::EMode flag must be set" ) );
 		return false;
 	}
 

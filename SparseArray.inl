@@ -908,7 +908,7 @@ void Helium::SparseArray< T, Allocator >::Remove( size_t index )
 
         // We should never reach this point, as our previous check for when the used size reaches zero should have
         // been triggered.
-        HELIUM_ASSERT_MSG_FALSE(
+        HELIUM_BREAK_MSG(
             TXT( "SparseArray::Remove(): Failed to find a used array slot, although at least one should exist." ) );
 
         m_size = 0;
@@ -1125,7 +1125,7 @@ size_t Helium::SparseArray< T, Allocator >::AllocateSlot()
             }
         }
 
-        HELIUM_ASSERT_MSG_FALSE(
+        HELIUM_BREAK_MSG(
             ( TXT( "SparseArray::AllocateSlot(): Failed to find an unused array slot, although at least one " )
               TXT( "should exist." ) ) );
     }

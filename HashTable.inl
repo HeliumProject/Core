@@ -146,7 +146,7 @@ Helium::ConstHashTableIterator< Value, Key, HashFunction, ExtractKey, EqualKey, 
         }
     }
 
-    HELIUM_ASSERT_MSG_FALSE( TXT( "Attempted backward HashTable iteration past the start of the table" ) );
+    HELIUM_BREAK_MSG( TXT( "Attempted backward HashTable iteration past the start of the table" ) );
 
     --m_pTable;
     m_bucketIndex = 0;
