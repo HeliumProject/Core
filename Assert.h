@@ -41,8 +41,21 @@
 #endif
 
 #if HELIUM_CC_CLANG
-# pragma clang diagnostic ignored "-Wunused-value"
-#endif
+
+# define HELIUM_CC_CLANG_PRAGMA( PRAGMA ) _Pragma( #PRAGMA )
+# define HELIUM_CC_PUSH_SILENCE_UNUSED_EXPRESSION_RESULT_WARNING \
+	HELIUM_CC_CLANG_PRAGMA( clang diagnostic push ) \
+	HELIUM_CC_CLANG_PRAGMA( clang diagnostic ignored "-Wunused-value" )
+# define HELIUM_CC_POP_SILENCE_UNUSED_EXPRESSION_RESULT_WARNING \
+	HELIUM_CC_CLANG_PRAGMA( clang diagnostic pop )
+
+#else // HELIUM_CC_CLANG
+
+# define HELIUM_CC_CLANG_PRAGMA( PRAGMA )
+# define HELIUM_CC_PUSH_SILENCE_UNUSED_EXPRESSION_RESULT_WARNING
+# define HELIUM_CC_POP_SILENCE_UNUSED_EXPRESSION_RESULT_WARNING
+
+#endif // HELIUM_CC_CLANG
 
 namespace Helium
 {
@@ -83,21 +96,33 @@ namespace Helium
 /// Trigger a debug breakpoint unconditionally in non-release builds.
 ///
 /// @see HELIUM_ASSERT(), HELIUM_ASSERT_MSG(), HELIUM_BREAK_MSG(), HELIUM_VERIFY(), HELIUM_VERIFY_MSG()
-#define HELIUM_BREAK() HELIUM_TRIGGER_ASSERT_HANDLER( NULL, NULL );
+#define HELIUM_BREAK() \
+HELIUM_CC_PUSH_SILENCE_UNUSED_EXPRESSION_RESULT_WARNING \
+	HELIUM_TRIGGER_ASSERT_HANDLER( NULL, NULL ); \
+HELIUM_CC_POP_SILENCE_UNUSED_EXPRESSION_RESULT_WARNING
 
 /// Trigger a debug breakpoint with a customized message unconditionally in non-release builds.
 ///
 /// @param[in] ...  Message to display if the assertion is triggered.
 ///
 /// @see HELIUM_ASSERT(), HELIUM_ASSERT_MSG(), HELIUM_BREAK(), HELIUM_VERIFY(), HELIUM_VERIFY_MSG()
-#define HELIUM_BREAK_MSG( ... ) HELIUM_TRIGGER_ASSERT_HANDLER( NULL, __VA_ARGS__ );
+#define HELIUM_BREAK_MSG( ... ) \
+HELIUM_CC_PUSH_SILENCE_UNUSED_EXPRESSION_RESULT_WARNING \
+	HELIUM_TRIGGER_ASSERT_HANDLER( NULL, __VA_ARGS__ ); \
+HELIUM_CC_POP_SILENCE_UNUSED_EXPRESSION_RESULT_WARNING
 
 /// Trigger a debug breakpoint if the result of an expression is false in non-release builds.
 ///
 /// @param[in] EXP  Expression to evaluate.
 ///
 /// @see HELIUM_ASSERT_MSG(), HELIUM_BREAK(), HELIUM_BREAK_MSG(), HELIUM_VERIFY(), HELIUM_VERIFY_MSG()
-#define HELIUM_ASSERT( EXP ) { if( !( EXP ) ) HELIUM_TRIGGER_ASSERT_HANDLER( TXT( #EXP ), NULL ); }
+#define HELIUM_ASSERT( EXP ) \
+	{ \
+		if( !( EXP ) ) \
+HELIUM_CC_PUSH_SILENCE_UNUSED_EXPRESSION_RESULT_WARNING \
+			HELIUM_TRIGGER_ASSERT_HANDLER( TXT( #EXP ), NULL ); \
+HELIUM_CC_POP_SILENCE_UNUSED_EXPRESSION_RESULT_WARNING \
+	}
 
 /// Trigger a debug breakpoint with a customized message if the result of an expression is false in non-release builds.
 ///
@@ -105,7 +130,13 @@ namespace Helium
 /// @param[in] ...      Message to display if the assertion is triggered.
 ///
 /// @see HELIUM_ASSERT(), HELIUM_BREAK(), HELIUM_BREAK_MSG() HELIUM_VERIFY(), HELIUM_VERIFY_MSG()
-#define HELIUM_ASSERT_MSG( EXP, ... ) { if( !( EXP ) ) HELIUM_TRIGGER_ASSERT_HANDLER( TXT( #EXP ), __VA_ARGS__ ); }
+#define HELIUM_ASSERT_MSG( EXP, ... ) \
+	{ \
+		if( !( EXP ) ) \
+HELIUM_CC_PUSH_SILENCE_UNUSED_EXPRESSION_RESULT_WARNING \
+			HELIUM_TRIGGER_ASSERT_HANDLER( TXT( #EXP ), __VA_ARGS__ ); \
+HELIUM_CC_POP_SILENCE_UNUSED_EXPRESSION_RESULT_WARNING \
+	}
 
 /// Trigger a debug breakpoint if the result of an expression is false in non-release builds while still evaluating the
 /// expression in release builds, and evaluating to the result of the expression.
@@ -113,7 +144,10 @@ namespace Helium
 /// @param[in] EXP  Expression to evaluate.
 ///
 /// @see HELIUM_ASSERT(), HELIUM_ASSERT_MSG(), HELIUM_BREAK(), HELIUM_BREAK_MSG(), HELIUM_VERIFY_MSG()
-#define HELIUM_VERIFY( EXP ) ( ( EXP ) ? true : ( HELIUM_TRIGGER_ASSERT_HANDLER( TXT( #EXP ), NULL ), false ) )
+#define HELIUM_VERIFY( EXP ) \
+HELIUM_CC_PUSH_SILENCE_UNUSED_EXPRESSION_RESULT_WARNING \
+	( ( EXP ) ? true : ( HELIUM_TRIGGER_ASSERT_HANDLER( TXT( #EXP ), NULL ), false ) ) \
+HELIUM_CC_POP_SILENCE_UNUSED_EXPRESSION_RESULT_WARNING
 
 /// Trigger a debug breakpoint with a customized message if the result of an expression is false in non-release builds
 /// while still evaluating the expression in release builds, and evaluating to the result of the expression.
@@ -122,7 +156,10 @@ namespace Helium
 /// @param[in] ...      Message to display if the assertion is triggered.
 ///
 /// @see HELIUM_ASSERT(), HELIUM_ASSERT_MSG(), HELIUM_BREAK(), HELIUM_BREAK_MSG(), HELIUM_VERIFY()
-#define HELIUM_VERIFY_MSG( EXP, ... ) ( ( EXP ) ? true : ( HELIUM_TRIGGER_ASSERT_HANDLER( TXT( #EXP ), NULL ), false ) )
+#define HELIUM_VERIFY_MSG( EXP, ... ) \
+HELIUM_CC_PUSH_SILENCE_UNUSED_EXPRESSION_RESULT_WARNING \
+	( ( EXP ) ? true : ( HELIUM_TRIGGER_ASSERT_HANDLER( TXT( #EXP ), NULL ), false ) ) \
+HELIUM_CC_POP_SILENCE_UNUSED_EXPRESSION_RESULT_WARNING
 
 #else  // HELIUM_ASSERT_ENABLED
 
@@ -161,7 +198,10 @@ namespace Helium
 /// @param[in] EXP      Expression to evaluate.
 ///
 /// @see HELIUM_ASSERT(), HELIUM_ASSERT_MSG(), HELIUM_BREAK(), HELIUM_BREAK_MSG(), HELIUM_VERIFY_MSG()
-#define HELIUM_VERIFY( EXP ) ( ( EXP ) ? true : false )
+#define HELIUM_VERIFY( EXP ) \
+HELIUM_CC_PUSH_SILENCE_UNUSED_EXPRESSION_RESULT_WARNING \
+	( ( EXP ) ? true : false ) \
+HELIUM_CC_POP_SILENCE_UNUSED_EXPRESSION_RESULT_WARNING
 
 /// Trigger a debug breakpoint if the result of an expression is false in non-release builds while still evaluating the
 /// expression in release builds, and evaluating to the result of the expression.
@@ -170,7 +210,10 @@ namespace Helium
 /// @param[in] ...      Message to display if the assertion is triggered.
 ///
 /// @see HELIUM_ASSERT(), HELIUM_ASSERT_MSG(), HELIUM_BREAK(), HELIUM_BREAK_MSG(), HELIUM_VERIFY()
-#define HELIUM_VERIFY_MSG( EXP, ... ) ( ( EXP ) ? true : false )
+#define HELIUM_VERIFY_MSG( EXP, ... ) \
+HELIUM_CC_PUSH_SILENCE_UNUSED_EXPRESSION_RESULT_WARNING \
+	( ( EXP ) ? true : false ) \
+HELIUM_CC_POP_SILENCE_UNUSED_EXPRESSION_RESULT_WARNING
 
 #endif
 
