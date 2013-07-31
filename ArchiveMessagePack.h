@@ -47,7 +47,7 @@ namespace Helium
 			virtual void Read( Reflect::ObjectPtr& object ) HELIUM_OVERRIDE;
 
 			void Start();
-			void ReadNext( Reflect::ObjectPtr &object );
+			bool ReadNext( Reflect::ObjectPtr &object );
 			void Resolve();
 
 		private:

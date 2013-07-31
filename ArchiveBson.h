@@ -81,7 +81,7 @@ namespace Helium
 			virtual void Read( Reflect::ObjectPtr& object ) HELIUM_OVERRIDE;
 
 			void Start();
-			void ReadNext( bson_iterator* i, Reflect::ObjectPtr &object );
+			bool ReadNext( Reflect::ObjectPtr &object );
 			void Resolve();
 
 		private:
@@ -98,6 +98,7 @@ namespace Helium
 			AutoPtr< Stream >       m_Stream;
 			int64_t                 m_Size;
 			bson                    m_Bson[1];
+			bson_iterator           m_Next[1];
 		};
 	}
 }

@@ -431,18 +431,17 @@ void ArchiveReaderBson::Read( Reflect::ObjectPtr& object )
 
 	if ( m_Flags & ArchiveFlags::Typeless )
 	{
-		ReadNext( i, object );
+		MemoryCopy( &m_Next, i, sizeof( bson_iterator ) );
+		ReadNext( object );
 	}
 	else
 	{
 		HELIUM_ASSERT( bson_iterator_type( i ) == BSON_ARRAY );
-
-		bson_iterator sub[1];
-		bson_iterator_subiterator( i, sub );
-		while ( bson_iterator_more( sub ) )
+		bson_iterator_subiterator( i, m_Next );
+		while ( bson_iterator_more( m_Next ) )
 		{
 			ObjectPtr object;
-			ReadNext( sub, object );
+			ReadNext( object );
 
 			ArchiveStatus info( *this, ArchiveStates::ObjectProcessed );
 			info.m_Progress = (int)(((float)(m_Stream->Tell()) / (float)m_Size) * 100.0f);
@@ -490,22 +489,26 @@ void Helium::Persist::ArchiveReaderBson::Start()
 	HELIUM_VERIFY( BSON_OK == bson_init_finished_data( m_Bson, reinterpret_cast< char* >( m_Buffer.GetData() ), false ) );
 }
 
-void Helium::Persist::ArchiveReaderBson::ReadNext( bson_iterator* i, Reflect::ObjectPtr& object )
+bool Helium::Persist::ArchiveReaderBson::ReadNext( Reflect::ObjectPtr& object )
 {
-	HELIUM_ASSERT( bson_iterator_more( i ) );
+	if ( !bson_iterator_more( m_Next ) )
+	{
+		return false;
+	}
 
 	if ( m_Flags & ArchiveFlags::Typeless )
 	{
 		HELIUM_ASSERT( object.ReferencesObject() );
-		DeserializeInstance( i, object, object->GetMetaClass(), object );
+		DeserializeInstance( m_Next, object, object->GetMetaClass(), object );
 	}
 	else
 	{
-		bson_iterator sub[1];
-		bson_iterator_subiterator( i, sub );
-		if ( bson_iterator_type( sub ) == BSON_OBJECT )
+		bson_iterator i[1];
+		bson_iterator_subiterator( m_Next, i );
+
+		if ( bson_iterator_type( i ) == BSON_OBJECT )
 		{
-			const char* key = bson_iterator_key( sub );
+			const char* key = bson_iterator_key( i );
 
 			uint32_t objectClassCrc = 0;
 			if ( key )
@@ -518,7 +521,7 @@ void Helium::Persist::ArchiveReaderBson::ReadNext( bson_iterator* i, Reflect::Ob
 			{
 				objectClass = Registry::GetInstance()->GetMetaClass( objectClassCrc );
 			}
-			
+
 			if ( !object && objectClass )
 			{
 				object = objectClass->m_Creator();
@@ -526,13 +529,14 @@ void Helium::Persist::ArchiveReaderBson::ReadNext( bson_iterator* i, Reflect::Ob
 
 			if ( object.ReferencesObject() )
 			{
-				DeserializeInstance( sub, object, object->GetMetaClass(), object );
+				DeserializeInstance( i, object, object->GetMetaClass(), object );
 				m_Objects.Push( object );
 			}
 		}
 	}
 
-	bson_iterator_next( i );
+	bson_iterator_next( m_Next );
+	return true;
 }
 
 void Helium::Persist::ArchiveReaderBson::Resolve()

@@ -77,7 +77,7 @@ namespace Helium
 			virtual void Read( Reflect::ObjectPtr& object ) HELIUM_OVERRIDE;
 
 			void Start();
-			void ReadNext( rapidjson::SizeType next, Reflect::ObjectPtr &object );
+			bool ReadNext( Reflect::ObjectPtr &object );
 			void Resolve();
 
 		private:
@@ -92,6 +92,7 @@ namespace Helium
 			DynamicArray< uint8_t > m_Buffer;
 			AutoPtr< Stream >       m_Stream;
 			rapidjson::Document     m_Document;
+			rapidjson::SizeType     m_Next;
 			int64_t                 m_Size;
 		};
 	}

@@ -333,6 +333,7 @@ void ArchiveWriterJson::ToStream( Object* object, Stream& stream, ObjectIdentifi
 ArchiveReaderJson::ArchiveReaderJson( const FilePath& path, ObjectResolver* resolver, uint32_t flags )
 	: ArchiveReader( path, resolver, flags )
 	, m_Stream( NULL )
+	, m_Next( 0 )
 	, m_Size( 0 )
 {
 
@@ -341,6 +342,7 @@ ArchiveReaderJson::ArchiveReaderJson( const FilePath& path, ObjectResolver* reso
 ArchiveReaderJson::ArchiveReaderJson( Stream *stream, ObjectResolver* resolver, uint32_t flags )
 	: ArchiveReader( resolver, flags )
 	, m_Stream( NULL )
+	, m_Next( 0 )
 	, m_Size( 0 )
 {
 	m_Stream.Reset( stream );
@@ -378,7 +380,7 @@ void ArchiveReaderJson::Read( Reflect::ObjectPtr& object )
 
 	if ( m_Flags & ArchiveFlags::Typeless )
 	{
-		ReadNext( 0, object );
+		ReadNext( object );
 	}
 	else
 	{
@@ -389,7 +391,7 @@ void ArchiveReaderJson::Read( Reflect::ObjectPtr& object )
 		for ( uint32_t i=0; i<length; i++ )
 		{
 			ObjectPtr object;
-			ReadNext( i, object );
+			ReadNext( object );
 
 			ArchiveStatus info( *this, ArchiveStates::ObjectProcessed );
 			info.m_Progress = (int)(((float)(m_Stream->Tell()) / (float)m_Size) * 100.0f);
@@ -468,14 +470,14 @@ void Helium::Persist::ArchiveReaderJson::Start()
 	}
 }
 
-void Helium::Persist::ArchiveReaderJson::ReadNext( rapidjson::SizeType next, Reflect::ObjectPtr& object )
+bool Helium::Persist::ArchiveReaderJson::ReadNext( Reflect::ObjectPtr& object )
 {
-	if ( !HELIUM_VERIFY( next < m_Document.Size() ) )
+	if ( m_Next >= m_Document.Size() )
 	{
-		return;
+		return false;
 	}
 
-	rapidjson::Value& value = m_Document[ next ];
+	rapidjson::Value& value = m_Document[ m_Next ];
 	
 	if ( m_Flags & ArchiveFlags::Typeless )
 	{
@@ -512,6 +514,9 @@ void Helium::Persist::ArchiveReaderJson::ReadNext( rapidjson::SizeType next, Ref
 			m_Objects.Push( object );
 		}
 	}
+
+	m_Next++;
+	return true;
 }
 
 void Helium::Persist::ArchiveReaderJson::Resolve()

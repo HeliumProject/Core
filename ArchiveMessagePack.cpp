@@ -456,8 +456,13 @@ void ArchiveReaderMessagePack::Start()
 	m_Reader.Advance();
 }
 
-void ArchiveReaderMessagePack::ReadNext( ObjectPtr& object )
+bool ArchiveReaderMessagePack::ReadNext( ObjectPtr& object )
 {
+	if ( m_Stream->Tell() == this->m_Size )
+	{
+		return false;
+	}
+
 	if ( m_Flags & ArchiveFlags::Typeless )
 	{
 		DeserializeInstance( object, object->GetMetaClass(), object );
@@ -504,6 +509,8 @@ void ArchiveReaderMessagePack::ReadNext( ObjectPtr& object )
 
 		m_Reader.EndMap();
 	}
+
+	return true;
 }
 
 void ArchiveReaderMessagePack::Resolve()
