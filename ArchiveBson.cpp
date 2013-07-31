@@ -595,7 +595,7 @@ void ArchiveReaderBson::DeserializeInstance( bson_iterator* i, void* instance, c
 			{
 				HELIUM_TRACE(
 					TraceLevels::Warning, 
-					"ArchiveReaderBson::DeserializeInstance - Could not find field '%s' (crc=)\n", 
+					"ArchiveReaderBson::DeserializeInstance - Could not find field '%s' (CRC-32 = %d)\n", 
 					key, 
 					fieldCrc);
 			}
@@ -603,7 +603,7 @@ void ArchiveReaderBson::DeserializeInstance( bson_iterator* i, void* instance, c
 			{
 				HELIUM_TRACE(
 					TraceLevels::Warning, 
-					"ArchiveReaderBson::DeserializeInstance - Could not find field (crc=)\n", 
+					"ArchiveReaderBson::DeserializeInstance - Could not find field with CRC-32 %d)\n", 
 					fieldCrc);
 			}
 				

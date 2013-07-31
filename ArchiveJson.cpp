@@ -570,7 +570,7 @@ void ArchiveReaderJson::DeserializeInstance( rapidjson::Value& value, void* inst
 				{
 					HELIUM_TRACE(
 						TraceLevels::Warning, 
-						"ArchiveReaderJson::DeserializeInstance - Could not find field '%s' (crc=)\n", 
+						"ArchiveReaderJson::DeserializeInstance - Could not find field '%s' (CRC-32 = %d)\n", 
 						itr->name.GetString(), 
 						fieldCrc);
 				}
@@ -578,7 +578,7 @@ void ArchiveReaderJson::DeserializeInstance( rapidjson::Value& value, void* inst
 				{
 					HELIUM_TRACE(
 						TraceLevels::Warning, 
-						"ArchiveReaderJson::DeserializeInstance - Could not find field (crc=)\n", 
+						"ArchiveReaderJson::DeserializeInstance - Could not find field with CRC-32 %d)\n", 
 						fieldCrc);
 				}
 				
