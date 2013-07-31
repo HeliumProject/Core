@@ -23,11 +23,10 @@ void Helium::FatalExit( int /*exitCode*/ )
 /// Handle an assertion.
 ///
 /// @param[in] pMessageText  Assert message text.
-AssertResult Assert::TriggerImplementation( const char* pMessageText )
+bool Assert::TriggerImplementation( const char* pMessageText )
 {
     PRINTF( "%s\n", pMessageText );
-
-    return AssertResults::Break;
+    return true;
 }
 
 #endif  // HELIUM_ASSERT_ENABLED
