@@ -29,17 +29,19 @@
 # define HELIUM_FUNCTION_NAME __FUNCSIG__
 #else
 # if HELIUM_CC_GCC
-#  if HELIUM_CPU_X86_32
-#   define HELIUM_ISSUE_BREAK() __asm__( "int $3" )
-#  else
-#   define HELIUM_ISSUE_BREAK() __builtin_trap()
-#  endif
+#  define HELIUM_ISSUE_BREAK() __builtin_trap()
+# elif HELIUM_CC_CLANG
+#  define HELIUM_ISSUE_BREAK() __builtin_trap()
 # elif HELIUM_CC_SNC
 #  define HELIUM_ISSUE_BREAK() __builtin_snpause()
 # else
-#  define HELIUM_ISSUE_BREAK() __asm__( "int $3" )
+#  error Platform has no break intrinsic!
 # endif
 # define HELIUM_FUNCTION_NAME __PRETTY_FUNCTION__
+#endif
+
+#if HELIUM_CC_CLANG
+# pragma clang diagnostic ignored "-Wunused-value"
 #endif
 
 namespace Helium
