@@ -38,3 +38,8 @@ bool Helium::Persist::BsonObjectId::operator>( const BsonObjectId& rhs ) const
 {
 	return 0 < MemoryCompare( bytes, rhs.bytes, sizeof( bytes ) );
 }
+
+Helium::Persist::BsonObjectId::operator bool() const
+{
+	return *this != BsonObjectId::Null;
+}

@@ -37,6 +37,7 @@ namespace Helium
 			inline bool operator!=( const BsonObjectId& rhs ) const;
 			inline bool operator<( const BsonObjectId& rhs ) const;
 			inline bool operator>( const BsonObjectId& rhs ) const;
+			inline operator bool() const;
 
 			static BsonObjectId Null;
 
