@@ -24,6 +24,18 @@ void BsonDate::PopulateMetaType( Reflect::MetaStruct& type )
 	type.AddField( &BsonDate::millis, "millis" );
 }
 
+void BsonObjectId::IntoString( String& str )
+{
+	char chars[ sizeof(bson_oid_t) * 2 + 1 ] = { 0 };
+	bson_oid_to_string( (bson_oid_t*)this, chars );
+	str = chars;
+}
+
+void BsonObjectId::FromString( const String& str )
+{
+	bson_oid_from_string( (bson_oid_t*)this, str.GetData() );
+}
+
 void BsonObjectId::PopulateMetaType( Reflect::MetaStruct& type )
 {
 	type.AddField( &BsonObjectId::bytes, "bytes" );
