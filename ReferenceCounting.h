@@ -5,16 +5,6 @@
 #include "Platform/Atomic.h"
 #include "Platform/Utility.h"
 
-#if HELIUM_WORDSIZE == 32
-# define HELIUM_IS_LINK_INDEX_FLAG (0x80000000)
-#else
-# define HELIUM_IS_LINK_INDEX_FLAG (0x8000000000000000)
-#endif
-
-#define HELIUM_IS_LINK_INDEX(_x_) ((_x_ & HELIUM_IS_LINK_INDEX_FLAG) == HELIUM_IS_LINK_INDEX_FLAG)
-#define HELIUM_FLAG_AS_LINK_INDEX(_x_) (HELIUM_IS_LINK_INDEX_FLAG | _x_)
-#define HELIUM_UNFLAG_AS_LINK_INDEX(_x_) ((~HELIUM_IS_LINK_INDEX_FLAG) & _x_)
-
 /// Utility macro for declaring common functions and variables for an object with strong/weak reference counting
 /// support.
 ///
@@ -125,16 +115,7 @@ namespace Helium
         T* Ptr() const;
         void Set( T* pObject );
         void Release();
-
         bool ReferencesObject() const;
-        //@}
-
-        /// @name Object Linking Support
-        //@{
-        void SetLinkIndex( uint32_t index );
-        uint32_t GetLinkIndex() const;
-        void ClearLinkIndex();
-        bool HasLinkIndex() const;
         //@}
 
         /// @name Overloaded Operators
@@ -157,11 +138,7 @@ namespace Helium
 
     private:
         /// Proxy object (cast to a RefCountProxyBase pointer to allow for declaring smart pointers to forward-declared types).
-        union
-        {
-            RefCountProxyBase* m_pProxy; // Almost always, a smart ptr is actually a pointer
-            uintptr_t m_LinkIndex;       // But when linking game objects, we may "tag" a reference with an index
-        };
+        RefCountProxyBase* m_pProxy;    // Almost always, a smart ptr is actually a pointer
 
         /// @name Conversion Utility Functions, Private
         //@{
