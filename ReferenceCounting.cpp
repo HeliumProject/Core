@@ -187,9 +187,9 @@ void TestRefCountingFull()
 	bool equal = strong1 == strong2;
 	equal = !(strong1 != strong2);
 
-	WeakPtr< Object > weak1 = strong1;
+	WeakPtr< Object > weak1 = WeakPtr< Object >( strong1 );
 	strong1 = weak1;
-	WeakPtr< Object > weak2 = strong2;
+	WeakPtr< Object > weak2 = WeakPtr< Object >( strong2 );
 	equal = weak1 == weak2;
 	equal = !(weak1 != weak2);
 
