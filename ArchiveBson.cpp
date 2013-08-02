@@ -17,6 +17,25 @@ using namespace Helium;
 using namespace Helium::Reflect;
 using namespace Helium::Persist;
 
+const char* Persist::GetBsonErrorString( int status )
+{
+	// if this is non-power-of-two then we have multiple errors
+	HELIUM_ASSERT( ( abs(status) & ( abs(status) - 1 ) ) == 0 );
+
+	switch( status )
+	{
+	case BSON_SIZE_OVERFLOW:        return "Trying to create a BSON object larger than INT_MAX";
+	case BSON_NOT_UTF8:             return "A key or a string is not valid UTF-8";
+	case BSON_FIELD_HAS_DOT:        return "A key contains '.' character";
+	case BSON_FIELD_INIT_DOLLAR:    return "A key starts with '$' character";
+	case BSON_ALREADY_FINISHED:     return "Trying to modify a finished BSON object";
+	case BSON_NOT_IN_SUBOBJECT:     return "Trying bson_append_finish_object() and not in sub";
+	case BSON_DOES_NOT_OWN_DATA:    return "Trying to expand a BSON object which does not own its data block";
+	}
+
+	return "Unknown error";
+}
+
 BsonObjectId BsonObjectId::Null;
 
 void BsonDate::PopulateMetaType( Reflect::MetaStruct& type )
@@ -498,7 +517,10 @@ void Helium::Persist::ArchiveReaderBson::Start()
 	m_Stream->Read( m_Buffer.GetData(),  static_cast< size_t >( m_Size ), 1 );
 	m_Buffer[ static_cast< size_t >( m_Size ) ] = '\0';
 
-	HELIUM_VERIFY( BSON_OK == bson_init_finished_data( m_Bson, reinterpret_cast< char* >( m_Buffer.GetData() ), false ) );
+	if ( !HELIUM_VERIFY( BSON_OK == bson_init_finished_data( m_Bson, reinterpret_cast< char* >( m_Buffer.GetData() ), false ) ) )
+	{
+		throw Persist::Exception( "Bson error: ", GetBsonErrorString( m_Bson->err ) );
+	}
 }
 
 bool Helium::Persist::ArchiveReaderBson::ReadNext( Reflect::ObjectPtr& object )

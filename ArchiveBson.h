@@ -16,6 +16,8 @@ namespace Helium
 {
 	namespace Persist
 	{
+		const char* GetBsonErrorString( int status );
+
 		struct BsonDate : Helium::Reflect::Struct
 		{
 			int64_t millis; // milliseconds since epoch UTC
