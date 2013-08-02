@@ -27,18 +27,19 @@ namespace Helium
     template< typename PointerT > class WeakPtr;
 
     /// Base type for reference counting object proxies.
+    template< typename T >
     class RefCountProxyBase
     {
     protected:
         /// Reference-counted object.
-        void* volatile m_pObject;
+        T* volatile m_pObject;
         /// Reference counts (strong references in lower 16-bits, weak references in upper 16-bits).
         volatile int32_t m_refCounts;
     };
 
     /// Reference counting object proxy.
     template< typename BaseT >
-    class RefCountProxy : public RefCountProxyBase
+    class RefCountProxy : public RefCountProxyBase< void >
     {
     public:
         /// @name Initialization
@@ -138,7 +139,7 @@ namespace Helium
 
     private:
         /// Proxy object (cast to a RefCountProxyBase pointer to allow for declaring smart pointers to forward-declared types).
-        RefCountProxyBase* m_pProxy;    // Almost always, a smart ptr is actually a pointer
+        RefCountProxyBase< PointerT >* m_pProxy;
 
         /// @name Conversion Utility Functions, Private
         //@{
@@ -197,7 +198,7 @@ namespace Helium
 
     private:
         /// Proxy object (cast to a RefCountProxyBase pointer to allow for declaring smart pointers to forward-declared types).
-        RefCountProxyBase* m_pProxy;
+        RefCountProxyBase< PointerT >* m_pProxy;
 
         /// @name Conversion Utility Functions, Private
         //@{

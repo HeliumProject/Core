@@ -162,9 +162,9 @@ Helium::StrongPtr< PointerT >::StrongPtr( PointerT* pObject )
 {
     if( pObject )
     {
-        m_pProxy = pObject->GetRefCountProxy();
+        m_pProxy = reinterpret_cast< RefCountProxyBase< PointerT >* >( pObject->GetRefCountProxy() );
         HELIUM_ASSERT( m_pProxy );
-        static_cast< RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* >( m_pProxy )->AddStrongRef();
+        reinterpret_cast< RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* >( m_pProxy )->AddStrongRef();
     }
 }
 
@@ -201,7 +201,7 @@ Helium::StrongPtr< PointerT >::StrongPtr( const StrongPtr& rPointer )
 {
     if( m_pProxy )
     {
-        static_cast< RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* >( m_pProxy )->AddStrongRef();
+        reinterpret_cast< RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* >( m_pProxy )->AddStrongRef();
     }
 }
 
@@ -222,7 +222,7 @@ PointerT* Helium::StrongPtr< PointerT >::Get() const
 {
     typedef typename PointerT::RefCountSupportType RefCountSupportType;
     return ( m_pProxy
-        ? static_cast< PointerT* >( static_cast< RefCountProxy< typename RefCountSupportType::BaseType >* >( m_pProxy )->GetObject() )
+        ? static_cast< PointerT* >( reinterpret_cast< RefCountProxy< typename RefCountSupportType::BaseType >* >( m_pProxy )->GetObject() )
         : NULL );
 }
 
@@ -245,7 +245,7 @@ PointerT* Helium::StrongPtr< PointerT >::Ptr() const
 template< typename PointerT >
 void Helium::StrongPtr< PointerT >::Set( PointerT* pObject )
 {
-    RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* pProxy = static_cast< RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* >( m_pProxy );
+    RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* pProxy = reinterpret_cast< RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* >( m_pProxy );
     if( pProxy )
     {
         if( pProxy->GetObject() == pObject )
@@ -264,9 +264,9 @@ void Helium::StrongPtr< PointerT >::Set( PointerT* pObject )
 
     if( pObject )
     {
-        m_pProxy = pObject->GetRefCountProxy();
+        m_pProxy = reinterpret_cast< RefCountProxyBase< PointerT >* >( pObject->GetRefCountProxy() );
         HELIUM_ASSERT( m_pProxy );
-        static_cast< RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* >( m_pProxy )->AddStrongRef();
+        reinterpret_cast< RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* >( m_pProxy )->AddStrongRef();
     }
 }
 
@@ -277,7 +277,7 @@ template< typename PointerT >
 void Helium::StrongPtr< PointerT >::Release()
 {
     RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* pProxy =
-        static_cast< RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* >( m_pProxy );
+        reinterpret_cast< RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* >( m_pProxy );
     m_pProxy = NULL;
 
     if( pProxy && pProxy->RemoveStrongRef() )
@@ -296,7 +296,7 @@ bool Helium::StrongPtr< PointerT >::ReferencesObject() const
     // whether we have a proxy object set.
     HELIUM_ASSERT(
         !m_pProxy ||
-        static_cast< RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* >( m_pProxy )->GetObject() );
+        reinterpret_cast< RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* >( m_pProxy )->GetObject() );
 
     return ( m_pProxy != NULL );
 }
@@ -366,20 +366,20 @@ Helium::StrongPtr< PointerT >& Helium::StrongPtr< PointerT >::operator=( Pointer
 template< typename PointerT >
 Helium::StrongPtr< PointerT >& Helium::StrongPtr< PointerT >::operator=( const WeakPtr< PointerT >& rPointer )
 {
-    // Note that a weak pointer can have a reference count proxy whose object is set to null, so we need to check for
-    // and handle that case as well.
-    RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* pOtherProxy =
-        static_cast< RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* >( rPointer.m_pProxy );
+    RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* pThisProxy = reinterpret_cast< RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* >( m_pProxy );
+    RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* pOtherProxy = reinterpret_cast< RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* >( rPointer.m_pProxy );
+
+    // Note that a weak pointer can have a reference count proxy whose object is set to null, so we need to check for and handle that case as well.
     if( pOtherProxy && !pOtherProxy->GetObject() )
     {
         pOtherProxy = NULL;
     }
 
-    if( m_pProxy != pOtherProxy )
+    if( pThisProxy != pOtherProxy )
     {
         Release();
 
-        m_pProxy = pOtherProxy;
+        m_pProxy = reinterpret_cast< RefCountProxyBase< PointerT >* >( pOtherProxy );
         if( pOtherProxy )
         {
             pOtherProxy->AddStrongRef();
@@ -397,13 +397,13 @@ Helium::StrongPtr< PointerT >& Helium::StrongPtr< PointerT >::operator=( const W
 template< typename PointerT >
 Helium::StrongPtr< PointerT >& Helium::StrongPtr< PointerT >::operator=( const StrongPtr& rPointer )
 {
-    RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* pOtherProxy =
-        static_cast< RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* >( rPointer.m_pProxy );
-    if( m_pProxy != pOtherProxy )
+    RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* pThisProxy = reinterpret_cast< RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* >( m_pProxy );
+    RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* pOtherProxy = reinterpret_cast< RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* >( rPointer.m_pProxy );
+    if( pThisProxy != pOtherProxy )
     {
         Release();
 
-        m_pProxy = pOtherProxy;
+        m_pProxy = reinterpret_cast< RefCountProxyBase< PointerT >* >( pOtherProxy );
         if( pOtherProxy )
         {
             pOtherProxy->AddStrongRef();
@@ -421,16 +421,17 @@ Helium::StrongPtr< PointerT >& Helium::StrongPtr< PointerT >::operator=( const S
 template< typename PointerT >
 bool Helium::StrongPtr< PointerT >::operator==( const WeakPtr< PointerT >& rPointer ) const
 {
-    // Note that a weak pointer can have a reference count proxy whose object is set to null, so we need to check
+    RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* pThisProxy = reinterpret_cast< RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* >( m_pProxy );
+    RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* pOtherProxy = reinterpret_cast< RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* >( rPointer.m_pProxy );
+
+	// Note that a weak pointer can have a reference count proxy whose object is set to null, so we need to check
     // for and handle that case as well.
-    RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* pOtherProxy =
-        static_cast< RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* >( rPointer.m_pProxy );
     if( pOtherProxy && !pOtherProxy->GetObject() )
     {
         pOtherProxy = NULL;
     }
 
-    return ( m_pProxy == pOtherProxy );
+    return ( pThisProxy == pOtherProxy );
 }
 
 /// Equality comparison operator.
@@ -452,16 +453,16 @@ bool Helium::StrongPtr< PointerT >::operator==( const StrongPtr& rPointer ) cons
 template< typename PointerT >
 bool Helium::StrongPtr< PointerT >::operator!=( const WeakPtr< PointerT >& rPointer ) const
 {
-    // Note that a weak pointer can have a reference count proxy whose object is set to null, so we need to check for
-    // and handle that case as well.
-    RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* pOtherProxy =
-        static_cast< RefCountProxy< typename PointerT::RefCountSupportType::BaseType > >( rPointer.m_pProxy );
+    RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* pThisProxy = reinterpret_cast< RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* >( m_pProxy );
+    RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* pOtherProxy = reinterpret_cast< RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* >( rPointer.m_pProxy );
+
+    // Note that a weak pointer can have a reference count proxy whose object is set to null, so we need to check for and handle that case as well.
     if( pOtherProxy && !pOtherProxy->GetObject() )
     {
         pOtherProxy = NULL;
     }
 
-    return ( m_pProxy != pOtherProxy );
+    return ( pThisProxy != pOtherProxy );
 }
 
 /// Inequality comparison operator.
@@ -503,9 +504,9 @@ Helium::WeakPtr< PointerT >::WeakPtr( PointerT* pObject )
 {
     if( pObject )
     {
-        m_pProxy = pObject->GetRefCountProxy();
+        m_pProxy = reinterpret_cast< RefCountProxyBase< PointerT >* >( pObject->GetRefCountProxy() );
         HELIUM_ASSERT( m_pProxy );
-        static_cast< RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* >( m_pProxy )->AddWeakRef();
+        reinterpret_cast< RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* >( m_pProxy )->AddWeakRef();
     }
 }
 
@@ -518,7 +519,7 @@ Helium::WeakPtr< PointerT >::WeakPtr( const StrongPtr< PointerT >& rPointer )
 {
     if( m_pProxy )
     {
-        static_cast< RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* >( m_pProxy )->AddWeakRef();
+        reinterpret_cast< RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* >( m_pProxy )->AddWeakRef();
     }
 }
 
@@ -533,7 +534,7 @@ Helium::WeakPtr< PointerT >::WeakPtr( const WeakPtr& rPointer )
     // that case as well.
     if( m_pProxy )
     {
-        RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* pProxy = static_cast< RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* >( m_pProxy );
+        RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* pProxy = reinterpret_cast< RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* >( m_pProxy );
         if( pProxy->GetObject() )
         {
             pProxy->AddWeakRef();
@@ -560,7 +561,7 @@ Helium::WeakPtr< PointerT >::~WeakPtr()
 template< typename PointerT >
 PointerT* Helium::WeakPtr< PointerT >::Get() const
 {
-    return m_pProxy ? static_cast< PointerT* >( static_cast< RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* >( m_pProxy )->GetObject() ) : NULL;
+    return m_pProxy ? static_cast< PointerT* >( reinterpret_cast< RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* >( m_pProxy )->GetObject() ) : NULL;
 }
 
 /// Get the object referenced by this smart pointer.
@@ -582,7 +583,7 @@ PointerT* Helium::WeakPtr< PointerT >::Ptr() const
 template< typename PointerT >
 void Helium::WeakPtr< PointerT >::Set( PointerT* pObject )
 {
-    RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* pProxy = static_cast< RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* >( m_pProxy );
+    RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* pProxy = reinterpret_cast< RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* >( m_pProxy );
     if( pProxy )
     {
         // Note that a weak pointer can have a reference count proxy set to null, so we need to check for and handle
@@ -603,9 +604,9 @@ void Helium::WeakPtr< PointerT >::Set( PointerT* pObject )
 
     if( pObject )
     {
-        m_pProxy = pObject->GetRefCountProxy();
+        m_pProxy = reinterpret_cast< RefCountProxyBase< PointerT >* >( pObject->GetRefCountProxy() );
         HELIUM_ASSERT( m_pProxy );
-        static_cast< RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* >( m_pProxy )->AddWeakRef();
+        reinterpret_cast< RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* >( m_pProxy )->AddWeakRef();
     }
 }
 
@@ -615,7 +616,7 @@ void Helium::WeakPtr< PointerT >::Set( PointerT* pObject )
 template< typename PointerT >
 void Helium::WeakPtr< PointerT >::Release()
 {
-    RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* pProxy = static_cast< RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* >( m_pProxy );
+    RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* pProxy = reinterpret_cast< RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* >( m_pProxy );
     m_pProxy = NULL;
 
     if( pProxy && pProxy->RemoveWeakRef() )
@@ -642,8 +643,7 @@ template< typename PointerT >
 bool Helium::WeakPtr< PointerT >::HasObjectProxy( const PointerT* pObject ) const
 {
     HELIUM_ASSERT( pObject );
-
-    return ( m_pProxy == pObject->GetRefCountProxy() );
+    return ( m_pProxy == reinterpret_cast< RefCountProxyBase< PointerT >* >( pObject->GetRefCountProxy() ) );
 }
 
 /// Get the object referenced by this smart pointer.
@@ -675,7 +675,6 @@ PointerT& Helium::WeakPtr< PointerT >::operator*() const
 {
     PointerT* pObject = Get();
     HELIUM_ASSERT( pObject );
-
     return *pObject;
 }
 
@@ -687,7 +686,6 @@ PointerT* Helium::WeakPtr< PointerT >::operator->() const
 {
     PointerT* pObject = Get();
     HELIUM_ASSERT( pObject );
-
     return pObject;
 }
 
@@ -700,7 +698,6 @@ template< typename PointerT >
 Helium::WeakPtr< PointerT >& Helium::WeakPtr< PointerT >::operator=( PointerT* pObject )
 {
     Set( pObject );
-
     return *this;
 }
 
@@ -712,12 +709,13 @@ Helium::WeakPtr< PointerT >& Helium::WeakPtr< PointerT >::operator=( PointerT* p
 template< typename PointerT >
 Helium::WeakPtr< PointerT >& Helium::WeakPtr< PointerT >::operator=( const StrongPtr< PointerT >& rPointer )
 {
+    RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* pThisProxy = reinterpret_cast< RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* >( m_pProxy );
     RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* pOtherProxy = static_cast< RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* >( rPointer.m_pProxy );
-    if( m_pProxy != pOtherProxy )
+    if( pThisProxy != pOtherProxy )
     {
         Release();
 
-        m_pProxy = pOtherProxy;
+        m_pProxy = reinterpret_cast< RefCountProxyBase< PointerT >* >( pOtherProxy );
         if( pOtherProxy )
         {
             pOtherProxy->AddWeakRef();
@@ -735,19 +733,20 @@ Helium::WeakPtr< PointerT >& Helium::WeakPtr< PointerT >::operator=( const Stron
 template< typename PointerT >
 Helium::WeakPtr< PointerT >& Helium::WeakPtr< PointerT >::operator=( const WeakPtr& rPointer )
 {
-    // Note that a weak pointer can have a reference count proxy whose object is set to null, so we need to check for
-    // and handle that case as well.
-    RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* pOtherProxy = static_cast< RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* >( rPointer.m_pProxy );
+    RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* pThisProxy = reinterpret_cast< RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* >( m_pProxy );
+    RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* pOtherProxy = reinterpret_cast< RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* >( rPointer.m_pProxy );
+
+    // Note that a weak pointer can have a reference count proxy whose object is set to null, so we need to check for and handle that case as well.
     if( pOtherProxy && !pOtherProxy->GetObject() )
     {
         pOtherProxy = NULL;
     }
 
-    if( m_pProxy != pOtherProxy )
+    if( pThisProxy != pOtherProxy )
     {
         Release();
 
-        m_pProxy = pOtherProxy;
+        m_pProxy = reinterpret_cast< RefCountProxyBase< PointerT >* >( pOtherProxy );
         if( pOtherProxy )
         {
             pOtherProxy->AddWeakRef();
@@ -765,15 +764,16 @@ Helium::WeakPtr< PointerT >& Helium::WeakPtr< PointerT >::operator=( const WeakP
 template< typename PointerT >
 bool Helium::WeakPtr< PointerT >::operator==( const StrongPtr< PointerT >& rPointer ) const
 {
-    // Note that a weak pointer can have a reference count proxy whose object is set to null, so we need to check for
-    // and handle that case as well.
-    RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* pThisProxy = static_cast< RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* >( m_pProxy );
+    RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* pThisProxy = reinterpret_cast< RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* >( m_pProxy );
+    RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* pOtherProxy = reinterpret_cast< RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* >( rPointer.m_pProxy );
+
+    // Note that a weak pointer can have a reference count proxy whose object is set to null, so we need to check for and handle that case as well.
     if( pThisProxy && !pThisProxy->GetObject() )
     {
         pThisProxy = NULL;
     }
 
-    return ( pThisProxy == rPointer.m_pProxy );
+    return ( pThisProxy == pOtherProxy );
 }
 
 /// Equality comparison operator.
@@ -784,8 +784,7 @@ bool Helium::WeakPtr< PointerT >::operator==( const StrongPtr< PointerT >& rPoin
 template< typename PointerT >
 bool Helium::WeakPtr< PointerT >::operator==( const WeakPtr& rPointer ) const
 {
-    // Note that a weak pointer can have a reference count proxy whose object is set to null, so we need to check for
-    // and handle that case as well.
+    // Note that a weak pointer can have a reference count proxy whose object is set to null, so we need to check for and handle that case as well.
     return ( Get() == rPointer.Get() );
 }
 
@@ -797,15 +796,16 @@ bool Helium::WeakPtr< PointerT >::operator==( const WeakPtr& rPointer ) const
 template< typename PointerT >
 bool Helium::WeakPtr< PointerT >::operator!=( const StrongPtr< PointerT >& rPointer ) const
 {
-    // Note that a weak pointer can have a reference count proxy whose object is set to null, so we need to check for
-    // and handle that case as well.
-    RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* pThisProxy = static_cast< RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* >( m_pProxy );
+    RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* pThisProxy = reinterpret_cast< RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* >( m_pProxy );
+    RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* pOtherProxy = reinterpret_cast< RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* >( rPointer.m_pProxy );
+
+    // Note that a weak pointer can have a reference count proxy whose object is set to null, so we need to check for and handle that case as well.
     if( pThisProxy && !pThisProxy->GetObject() )
     {
         pThisProxy = NULL;
     }
 
-    return ( pThisProxy != rPointer.m_pProxy );
+    return ( pThisProxy != pOtherProxy );
 }
 
 /// Inequality comparison operator.
@@ -816,8 +816,7 @@ bool Helium::WeakPtr< PointerT >::operator!=( const StrongPtr< PointerT >& rPoin
 template< typename PointerT >
 bool Helium::WeakPtr< PointerT >::operator!=( const WeakPtr& rPointer ) const
 {
-    // Note that a weak pointer can have a reference count proxy whose object is set to null, so we need to check for
-    // and handle that case as well.
+    // Note that a weak pointer can have a reference count proxy whose object is set to null, so we need to check for and handle that case as well.
     return ( Get() != rPointer.Get() );
 }
 

@@ -3,6 +3,7 @@
 #include "Platform/Locks.h"
 
 #include "Foundation/API.h"
+#include "Foundation/Math.h"
 
 namespace Helium
 {
