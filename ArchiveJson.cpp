@@ -50,7 +50,6 @@ void ArchiveWriterJson::Close()
 {
 	HELIUM_ASSERT( m_Stream );
 	m_Stream->Close();
-	m_Stream.Release();
 	m_Output.SetStream( NULL );
 }
 
@@ -369,7 +368,6 @@ void ArchiveReaderJson::Close()
 {
 	HELIUM_ASSERT( m_Stream );
 	m_Stream->Close();
-	m_Stream.Release();
 }
 
 void ArchiveReaderJson::Read( Reflect::ObjectPtr& object )

@@ -92,7 +92,6 @@ void ArchiveWriterBson::Close()
 {
 	HELIUM_ASSERT( m_Stream );
 	m_Stream->Close();
-	m_Stream.Release();
 }
 
 void ArchiveWriterBson::Write( Object* object )
@@ -448,7 +447,6 @@ void ArchiveReaderBson::Close()
 {
 	HELIUM_ASSERT( m_Stream );
 	m_Stream->Close();
-	m_Stream.Release();
 }
 
 void ArchiveReaderBson::Read( Reflect::ObjectPtr& object )

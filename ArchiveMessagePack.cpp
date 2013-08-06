@@ -47,7 +47,6 @@ void ArchiveWriterMessagePack::Close()
 {
 	HELIUM_ASSERT( m_Stream );
 	m_Stream->Close(); 
-	m_Stream.Release(); 
 }
 
 void ArchiveWriterMessagePack::Write( Reflect::Object* object )
@@ -387,7 +386,6 @@ void ArchiveReaderMessagePack::Close()
 {
 	HELIUM_ASSERT( m_Stream );
 	m_Stream->Close(); 
-	m_Stream.Release(); 
 }
 
 void ArchiveReaderMessagePack::Read( Reflect::ObjectPtr& object )
