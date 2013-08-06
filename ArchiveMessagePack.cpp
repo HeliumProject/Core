@@ -60,46 +60,38 @@ void ArchiveWriterMessagePack::Write( Reflect::Object* object )
 	// the master object
 	m_Objects.Push( object );
 
-	if ( m_Flags & ArchiveFlags::Typeless )
+	// begin top level array of objects
+	m_Writer.BeginArray();
+
+	// objects can get changed during this iteration (in Identify), so use indices
+	for ( size_t index = 0; index < m_Objects.GetSize(); ++index )
 	{
+		Object* object = m_Objects.GetElement( index );
 		const MetaClass* objectClass = object->GetMetaClass();
-		SerializeInstance( object, objectClass, object );
-	}
-	else
-	{
-		// begin top level array of objects
-		m_Writer.BeginArray();
 
-		// objects can get changed during this iteration (in Identify), so use indices
-		for ( size_t index = 0; index < m_Objects.GetSize(); ++index )
+		m_Writer.BeginMap( 1 );
+
+		if ( m_Flags & ArchiveFlags::StringCrc )
 		{
-			Object* object = m_Objects.GetElement( index );
-			const MetaClass* objectClass = object->GetMetaClass();
-
-			m_Writer.BeginMap( 1 );
-
-			if ( m_Flags & ArchiveFlags::StringCrc )
-			{
-				uint32_t typeCrc = Crc32( objectClass->m_Name );
-				m_Writer.Write( typeCrc );
-			}
-			else
-			{
-				m_Writer.Write( objectClass->m_Name );
-			}
-
-			SerializeInstance( object, objectClass, object );
-
-			m_Writer.EndMap();
-
-			info.m_State = ArchiveStates::ObjectProcessed;
-			info.m_Progress = (int)(((float)(index) / (float)m_Objects.GetSize()) * 100.0f);
-			e_Status.Raise( info );
+			uint32_t typeCrc = Crc32( objectClass->m_Name );
+			m_Writer.Write( typeCrc );
+		}
+		else
+		{
+			m_Writer.Write( objectClass->m_Name );
 		}
 
-		// end top level array
-		m_Writer.EndArray();
+		SerializeInstance( object, objectClass, object );
+
+		m_Writer.EndMap();
+
+		info.m_State = ArchiveStates::ObjectProcessed;
+		info.m_Progress = (int)(((float)(index) / (float)m_Objects.GetSize()) * 100.0f);
+		e_Status.Raise( info );
 	}
+
+	// end top level array
+	m_Writer.EndArray();
 
 	// notify completion of last object processed
 	info.m_State = ArchiveStates::ObjectProcessed;
@@ -394,13 +386,8 @@ void ArchiveReaderMessagePack::Read( Reflect::ObjectPtr& object )
 
 	Start();
 
-	if ( m_Flags & ArchiveFlags::Typeless )
+	if ( HELIUM_VERIFY( m_Reader.IsArray() ) )
 	{
-		ReadNext( object );
-	}
-	else
-	{
-		HELIUM_ASSERT( m_Reader.IsArray() );
 		uint32_t length = m_Reader.ReadArrayLength();
 
 		m_Objects.Reserve( length );
@@ -461,13 +448,8 @@ bool ArchiveReaderMessagePack::ReadNext( ObjectPtr& object )
 		return false;
 	}
 
-	if ( m_Flags & ArchiveFlags::Typeless )
+	if ( HELIUM_VERIFY( m_Reader.IsMap() ) )
 	{
-		DeserializeInstance( object, object->GetMetaClass(), object );
-	}
-	else
-	{
-		HELIUM_ASSERT( m_Reader.IsMap() );
 		uint32_t length = m_Reader.ReadMapLength();
 		HELIUM_ASSERT( length == 1 );
 		m_Reader.BeginMap( length );
@@ -535,7 +517,7 @@ void ArchiveReaderMessagePack::DeserializeInstance( void* instance, const MetaSt
 
 	object->PreDeserialize( NULL );
 
-	if ( m_Reader.IsMap() )
+	if ( HELIUM_VERIFY( m_Reader.IsMap() ) )
 	{
 		uint32_t length = m_Reader.ReadMapLength();
 		m_Reader.BeginMap( length );

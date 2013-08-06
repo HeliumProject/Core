@@ -64,35 +64,27 @@ void ArchiveWriterJson::Write( Object* object )
 	// the master object
 	m_Objects.Push( object );
 
-	if ( m_Flags & ArchiveFlags::Typeless )
+	// begin top level array of objects
+	m_Writer.StartArray();
+
+	// objects can get changed during this iteration (in Identify), so use indices
+	for ( size_t index = 0; index < m_Objects.GetSize(); ++index )
 	{
+		Object* object = m_Objects.GetElement( index );
 		const MetaClass* objectClass = object->GetMetaClass();
+
+		m_Writer.StartObject();
+		m_Writer.String( objectClass->m_Name );
 		SerializeInstance( object, objectClass, object );
+		m_Writer.EndObject();
+
+		info.m_State = ArchiveStates::ObjectProcessed;
+		info.m_Progress = (int)(((float)(index) / (float)m_Objects.GetSize()) * 100.0f);
+		e_Status.Raise( info );
 	}
-	else
-	{
-		// begin top level array of objects
-		m_Writer.StartArray();
 
-		// objects can get changed during this iteration (in Identify), so use indices
-		for ( size_t index = 0; index < m_Objects.GetSize(); ++index )
-		{
-			Object* object = m_Objects.GetElement( index );
-			const MetaClass* objectClass = object->GetMetaClass();
-
-			m_Writer.StartObject();
-			m_Writer.String( objectClass->m_Name );
-			SerializeInstance( object, objectClass, object );
-			m_Writer.EndObject();
-
-			info.m_State = ArchiveStates::ObjectProcessed;
-			info.m_Progress = (int)(((float)(index) / (float)m_Objects.GetSize()) * 100.0f);
-			e_Status.Raise( info );
-		}
-
-		// end top level array
-		m_Writer.EndArray();
-	}
+	// end top level array
+	m_Writer.EndArray();
 
 	// notify completion of last object processed
 	info.m_State = ArchiveStates::ObjectProcessed;
@@ -376,14 +368,8 @@ void ArchiveReaderJson::Read( Reflect::ObjectPtr& object )
 
 	Start();
 
-	if ( m_Flags & ArchiveFlags::Typeless )
+	if ( HELIUM_VERIFY( m_Document.IsArray() ) )
 	{
-		ReadNext( object );
-	}
-	else
-	{
-		HELIUM_ASSERT( m_Document.IsArray() );
-
 		uint32_t length = m_Document.Size();
 		m_Objects.Reserve( length );
 		for ( uint32_t i=0; i<length; i++ )
@@ -477,39 +463,35 @@ bool Helium::Persist::ArchiveReaderJson::ReadNext( Reflect::ObjectPtr& object )
 
 	rapidjson::Value& value = m_Document[ m_Next ];
 	
-	if ( m_Flags & ArchiveFlags::Typeless )
+	if ( HELIUM_VERIFY( value.IsObject() ) )
 	{
-		DeserializeInstance( value, object, object->GetMetaClass(), object );
-	}
-	else
-	{
-		HELIUM_ASSERT( value.IsObject() );
 		rapidjson::Value::Member* member = value.MemberBegin();
-		HELIUM_ASSERT( member != value.MemberEnd() )
-
-		uint32_t objectClassCrc = 0;
-		if ( member->name.IsString() )
+		if ( HELIUM_VERIFY( member != value.MemberEnd() ) )
 		{
-			String typeStr;
-			typeStr = member->name.GetString();
-			objectClassCrc = Helium::Crc32( typeStr.GetData() );
-		}
+			uint32_t objectClassCrc = 0;
+			if ( member->name.IsString() )
+			{
+				String typeStr;
+				typeStr = member->name.GetString();
+				objectClassCrc = Helium::Crc32( typeStr.GetData() );
+			}
 
-		const MetaClass* objectClass = NULL;
-		if ( objectClassCrc != 0 )
-		{
-			objectClass = Registry::GetInstance()->GetMetaClass( objectClassCrc );
-		}
+			const MetaClass* objectClass = NULL;
+			if ( objectClassCrc != 0 )
+			{
+				objectClass = Registry::GetInstance()->GetMetaClass( objectClassCrc );
+			}
 			
-		if ( !object && objectClass )
-		{
-			object = objectClass->m_Creator();
-		}
+			if ( !object && objectClass )
+			{
+				object = objectClass->m_Creator();
+			}
 
-		if ( object.ReferencesObject() )
-		{
-			DeserializeInstance( member->value, object, object->GetMetaClass(), object );
-			m_Objects.Push( object );
+			if ( object.ReferencesObject() )
+			{
+				DeserializeInstance( member->value, object, object->GetMetaClass(), object );
+				m_Objects.Push( object );
+			}
 		}
 	}
 
@@ -541,7 +523,7 @@ void ArchiveReaderJson::DeserializeInstance( rapidjson::Value& value, void* inst
 
 	object->PreDeserialize( NULL );
 
-	if ( value.IsObject() )
+	if ( HELIUM_VERIFY( value.IsObject() ) )
 	{
 		for ( rapidjson::Value::MemberIterator itr = value.MemberBegin(), end = value.MemberEnd(); itr != end; ++itr )
 		{

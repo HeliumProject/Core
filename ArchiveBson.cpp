@@ -108,34 +108,26 @@ void ArchiveWriterBson::Write( Object* object )
 	bson b[1];
 	bson_init( b );
 
-	if ( m_Flags & ArchiveFlags::Typeless )
+	HELIUM_VERIFY( BSON_OK == bson_append_start_array( b, "objects" ) );
+
+	// objects can get changed during this iteration (in Identify), so use indices
+	for ( size_t index = 0; index < m_Objects.GetSize(); ++index )
 	{
+		Object* object = m_Objects.GetElement( index );
 		const MetaClass* objectClass = object->GetMetaClass();
-		SerializeInstance( b, NULL, object, objectClass, object );
+
+		char num[16];
+		Helium::StringPrint( num, "%d", index );
+		HELIUM_VERIFY( BSON_OK == bson_append_start_object( b, num ) );
+		SerializeInstance( b, objectClass->m_Name, object, objectClass, object );
+		HELIUM_VERIFY( BSON_OK == bson_append_finish_object( b ) );
+
+		info.m_State = ArchiveStates::ObjectProcessed;
+		info.m_Progress = (int)(((float)(index) / (float)m_Objects.GetSize()) * 100.0f);
+		e_Status.Raise( info );
 	}
-	else
-	{
-		HELIUM_VERIFY( BSON_OK == bson_append_start_array( b, "BSON" ) );
 
-		// objects can get changed during this iteration (in Identify), so use indices
-		for ( size_t index = 0; index < m_Objects.GetSize(); ++index )
-		{
-			Object* object = m_Objects.GetElement( index );
-			const MetaClass* objectClass = object->GetMetaClass();
-
-			char num[16];
-			Helium::StringPrint( num, "%d", index );
-			HELIUM_VERIFY( BSON_OK == bson_append_start_object( b, num ) );
-			SerializeInstance( b, objectClass->m_Name, object, objectClass, object );
-			HELIUM_VERIFY( BSON_OK == bson_append_finish_object( b ) );
-
-			info.m_State = ArchiveStates::ObjectProcessed;
-			info.m_Progress = (int)(((float)(index) / (float)m_Objects.GetSize()) * 100.0f);
-			e_Status.Raise( info );
-		}
-
-		bson_append_finish_array( b );
-	}
+	HELIUM_VERIFY( BSON_OK == bson_append_finish_array( b ) );
 
 	// notify completion of last object processed
 	info.m_State = ArchiveStates::ObjectProcessed;
@@ -458,14 +450,8 @@ void ArchiveReaderBson::Read( Reflect::ObjectPtr& object )
 	bson_iterator i[1];
 	bson_iterator_init( i, m_Bson );
 
-	if ( m_Flags & ArchiveFlags::Typeless )
+	if ( HELIUM_VERIFY( bson_iterator_type( i ) == BSON_ARRAY ) )
 	{
-		MemoryCopy( &m_Next, i, sizeof( bson_iterator ) );
-		ReadNext( object );
-	}
-	else
-	{
-		HELIUM_ASSERT( bson_iterator_type( i ) == BSON_ARRAY );
 		bson_iterator_subiterator( i, m_Next );
 		while ( bson_iterator_more( m_Next ) )
 		{
@@ -528,42 +514,35 @@ bool Helium::Persist::ArchiveReaderBson::ReadNext( Reflect::ObjectPtr& object )
 		return false;
 	}
 
-	if ( m_Flags & ArchiveFlags::Typeless )
+	bson_iterator i[1];
+	bson_iterator_subiterator( m_Next, i );
+	if ( HELIUM_VERIFY( bson_iterator_type( i ) == BSON_OBJECT ) )
 	{
-		HELIUM_ASSERT( object.ReferencesObject() );
-		DeserializeInstance( m_Next, object, object->GetMetaClass(), object );
-	}
-	else
-	{
-		bson_iterator i[1];
-		bson_iterator_subiterator( m_Next, i );
+		const char* key = bson_iterator_key( i );
 
-		if ( bson_iterator_type( i ) == BSON_OBJECT )
+		uint32_t objectClassCrc = 0;
+		if ( key )
 		{
-			const char* key = bson_iterator_key( i );
+			objectClassCrc = Helium::Crc32( key );
+		}
 
-			uint32_t objectClassCrc = 0;
-			if ( key )
-			{
-				objectClassCrc = Helium::Crc32( key );
-			}
+		const MetaClass* objectClass = NULL;
+		if ( objectClassCrc != 0 )
+		{
+			objectClass = Registry::GetInstance()->GetMetaClass( objectClassCrc );
+		}
 
-			const MetaClass* objectClass = NULL;
-			if ( objectClassCrc != 0 )
-			{
-				objectClass = Registry::GetInstance()->GetMetaClass( objectClassCrc );
-			}
+		if ( !object && objectClass )
+		{
+			object = objectClass->m_Creator();
+		}
 
-			if ( !object && objectClass )
-			{
-				object = objectClass->m_Creator();
-			}
-
-			if ( object.ReferencesObject() )
-			{
-				DeserializeInstance( i, object, object->GetMetaClass(), object );
-				m_Objects.Push( object );
-			}
+		if ( object.ReferencesObject() )
+		{
+			bson_iterator elem[1];
+			bson_iterator_subiterator( i, elem );
+			DeserializeInstance( elem, object, object->GetMetaClass(), object );
+			m_Objects.Push( object );
 		}
 	}
 
@@ -593,14 +572,6 @@ void ArchiveReaderBson::DeserializeInstance( bson_iterator* i, void* instance, c
 	Log::Print(TXT("Deserializing %s\n"), structure->m_Name);
 #endif
 	object->PreDeserialize( NULL );
-
-	bson_iterator obj[1];
-	if ( !( m_Flags & ArchiveFlags::Typeless ) )
-	{
-		HELIUM_ASSERT( bson_iterator_type( i ) == BSON_OBJECT )
-		bson_iterator_subiterator( i, obj );
-		i = obj;
-	}
 
 	while( bson_iterator_next( i ) )
 	{
@@ -917,7 +888,10 @@ void ArchiveReaderBson::DeserializeTranslator( bson_iterator* i, Pointer pointer
 			if ( translator->GetMetaId() == MetaIds::StructureTranslator )
 			{
 				StructureTranslator* structure = static_cast< StructureTranslator* >( translator );
-				DeserializeInstance( i, pointer.m_Address,  structure->GetMetaStruct(), object );
+
+				bson_iterator elem[1];
+				bson_iterator_subiterator( i, elem );
+				DeserializeInstance( elem, pointer.m_Address,  structure->GetMetaStruct(), object );
 			}
 			else if ( translator->GetMetaId() == MetaIds::AssociationTranslator )
 			{

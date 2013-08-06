@@ -29,8 +29,7 @@ namespace Helium
 			enum ArchiveFlag
 			{
 				Notify      = 1 << 0, // Notify objects of changes
-				Typeless    = 1 << 1, // Omit type header on both read and write (breaks factory alloc on read and builtin multi-object support)
-				StringCrc   = 1 << 2, // Using string CRC-32 values for meta-data instead of full strings (for brevity)
+				StringCrc   = 1 << 1, // Using string CRC-32 values for meta-data instead of full strings (for brevity)
 			};
 		}
 
