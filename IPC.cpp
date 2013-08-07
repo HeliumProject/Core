@@ -260,7 +260,7 @@ void Connection::SetState(ConnectionState state)
 
         if (m_State == ConnectionStates::Active && state != ConnectionStates::Active)
         {
-            Helium::Print( TXT( "%s: Disonnected\n" ), m_Name );
+            Helium::Print( TXT( "%s: Disconnected\n" ), m_Name );
         }
 
         if (m_State == ConnectionStates::Active && state == ConnectionStates::Waiting)
@@ -341,18 +341,9 @@ ConnectionState Connection::Receive(Message** msg, bool wait)
 {
     ConnectionState result = GetState();
 
-    if (result != ConnectionStates::Active)
-    {
-        if (msg)
-        {
-            *msg = 0;
-        }
-
-        return result;
-    }
-
     if (msg)
     {
+        *msg = 0;
         if (wait || m_ReadQueue.Count())
         {
             *msg = m_ReadQueue.Remove();
