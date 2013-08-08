@@ -47,26 +47,29 @@ bool File::Open( const char* filename, FileMode mode, bool truncate )
 	{
 	case FileModes::Read:
 		flags = O_RDONLY;
+		break;
 
 	case FileModes::Write:
 		flags = O_WRONLY;
+		break;
 
 	case FileModes::Both:
 		flags = O_RDWR;
+		break;
 	}
 
 	if ( mode & FileModes::Write )
 	{
 		flags |= O_CREAT;
-	}
 
-	if ( truncate )
-	{
-		flags |= O_TRUNC;
+		if ( truncate )
+		{
+			flags |= O_TRUNC;
+		}
 	}
 
 	m_Handle = open( filename, flags );
-	return m_Handle < 0;
+	return m_Handle >= 0;
 }
 
 bool File::Close()
