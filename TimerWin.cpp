@@ -59,30 +59,3 @@ float64_t Timer::GetSeconds()
 
     return ( static_cast< float64_t >( perfCounter.QuadPart - sm_startTickCount ) * sm_secondsPerTick );
 }
-
-IntervalTimer::IntervalTimer()
-    : m_Thread( GetCurrentThreadID() )
-{
-    m_Handle = ::CreateWaitableTimer(NULL, FALSE, NULL);
-}
-
-IntervalTimer::~IntervalTimer()
-{
-    ::CloseHandle( m_Handle );
-}
-
-void IntervalTimer::Set( int32_t timeoutInMs )
-{
-    LARGE_INTEGER dueTime;
-    MemorySet( &dueTime, 0, sizeof( dueTime ) );
-    dueTime.QuadPart = -(LONGLONG)( timeoutInMs * 10000.00 );
-    ::SetWaitableTimer( m_Handle, &dueTime, 0, NULL, NULL, FALSE );
-}
-
-void IntervalTimer::Wait()
-{
-    // this limitation is to maintain POSIX signal timer-based functionality
-    HELIUM_ASSERT( GetCurrentThreadID() == m_Thread );
-
-    ::WaitForSingleObject( m_Handle, INFINITE );
-}

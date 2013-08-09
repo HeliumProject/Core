@@ -35,40 +35,6 @@ namespace Helium
         /// Seconds per performance counter tick.
         static float64_t sm_secondsPerTick;
     };
-
-// MacOSX has no rt timers
-#if !HELIUM_OS_MAC
-
-    /// Interval-based timer (wait for a periodic timeout in real time)
-    ///  Note: this will only kick 1 thread each time it expires
-    ///  If you want multiple threads to kick then wait them on a Condition and signal
-    ///  it in a thread waiting on this timer.
-    class HELIUM_PLATFORM_API IntervalTimer : NonCopyable
-    {
-    public:
-        IntervalTimer();
-        ~IntervalTimer();
-
-        void Set( int32_t timeoutInMs );
-        void Wait();
-
-    private:
-#if HELIUM_OS_WIN
-        typedef HANDLE Handle;
-#else
-        typedef timer_t Handle;
-#endif
-        Handle       m_Handle;
-        Thread::id_t m_Thread;
-
-#if !HELIUM_OS_WIN
-        sigset_t     m_AlarmSet;
-        int          m_Signal;
-        int          m_WakeupsMissed;
-#endif
-    };
-
-#endif
 }
 
 #include "Platform/Timer.inl"
