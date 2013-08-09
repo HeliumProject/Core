@@ -23,6 +23,8 @@ namespace Helium
 			int64_t millis; // milliseconds since epoch UTC
 
 			inline BsonDate();
+			static BsonDate Now();
+
 			REFLECT_DECLARE_BASE_STRUCT( BsonDate );
 			static void PopulateMetaType( Helium::Reflect::MetaStruct& structure );
 		};

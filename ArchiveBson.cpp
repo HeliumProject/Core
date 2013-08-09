@@ -10,6 +10,8 @@
 #include "Reflect/Registry.h"
 #include "Reflect/TranslatorDeduction.h"
 
+#include <time.h>
+
 REFLECT_DEFINE_BASE_STRUCT( Helium::Persist::BsonDate );
 REFLECT_DEFINE_BASE_STRUCT( Helium::Persist::BsonObjectId );
 
@@ -41,6 +43,16 @@ BsonObjectId BsonObjectId::Null;
 void BsonDate::PopulateMetaType( Reflect::MetaStruct& type )
 {
 	type.AddField( &BsonDate::millis, "millis" );
+}
+
+BsonDate BsonDate::Now()
+{
+    time_t t;
+    time( &t );
+
+    BsonDate d;
+    d.millis = t * 1000;
+    return d;
 }
 
 void BsonObjectId::IntoString( String& str )
