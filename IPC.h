@@ -121,6 +121,7 @@ namespace Helium
 			Message* m_Tail;			// pointer to tail message 
 			uint32_t m_Count;			// number of messages in queue
 			uint32_t m_Total;			// number of messages that have passed through the queue since clear
+      uint32_t  m_QueueMax; // max allowable number of messages in queue.  A value of zero means unlimited
 
 			Helium::Mutex m_Mutex;      // mutex to control access to the queue
 			Helium::Semaphore m_Append; // semaphore that increments on add, decrements on remove
@@ -128,6 +129,16 @@ namespace Helium
 		public:
 			MessageQueue();
 			~MessageQueue();
+
+			void SetQueueMax(uint32_t q)
+			{
+				m_QueueMax = q;
+			}
+
+			uint32_t GetQueueMax() const
+			{
+				return m_QueueMax;
+			}
 
 			void Add(Message*);
 			Message* Remove();
@@ -176,6 +187,17 @@ namespace Helium
 		public:
 			Connection();
 			virtual ~Connection();
+
+			void SetReadQueueMax(uint32_t q)
+			{
+				m_ReadQueue.SetQueueMax(q);
+			}
+
+			void SetWriteQueueMax(uint32_t q)
+			{
+				m_WriteQueue.SetQueueMax(q);
+			}
+
 
 		protected:
 			bool Initialize(bool server, const char* name);
