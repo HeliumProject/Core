@@ -6,6 +6,13 @@ Helium::AutoPtr< T >::AutoPtr( T* ptr )
 }
 
 template< typename T >
+Helium::AutoPtr< T >::AutoPtr( const AutoPtr& rhs )
+	: m_Ptr( rhs.m_Ptr )
+{
+	rhs.m_Ptr = 0;
+}
+
+template< typename T >
 Helium::AutoPtr< T >::~AutoPtr()
 {
 	if ( !IsOrphan() )
@@ -102,9 +109,17 @@ T* Helium::AutoPtr< T >::Release()
 }
 
 template< typename T >
-Helium::ArrayPtr< T >::ArrayPtr( T* ptr ) : m_Ptr( ptr )
+Helium::ArrayPtr< T >::ArrayPtr( T* ptr )
+	: m_Ptr( ptr )
 {
 
+}
+
+template< typename T >
+Helium::ArrayPtr< T >::ArrayPtr( const ArrayPtr& rhs )
+	: m_Ptr( rhs.m_Ptr )
+{
+	rhs.m_Ptr = NULL;
 }
 
 template< typename T >
