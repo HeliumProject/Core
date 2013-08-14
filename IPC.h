@@ -130,12 +130,12 @@ namespace Helium
 			MessageQueue();
 			~MessageQueue();
 
-			void SetQueueMax(uint32_t q)
+			void SetMaxLength(uint32_t q)
 			{
 				m_MaxLength = q;
 			}
 
-			uint32_t GetQueueMax() const
+			uint32_t GetMaxLength() const
 			{
 				return m_MaxLength;
 			}
@@ -190,12 +190,12 @@ namespace Helium
 
 			void SetReadQueueMax(uint32_t q)
 			{
-				m_ReadQueue.SetQueueMax(q);
+				m_ReadQueue.SetMaxLength(q);
 			}
 
 			void SetWriteQueueMax(uint32_t q)
 			{
-				m_WriteQueue.SetQueueMax(q);
+				m_WriteQueue.SetMaxLength(q);
 			}
 
 
