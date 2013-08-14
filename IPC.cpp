@@ -94,10 +94,18 @@ void MessageQueue::Add(Message* msg)
         msg->SetNumber( m_Total );
         
         // if we're over our limit now, then remove the oldest message.
-        if (m_QueueMax != 0 && m_Count > m_QueueMax)
+        if (m_QueueMax > 0 && m_Count > m_QueueMax)
         {
-          Message* trash = Remove();
-          delete trash;
+            //  Message* trash = Remove();
+            m_Count--;
+
+            // take the head of the queue
+            Message* trash = m_Head;
+
+            // move the the head dow
+            m_Head = m_Head->m_Next;
+
+            delete trash;
         }
     }
 
