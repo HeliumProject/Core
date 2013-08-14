@@ -30,16 +30,14 @@ void ReadWriteLock::LockRead()
         localLockCount = currentLockCount;
         while( localLockCount == -1 )
         {
-            while( !m_writeReleaseCondition.Wait() )
-            {
-            }
-
+            while( !m_writeReleaseCondition.Wait() );
             localLockCount = m_readLockCount;
         }
 
         HELIUM_ASSERT( localLockCount != -2 );
         currentLockCount = AtomicCompareExchangeAcquire( m_readLockCount, localLockCount + 1, localLockCount );
-    } while( currentLockCount != localLockCount );
+    }
+    while( currentLockCount != localLockCount );
 
     if( localLockCount == 0 )
     {
@@ -66,7 +64,7 @@ void ReadWriteLock::UnlockRead()
 /// @see UnlockWrite(), LockRead(), UnlockRead()
 void ReadWriteLock::LockWrite()
 {
-    for( ; ; )
+    for (;;)
     {
         int32_t currentLockCount = AtomicCompareExchangeAcquire( m_readLockCount, -1, 0 );
         if( currentLockCount == 0 )
@@ -74,13 +72,8 @@ void ReadWriteLock::LockWrite()
             break;
         }
 
-        while( !m_readReleaseCondition.Wait() )
-        {
-        }
-
-        while( !m_writeReleaseCondition.Wait() )
-        {
-        }
+        while( !m_readReleaseCondition.Wait() );
+        while( !m_writeReleaseCondition.Wait() );
     }
 
     m_writeReleaseCondition.Reset();
