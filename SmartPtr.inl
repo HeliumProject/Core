@@ -7,9 +7,9 @@ Helium::AutoPtr< T >::AutoPtr( T* ptr )
 
 template< typename T >
 Helium::AutoPtr< T >::AutoPtr( const AutoPtr& rhs )
-	: m_Ptr( rhs.m_Ptr )
+	: m_Ptr( 0 )
 {
-	rhs.m_Ptr = 0;
+	m_Ptr = reinterpret_cast< uintptr_t >( AtomicExchange<void>( *reinterpret_cast<void**>( &rhs.m_Ptr ), 0 ) );
 }
 
 template< typename T >
@@ -117,9 +117,8 @@ Helium::ArrayPtr< T >::ArrayPtr( T* ptr )
 
 template< typename T >
 Helium::ArrayPtr< T >::ArrayPtr( const ArrayPtr& rhs )
-	: m_Ptr( rhs.m_Ptr )
 {
-	rhs.m_Ptr = NULL;
+	m_Ptr = AtomicExchange( rhs.m_Ptr, 0 );
 }
 
 template< typename T >
