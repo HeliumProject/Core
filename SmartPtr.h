@@ -15,12 +15,13 @@ namespace Helium
 	// 
 
 	template <typename T>
-	struct AutoPtr : NonCopyable
+	struct AutoPtr
 	{
 		HELIUM_COMPILE_ASSERT( sizeof( T ) > 1 );
 
 	public:
 		AutoPtr( T* ptr = NULL );
+		explicit AutoPtr( const AutoPtr& rhs );
 		~AutoPtr();
 
 		T* Ptr();
@@ -40,7 +41,7 @@ namespace Helium
 		T* Release();
 
 	private: 
-		uintptr_t m_Ptr;
+		mutable uintptr_t m_Ptr;
 	};
 	
 	//
@@ -53,10 +54,11 @@ namespace Helium
 	// 
 
 	template <typename T>
-	struct ArrayPtr : NonCopyable
+	struct ArrayPtr
 	{
 	public: 
 		ArrayPtr( T* ptr = NULL );
+		explicit ArrayPtr( const ArrayPtr& rhs );
 		~ArrayPtr();
 
 		T* Ptr();
@@ -65,7 +67,7 @@ namespace Helium
 		T& operator[]( size_t i );
 
 	private: 
-		T* m_Ptr; 
+		mutable T* m_Ptr; 
 	};
 
 	/// Base class for non-atomic reference counting support.
