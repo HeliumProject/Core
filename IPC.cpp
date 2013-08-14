@@ -40,6 +40,7 @@ MessageQueue::MessageQueue()
 , m_Tail (0)
 , m_Count (0)
 , m_Total (0)
+, m_QueueMax (0)
 {
 
 }
@@ -60,7 +61,7 @@ void MessageQueue::Add(Message* msg)
         if (m_Tail == 0)
         {
             // header must also be zero and count must be zero
-            if(m_Count !=0)
+            if (m_Count !=0)
             {
                 HELIUM_BREAK();
             }
@@ -85,11 +86,27 @@ void MessageQueue::Add(Message* msg)
 
             // we point to null
             msg->m_Next = 0;       
+            
         }
 
         m_Count++;
         m_Total++;
         msg->SetNumber( m_Total );
+        
+        // if we're over our limit now, then remove the oldest message.
+        if (m_QueueMax > 0 && m_Count > m_QueueMax)
+        {
+            //  Message* trash = Remove();
+            m_Count--;
+
+            // take the head of the queue
+            Message* trash = m_Head;
+
+            // move the the head dow
+            m_Head = m_Head->m_Next;
+
+            delete trash;
+        }
     }
 
     m_Append.Increment();
