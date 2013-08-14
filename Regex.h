@@ -5,7 +5,7 @@
 #include <string> 
 #include <sstream>
 
-#if HELIUM_CC_GCC
+#if HELIUM_CC_GCC && !HELIUM_CPP11
 
 #include <tr1/regex>
 
