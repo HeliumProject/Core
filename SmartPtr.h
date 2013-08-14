@@ -21,7 +21,7 @@ namespace Helium
 
 	public:
 		AutoPtr( T* ptr = NULL );
-		explicit AutoPtr( const AutoPtr& rhs );
+		AutoPtr( const AutoPtr& rhs );
 		~AutoPtr();
 
 		T* Ptr();
@@ -58,7 +58,7 @@ namespace Helium
 	{
 	public: 
 		ArrayPtr( T* ptr = NULL );
-		explicit ArrayPtr( const ArrayPtr& rhs );
+		ArrayPtr( const ArrayPtr& rhs );
 		~ArrayPtr();
 
 		T* Ptr();

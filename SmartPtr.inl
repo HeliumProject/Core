@@ -9,7 +9,7 @@ template< typename T >
 Helium::AutoPtr< T >::AutoPtr( const AutoPtr& rhs )
 	: m_Ptr( rhs.m_Ptr )
 {
-	rhs.m_Ptr = NULL;
+	rhs.m_Ptr = 0;
 }
 
 template< typename T >
