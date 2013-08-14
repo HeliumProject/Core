@@ -120,34 +120,43 @@ void ArchiveWriterBson::Write( Object* object )
 	bson b[1];
 	bson_init( b );
 
-	HELIUM_VERIFY( BSON_OK == bson_append_start_array( b, "objects" ) );
-
-	// objects can get changed during this iteration (in Identify), so use indices
-	for ( size_t index = 0; index < m_Objects.GetSize(); ++index )
+	try
 	{
-		Object* object = m_Objects.GetElement( index );
-		const MetaClass* objectClass = object->GetMetaClass();
+		HELIUM_VERIFY( BSON_OK == bson_append_start_array( b, "objects" ) );
 
-		char num[16];
-		Helium::StringPrint( num, "%d", index );
-		HELIUM_VERIFY( BSON_OK == bson_append_start_object( b, num ) );
-		SerializeInstance( b, objectClass->m_Name, object, objectClass, object );
-		HELIUM_VERIFY( BSON_OK == bson_append_finish_object( b ) );
+		// objects can get changed during this iteration (in Identify), so use indices
+		for ( size_t index = 0; index < m_Objects.GetSize(); ++index )
+		{
+			Object* object = m_Objects.GetElement( index );
+			const MetaClass* objectClass = object->GetMetaClass();
 
+			char num[16];
+			Helium::StringPrint( num, "%d", index );
+			HELIUM_VERIFY( BSON_OK == bson_append_start_object( b, num ) );
+			SerializeInstance( b, objectClass->m_Name, object, objectClass, object );
+			HELIUM_VERIFY( BSON_OK == bson_append_finish_object( b ) );
+
+			info.m_State = ArchiveStates::ObjectProcessed;
+			info.m_Progress = (int)(((float)(index) / (float)m_Objects.GetSize()) * 100.0f);
+			e_Status.Raise( info );
+		}
+
+		HELIUM_VERIFY( BSON_OK == bson_append_finish_array( b ) );
+
+		// notify completion of last object processed
 		info.m_State = ArchiveStates::ObjectProcessed;
-		info.m_Progress = (int)(((float)(index) / (float)m_Objects.GetSize()) * 100.0f);
+		info.m_Progress = 100;
 		e_Status.Raise( info );
+
+		HELIUM_VERIFY( BSON_OK == bson_finish( b ) );
+		m_Stream->Write( bson_data( b ), bson_size( b ), 1 );
+	}
+	catch( ... )
+	{
+		bson_destroy( b );
+		throw;
 	}
 
-	HELIUM_VERIFY( BSON_OK == bson_append_finish_array( b ) );
-
-	// notify completion of last object processed
-	info.m_State = ArchiveStates::ObjectProcessed;
-	info.m_Progress = 100;
-	e_Status.Raise( info );
-
-	HELIUM_VERIFY( BSON_OK == bson_finish( b ) );
-	m_Stream->Write( bson_data( b ), bson_size( b ), 1 );
 	bson_destroy( b );
 
 	// do cleanup
