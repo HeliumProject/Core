@@ -40,7 +40,7 @@ MessageQueue::MessageQueue()
 , m_Tail (0)
 , m_Count (0)
 , m_Total (0)
-, m_QueueMax (0)
+, m_MaxLength (0)
 {
 
 }
@@ -94,7 +94,7 @@ void MessageQueue::Add(Message* msg)
         msg->SetNumber( m_Total );
         
         // if we're over our limit now, then remove the oldest message.
-        if (m_QueueMax > 0 && m_Count > m_QueueMax)
+        if (m_MaxLength > 0 && m_Count > m_MaxLength)
         {
             //  Message* trash = Remove();
             m_Count--;
