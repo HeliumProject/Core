@@ -43,7 +43,7 @@ namespace Helium
 			inline bool operator>( const BsonObjectId& rhs ) const;
 			inline operator bool() const;
 
-			void IntoString( String& str );
+			void IntoString( String& str ) const;
 			void FromString( const String& str );
 
 			static BsonObjectId Null;

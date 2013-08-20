@@ -55,7 +55,7 @@ BsonDate BsonDate::Now()
     return d;
 }
 
-void BsonObjectId::IntoString( String& str )
+void BsonObjectId::IntoString( String& str ) const
 {
 	char chars[ sizeof(bson_oid_t) * 2 + 1 ] = { 0 };
 	bson_oid_to_string( (bson_oid_t*)this, chars );
