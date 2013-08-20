@@ -13,6 +13,13 @@
 // This spuriously comes up on occasion with certain template class methods.
 #pragma warning( disable : 4505 ) // 'function' : unreferenced local function has been removed
 
+// Language usage
+#if _MSC_VER < 1700
+# define HELIUM_CPP11 0
+#else
+# define HELIUM_CPP11 1
+#endif
+
 // Check C-runtime setttings
 #ifndef _MT
 # error Danger: MultiThreaded CRT must be used to ensure proper DLL-exported template compatibility!

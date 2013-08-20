@@ -1,5 +1,11 @@
 #pragma once
 
+#if __cplusplus < 201103L
+# define HELIUM_CPP11 0
+#else
+# define HELIUM_CPP11 1
+#endif
+
 /// Declare a class method as overriding a virtual method of a parent class.
 #define HELIUM_OVERRIDE
 /// Declare a class as an abstract base class.

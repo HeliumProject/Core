@@ -68,12 +68,6 @@
 # error Unsupported compiler.
 #endif
 
-#if __cplusplus < 201103L
-# define HELIUM_CPP11 0
-#else
-# define HELIUM_CPP11 1
-#endif
-
 #if HELIUM_CC_CL
 # include "Platform/CompilerCl.h"
 #elif HELIUM_CC_CLANG
