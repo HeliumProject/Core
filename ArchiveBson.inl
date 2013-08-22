@@ -3,6 +3,32 @@ Helium::Persist::BsonDate::BsonDate()
 {
 }
 
+Helium::Persist::BsonDate& Helium::Persist::BsonDate::operator=( const BsonDate& rhs )
+{
+	millis = rhs.millis;
+	return *this;
+}
+
+bool Helium::Persist::BsonDate::operator==( const BsonDate& rhs ) const
+{
+	return millis == rhs.millis;
+}
+
+bool Helium::Persist::BsonDate::operator!=( const BsonDate& rhs ) const
+{
+	return millis != rhs.millis;
+}
+
+bool Helium::Persist::BsonDate::operator<( const BsonDate& rhs ) const
+{
+	return millis < rhs.millis;
+}
+
+bool Helium::Persist::BsonDate::operator>( const BsonDate& rhs ) const
+{
+	return millis > rhs.millis;
+}
+
 Helium::Persist::BsonObjectId::BsonObjectId()
 {
 	MemorySet( bytes, 0, sizeof( bytes ) );
