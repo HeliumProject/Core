@@ -44,3 +44,15 @@ void Helium::CallbackThread::EntryHelperWithArgs( void* param )
     delete helperArgs;
     delete args;
 }
+
+template< class T >
+T* Helium::ThreadLocal< T >::GetPointer() const
+{
+	return static_cast< T* >( ThreadLocalPointer::GetPointer() );
+}
+
+template< class T >
+void Helium::ThreadLocal< T >::SetPointer(T* value)
+{
+	ThreadLocalPointer::SetPointer( value );
+}

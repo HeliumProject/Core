@@ -228,6 +228,14 @@ namespace Helium
 #endif
 	};
 
+	template< class T >
+	class ThreadLocal : public ThreadLocalPointer
+	{
+	public:
+		T* GetPointer() const;
+		void SetPointer(T* value);
+	};
+
 	HELIUM_PLATFORM_API Thread::id_t GetMainThreadID();
 	HELIUM_PLATFORM_API Thread::id_t GetCurrentThreadID();
 

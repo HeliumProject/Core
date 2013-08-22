@@ -24,8 +24,8 @@ namespace Helium
 	public:
 		/// @name Construction/Destruction
 		//@{
-		explicit ScopeLock( T& rSyncObject );
-		~ScopeLock();
+		HELIUM_FORCEINLINE explicit ScopeLock( T& rSyncObject );
+		HELIUM_FORCEINLINE ~ScopeLock();
 		//@}
 
 	private:
