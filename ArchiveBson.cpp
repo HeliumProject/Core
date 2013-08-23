@@ -12,8 +12,8 @@
 
 #include <time.h>
 
-REFLECT_DEFINE_BASE_STRUCT( Helium::Persist::BsonDate );
-REFLECT_DEFINE_BASE_STRUCT( Helium::Persist::BsonObjectId );
+HELIUM_DEFINE_BASE_STRUCT( Helium::Persist::BsonDate );
+HELIUM_DEFINE_BASE_STRUCT( Helium::Persist::BsonObjectId );
 
 using namespace Helium;
 using namespace Helium::Reflect;

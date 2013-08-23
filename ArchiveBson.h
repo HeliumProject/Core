@@ -30,7 +30,7 @@ namespace Helium
 			inline bool operator>( const BsonDate& rhs ) const;
 			static BsonDate Now();
 
-			REFLECT_DECLARE_BASE_STRUCT( BsonDate );
+			HELIUM_DECLARE_BASE_STRUCT( BsonDate );
 			static void PopulateMetaType( Helium::Reflect::MetaStruct& structure );
 		};
 		HELIUM_COMPILE_ASSERT( sizeof( bson_date_t ) == 8 );
@@ -53,7 +53,7 @@ namespace Helium
 
 			static BsonObjectId Null;
 
-			REFLECT_DECLARE_BASE_STRUCT( BsonObjectId );
+			HELIUM_DECLARE_BASE_STRUCT( BsonObjectId );
 			static void PopulateMetaType( Helium::Reflect::MetaStruct& structure );
 		};
 		HELIUM_COMPILE_ASSERT( sizeof( bson_oid_t ) == 12 );
