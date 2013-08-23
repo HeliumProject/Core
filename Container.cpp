@@ -2,7 +2,7 @@
 #include "Inspect/Container.h"
 #include "Inspect/Canvas.h"
 
-REFLECT_DEFINE_CLASS( Helium::Inspect::Container );
+HELIUM_DEFINE_CLASS( Helium::Inspect::Container );
 
 using namespace Helium;
 using namespace Helium::Inspect;

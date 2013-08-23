@@ -4,7 +4,7 @@
 
 #include <sstream>
 
-REFLECT_DEFINE_CLASS( Helium::Inspect::ColorPicker );
+HELIUM_DEFINE_CLASS( Helium::Inspect::ColorPicker );
 
 using namespace Helium;
 using namespace Helium::Inspect;

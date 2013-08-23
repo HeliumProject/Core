@@ -65,7 +65,7 @@ namespace Helium
         class HELIUM_INSPECT_API Choice : public Control
         {
         public:
-            REFLECT_DECLARE_CLASS( Choice, Control );
+            HELIUM_DECLARE_CLASS( Choice, Control );
 
             Choice();
 

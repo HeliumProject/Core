@@ -3,7 +3,7 @@
 #include "Inspect/Interpreter.h"
 #include "Inspect/Controls.h"
 
-REFLECT_DEFINE_CLASS( Helium::Inspect::Canvas );
+HELIUM_DEFINE_CLASS( Helium::Inspect::Canvas );
 
 using namespace Helium;
 using namespace Helium::Inspect;

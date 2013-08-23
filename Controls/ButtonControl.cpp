@@ -3,7 +3,7 @@
 #include "Inspect/Container.h"
 #include "Inspect/Canvas.h"
 
-REFLECT_DEFINE_CLASS( Helium::Inspect::Button );
+HELIUM_DEFINE_CLASS( Helium::Inspect::Button );
 
 using namespace Helium;
 using namespace Helium::Inspect;

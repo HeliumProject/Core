@@ -28,7 +28,7 @@ namespace Helium
         class HELIUM_INSPECT_API Button : public Control
         {
         public:
-            REFLECT_DECLARE_CLASS( Button, Control );
+            HELIUM_DECLARE_CLASS( Button, Control );
 
             Button();
 

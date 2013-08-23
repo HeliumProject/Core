@@ -59,7 +59,7 @@ namespace Helium
 		class HELIUM_INSPECT_API ClientData : public Reflect::Object
 		{
 		public:
-			REFLECT_DECLARE_ABSTRACT( ClientData, Reflect::Object );
+			HELIUM_DECLARE_ABSTRACT( ClientData, Reflect::Object );
 
 			ClientData( Control* control = NULL )
 				: m_Control ( control )
@@ -99,7 +99,7 @@ namespace Helium
 		class HELIUM_INSPECT_API Widget : public Reflect::Object
 		{
 		public:
-			REFLECT_DECLARE_ABSTRACT( Widget, Reflect::Object );
+			HELIUM_DECLARE_ABSTRACT( Widget, Reflect::Object );
 
 			Widget()
 				: m_Control( NULL )
@@ -135,7 +135,7 @@ namespace Helium
 		class HELIUM_INSPECT_API Control : public Reflect::Object
 		{
 		public:
-			REFLECT_DECLARE_ABSTRACT( Control, Reflect::Object );
+			HELIUM_DECLARE_ABSTRACT( Control, Reflect::Object );
 			Control();
 			virtual ~Control();
 

@@ -2,7 +2,7 @@
 #include "Inspect/Controls/SliderControl.h"
 #include "Inspect/Canvas.h"
 
-REFLECT_DEFINE_CLASS( Helium::Inspect::Slider );
+HELIUM_DEFINE_CLASS( Helium::Inspect::Slider );
 
 using namespace Helium;
 using namespace Helium::Inspect;

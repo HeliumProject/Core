@@ -22,7 +22,7 @@ namespace Helium
         class HELIUM_INSPECT_API Canvas : public Container
         {
         public:
-            REFLECT_DECLARE_ABSTRACT( Canvas, Container );
+            HELIUM_DECLARE_ABSTRACT( Canvas, Container );
 
             Canvas();
             ~Canvas();

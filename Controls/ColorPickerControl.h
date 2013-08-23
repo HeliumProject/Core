@@ -16,7 +16,7 @@ namespace Helium
         class HELIUM_INSPECT_API ColorPicker : public Control
         {
         public:
-            REFLECT_DECLARE_CLASS( ColorPicker, Control );
+            HELIUM_DECLARE_CLASS( ColorPicker, Control );
 
             ColorPicker();
 

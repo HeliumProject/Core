@@ -2,7 +2,7 @@
 #include "Inspect/Controls/ValueControl.h"
 #include "Inspect/Canvas.h"
 
-REFLECT_DEFINE_CLASS( Helium::Inspect::Value );
+HELIUM_DEFINE_CLASS( Helium::Inspect::Value );
 
 using namespace Helium;
 using namespace Helium::Inspect;

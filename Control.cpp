@@ -2,9 +2,9 @@
 #include "Inspect/Control.h"
 #include "Inspect/Canvas.h"
 
-REFLECT_DEFINE_ABSTRACT( Helium::Inspect::ClientData );
-REFLECT_DEFINE_ABSTRACT( Helium::Inspect::Widget );
-REFLECT_DEFINE_ABSTRACT( Helium::Inspect::Control );
+HELIUM_DEFINE_ABSTRACT( Helium::Inspect::ClientData );
+HELIUM_DEFINE_ABSTRACT( Helium::Inspect::Widget );
+HELIUM_DEFINE_ABSTRACT( Helium::Inspect::Control );
 
 using namespace Helium;
 using namespace Helium::Inspect;

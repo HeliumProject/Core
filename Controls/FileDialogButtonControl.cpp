@@ -1,7 +1,7 @@
 #include "InspectPch.h"
 #include "Inspect/Controls/FileDialogButtonControl.h"
 
-REFLECT_DEFINE_CLASS( Helium::Inspect::FileDialogButton );
+HELIUM_DEFINE_CLASS( Helium::Inspect::FileDialogButton );
 
 using namespace Helium;
 using namespace Helium::Inspect;

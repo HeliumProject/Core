@@ -13,7 +13,7 @@
 
 #include "Inspect/Interpreters/ReflectPathInterpreter.h"
 
-REFLECT_DEFINE_ABSTRACT( Helium::Inspect::ClientDataFilter );
+HELIUM_DEFINE_ABSTRACT( Helium::Inspect::ClientDataFilter );
 
 using namespace Helium;
 using namespace Helium::Inspect;

@@ -12,7 +12,7 @@ namespace Helium
         class ClientDataFilter : public ClientData
         {
         public:
-            REFLECT_DECLARE_ABSTRACT( ClientDataFilter, ClientData );
+            HELIUM_DECLARE_ABSTRACT( ClientDataFilter, ClientData );
 
             ClientDataFilter( List* list, const Reflect::MetaClass* instanceClass, const std::string& filter )
                 : m_List( list )
