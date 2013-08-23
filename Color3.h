@@ -18,7 +18,7 @@ namespace Helium
 	struct HELIUM_MATH_API Color3 : Reflect::Struct
 	{
 	public:
-		REFLECT_DECLARE_BASE_STRUCT( Color3 );
+		HELIUM_DECLARE_BASE_STRUCT( Color3 );
 		static void PopulateMetaType( Reflect::MetaStruct& comp );
 
 		uint8_t r, g, b;

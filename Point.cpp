@@ -7,7 +7,7 @@ using namespace Helium;
 
 const Point Point::Zero;
 
-REFLECT_DEFINE_BASE_STRUCT( Helium::Point );
+HELIUM_DEFINE_BASE_STRUCT( Helium::Point );
 
 void Helium::Point::PopulateMetaType( Reflect::MetaStruct& comp )
 {

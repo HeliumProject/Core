@@ -2,7 +2,7 @@
 #include "Math/Vector4.h"
 #include "Reflect/TranslatorDeduction.h"
 
-REFLECT_DEFINE_BASE_STRUCT( Helium::Vector4 );
+HELIUM_DEFINE_BASE_STRUCT( Helium::Vector4 );
 
 using namespace Helium;
 

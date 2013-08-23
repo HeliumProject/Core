@@ -16,7 +16,7 @@ namespace Helium
 	struct HELIUM_MATH_API Vector3 : Reflect::Struct
 	{
 	public:
-		REFLECT_DECLARE_BASE_STRUCT( Vector3 );
+		HELIUM_DECLARE_BASE_STRUCT( Vector3 );
 		static void PopulateMetaType( Reflect::MetaStruct& comp );
 
 		float32_t x, y, z;

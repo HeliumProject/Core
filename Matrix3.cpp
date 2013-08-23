@@ -5,7 +5,7 @@
 #include "Math/EulerAngles.h"
 #include "Reflect/TranslatorDeduction.h"
 
-REFLECT_DEFINE_BASE_STRUCT( Helium::Matrix3 );
+HELIUM_DEFINE_BASE_STRUCT( Helium::Matrix3 );
 
 using namespace Helium;
 

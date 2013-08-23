@@ -3,7 +3,7 @@
 #include "Math/Scale.h"
 #include "Reflect/TranslatorDeduction.h"
 
-REFLECT_DEFINE_BASE_STRUCT( Helium::Vector3 );
+HELIUM_DEFINE_BASE_STRUCT( Helium::Vector3 );
 
 using namespace Helium;
 

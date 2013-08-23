@@ -10,7 +10,7 @@ namespace Helium
     class HELIUM_MATH_API Point : public Reflect::Struct
     {
     public:
-        REFLECT_DECLARE_BASE_STRUCT( Helium::Point );
+        HELIUM_DECLARE_BASE_STRUCT( Helium::Point );
         static void PopulateMetaType( Reflect::MetaStruct& comp );
 
         int32_t x, y;

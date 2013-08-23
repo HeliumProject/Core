@@ -2,7 +2,7 @@
 #include "Math/Vector2.h"
 #include "Reflect/TranslatorDeduction.h"
 
-REFLECT_DEFINE_BASE_STRUCT( Helium::Vector2 );
+HELIUM_DEFINE_BASE_STRUCT( Helium::Vector2 );
 
 using namespace Helium;
 
