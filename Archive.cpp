@@ -131,7 +131,7 @@ bool ArchiveReader::Resolve( const Name& identity, ObjectPtr& pointer, const Met
 		{
 			HELIUM_TRACE(
 				TraceLevels::Warning,
-				"ArchiveReader::Resolve - Could not parse identity '%s' as a number.\n", 
+				"ArchiveReader::Resolve - Could not parse identity '%s' as a number. Paths must begin with a '/'!\n", 
 				*str);
 		}
 		else if (index <= m_Objects.GetSize() )
