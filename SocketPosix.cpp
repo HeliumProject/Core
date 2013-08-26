@@ -216,15 +216,16 @@ bool Socket::Write(void* buffer, uint32_t bytes, uint32_t& wrote, const char* ip
     bool udp = m_Protocol == SocketProtocols::Udp;
     if (udp)
     {
-	int opt = ip ? 0 : 1;
+        int opt = ip ? 0 : 1;
         int err = ::setsockopt( m_Handle, SOL_SOCKET, SO_BROADCAST, (char*)&opt, sizeof(opt) );
         if (err < 0)
           return false;
     }
-
+	
     uint32_t addrLen = sizeof( addr );
-    int32_t local_wrote = udp ? ::sendto( m_Handle, (char*)buffer, bytes, 0, (sockaddr*)&addr, addrLen ) :
-                                ::send  ( m_Handle, (char*)buffer, bytes, 0 );
+    int32_t local_wrote = udp ? ::sendto( m_Handle, (char*)buffer, bytes, MSG_NOSIGNAL, (sockaddr*)&addr, addrLen ) :
+                                ::send  ( m_Handle, (char*)buffer, bytes, MSG_NOSIGNAL );
+
     if (local_wrote < 0)
     {
         return false;
