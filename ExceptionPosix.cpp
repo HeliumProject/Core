@@ -7,8 +7,8 @@
 #include "Platform/Process.h"
 
 #include <unistd.h>
-#include <sys/ptrace.h>
 #include <sys/types.h>
+#include <sys/ptrace.h>
 #include <sys/wait.h>
 
 #if HELIUM_OS_MAC

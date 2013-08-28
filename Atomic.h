@@ -409,6 +409,6 @@ namespace Helium
 
 #if HELIUM_OS_WIN
 #include "Platform/AtomicWin.inl"
-#elif HELIUM_OS_LINUX
+#else
 #include "Platform/AtomicPosix.inl"
 #endif

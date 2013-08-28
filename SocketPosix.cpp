@@ -221,10 +221,14 @@ bool Socket::Write(void* buffer, uint32_t bytes, uint32_t& wrote, const char* ip
         if (err < 0)
           return false;
     }
-	
+
+    uint32_t flags = 0;
+#if HELIUM_OS_LINUX
+    flags = MSG_NOSIGNAL;
+#endif
     uint32_t addrLen = sizeof( addr );
-    int32_t local_wrote = udp ? ::sendto( m_Handle, (char*)buffer, bytes, MSG_NOSIGNAL, (sockaddr*)&addr, addrLen ) :
-                                ::send  ( m_Handle, (char*)buffer, bytes, MSG_NOSIGNAL );
+    int32_t local_wrote = udp ? ::sendto( m_Handle, (char*)buffer, bytes, flags, (sockaddr*)&addr, addrLen ) :
+                                ::send  ( m_Handle, (char*)buffer, bytes, flags );
 
     if (local_wrote < 0)
     {

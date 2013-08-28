@@ -36,7 +36,9 @@ int pthread_timedjoin_np(pthread_t td, void **res, struct timespec *ts)
 {
     pthread_t tmp;
     int ret;
-    struct args args = { .td = td, .res = res };
+    struct args args;
+    args.td = td;
+    args.res = res;
 
     pthread_mutex_init(&args.mtx, 0);
     pthread_cond_init(&args.cond, 0);

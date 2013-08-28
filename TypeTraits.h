@@ -103,6 +103,31 @@ namespace std
 
 #elif HELIUM_OS_MAC // HELIUM_OS_LINUX
 
+#if HELIUM_CC_GCC
+
+#include <tr1/type_traits>
+
+namespace std
+{
+	namespace tr1 {}
+	using tr1::true_type;
+	using tr1::false_type;
+	using tr1::integral_constant;
+	using tr1::is_base_of;
+	using tr1::is_pointer;
+	using tr1::is_signed;
+	using tr1::is_array;
+	using tr1::remove_cv;
+	using tr1::remove_extent;
+	using tr1::alignment_of;
+	using tr1::has_trivial_assign;
+	using tr1::has_trivial_constructor;
+	using tr1::has_trivial_destructor;
+	using tr1::has_trivial_copy;
+}
+
+#elif HELIUM_CC_CLANG // HELIUM_CC_GCC
+
 #include <type_traits>
 
 namespace std
@@ -112,5 +137,7 @@ namespace std
 	template< class T > struct has_trivial_destructor : is_trivially_destructible< T > {};
 	template< class T > struct has_trivial_copy : is_trivially_copyable< T > {};
 }
+
+#endif // HELIUM_CC_CLANG
 
 #endif // HELIUM_OS_MAC
