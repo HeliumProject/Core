@@ -184,7 +184,7 @@ void MessagePackWriter::Write( uint64_t value )
 
 void MessagePackWriter::Write( int8_t value )
 {
-	if ( value >= 0 && value <= MessagePackMasks::FixNumPositiveValue )
+	if ( value >= 0 )
 	{
 		stream->Write< int8_t >( value );
 	}
@@ -345,7 +345,7 @@ void MessagePackWriter::WriteRaw( const void* bytes, uint32_t length )
 		stream->Write< uint16_t >( temp );
 		stream->Write( bytes, length, 1 );
 	}
-	else if ( length <= 4294967295 )
+	else
 	{
 		uint32_t temp = length;
 #if HELIUM_ENDIAN_LITTLE
@@ -354,10 +354,6 @@ void MessagePackWriter::WriteRaw( const void* bytes, uint32_t length )
 		stream->Write< uint8_t >( MessagePackTypes::Raw32 );
 		stream->Write< uint32_t >( temp );
 		stream->Write( bytes, length, 1 );
-	}
-	else
-	{
-		throw Helium::Exception( "Buffer too large: %d", length );
 	}
 
 	if ( !containerState.IsEmpty() )
@@ -395,7 +391,7 @@ void MessagePackWriter::BeginArray( uint32_t length )
 			stream->Write< uint8_t >( MessagePackTypes::Array16 );
 			stream->Write< uint16_t >( temp );
 		}
-		else if ( length <= 4294967295 )
+		else
 		{
 			uint32_t temp = length;
 #if HELIUM_ENDIAN_LITTLE
@@ -403,10 +399,6 @@ void MessagePackWriter::BeginArray( uint32_t length )
 #endif
 			stream->Write< uint8_t >( MessagePackTypes::Array32 );
 			stream->Write< uint32_t >( temp );
-		}
-		else
-		{
-			throw Helium::Exception( "Array too large: %d", length );
 		}
 	}
 
@@ -479,7 +471,7 @@ void MessagePackWriter::BeginMap( uint32_t length )
 			stream->Write< uint8_t >( MessagePackTypes::Array16 );
 			stream->Write< uint16_t >( temp );
 		}
-		else if ( length <= 4294967295 )
+		else
 		{
 			uint32_t temp = length;
 #if HELIUM_ENDIAN_LITTLE
@@ -487,10 +479,6 @@ void MessagePackWriter::BeginMap( uint32_t length )
 #endif
 			stream->Write< uint8_t >( MessagePackTypes::Array32 );
 			stream->Write< uint32_t >( temp );
-		}
-		else
-		{
-			throw Helium::Exception( "Map too large: %d", length );
 		}
 
 		// our state is going to bookkeep the number written, but we need to write TWICE as many due to key+value
