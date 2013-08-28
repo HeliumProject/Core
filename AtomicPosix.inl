@@ -4,7 +4,7 @@
     PREFIX Helium::Atomic##OPERATION##Release PARAM_LIST ACTION \
     PREFIX Helium::Atomic##OPERATION##Unsafe PARAM_LIST ACTION
 
-#if !defined( HELIUM_CC_GCC )
+#if !defined( HELIUM_CC_GCC ) && !defined( HELIUM_CC_CLANG )
 #error "implement atomics for this compiler"
 #else
 

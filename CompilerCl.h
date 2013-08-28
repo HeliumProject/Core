@@ -1,36 +1,15 @@
 #pragma once
 
+#if _MSC_VER < 1500
+#error Visual Studio 2008 SP1 required.
+#endif
+
 #include <intrin.h>
 
-// Template classes shouldn't be DLL exported, but the compiler warns us by default.
-#pragma warning( disable : 4251 ) // 'identifier' : class 'type' needs to have dll-interface to be used by clients of class 'type2'
-// Visual C++ does not support exception specifications at this time, but we still want to retain them for compilers
-// that do support them.  This is harmless to ignore.
-#pragma warning( disable : 4290 ) // C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
-// Visual C++ specific keywords such as "override" and "abstract" are used, but are abstracted via "HELIUM_OVERRIDE" and
-// "HELIUM_ABSTRACT" macros.
-#pragma warning( disable : 4481 ) // nonstandard extension used: override specifier 'keyword'
-// This spuriously comes up on occasion with certain template class methods.
-#pragma warning( disable : 4505 ) // 'function' : unreferenced local function has been removed
-
-// Language usage
 #if _MSC_VER < 1700
 # define HELIUM_CPP11 0
 #else
 # define HELIUM_CPP11 1
-#endif
-
-// Check C-runtime setttings
-#ifndef _MT
-# error Danger: MultiThreaded CRT must be used to ensure proper DLL-exported template compatibility!
-#endif
-#ifndef _DLL
-# error Danger: DLL CRT must be used to ensure proper DLL-exported template compatibility!
-#endif
-
-#if _MSC_VER < 1600
-// ceil() flawed in vs2008 headers
-#pragma warning( disable : 4985 )
 #endif
 
 /// Declare a class method as overriding a virtual method of a parent class.
@@ -49,9 +28,6 @@
 /// Attribute for explicitly defining a pointer or reference as not being externally aliased.
 #define HELIUM_RESTRICT __restrict
 
-/// C99 is never supported in cl
-#define HELIUM_C99 0
-
 /// Prefix macro for declaring type or variable alignment.
 ///
 /// @param[in] ALIGNMENT  Byte alignment (must be a power of two).
@@ -62,11 +38,17 @@
 /// @param[in] ALIGNMENT  Byte alignment (must be a power of two).
 #define HELIUM_ALIGN_POST( ALIGNMENT )
 
-#if _MSC_VER < 1700
-// Import tr1 into std
-namespace std
-{
-	namespace tr1 {}
-	using namespace tr1;
-}
+// Template classes shouldn't be DLL exported, but the compiler warns us by default.
+#pragma warning( disable : 4251 ) // 'identifier' : class 'type' needs to have dll-interface to be used by clients of class 'type2'
+// Visual C++ does not support exception specifications at this time, but we still want to retain them for compilers
+// that do support them.  This is harmless to ignore.
+#pragma warning( disable : 4290 ) // C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+// Visual C++ specific keywords such as "override" and "abstract" are used, but are abstracted via "HELIUM_OVERRIDE" and
+// "HELIUM_ABSTRACT" macros.
+#pragma warning( disable : 4481 ) // nonstandard extension used: override specifier 'keyword'
+// This spuriously comes up on occasion with certain template class methods.
+#pragma warning( disable : 4505 ) // 'function' : unreferenced local function has been removed
+
+#if _MSC_VER == 1500
+#pragma warning( disable : 4985 ) // ceil() flawed in vs2008 headers
 #endif

@@ -1,5 +1,11 @@
 #pragma once
 
+#if __clang_major__ < 3
+#error Clang 3 required.
+#endif
+
+#define HELIUM_CC_CLANG_VERSION ( __clang_major__ * 10000 + __clang_minor__ * 100 + __clang_patchlevel__ )
+
 #if __cplusplus < 201103L
 # define HELIUM_CPP11 0
 #else
@@ -31,12 +37,3 @@
 ///
 /// @param[in] ALIGNMENT  Byte alignment (must be a power of two).
 #define HELIUM_ALIGN_POST( ALIGNMENT ) __attribute__( ( aligned( ALIGNMENT ) ) )
-
-#include <type_traits>
-namespace std
-{
-	template< class T > struct has_trivial_assign : is_trivially_assignable< T, T > {};
-	template< class T > struct has_trivial_constructor : is_trivially_constructible< T > {};
-	template< class T > struct has_trivial_destructor : is_trivially_destructible< T > {};
-	template< class T > struct has_trivial_copy : is_trivially_copyable< T > {};
-}

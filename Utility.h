@@ -2,6 +2,7 @@
 
 #include "Platform/API.h"
 #include "Platform/Types.h"
+#include "Platform/TypeTraits.h"
 #include "Platform/Assert.h"
 #include "Platform/System.h"
 
