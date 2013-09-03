@@ -11,8 +11,12 @@
 #define HELIUM_ASSERT_ONLY
 
 // this sets the master flag if we are going to compile in asserts or not
-#if !defined( NDEBUG ) && !defined( HELIUM_ASSERT_ENABLED )
-#define HELIUM_ASSERT_ENABLED 1
+#if !defined( HELIUM_ASSERT_ENABLED )
+# if !defined( HELIUM_RELEASE ) && !defined( HELIUM_PROFILE )
+#  define HELIUM_ASSERT_ENABLED 1
+# else
+#  define HELIUM_ASSERT_ENABLED 0
+# endif
 #endif
 
 
