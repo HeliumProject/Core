@@ -23,11 +23,12 @@ namespace Helium
 			int64_t millis; // milliseconds since epoch UTC
 
 			inline BsonDate();
-			inline BsonDate& operator=( const BsonDate& rhs );
+
 			inline bool operator==( const BsonDate& rhs ) const;
 			inline bool operator!=( const BsonDate& rhs ) const;
 			inline bool operator<( const BsonDate& rhs ) const;
 			inline bool operator>( const BsonDate& rhs ) const;
+
 			static BsonDate Now();
 
 			HELIUM_DECLARE_BASE_STRUCT( BsonDate );
@@ -41,7 +42,7 @@ namespace Helium
 
 			inline BsonObjectId();
 			inline BsonObjectId( const BsonObjectId& rhs );
-			inline BsonObjectId& operator=( const BsonObjectId& rhs );
+
 			inline bool operator==( const BsonObjectId& rhs ) const;
 			inline bool operator!=( const BsonObjectId& rhs ) const;
 			inline bool operator<( const BsonObjectId& rhs ) const;

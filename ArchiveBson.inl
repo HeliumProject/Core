@@ -3,12 +3,6 @@ Helium::Persist::BsonDate::BsonDate()
 {
 }
 
-Helium::Persist::BsonDate& Helium::Persist::BsonDate::operator=( const BsonDate& rhs )
-{
-	millis = rhs.millis;
-	return *this;
-}
-
 bool Helium::Persist::BsonDate::operator==( const BsonDate& rhs ) const
 {
 	return millis == rhs.millis;
@@ -37,12 +31,6 @@ Helium::Persist::BsonObjectId::BsonObjectId()
 Helium::Persist::BsonObjectId::BsonObjectId( const BsonObjectId& rhs )
 {
 	MemoryCopy( bytes, rhs.bytes, sizeof( bytes ) );
-}
-
-Helium::Persist::BsonObjectId& Helium::Persist::BsonObjectId::operator=( const BsonObjectId& rhs )
-{
-	MemoryCopy( bytes, rhs.bytes, sizeof( bytes ) );
-	return *this;
 }
 
 bool Helium::Persist::BsonObjectId::operator==( const BsonObjectId& rhs ) const
