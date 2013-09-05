@@ -36,7 +36,7 @@
 #  define HELIUM_CPU_X86 1
 #  define HELIUM_CPU_X86_32 1
 # endif
-#elif defined( __gnu_linux__)
+#elif defined( __gnu_linux__ )
 # define HELIUM_OS_LINUX 1
 # if defined( __x86_64__ )
 #  define HELIUM_CPU_X86 1
