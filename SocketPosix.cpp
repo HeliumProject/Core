@@ -168,16 +168,17 @@ bool Socket::Connect( uint16_t port, const char* ip )
 {
     bool result = false;
 
-    HELIUM_ASSERT( m_Protocol == Helium::SocketProtocols::Tcp );
-
-    struct sockaddr_in addr;
-    addr.sin_family = AF_INET;
-    addr.sin_addr.s_addr = ip ? inet_addr(ip) : htonl(INADDR_BROADCAST);
-    addr.sin_port = htons(port);
-    if ( ::connect(m_Handle, (sockaddr*)&addr, sizeof(addr)) == 0 )
-    {
-        result = true;
-    }
+    if ( HELIUM_VERIFY( m_Protocol == Helium::SocketProtocols::Tcp ) )
+	{
+		struct sockaddr_in addr;
+		addr.sin_family = AF_INET;
+		addr.sin_addr.s_addr = ip ? inet_addr(ip) : htonl(INADDR_BROADCAST);
+		addr.sin_port = htons(port);
+		if ( ::connect(m_Handle, (sockaddr*)&addr, sizeof(addr)) == 0 )
+		{
+			result = true;
+		}
+	}
 
     return result;
 }
