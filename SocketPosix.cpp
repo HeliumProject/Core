@@ -3,38 +3,36 @@
 #include "Platform/Console.h"
 #include "Platform/Assert.h"
 
-using namespace Helium;
-
-#ifdef PS3_POSIX
-# define close close
-# define select select
-# define errno sys_net_errno
+#if HELIUM_OS_LINUX
+# include <pthread.h>
+# include <signal.h>
 #endif
+
+using namespace Helium;
 
 bool Helium::InitializeSockets()
 {
+#if HELIUM_OS_LINUX
+    sigset_t set;
+    sigemptyset(&set);
+    sigaddset(&set, SIGPIPE);
+    int s = pthread_sigmask(SIG_BLOCK, &set, NULL);
+    return HELIUM_VERIFY( s == 0 );
+#else
     return true;
+#endif
 }
 
 void Helium::CleanupSockets()
 {
-
 }
 
 void Helium::InitializeSocketThread()
 {
-
 }
 
 void Helium::CleanupSocketThread()
 {
-#ifdef PS3_POSIX
-    // Cleaning up just a single thread doesn't seem to actually work
-    if ( sys_net_free_thread_context( 0, SYS_NET_THREAD_ALL ) != 0 )
-    {
-        Helium::Print( "Failed to cleanup thread context (%d)\n", Helium::GetSocketError() );
-    }
-#endif
 }
 
 int Helium::GetSocketError()
@@ -223,13 +221,9 @@ bool Socket::Write(void* buffer, uint32_t bytes, uint32_t& wrote, const char* ip
           return false;
     }
 
-    uint32_t flags = 0;
-#if HELIUM_OS_LINUX
-    flags = MSG_NOSIGNAL;
-#endif
     uint32_t addrLen = sizeof( addr );
-    int32_t local_wrote = udp ? ::sendto( m_Handle, (char*)buffer, bytes, flags, (sockaddr*)&addr, addrLen ) :
-                                ::send  ( m_Handle, (char*)buffer, bytes, flags );
+    int32_t local_wrote = udp ? ::sendto( m_Handle, (char*)buffer, bytes, 0, (sockaddr*)&addr, addrLen ) :
+                                ::send  ( m_Handle, (char*)buffer, bytes, 0 );
 
     if (local_wrote < 0)
     {
