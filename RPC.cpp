@@ -190,18 +190,12 @@ void Host::Emit(Invoker* invoker, Args* args, uint32_t size, SwizzleFunc swizzle
 
         if (args != NULL)
         {
-            if (Swizzle())
-            {
-                swizzler(args);
-            }
+            swizzler(args);
 
             memcpy(ptr, args, size);
             ptr += size;
 
-            if (Swizzle())
-            {
-                swizzler(args);
-            }
+            swizzler(args);
         }
 
         if (args->m_Payload != NULL)
@@ -291,10 +285,7 @@ void Host::Emit(Invoker* invoker, Args* args, uint32_t size, SwizzleFunc swizzle
                 // do ref args processing here
                 if (args->m_Flags & RPC::Flags::ReplyWithArgs && args != NULL)
                 {
-                    if (Swizzle())
-                    {
-                        swizzler(ptr);
-                    }
+                    swizzler(ptr);
 
                     // copy our data BACK
                     memcpy(args, ptr, size);
@@ -407,10 +398,7 @@ bool Host::Invoke(IPC::Message* msg)
         // if we have a ref args
         if (args->m_Flags & RPC::Flags::ReplyWithArgs)
         {
-            if (Swizzle())
-            {
-                invoker->Swizzle( msg->GetData() );
-            }
+            invoker->Swizzle( msg->GetData() );
 
             // write to ptr
             memcpy(ptr, msg->GetData(), argSize);  
@@ -477,11 +465,6 @@ bool Host::Connected()
     }
 
     return true;
-}
-
-bool Host::Swizzle()
-{
-    return Platform::GetType() == Platform::Types::Windows && m_Connection->GetRemotePlatform() != Platform::Types::Windows;
 }
 
 bool Host::Dispatch()

@@ -10,38 +10,38 @@
 
 namespace Helium
 {
-    namespace IPC
-    {
-        const static uint32_t IPC_TCP_BUFFER_SIZE = 32 << 10;
+	namespace IPC
+	{
+		const static uint32_t IPC_TCP_BUFFER_SIZE = 32 << 10;
 
-        class HELIUM_FOUNDATION_API TCPConnection : public Connection
-        {
-        private:
-            char             m_IP[64];                       // ip of the server
+		class HELIUM_FOUNDATION_API TCPConnection : public Connection
+		{
+		private:
+			char           m_IP[64];      // ip of the server
 
-            uint16_t            m_ReadPort;                     // port number for read operations
-            Helium::Socket      m_ReadSocket;                   // socket used for read operations
+			uint16_t       m_ReadPort;    // port number for read operations
+			Helium::Socket m_ReadSocket;  // socket used for read operations
 
-            uint16_t            m_WritePort;                    // port number for write operations
-            Helium::Socket      m_WriteSocket;                  // socket used for write operations
+			uint16_t       m_WritePort;   // port number for write operations
+			Helium::Socket m_WriteSocket; // socket used for write operations
 
-        public:
-            TCPConnection();
-            virtual ~TCPConnection();
+		public:
+			TCPConnection();
+			virtual ~TCPConnection();
 
-        public:
-            bool Initialize(bool server, const char* name, const char* server_ip, const uint16_t server_port_no);
-            void Close();
+		public:
+			bool Initialize(bool server, const char* name, const char* server_ip, const uint16_t server_port_no);
+			void Close();
 
-        protected:
-            void ServerThread();
-            void ClientThread();
+		protected:
+			void ServerThread();
+			void ClientThread();
 
-            virtual void CleanupThread();
-            virtual bool ReadMessage(Message** msg);
-            virtual bool WriteMessage(Message* msg);
-            virtual bool Read(void* buffer, uint32_t bytes);
-            virtual bool Write(void* buffer, uint32_t bytes);
-        };
-    }
+			virtual void CleanupThread();
+			virtual bool ReadMessage(Message** msg);
+			virtual bool WriteMessage(Message* msg);
+			virtual bool Read(void* buffer, uint32_t bytes);
+			virtual bool Write(void* buffer, uint32_t bytes);
+		};
+	}
 }

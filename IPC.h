@@ -117,11 +117,11 @@ namespace Helium
 		class HELIUM_FOUNDATION_API MessageQueue
 		{
 		private:
-			Message* m_Head;			// pointer to head message 
-			Message* m_Tail;			// pointer to tail message 
-			uint32_t m_Count;			// number of messages in queue
-			uint32_t m_Total;			// number of messages that have passed through the queue since clear
-      uint32_t  m_MaxLength; // max allowable number of messages in queue.  A value of zero means unlimited
+			Message* m_Head;            // pointer to head message 
+			Message* m_Tail;            // pointer to tail message 
+			uint32_t m_Count;           // number of messages in queue
+			uint32_t m_Total;           // number of messages that have passed through the queue since clear
+			uint32_t m_MaxLength;       // max allowable number of messages in queue.  A value of zero means unlimited
 
 			Helium::Mutex m_Mutex;      // mutex to control access to the queue
 			Helium::Semaphore m_Append; // semaphore that increments on add, decrements on remove
@@ -164,25 +164,26 @@ namespace Helium
 		class HELIUM_FOUNDATION_API Connection
 		{
 		protected:
-			char					m_Name[256];          // friendly name for this connection
-			bool					m_Server;             // are we the server side or the client side
-			bool                    m_Terminating;        // used by the closedown code to signal it wants the threads to terminate
+			char                         m_Name[256];        // friendly name for this connection
+			bool                         m_Server;           // are we the server side or the client side
+			bool                         m_Terminating;      // used by the closedown code to signal it wants the threads to terminate
 
-			ConnectionState         m_State;              // current status, do not change outside of m_Mutex 
-			uint32_t                m_ConnectCount;       // track the number of connection that have occured
-			Helium::Platform::Type  m_RemotePlatform;     // the platform of the end point on the other side
-			int32_t                 m_NextTransaction;    // next transaction id for this connection endpoint
+			ConnectionState              m_State;            // current status, do not change outside of m_Mutex 
+			uint32_t                     m_ConnectCount;     // track the number of connection that have occured
+			Helium::Platform::Type       m_RemoteType;       // the platform of the end point on the other side
+			Helium::Platform::Endianness m_RemoteEndianness; // the platform of the end point on the other side
+			int32_t                      m_NextTransaction;  // next transaction id for this connection endpoint
 
-			Helium::Mutex           m_Mutex;              // mutex to protect access to this class
-			MessageQueue            m_ReadQueue;          // incoming messages
-			MessageQueue            m_WriteQueue;         // outgoing messages
+			Helium::Mutex                m_Mutex;            // mutex to protect access to this class
+			MessageQueue                 m_ReadQueue;        // incoming messages
+			MessageQueue                 m_WriteQueue;       // outgoing messages
 
-			Helium::CallbackThread  m_ConnectThread;      // handle of the core thread that manages the connection, once
-			Helium::CallbackThread  m_ReadThread;         // handle of the thread reads from the pipe (incomming)
-			Helium::CallbackThread  m_WriteThread;        // handle of the thread that writes to the pipe (outgoing)
+			Helium::CallbackThread       m_ConnectThread;    // handle of the core thread that manages the connection, once
+			Helium::CallbackThread       m_ReadThread;       // handle of the thread reads from the pipe (incomming)
+			Helium::CallbackThread       m_WriteThread;      // handle of the thread that writes to the pipe (outgoing)
 
-			MessageHeader           m_ReadHeader;
-			MessageHeader           m_WriteHeader;
+			MessageHeader                m_ReadHeader;
+			MessageHeader                m_WriteHeader;
 
 		public:
 			Connection();
@@ -226,9 +227,14 @@ namespace Helium
 			//
 
 		public:
-			Helium::Platform::Type GetRemotePlatform()
+			Helium::Platform::Type GetRemoteType()
 			{
-				return m_RemotePlatform;
+				return m_RemoteType;
+			}
+
+			Helium::Platform::Endianness GetRemoteEndianness()
+			{
+				return m_RemoteEndianness;
 			}
 
 			uint32_t GetConnectCount()
@@ -315,11 +321,11 @@ namespace Helium
 			// Send the disconnect message
 			void SendProtocolMessage(uint32_t message);
 
-			// Send host type message
-			bool WriteHostType();
+			// Send peer info message
+			bool WritePeerInfo();
 
-			// Receive host type message
-			bool ReadHostType();
+			// Receive peer info message
+			bool ReadPeerInfo();
 		};
 	}
 }

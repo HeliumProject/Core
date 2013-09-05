@@ -23,73 +23,7 @@ namespace Helium
         template <class T>
         inline void Swizzle(T* data)
         {
-#ifdef WIN32
-            HELIUM_BREAK();
-#endif
-        }
-
-        template<>
-        inline void Swizzle<uint8_t>(uint8_t* data)
-        {
-#ifdef WIN32
-            Helium::Swizzle(*data, true);
-#endif
-        }
-        template<> inline void Swizzle(int8_t* data)
-        {
-#ifdef WIN32
-            Helium::Swizzle(*data, true);
-#endif
-        }
-
-        template<> inline void Swizzle(uint16_t* data)
-        {
-#ifdef WIN32
-            Helium::Swizzle(*data, true);
-#endif
-        }
-        template<> inline void Swizzle(int16_t* data)
-        {
-#ifdef WIN32
-            Helium::Swizzle(*data, true);
-#endif
-        }
-
-        template<> inline void Swizzle(uint32_t* data)
-        {
-#ifdef WIN32
-            Helium::Swizzle(*data, true);
-#endif
-        }
-        template<> inline void Swizzle(int32_t* data)
-        {
-#ifdef WIN32
-            Helium::Swizzle(*data, true);
-#endif
-        }
-
-        template<> inline void Swizzle(uint64_t* data)
-        {
-#ifdef WIN32
-            Helium::Swizzle(*data, true);
-#endif
-        }
-        template<> inline void Swizzle(int64_t* data)
-        {
-#ifdef WIN32
-            Helium::Swizzle(*data, true);
-#endif
-        }
-
-        template<> inline void Swizzle(float32_t* data)
-        {
-#ifdef WIN32
-            Helium::Swizzle(*data, true);
-#endif
-        }
-        template<> inline void Swizzle(float64_t* data)
-        {
-#ifdef WIN32
+#ifdef HELIUM_ENDIAN_LITTLE
             Helium::Swizzle(*data, true);
 #endif
         }
@@ -97,7 +31,7 @@ namespace Helium
         template <class T>
         inline void Swizzle(T& data)
         {
-#ifdef WIN32
+#ifdef HELIUM_ENDIAN_LITTLE
             Swizzle(&data);
 #endif
         }
@@ -280,9 +214,6 @@ namespace Helium
             // Are we connected and ready to do work?
             bool Connected();
 
-            // Should we swizzle?
-            bool Swizzle();
-
             // Call this periodically in your to dispatch (invoke) rpc functions within the calling thread and return
             bool Dispatch();
 
@@ -349,10 +280,7 @@ namespace Helium
             {
                 if (size)
                 {
-                    if (m_Interface->GetHost()->Swizzle())
-                    {
-                        m_Swizzler(data);
-                    }
+                    m_Swizzler(data);
 
                     ArgsType* args = (ArgsType*)data;
 
