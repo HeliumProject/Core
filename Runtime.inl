@@ -12,7 +12,7 @@ const char* Helium::Platform::GetTypeString(Type t)
 
 const char* Helium::Platform::GetEndiannessString(Endianness e)
 {
-	if (e >= 0 && e<Endianness::Count)
+	if (e >= 0 && e<Endiannesses::Count)
 	{
 		return Endiannesses::Strings[e];
 	}
