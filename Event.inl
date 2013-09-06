@@ -154,6 +154,27 @@ bool Helium::Delegate< ArgsType, RefCountBaseType >::Function::Equals( const Del
 	return m_Function == f->m_Function;
 }
 
+namespace Helium
+{
+	template< typename ArgsType >
+	void _InvokeFunction( void (*function)( ArgsType ), void* parameter, std::true_type /*isRef*/ )
+	{
+		function( *static_cast< std::remove_reference< ArgsType >::type* >( parameter ) );
+	}
+
+	template< typename ArgsType >
+	void _InvokeFunction( void (*function)( ArgsType ), void* parameter, std::false_type /*isRef*/ )
+	{
+		function( *static_cast< ArgsType* >( parameter ) );
+	}
+}
+
+template< typename ArgsType, template< typename T > class RefCountBaseType >
+void Helium::Delegate< ArgsType, RefCountBaseType >::Function::Invoke( void* parameter, void* ) const
+{
+	_InvokeFunction( m_Function, parameter, std::is_reference< ArgsType >() );
+}
+
 template< typename ArgsType, template< typename T > class RefCountBaseType >
 void Helium::Delegate< ArgsType, RefCountBaseType >::Function::Invoke( ArgsType parameter ) const
 {
@@ -166,7 +187,6 @@ Helium::Delegate< ArgsType, RefCountBaseType >::Method< ClassType >::Method( Cla
 	: m_Instance( instance )
 	, m_Method( method )
 {
-	HELIUM_ASSERT( instance );
 	HELIUM_ASSERT( method );
 }
 
@@ -196,6 +216,29 @@ template< class ClassType >
 void Helium::Delegate< ArgsType, RefCountBaseType >::Method< ClassType >::Invoke( ArgsType parameter ) const
 {
 	(m_Instance->*m_Method)( parameter );
+}
+
+namespace Helium
+{
+	template< class ClassType, typename ArgsType >
+	void _InvokeMethod( ClassType* instance, void (ClassType::*method)( ArgsType ), void* parameter, std::true_type /*isRef*/ )
+	{
+		(instance->*method)( *static_cast< std::remove_reference< ArgsType >::type* >( parameter ) );
+	}
+
+	template< class ClassType, typename ArgsType >
+	void _InvokeMethod( ClassType* instance, void (ClassType::*method)( ArgsType ), void* parameter, std::false_type /*isRef*/ )
+	{
+		(instance->*method)( *static_cast< ArgsType* >( parameter ) );
+	}
+}
+
+template< typename ArgsType, template< typename T > class RefCountBaseType >
+template< class ClassType >
+void Helium::Delegate< ArgsType, RefCountBaseType >::Method< ClassType >::Invoke( void* parameter, void* instance ) const
+{
+	ClassType* i = instance ? static_cast< ClassType* >( instance ) : m_Instance;
+	_InvokeMethod( i, m_Method, parameter, std::is_reference< ArgsType >() );
 }
 
 template< typename ArgsType, template< typename T > class RefCountBaseType >
