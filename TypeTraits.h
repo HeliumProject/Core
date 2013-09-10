@@ -87,6 +87,7 @@ namespace std
 	using tr1::is_array;
 	using tr1::remove_cv;
 	using tr1::remove_extent;
+	using tr1::remove_reference;
 	using tr1::alignment_of;
 	using tr1::has_trivial_assign;
 	using tr1::has_trivial_constructor;
@@ -119,6 +120,7 @@ namespace std
 	using tr1::is_array;
 	using tr1::remove_cv;
 	using tr1::remove_extent;
+	using tr1::remove_reference;
 	using tr1::alignment_of;
 	using tr1::has_trivial_assign;
 	using tr1::has_trivial_constructor;
