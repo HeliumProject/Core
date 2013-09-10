@@ -4,6 +4,7 @@
 #error Clang 3 required.
 #endif
 
+#define HELIUM_CC_CLANG 1
 #define HELIUM_CC_CLANG_VERSION ( __clang_major__ * 10000 + __clang_minor__ * 100 + __clang_patchlevel__ )
 
 #if __cplusplus < 201103L

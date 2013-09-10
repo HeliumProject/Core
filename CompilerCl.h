@@ -6,6 +6,8 @@
 
 #include <intrin.h>
 
+#define HELIUM_CC_CL 1
+
 #if _MSC_VER < 1700
 # define HELIUM_CPP11 0
 #else
