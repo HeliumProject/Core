@@ -43,7 +43,7 @@ bool Assert::Trigger(
 			va_list args;
 			va_start(args, pMessage); 
 			char message[1024];
-			StringPrint(message, pMessage, args);
+			StringPrintArgs(message, pMessage, args);
 			va_end(args); 
 
 			StringPrint(
@@ -73,7 +73,7 @@ bool Assert::Trigger(
 			va_list args;
 			va_start(args, pMessage); 
 			char message[1024];
-			StringPrint(message, pMessage, args);
+			StringPrintArgs(message, pMessage, args);
 			va_end(args); 
 
 			StringPrint(
