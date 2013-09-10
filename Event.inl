@@ -159,7 +159,7 @@ namespace Helium
 	template< typename ArgsType >
 	void _InvokeFunction( void (*function)( ArgsType ), void* parameter, std::true_type /*isRef*/ )
 	{
-		function( *static_cast< std::remove_reference< ArgsType >::type* >( parameter ) );
+		function( *static_cast< typename std::remove_reference< ArgsType >::type* >( parameter ) );
 	}
 
 	template< typename ArgsType >
@@ -223,7 +223,7 @@ namespace Helium
 	template< class ClassType, typename ArgsType >
 	void _InvokeMethod( ClassType* instance, void (ClassType::*method)( ArgsType ), void* parameter, std::true_type /*isRef*/ )
 	{
-		(instance->*method)( *static_cast< std::remove_reference< ArgsType >::type* >( parameter ) );
+		(instance->*method)( *static_cast< typename std::remove_reference< ArgsType >::type* >( parameter ) );
 	}
 
 	template< class ClassType, typename ArgsType >
