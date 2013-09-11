@@ -105,7 +105,7 @@ bool Socket::Bind(uint16_t port)
 {
     bool result = false;
 
-    bool reuse = true;
+    int reuse = 1;
     ::setsockopt( m_Handle, SOL_SOCKET, SO_REUSEADDR, (char *)&reuse, sizeof(reuse) );
 
     sockaddr_in service;
