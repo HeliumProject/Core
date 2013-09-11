@@ -51,7 +51,7 @@ void MessageQueue::Add(Message* msg)
 {
 	IPC_SCOPE_TIMER("");
 
-	if ( HELIUM_VERIFY( msg ) )
+	if ( msg )
 	{
 		Helium::MutexScopeLock mutex (m_Mutex);
 
@@ -338,6 +338,7 @@ void Connection::Wait()
 
 ConnectionState Connection::Send(Message* message)
 {
+	HELIUM_ASSERT( message );
 	ConnectionState result = GetState();
 
 	if (result != ConnectionStates::Active)
