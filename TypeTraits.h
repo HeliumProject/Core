@@ -83,6 +83,7 @@ namespace std
 	using tr1::integral_constant;
 	using tr1::is_base_of;
 	using tr1::is_pointer;
+	using tr1::is_reference;
 	using tr1::is_signed;
 	using tr1::is_array;
 	using tr1::remove_cv;
@@ -116,6 +117,7 @@ namespace std
 	using tr1::integral_constant;
 	using tr1::is_base_of;
 	using tr1::is_pointer;
+	using tr1::is_reference;
 	using tr1::is_signed;
 	using tr1::is_array;
 	using tr1::remove_cv;
