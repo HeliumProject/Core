@@ -191,14 +191,14 @@ namespace Helium
 		/// @name Caller Interface
 		//@{
 		// create and execute a thread
-		bool Create( Entry entry, void* obj, const char* name, ThreadPriority priority = ThreadPriorities::Normal );
+		bool Create( Entry entry, void* obj, const char* name, ThreadPriority priority = ThreadPriorities::Inherit );
 
 		// C++ helper (remember, it is valid to pass a member function pointer as a template parameter!)
 		template< class ObjectT, void (ObjectT::*method)() >
 		static void EntryHelper( void* param );
 
 		// create and execute a thread with a separate args object
-		inline bool CreateWithArgs( Entry entry, void* obj, void* args, const char* name, ThreadPriority priority = ThreadPriorities::Normal );
+		inline bool CreateWithArgs( Entry entry, void* obj, void* args, const char* name, ThreadPriority priority = ThreadPriorities::Inherit );
 
 		// C++ helper (remember, it is valid to pass a member function pointer as a template parameter!)
 		template< class ObjectT, typename ArgsT, void (ObjectT::*method)( ArgsT& ) >
