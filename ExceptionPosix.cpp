@@ -38,19 +38,19 @@ bool Helium::IsDebuggerPresent()
     if (ptrace(PTRACE_ATTACH, ppid, NULL, 0) == 0)
     {
         /* Wait for the parent to stop and continue it */
-        waitpid(ppid, NULL, 0);
-        ptrace(PTRACE_CONT, ppid, NULL, 0);
+      waitpid(ppid, NULL, 0);
+      ptrace(PTRACE_CONT, ppid, NULL, 0);
 
         /* Detach */
-        ptrace(PTRACE_DETACH, getppid(), NULL, 0);
+      ptrace(PTRACE_DETACH, getppid(), NULL, 0);
 
         /* We were the tracers, so gdb is not present */
-        res = 0;
+      res = 0;
     }
     else
     {
         /* Trace failed so gdb is present */
-        res = 1;
+      res = 1;
     }
     exit(res);
   }
@@ -61,6 +61,11 @@ bool Helium::IsDebuggerPresent()
   }
 
   return res == 1;
+}
+
+bool Helium::InitializeSymbols(const std::string& path)
+{
+  return true;
 }
 
 #if !HELIUM_RELEASE && !HELIUM_PROFILE
