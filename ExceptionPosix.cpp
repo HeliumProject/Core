@@ -63,12 +63,27 @@ bool Helium::IsDebuggerPresent()
   return res == 1;
 }
 
+#if !HELIUM_RELEASE && !HELIUM_PROFILE
+
 bool Helium::InitializeSymbols(const std::string& path)
 {
   return true;
 }
 
-#if !HELIUM_RELEASE && !HELIUM_PROFILE
+bool Helium::GetSymbolsInitialized()
+{
+  return true;
+}
+
+size_t GetStackTrace( void** ppStackTraceArray, size_t stackTraceArraySize, size_t skipCount = 1 )
+{
+  return 0;
+}
+
+void GetAddressSymbol( std::string& rSymbol, void* pAddress )
+{
+  rSymbol.clear();
+}
 
 /// Write a string to any platform-specific debug log output.
 ///
