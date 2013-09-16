@@ -177,6 +177,7 @@ void ArchiveWriterJson::SerializeTranslator( Pointer pointer, Translator* transl
 	switch ( translator->GetMetaId() )
 	{
 	case MetaIds::ScalarTranslator:
+	case MetaIds::SimpleTranslator:
 	case MetaIds::EnumerationTranslator:
 	case MetaIds::PointerTranslator:
 	case MetaIds::TypeTranslator:
@@ -602,7 +603,7 @@ void ArchiveReaderJson::DeserializeTranslator( rapidjson::Value& value, Pointer 
 {
 	if ( value.IsBool() )
 	{
-		if ( translator->GetMetaId() == MetaIds::ScalarTranslator )
+		if ( translator->IsA(MetaIds::ScalarTranslator) )
 		{
 			ScalarTranslator* scalar = static_cast< ScalarTranslator* >( translator );
 			if ( scalar->m_Type == ScalarTypes::Boolean )
@@ -613,7 +614,7 @@ void ArchiveReaderJson::DeserializeTranslator( rapidjson::Value& value, Pointer 
 	}
 	else if ( value.IsNumber() )
 	{
-		if ( translator->GetMetaId() == MetaIds::ScalarTranslator )
+		if ( translator->IsA(MetaIds::ScalarTranslator) )
 		{
 			ScalarTranslator* scalar = static_cast< ScalarTranslator* >( translator );
 			bool clamp = true;

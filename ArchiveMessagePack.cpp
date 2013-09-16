@@ -193,6 +193,7 @@ void ArchiveWriterMessagePack::SerializeTranslator( Pointer pointer, Translator*
 	switch ( translator->GetMetaId() )
 	{
 	case MetaIds::ScalarTranslator:
+	case MetaIds::SimpleTranslator:
 	case MetaIds::EnumerationTranslator:
 	case MetaIds::PointerTranslator:
 	case MetaIds::TypeTranslator:
@@ -601,7 +602,7 @@ void ArchiveReaderMessagePack::DeserializeTranslator( Pointer pointer, Translato
 {
 	if ( m_Reader.IsBoolean() )
 	{
-		if ( translator->GetMetaId() == MetaIds::ScalarTranslator )
+		if ( translator->IsA(MetaIds::ScalarTranslator) )
 		{
 			ScalarTranslator* scalar = static_cast< ScalarTranslator* >( translator );
 			if ( scalar->m_Type == ScalarTypes::Boolean )
@@ -620,7 +621,7 @@ void ArchiveReaderMessagePack::DeserializeTranslator( Pointer pointer, Translato
 	}
 	else if ( m_Reader.IsNumber() )
 	{
-		if ( translator->GetMetaId() == MetaIds::ScalarTranslator )
+		if ( translator->IsA(MetaIds::ScalarTranslator) )
 		{
 			ScalarTranslator* scalar = static_cast< ScalarTranslator* >( translator );
 			bool clamp = true;

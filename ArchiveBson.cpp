@@ -255,6 +255,7 @@ void ArchiveWriterBson::SerializeTranslator( bson* b, const char* name, Pointer 
 	switch ( translator->GetMetaId() )
 	{
 	case MetaIds::ScalarTranslator:
+	case MetaIds::SimpleTranslator:
 	case MetaIds::EnumerationTranslator:
 	case MetaIds::PointerTranslator:
 	case MetaIds::TypeTranslator:
@@ -676,7 +677,7 @@ void ArchiveReaderBson::DeserializeTranslator( bson_iterator* i, Pointer pointer
 	{
 	case BSON_BOOL:
 		{
-			if ( translator->GetMetaId() == MetaIds::ScalarTranslator )
+			if ( translator->IsA( MetaIds::ScalarTranslator) )
 			{
 				ScalarTranslator* scalar = static_cast< ScalarTranslator* >( translator );
 				if ( scalar->m_Type == ScalarTypes::Boolean )
@@ -689,7 +690,7 @@ void ArchiveReaderBson::DeserializeTranslator( bson_iterator* i, Pointer pointer
 
 	case BSON_INT:
 		{
-			if ( translator->GetMetaId() == MetaIds::ScalarTranslator )
+			if ( translator->IsA( MetaIds::ScalarTranslator ) )
 			{
 				ScalarTranslator* scalar = static_cast< ScalarTranslator* >( translator );
 				bool clamp = true;
@@ -745,7 +746,7 @@ void ArchiveReaderBson::DeserializeTranslator( bson_iterator* i, Pointer pointer
 
 	case BSON_LONG:
 		{
-			if ( translator->GetMetaId() == MetaIds::ScalarTranslator )
+			if ( translator->IsA( MetaIds::ScalarTranslator ) )
 			{
 				ScalarTranslator* scalar = static_cast< ScalarTranslator* >( translator );
 				bool clamp = true;
@@ -801,7 +802,7 @@ void ArchiveReaderBson::DeserializeTranslator( bson_iterator* i, Pointer pointer
 
 	case BSON_DOUBLE:
 		{
-			if ( translator->GetMetaId() == MetaIds::ScalarTranslator )
+			if ( translator->IsA( MetaIds::ScalarTranslator ) )
 			{
 				ScalarTranslator* scalar = static_cast< ScalarTranslator* >( translator );
 				bool clamp = true;
