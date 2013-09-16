@@ -32,7 +32,7 @@ const char* Helium::TraceFile::GetFilePath()
 
 static HELIUM_FORCEINLINE uint64_t rdtsc(void)
 {
-    uint64_t int x;
+    uint64_t x;
     __asm__ volatile (".byte 0x0f, 0x31" : "=A" (x));
     return x;
 }
