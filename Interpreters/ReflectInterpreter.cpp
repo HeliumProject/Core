@@ -8,6 +8,8 @@
 #include "Inspect/Controls/ListControl.h"
 #include "Inspect/Container.h"
 
+#include "Reflect/Object.h"
+
 using namespace Helium;
 using namespace Helium::Reflect;
 using namespace Helium::Inspect;
@@ -27,8 +29,8 @@ void ReflectInterpreter::Interpret(const std::vector<Reflect::Object*>& instance
 
 void ReflectInterpreter::InterpretType(const std::vector<Reflect::Object*>& instances, Container* parent, int32_t includeFlags, int32_t excludeFlags, bool expandPanel)
 {
-#if REFLECT_REFACTOR
-    const Composite* composite = instances[0]->GetMetaClass();
+	const Reflect::Object *pObject = instances[0];
+    const MetaStruct* composite = pObject->GetMetaClass();
 
     // create a container
     ContainerPtr container = CreateControl<Container>();
@@ -76,15 +78,15 @@ void ReflectInterpreter::InterpretType(const std::vector<Reflect::Object*>& inst
     std::map< std::string, ContainerPtr > containersMap;
     containersMap.insert( std::make_pair( TXT( "" ), container) );
 
-    std::stack< const Composite* > bases;
-    for ( const Composite* current = composite; current != NULL; current = current->m_Base )
+    std::stack< const MetaStruct* > bases;
+    for ( const MetaStruct* current = composite; current != NULL; current = current->m_Base )
     {
         bases.push( current );
     }
 
     while ( !bases.empty() )
     {
-        const Composite* current = bases.top();
+        const MetaStruct* current = bases.top();
         bases.pop();
 
         // for each field in the type
@@ -181,36 +183,37 @@ void ReflectInterpreter::InterpretType(const std::vector<Reflect::Object*>& inst
                 // Pointer support
                 //
 
-                if (field->m_DataClass == Reflect::GetMetaClass<Reflect::PointerData>())
-                {
-                    if (hidden)
-                    {
-                        continue; 
-                    }        
+                //if (field->m_DataClass == Reflect::GetMetaClass<Reflect::PointerData>())
+				//if (field->m_Translator->)
+    //            {
+    //                if (hidden)
+    //                {
+    //                    continue; 
+    //                }        
 
-                    std::vector<Reflect::Object*> fieldInstances;
+    //                std::vector<Reflect::Object*> fieldInstances;
 
-                    std::vector<Reflect::Object*>::const_iterator elementItr = instances.begin();
-                    std::vector<Reflect::Object*>::const_iterator elementEnd = instances.end();
-                    for ( ; elementItr != elementEnd; ++elementItr )
-                    {
-                        uintptr_t fieldAddress = (uintptr_t)(*elementItr) + itr->m_Offset;
+    //                std::vector<Reflect::Object*>::const_iterator elementItr = instances.begin();
+    //                std::vector<Reflect::Object*>::const_iterator elementEnd = instances.end();
+    //                for ( ; elementItr != elementEnd; ++elementItr )
+    //                {
+    //                    uintptr_t fieldAddress = (uintptr_t)(*elementItr) + itr->m_Offset;
 
-                        Object* element = *((ObjectPtr*)(fieldAddress));
+    //                    Object* element = *((ObjectPtr*)(fieldAddress));
 
-                        if ( element )
-                        {
-                            fieldInstances.push_back( element );
-                        }
-                    }
+    //                    if ( element )
+    //                    {
+    //                        fieldInstances.push_back( element );
+    //                    }
+    //                }
 
-                    if ( !fieldInstances.empty() && fieldInstances.size() == instances.size() )
-                    {
-                        InterpretType(fieldInstances, container);
-                    }
+    //                if ( !fieldInstances.empty() && fieldInstances.size() == instances.size() )
+    //                {
+    //                    InterpretType(fieldInstances, container);
+    //                }
 
-                    continue;
-                }
+    //                continue;
+    //            }
 
 
                 //
@@ -219,83 +222,87 @@ void ReflectInterpreter::InterpretType(const std::vector<Reflect::Object*>& inst
 
                 ReflectFieldInterpreterPtr fieldInterpreter;
 
-                for ( const Reflect::MetaClass* type = field->m_DataClass;
-                    type != Reflect::GetMetaClass<Reflect::Object>() && !fieldInterpreter;
-                    type = Reflect::ReflectionCast< const MetaClass >( type->m_Base ) )
-                {
-                    fieldInterpreter = ReflectFieldInterpreterFactory::Create( type, field->m_Flags, m_Container );
-                }
+                //for ( const Reflect::MetaClass* type = field->m_DataClass;
+                //    type != Reflect::GetMetaClass<Reflect::Object>() && !fieldInterpreter;
+                //    type = Reflect::ReflectionCast< const MetaClass >( type->m_Base ) )
+                //{
+                //    fieldInterpreter = ReflectFieldInterpreterFactory::Create( type, field->m_Flags, m_Container );
+                //}
 
-                if ( fieldInterpreter.ReferencesObject() )
-                {
-                    Interpreter::ConnectInterpreterEvents( this, fieldInterpreter );
-                    fieldInterpreter->InterpretField( field, instances, container );
-                    m_Interpreters.push_back( fieldInterpreter );
-                    continue;
-                }
+                //if ( fieldInterpreter.ReferencesObject() )
+                //{
+                //    Interpreter::ConnectInterpreterEvents( this, fieldInterpreter );
+                //    fieldInterpreter->InterpretField( field, instances, container );
+                //    m_Interpreters.push_back( fieldInterpreter );
+                //    continue;
+                //}
 
 
                 //
                 // ElementArray support
                 //
 
-#pragma TODO("Move this out to an interpreter")
-                if (field->m_DataClass == Reflect::GetMetaClass<ObjectStlVectorData>())
-                {
-                    if (hidden)
-                    {
-                        continue;
-                    }
-
-                    if ( instances.size() == 1 )
-                    {
-                        uintptr_t fieldAddress = (uintptr_t)(instances.front()) + itr->m_Offset;
-
-                        std::vector< ObjectPtr >* elements = (std::vector< ObjectPtr >*)fieldAddress;
-
-                        if ( elements->size() > 0 )
-                        {
-                            ContainerPtr childContainer = CreateControl<Container>();
-
-                            std::string temp;
-                            field->GetProperty( TXT( "UIName" ), temp );
-                            if ( temp.empty() )
-                            {
-                                bool converted = Helium::ConvertString( field->m_Name, temp );
-                                HELIUM_ASSERT( converted );
-                            }
-
-                            childContainer->a_Name.Set( temp );
-
-                            std::vector< ObjectPtr >::const_iterator elementItr = elements->begin();
-                            std::vector< ObjectPtr >::const_iterator elementEnd = elements->end();
-                            for ( ; elementItr != elementEnd; ++elementItr )
-                            {
-                                std::vector<Reflect::Object*> childInstances;
-                                childInstances.push_back(*elementItr);
-                                InterpretType(childInstances, childContainer);
-                            }
-
-                            container->AddChild( childContainer );
-                        }
-                    }
-
-                    continue;
-                }
+//#pragma TODO("Move this out to an interpreter")
+//                if (field->m_DataClass == Reflect::GetMetaClass<ObjectStlVectorData>())
+//                {
+//                    if (hidden)
+//                    {
+//                        continue;
+//                    }
+//
+//                    if ( instances.size() == 1 )
+//                    {
+//                        uintptr_t fieldAddress = (uintptr_t)(instances.front()) + itr->m_Offset;
+//
+//                        std::vector< ObjectPtr >* elements = (std::vector< ObjectPtr >*)fieldAddress;
+//
+//                        if ( elements->size() > 0 )
+//                        {
+//                            ContainerPtr childContainer = CreateControl<Container>();
+//
+//                            std::string temp;
+//                            field->GetProperty( TXT( "UIName" ), temp );
+//                            if ( temp.empty() )
+//                            {
+//                                bool converted = Helium::ConvertString( field->m_Name, temp );
+//                                HELIUM_ASSERT( converted );
+//                            }
+//
+//                            childContainer->a_Name.Set( temp );
+//
+//                            std::vector< ObjectPtr >::const_iterator elementItr = elements->begin();
+//                            std::vector< ObjectPtr >::const_iterator elementEnd = elements->end();
+//                            for ( ; elementItr != elementEnd; ++elementItr )
+//                            {
+//                                std::vector<Reflect::Object*> childInstances;
+//                                childInstances.push_back(*elementItr);
+//                                InterpretType(childInstances, childContainer);
+//                            }
+//
+//                            container->AddChild( childContainer );
+//                        }
+//                    }
+//
+//                    continue;
+//                }
 
 
                 //
                 // Lastly fall back to the value interpreter
                 //
 
-                const Reflect::MetaClass* type = field->m_DataClass;
-                if ( !type->IsType( Reflect::GetMetaClass<Reflect::ContainerData>() ) )
-                {
-                    fieldInterpreter = CreateInterpreter< ReflectValueInterpreter >( m_Container );
-                    fieldInterpreter->InterpretField( field, instances, container );
-                    m_Interpreters.push_back( fieldInterpreter );
-                    continue;
-                }
+               //const Reflect::MetaClass* type = field->m_Translator;
+				//Translator *pTranslator = field->m_Translator;
+
+				
+				HELIUM_ASSERT( field->m_Translator );
+               if ( field->m_Translator->IsA(MetaIds::SimpleTranslator) )
+               {
+                   fieldInterpreter = CreateInterpreter< ReflectValueInterpreter >( m_Container );
+                   fieldInterpreter->InterpretField( field, instances, container );
+                   m_Interpreters.push_back( fieldInterpreter );
+                   continue;
+               }
             }
         }
     }
@@ -307,7 +314,6 @@ void ReflectInterpreter::InterpretType(const std::vector<Reflect::Object*>& inst
     {
         parent->AddChild(container);
     }
-#endif
 }
 
 

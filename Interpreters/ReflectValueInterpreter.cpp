@@ -46,7 +46,7 @@ void ReflectValueInterpreter::InterpretField(const Field* field, const std::vect
 
 	if (!result)
 	{
-		if ( field->m_ValueType->IsA( MetaIds::MetaEnum ) )
+		if ( field->m_ValueType && field->m_ValueType->IsA( MetaIds::MetaEnum ) )
 		{
 			const Reflect::MetaEnum* enumeration = Reflect::ReflectionCast< MetaEnum >( field->m_ValueType );
 
