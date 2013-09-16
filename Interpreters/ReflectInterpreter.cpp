@@ -296,13 +296,13 @@ void ReflectInterpreter::InterpretType(const std::vector<Reflect::Object*>& inst
 
 				
 				HELIUM_ASSERT( field->m_Translator );
-               if ( field->m_Translator->IsA(MetaIds::SimpleTranslator) )
-               {
-                   fieldInterpreter = CreateInterpreter< ReflectValueInterpreter >( m_Container );
+                if ( field->m_Translator->IsA(MetaIds::SimpleTranslator) )
+                {
+                   fieldInterpreter = CreateInterpreter< ReflectValueInterpreter >( m_Container ).Ptr();
                    fieldInterpreter->InterpretField( field, instances, container );
                    m_Interpreters.push_back( fieldInterpreter );
                    continue;
-               }
+                }
             }
         }
     }
