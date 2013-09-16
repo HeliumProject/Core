@@ -39,6 +39,9 @@ namespace Helium
             X     = 1 << 0,
             Y     = 1 << 1,
             Z     = 1 << 2,
+            XY    = X | Y,
+            YZ    = Y | Z,
+            ZX    = Z | X,
             All   = X | Y | Z,
         };
     }
