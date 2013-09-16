@@ -50,6 +50,7 @@ MessageQueue::~MessageQueue()
 void MessageQueue::Add(Message* msg)
 {
 	IPC_SCOPE_TIMER("");
+	bool shouldIncrement = true;
 
 	if ( msg )
 	{
@@ -93,6 +94,7 @@ void MessageQueue::Add(Message* msg)
 		if (m_MaxLength > 0 && m_Count > m_MaxLength)
 		{
 			m_Count--;
+			shouldIncrement = false;
 
 			// take the head of the queue
 			Message* trash = m_Head;
@@ -104,7 +106,10 @@ void MessageQueue::Add(Message* msg)
 		}
 	}
 
-	m_Append.Increment();
+	if (shouldIncrement)
+	{
+		m_Append.Increment();
+	}
 }
 
 Message* MessageQueue::Remove()
@@ -416,11 +421,17 @@ bool Connection::WritePump()
 		result = WriteMessage(msg);
 
 #ifdef IPC_CONNECTION_DEBUG
-		Helium::Print("%s: Put message %d, id '%d', transaction '%d', size '%d'\n", m_Name, msg->GetNumber(), msg->GetID(), msg->GetTransaction(), msg->GetSize());
+		Helium::Print("%s: %s putting message %d, id '%d', transaction '%d', size '%d'\n", result ? "Success" : "Failure", m_Name, msg->GetNumber(), msg->GetID(), msg->GetTransaction(), msg->GetSize());
 #endif
 
 		// free the memory
 		delete msg;
+	}
+	else
+	{
+#ifdef IPC_CONNECTION_DEBUG
+		Helium::Print("%s: Null message in queue\n", m_Name);
+#endif
 	}
 
 	// there was a failure
