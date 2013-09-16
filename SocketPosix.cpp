@@ -193,8 +193,9 @@ bool Socket::Read(void* buffer, uint32_t bytes, uint32_t& read, sockaddr_in* pee
     sockaddr_in addr;
     socklen_t addrLen = sizeof( addr );
     bool udp = m_Protocol == SocketProtocols::Udp;
-    int32_t local_read = udp ? ::recvfrom( m_Handle, (char*)buffer, bytes, 0, (sockaddr*)(peer ? peer : &addr), &addrLen ) :
-                               ::recv    ( m_Handle, (char*)buffer, bytes, 0 );
+    uint32_t flags = MSG_WAITALL;
+    int32_t local_read = udp ? ::recvfrom( m_Handle, (char*)buffer, bytes, flags, (sockaddr*)(peer ? peer : &addr), &addrLen ) :
+                               ::recv    ( m_Handle, (char*)buffer, bytes, flags );
     if (local_read < 0)
     {
         return false;
