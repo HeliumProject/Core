@@ -27,9 +27,9 @@ using namespace Helium::Log;
 
 #define NTFS_PATH_MAX (0x7FFF)
 
-uint32_t g_LogFileCount = 20;
+static uint32_t g_LogFileCount = 20;
 
-Helium::Mutex g_Mutex;
+static Helium::Mutex g_Mutex;
 
 typedef std::map<std::string, File*> M_Files;
 
@@ -109,16 +109,16 @@ struct OutputFile
 };
 
 typedef std::map< std::string, OutputFile > M_OutputFile;
-M_OutputFile g_TraceFiles;
+static M_OutputFile g_TraceFiles;
 
-uint32_t g_Streams = Streams::Normal | Streams::Warning | Streams::Error;
-Level g_Level = Levels::Default;
-int g_WarningCount = 0;
-int g_ErrorCount = 0;
-int g_Indent = 0;
+static uint32_t g_Streams = Streams::Normal | Streams::Warning | Streams::Error;
+static Level g_Level = Levels::Default;
+static int g_WarningCount = 0;
+static int g_ErrorCount = 0;
+static int g_Indent = 0;
 
-PrintingSignature::Event g_PrintingEvent;
-PrintedSignature::Event g_PrintedEvent;
+static PrintingSignature::Event g_PrintingEvent;
+static PrintedSignature::Event g_PrintedEvent;
 
 void Log::Statement::ApplyIndent( const char* string, std::string& output )
 {
