@@ -5,20 +5,20 @@
 #include <string> 
 #include <sstream>
 
-#if HELIUM_CC_GCC && !HELIUM_CPP11
-
-#include <tr1/regex>
-
+#if HELIUM_CC_GCC
+# include <boost/regex.hpp>
 namespace std
 {
-    using std::tr1::regex;
-    using std::tr1::smatch;
-    using std::tr1::match_results;
-    using std::tr1::sregex_token_iterator;
+    using boost::regex;
+    using boost::regex_search;
+    using boost::regex_replace;
+    using boost::smatch;
+    using boost::sregex_iterator;
+    using boost::sregex_token_iterator;
+    using boost::match_results;
 }
-
 #else
-#include <regex>
+# include <regex>
 #endif
 
 //--------------------------------------------------------------
