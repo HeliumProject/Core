@@ -930,8 +930,11 @@ void ArchiveReaderBson::DeserializeTranslator( bson_iterator* i, Pointer pointer
 				{
 					String key ( bson_iterator_key( elem ) );
 					keyTranslator->Parse( key, keyVariable, m_Resolver );
-					DeserializeTranslator( elem, valueVariable, valueTranslator, field, object );
 					assocation->SetItem( pointer, keyVariable, valueVariable );
+
+					// Delay this deserialize until after the object is place in the map
+					Pointer valuePtr = assocation->GetItem( pointer, keyVariable );
+					DeserializeTranslator( elem, valuePtr, valueTranslator, field, object );
 				}
 			}
 			break;

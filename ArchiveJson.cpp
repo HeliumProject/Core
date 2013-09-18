@@ -722,8 +722,11 @@ void ArchiveReaderJson::DeserializeTranslator( rapidjson::Value& value, Pointer 
 			for ( rapidjson::Value::MemberIterator itr = value.MemberBegin(), end = value.MemberEnd(); itr != end; ++itr )
 			{
 				DeserializeTranslator( itr->name, keyVariable, keyTranslator, field, object );
-				DeserializeTranslator( itr->value, valueVariable, valueTranslator, field, object );
 				assocation->SetItem( pointer, keyVariable, valueVariable );
+
+				// Delay this deserialize until after the object is place in the map
+				Pointer valuePtr = assocation->GetItem( pointer, keyVariable );
+				DeserializeTranslator( itr->value, valuePtr, valueTranslator, field, object );
 			}
 		}
 	}

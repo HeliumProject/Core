@@ -748,8 +748,11 @@ void ArchiveReaderMessagePack::DeserializeTranslator( Pointer pointer, Translato
 			for ( uint32_t i=0; i<length; ++i )
 			{
 				DeserializeTranslator( key, keyTranslator, field, object );
-				DeserializeTranslator( value, valueTranslator, field, object );
 				assocation->SetItem( pointer, key, value );
+
+				// Delay this deserialize until after the object is place in the map
+				Pointer valuePtr = assocation->GetItem( pointer, key );
+				DeserializeTranslator( valuePtr, valueTranslator, field, object );
 			}
 			m_Reader.EndMap();
 		}
