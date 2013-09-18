@@ -2,6 +2,7 @@
 #include "TUID.h"
 
 #include "Platform/Exception.h"
+#include "Platform/Timer.h"
 #include "Foundation/Endian.h"
 
 #include <time.h>
@@ -11,6 +12,11 @@
 
 #if HELIUM_OS_WIN
 # include <iphlpapi.h>
+#elif HELIUM_OS_LINUX
+# include <sys/socket.h>
+# include <sys/ioctl.h>
+# include <linux/if.h>
+# include <netdb.h>
 #endif
 
 using namespace Helium;
@@ -122,47 +128,59 @@ void TUID::Generate( tuid& uid )
     // fetches the MAC address (if it has not already been set)
     if ( s_CachedMacBits64 == 0 )
     {
+        uint64_t bits = 0;
+
 #if HELIUM_OS_WIN
+
         IP_ADAPTER_INFO adapterInfo[16];
         DWORD bufLength = sizeof( adapterInfo );
-        DWORD status = GetAdaptersInfo( adapterInfo, &bufLength );
-        if ( status != ERROR_SUCCESS )
+        bool gotAddress = GetAdaptersInfo( adapterInfo, &bufLength ) == ERROR_SUCCESS;
+        if ( HELIUM_VERIFY( gotAddress ) )
+        {
+            uint64_t tempByte = 0;
+            for ( int32_t address_byte = 5; address_byte >= 0; --address_byte )
+            {
+                tempByte = adapterInfo[0].Address[ address_byte ];
+                bits |= tempByte << ( 8 * address_byte );
+            }
+        }
+        else
         {
             throw Helium::Exception( TXT( "Could not get network adapter info to seed TUID generation." ) );
         }
 
-        // cache the appropriate bits
-        uint64_t bits = 0;
-        uint64_t tempByte = 0;
-        for ( int32_t address_byte = 5; address_byte >= 0; --address_byte )
-        {
-            tempByte = adapterInfo[0].Address[ address_byte ];
-            bits |= tempByte << ( 8 * address_byte );
-        }
+#elif HELIUM_OS_LINUX
 
-        s_CachedMacBits64 |= (bits << 8); // shift left 8 to center
+        int fd = socket(PF_INET, SOCK_DGRAM, IPPROTO_IP);
+
+        struct ifreq s;
+        strcpy(s.ifr_name, "eth0");
+        bool gotAddress = fd >= 0 && 0 == ioctl(fd, SIOCGIFHWADDR, &s);
+        if ( HELIUM_VERIFY( gotAddress ) )
+        {
+            uint64_t tempByte = 0;
+            for ( int32_t address_byte = 5; address_byte >= 0; --address_byte )
+            {
+                tempByte = s.ifr_addr.sa_data[ address_byte ];
+                bits |= tempByte << ( 8 * address_byte );
+            }
+        }
+        shutdown( fd, 0 );
+
+        if ( !gotAddress )
+        {
+            throw Helium::Exception( TXT( "Could not get network adapter info to seed TUID generation." ) );
+        }
 #else
         HELIUM_ASSERT( false );
 #endif
+
+        s_CachedMacBits64 |= (bits << 8); // shift left 8 to center
     }
 
     uid |= s_CachedMacBits64;
 
-    uint64_t timeBits = 0;
-
-    // get the clock ticks
-#if HELIUM_OS_WIN
-    LARGE_INTEGER ticks;
-    BOOL result = QueryPerformanceCounter( &ticks );
-    if ( !result )
-    {
-        throw Helium::Exception( TXT( "Could not obtain performance counter ticks to generate TUID." ) );
-    }
-    timeBits = ticks.LowPart;
-    timeBits = timeBits << 32; // shift left
-#else
-    HELIUM_ASSERT( false );
-#endif
+    uint64_t timeBits = Timer::GetTickCount();
 
     // get the system time
     time_t systemTime;
