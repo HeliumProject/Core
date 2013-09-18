@@ -704,7 +704,10 @@ void Helium::DynamicArray< T, Allocator >::Insert( size_t index, const T& rValue
 		if( shiftCount <= count )
 		{
 			ArrayUninitializedCopy( m_pBuffer + index + count, m_pBuffer + index, shiftCount );
-			ArrayUninitializedFill( m_pBuffer + m_size, rValue, count - shiftCount );
+			if ( shiftCount != count )
+			{
+				ArrayUninitializedFill( m_pBuffer + m_size, rValue, count - shiftCount );
+			}
 
 			ArraySet( m_pBuffer + index, rValue, shiftCount );
 		}
