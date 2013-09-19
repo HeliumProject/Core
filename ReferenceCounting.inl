@@ -110,14 +110,16 @@ template< typename BaseT >
 void Helium::RefCountProxy< BaseT >::DestroyObject()
 {
     BaseT* pObject = static_cast< BaseT* >( m_pObject );
-    HELIUM_ASSERT( pObject );
-    BaseT::RefCountSupportType::PreDestroy( pObject );
+    if ( pObject )
+	{
+		BaseT::RefCountSupportType::PreDestroy( pObject );
 
-    BaseT* pAtomicObjectOld = static_cast< BaseT* >( AtomicExchangeRelease< void >( m_pObject, NULL ) );
-    HELIUM_ASSERT( pAtomicObjectOld == pObject );
-    HELIUM_UNREF( pAtomicObjectOld );
+		BaseT* pAtomicObjectOld = static_cast< BaseT* >( AtomicExchangeRelease< void >( m_pObject, NULL ) );
+		HELIUM_ASSERT( pAtomicObjectOld == pObject );
+		HELIUM_UNREF( pAtomicObjectOld );
 
-    BaseT::RefCountSupportType::Destroy( pObject );
+		BaseT::RefCountSupportType::Destroy( pObject );
+	}
 }
 
 /// Constructor.
@@ -144,10 +146,7 @@ Helium::RefCountProxy< BaseT >* Helium::RefCountProxyContainer< BaseT >::Get( Ba
 
         // Atomically set the existing proxy, making sure the proxy is still null.  If another proxy was swapped in
         // first, release the proxy we just tried to allocate.
-        RefCountProxy< BaseT >* pExistingProxy = AtomicCompareExchangeRelease< RefCountProxy< BaseT > >(
-            m_pProxy,
-            pProxy,
-            NULL );
+        RefCountProxy< BaseT >* pExistingProxy = AtomicCompareExchangeRelease< RefCountProxy< BaseT > >( m_pProxy, pProxy, NULL );
         if( pExistingProxy )
         {
             SupportType::Release( pProxy );
@@ -156,6 +155,17 @@ Helium::RefCountProxy< BaseT >* Helium::RefCountProxyContainer< BaseT >::Get( Ba
     }
 
     return pProxy;
+}
+
+/// Set the reference count proxy manually.
+///
+/// @param[in] proxy  The proxy to use for reference counting.
+///
+/// @return  Pointer to the reference count proxy instance.
+template< typename BaseT >
+void Helium::RefCountProxyContainer< BaseT >::Set( RefCountProxy< BaseT >* pProxy )
+{
+	m_pProxy = pProxy;
 }
 
 /// Constructor.
@@ -327,11 +337,11 @@ Helium::RefCountProxyBase< PointerT >* Helium::StrongPtr< PointerT >::GetProxy()
 ///
 /// @see GetProxy()
 template< typename PointerT >
-void Helium::StrongPtr< PointerT >::SetProxy( RefCountProxyBase< PointerT >* proxy )
+void Helium::StrongPtr< PointerT >::SetProxy( RefCountProxyBase< PointerT >* pProxy )
 {
 	if ( HELIUM_VERIFY( m_pProxy == NULL ) )
 	{
-		m_pProxy = proxy;
+		m_pProxy = pProxy;
 	}
 }
 
@@ -684,11 +694,11 @@ Helium::RefCountProxyBase< PointerT >* Helium::WeakPtr< PointerT >::GetProxy() c
 ///
 /// @see GetProxy()
 template< typename PointerT >
-void Helium::WeakPtr< PointerT >::SetProxy( RefCountProxyBase< PointerT >* proxy )
+void Helium::WeakPtr< PointerT >::SetProxy( RefCountProxyBase< PointerT >* pProxy )
 {
 	if ( HELIUM_VERIFY( m_pProxy == NULL ) )
 	{
-		m_pProxy = proxy;
+		m_pProxy = pProxy;
 	}
 }
 /// Get whether this weak pointer is holding onto the reference counting proxy object for the given object.

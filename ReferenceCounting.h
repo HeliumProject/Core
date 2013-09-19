@@ -14,9 +14,13 @@
 	public: \
 	typedef SUPPORT_TYPE RefCountSupportType; \
 	Helium::RefCountProxy< CLASS >* GetRefCountProxy() const \
-		{ \
+	{ \
 		return m_refCountProxyContainer.Get( const_cast< CLASS* >( this ) ); \
-		} \
+	} \
+	void SetRefCountProxy( Helium::RefCountProxy< CLASS >* pProxy ) const \
+	{ \
+		return m_refCountProxyContainer.Set( pProxy ); \
+	} \
 	private: \
 	mutable Helium::RefCountProxyContainer< CLASS > m_refCountProxyContainer;
 
@@ -88,6 +92,7 @@ namespace Helium
 		/// @name Access
 		//@{
 		RefCountProxy< BaseT >* Get( BaseT* pObject );
+		void Set( RefCountProxy< BaseT >* pProxy );
 		//@}
 
 	private:
@@ -123,7 +128,7 @@ namespace Helium
 		/// @name Proxy Referencing
 		//@{
 		RefCountProxyBase< PointerT >* GetProxy() const;
-		void SetProxy( RefCountProxyBase< PointerT >* proxy );
+		void SetProxy( RefCountProxyBase< PointerT >* pProxy );
 		//@}
 
 		/// @name Overloaded Operators
@@ -182,7 +187,7 @@ namespace Helium
 		/// @name Proxy Referencing
 		//@{
 		RefCountProxyBase< PointerT >* GetProxy() const;
-		void SetProxy( RefCountProxyBase< PointerT >* proxy );
+		void SetProxy( RefCountProxyBase< PointerT >* pProxy );
 		//@}
 
 		/// @name Reference Count Proxy Matching
