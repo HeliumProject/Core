@@ -501,7 +501,7 @@ void ArchiveReaderBson::Read( Reflect::ObjectPtr& object )
 	bson_destroy( m_Bson );
 }
 
-void Helium::Persist::ArchiveReaderBson::Start()
+void ArchiveReaderBson::Start()
 {
 	ArchiveStatus info( *this, ArchiveStates::Starting );
 	e_Status.Raise( info );
@@ -529,7 +529,7 @@ void Helium::Persist::ArchiveReaderBson::Start()
 	}
 }
 
-bool Helium::Persist::ArchiveReaderBson::ReadNext( Reflect::ObjectPtr& object )
+bool ArchiveReaderBson::ReadNext( Reflect::ObjectPtr& object )
 {
 	if ( !bson_iterator_more( m_Next ) )
 	{
@@ -570,22 +570,6 @@ bool Helium::Persist::ArchiveReaderBson::ReadNext( Reflect::ObjectPtr& object )
 
 	bson_iterator_next( m_Next );
 	return true;
-}
-
-void Helium::Persist::ArchiveReaderBson::Resolve()
-{
-	ArchiveStatus info( *this, ArchiveStates::ObjectProcessed );
-	info.m_Progress = 100;
-	e_Status.Raise( info );
-
-	// finish linking objects (unless we have a custom handler)
-	for ( DynamicArray< Fixup >::ConstIterator itr = m_Fixups.Begin(), end = m_Fixups.End(); itr != end; ++itr )
-	{
-		ArchiveReader::Resolve( itr->m_Identity, itr->m_Pointer, itr->m_PointerClass );
-	}
-
-	info.m_State = ArchiveStates::Complete;
-	e_Status.Raise( info );
 }
 
 void ArchiveReaderBson::DeserializeInstance( bson_iterator* i, void* instance, const MetaStruct* structure, Object* object )
@@ -930,11 +914,8 @@ void ArchiveReaderBson::DeserializeTranslator( bson_iterator* i, Pointer pointer
 				{
 					String key ( bson_iterator_key( elem ) );
 					keyTranslator->Parse( key, keyVariable, m_Resolver );
+					DeserializeTranslator( elem, valueVariable, valueTranslator, field, object );
 					assocation->SetItem( pointer, keyVariable, valueVariable );
-
-					// Delay this deserialize until after the object is place in the map
-					Pointer valuePtr = assocation->GetItem( pointer, keyVariable );
-					DeserializeTranslator( elem, valuePtr, valueTranslator, field, object );
 				}
 			}
 			break;

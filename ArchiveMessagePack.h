@@ -48,7 +48,6 @@ namespace Helium
 
 			void Start();
 			bool ReadNext( Reflect::ObjectPtr &object );
-			void Resolve();
 
 		private:
 			void DeserializeInstance( void* instance, const Reflect::MetaStruct* composite, Reflect::Object* object );

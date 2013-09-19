@@ -397,7 +397,7 @@ void ArchiveReaderJson::Read( Reflect::ObjectPtr& object )
 	}
 }
 
-void Helium::Persist::ArchiveReaderJson::Start()
+void ArchiveReaderJson::Start()
 {
 	ArchiveStatus info( *this, ArchiveStates::Starting );
 	e_Status.Raise( info );
@@ -455,7 +455,7 @@ void Helium::Persist::ArchiveReaderJson::Start()
 	}
 }
 
-bool Helium::Persist::ArchiveReaderJson::ReadNext( Reflect::ObjectPtr& object )
+bool ArchiveReaderJson::ReadNext( Reflect::ObjectPtr& object )
 {
 	if ( m_Next >= m_Document.Size() )
 	{
@@ -498,22 +498,6 @@ bool Helium::Persist::ArchiveReaderJson::ReadNext( Reflect::ObjectPtr& object )
 
 	m_Next++;
 	return true;
-}
-
-void Helium::Persist::ArchiveReaderJson::Resolve()
-{
-	ArchiveStatus info( *this, ArchiveStates::ObjectProcessed );
-	info.m_Progress = 100;
-	e_Status.Raise( info );
-
-	// finish linking objects (unless we have a custom handler)
-	for ( DynamicArray< Fixup >::ConstIterator itr = m_Fixups.Begin(), end = m_Fixups.End(); itr != end; ++itr )
-	{
-		ArchiveReader::Resolve( itr->m_Identity, itr->m_Pointer, itr->m_PointerClass );
-	}
-
-	info.m_State = ArchiveStates::Complete;
-	e_Status.Raise( info );
 }
 
 void ArchiveReaderJson::DeserializeInstance( rapidjson::Value& value, void* instance, const MetaStruct* structure, Object* object )
@@ -722,11 +706,8 @@ void ArchiveReaderJson::DeserializeTranslator( rapidjson::Value& value, Pointer 
 			for ( rapidjson::Value::MemberIterator itr = value.MemberBegin(), end = value.MemberEnd(); itr != end; ++itr )
 			{
 				DeserializeTranslator( itr->name, keyVariable, keyTranslator, field, object );
+				DeserializeTranslator( itr->value, valueVariable, valueTranslator, field, object );
 				assocation->SetItem( pointer, keyVariable, valueVariable );
-
-				// Delay this deserialize until after the object is place in the map
-				Pointer valuePtr = assocation->GetItem( pointer, keyVariable );
-				DeserializeTranslator( itr->value, valuePtr, valueTranslator, field, object );
 			}
 		}
 	}

@@ -494,22 +494,6 @@ bool ArchiveReaderMessagePack::ReadNext( ObjectPtr& object )
 	return true;
 }
 
-void ArchiveReaderMessagePack::Resolve()
-{
-	ArchiveStatus info( *this, ArchiveStates::ObjectProcessed );
-	info.m_Progress = 100;
-	e_Status.Raise( info );
-
-	// finish linking objects (unless we have a custom handler)
-	for ( DynamicArray< Fixup >::ConstIterator itr = m_Fixups.Begin(), end = m_Fixups.End(); itr != end; ++itr )
-	{
-		ArchiveReader::Resolve( itr->m_Identity, itr->m_Pointer, itr->m_PointerClass );
-	}
-
-	info.m_State = ArchiveStates::Complete;
-	e_Status.Raise( info );
-}
-
 void ArchiveReaderMessagePack::DeserializeInstance( void* instance, const MetaStruct* structure, Object* object )
 {
 #if PERSIST_ARCHIVE_VERBOSE
@@ -748,11 +732,8 @@ void ArchiveReaderMessagePack::DeserializeTranslator( Pointer pointer, Translato
 			for ( uint32_t i=0; i<length; ++i )
 			{
 				DeserializeTranslator( key, keyTranslator, field, object );
+				DeserializeTranslator( value, valueTranslator, field, object );
 				assocation->SetItem( pointer, key, value );
-
-				// Delay this deserialize until after the object is place in the map
-				Pointer valuePtr = assocation->GetItem( pointer, key );
-				DeserializeTranslator( valuePtr, valueTranslator, field, object );
 			}
 			m_Reader.EndMap();
 		}

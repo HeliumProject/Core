@@ -134,7 +134,7 @@ bool ArchiveReader::Resolve( const Name& identity, ObjectPtr& pointer, const Met
 				"ArchiveReader::Resolve - Could not parse identity '%s' as a number!\n", 
 				*str);
 		}
-		else if (index <= m_Objects.GetSize() )
+		else if ( index <= m_Objects.GetSize() )
 		{
 			found = m_Objects.GetElement( index );
 		}
@@ -152,11 +152,61 @@ bool ArchiveReader::Resolve( const Name& identity, ObjectPtr& pointer, const Met
 		}
 		else // not found yet, must be later in the file, add a fixup to try again once the objects are done loading
 		{
-			m_Fixups.Push( Fixup ( identity, pointer, pointerClass ) );
+			// ensure our list of proxies is sufficient size for this index
+			if ( m_Proxies.GetSize() < index+1 )
+			{
+				m_Proxies.Resize( index+1 );
+			}
+
+			// ensure that we have allocated a proxy for this object
+			RefCountProxyBase< void >* proxy = m_Proxies[ index ];
+			if ( !proxy )
+			{
+				proxy = Object::RefCountSupportType::Allocate();
+				m_Proxies[ index ] = proxy;
+			}
+
+			// set the pointer to look at our pre-allocated proxy
+			pointer.SetProxy( reinterpret_cast< RefCountProxyBase< Reflect::Object >* >( proxy ) );
+
+			// kick down the road the association of the proxy with the object (we will find it again by index)
+			m_Fixups.Push( Fixup ( index, pointerClass ) );
 		}
 	}
 
 	return true;
+}
+
+void ArchiveReader::Resolve()
+{
+	ArchiveStatus info( *this, ArchiveStates::ObjectProcessed );
+	info.m_Progress = 100;
+	e_Status.Raise( info );
+
+	// finish linking objects (unless we have a custom handler)
+	for ( DynamicArray< Fixup >::ConstIterator itr = m_Fixups.Begin(), end = m_Fixups.End(); itr != end; ++itr )
+	{
+		RefCountProxyBase< void >* proxy = m_Proxies[ itr->m_Index ];
+		if ( proxy )
+		{
+			Object* found = m_Objects.GetElement( itr->m_Index );
+			if ( HELIUM_VERIFY( found ) )
+			{
+				if ( !found->IsA( itr->m_PointerClass ) )
+				{
+					Log::Warning( TXT( "Object of type '%s' is not valid for pointer type '%s'" ), found->GetMetaClass()->m_Name, itr->m_PointerClass->m_Name );
+				}
+				else
+				{
+					reinterpret_cast< RefCountProxy< Reflect::Object >* >( m_Proxies[ itr->m_Index ] )->SetObject( found );
+				}
+			}
+			m_Proxies[ itr->m_Index ] = NULL;
+		}
+	}
+
+	info.m_State = ArchiveStates::Complete;
+	e_Status.Raise( info );
 }
 
 ArchiveWriterPtr Persist::GetWriter( const FilePath& path, ObjectIdentifier* identifier, ArchiveType archiveType )
