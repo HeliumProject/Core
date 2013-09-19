@@ -121,14 +121,11 @@ Reflect::ObjectPtr ArchiveReader::AllocateObject( const Reflect::MetaClass* type
 {
 	Object* object = type->m_Creator();
 
-	// make a pointer to hold the object
-	m_Objects.Push( ObjectPtr () );
-
 	// if we pre-allocated a proxy, hook it up to the object
-	if ( m_Proxies.size() >= m_Objects.GetSize() )
+	if ( m_Proxies.size() > m_Objects.GetSize() )
 	{
 		// find the appropriate pre-allocated proxy
-		RefCountProxy< Object >* proxy = m_Proxies[ m_Objects.GetSize()-1 ];
+		RefCountProxy< Object >* proxy = m_Proxies[ m_Objects.GetSize() ];
 
 		// associate the object with the proxy
 		proxy->SetObject( object );
@@ -137,10 +134,7 @@ Reflect::ObjectPtr ArchiveReader::AllocateObject( const Reflect::MetaClass* type
 		object->SetRefCountProxy( proxy );
 	}
 
-	// keep a copy in the list for fixups later
-	m_Objects.GetLast() = object;
-
-	return object;
+	return ObjectPtr( object );
 }
 
 bool ArchiveReader::Resolve( const Name& identity, ObjectPtr& pointer, const MetaClass* pointerClass )
@@ -193,8 +187,12 @@ bool ArchiveReader::Resolve( const Name& identity, ObjectPtr& pointer, const Met
 				m_Proxies[ index ] = proxy;
 			}
 
-			// set the pointer to look at our pre-allocated proxy
+			// release whatever we might already be pointing at and set the pointer to look at our pre-allocated proxy
+			pointer.Release();
 			pointer.SetProxy( reinterpret_cast< RefCountProxyBase< Reflect::Object >* >( proxy ) );
+
+			// Make sure the proxy accounts for our reference
+			proxy->AddStrongRef();
 
 			// kick down the road the association of the proxy with the object (we will find it again by index)
 			m_Fixups.Push( Fixup ( index, pointerClass ) );
@@ -210,6 +208,7 @@ void ArchiveReader::Resolve()
 	info.m_Progress = 100;
 	e_Status.Raise( info );
 
+#if HELIUM_TOOLS
 	// finish linking objects (unless we have a custom handler)
 	for ( DynamicArray< Fixup >::ConstIterator itr = m_Fixups.Begin(), end = m_Fixups.End(); itr != end; ++itr )
 	{
@@ -223,14 +222,10 @@ void ArchiveReader::Resolve()
 				{
 					Log::Warning( TXT( "Object of type '%s' is not valid for pointer type '%s'" ), found->GetMetaClass()->m_Name, itr->m_PointerClass->m_Name );
 				}
-				else
-				{
-					reinterpret_cast< RefCountProxy< Reflect::Object >* >( m_Proxies[ itr->m_Index ] )->SetObject( found );
-				}
 			}
-			m_Proxies[ itr->m_Index ] = NULL;
 		}
 	}
+#endif
 
 	info.m_State = ArchiveStates::Complete;
 	e_Status.Raise( info );
