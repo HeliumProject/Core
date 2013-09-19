@@ -11,200 +11,212 @@
 /// @param[in] CLASS         Class type being declared.
 /// @param[in] SUPPORT_TYPE  Reference counting support type.
 #define HELIUM_DECLARE_REF_COUNT( CLASS, SUPPORT_TYPE ) \
-    public: \
-        typedef SUPPORT_TYPE RefCountSupportType; \
-        Helium::RefCountProxy< CLASS >* GetRefCountProxy() const \
-        { \
-            return m_refCountProxyContainer.Get( const_cast< CLASS* >( this ) ); \
-        } \
-    private: \
-        mutable Helium::RefCountProxyContainer< CLASS > m_refCountProxyContainer;
+	public: \
+	typedef SUPPORT_TYPE RefCountSupportType; \
+	Helium::RefCountProxy< CLASS >* GetRefCountProxy() const \
+		{ \
+		return m_refCountProxyContainer.Get( const_cast< CLASS* >( this ) ); \
+		} \
+	private: \
+	mutable Helium::RefCountProxyContainer< CLASS > m_refCountProxyContainer;
 
 namespace Helium
 {
-    template< typename BaseT > class RefCountProxy;
-    template< typename PointerT > class StrongPtr;
-    template< typename PointerT > class WeakPtr;
+	template< typename BaseT > class RefCountProxy;
+	template< typename PointerT > class StrongPtr;
+	template< typename PointerT > class WeakPtr;
 
-    /// Base type for reference counting object proxies.
-    template< typename T >
-    class RefCountProxyBase
-    {
-    protected:
-        /// Reference-counted object.
-        T* volatile m_pObject;
-        /// Reference counts (strong references in lower 16-bits, weak references in upper 16-bits).
-        volatile int32_t m_refCounts;
-    };
+	/// Base type for reference counting object proxies.
+	template< typename T >
+	class RefCountProxyBase
+	{
+	protected:
+		/// Reference-counted object.
+		T* volatile m_pObject;
+		/// Reference counts (strong references in lower 16-bits, weak references in upper 16-bits).
+		volatile int32_t m_refCounts;
+	};
 
-    /// Reference counting object proxy.
-    template< typename BaseT >
-    class RefCountProxy : public RefCountProxyBase< void >
-    {
-    public:
-        /// @name Initialization
-        //@{
-        void Initialize( BaseT* pObject );
-        //@}
+	/// Reference counting object proxy.
+	template< typename BaseT >
+	class RefCountProxy : public RefCountProxyBase< void >
+	{
+	public:
+		/// @name Initialization
+		//@{
+		void Initialize( BaseT* pObject );
+		//@}
 
-        /// @name Object Access
-        //@{
-        BaseT* GetObject() const;
-        //@}
+		/// @name Object Access
+		//@{
+		BaseT* GetObject() const;
+		void SetObject( BaseT* object );
+		//@}
 
-        /// @name Reference Counting
-        //@{
-        void AddStrongRef();
-        bool RemoveStrongRef();
-        uint16_t GetStrongRefCount() const;
+		/// @name Reference Counting
+		//@{
+		void AddStrongRef();
+		bool RemoveStrongRef();
+		uint16_t GetStrongRefCount() const;
 
-        void AddWeakRef();
-        bool RemoveWeakRef();
-        uint16_t GetWeakRefCount() const;
-        //@}
+		void AddWeakRef();
+		bool RemoveWeakRef();
+		uint16_t GetWeakRefCount() const;
+		//@}
 
-    private:
-        /// @name Private Utility Functions
-        //@{
-        void DestroyObject();
-        //@}
-    };
+	private:
+		/// @name Private Utility Functions
+		//@{
+		void DestroyObject();
+		//@}
+	};
 
-    /// Reference counting object proxy container.  This is provided to ease the management of a reference count proxy
-    /// for an object (i.e. don't need to initialize in the constructor).
-    template< typename BaseT >
-    class RefCountProxyContainer
-    {
-    public:
-        /// Reference count support type.
-        typedef typename BaseT::RefCountSupportType SupportType;
+	/// Reference counting object proxy container.  This is provided to ease the management of a reference count proxy
+	/// for an object (i.e. don't need to initialize in the constructor).
+	template< typename BaseT >
+	class RefCountProxyContainer
+	{
+	public:
+		/// Reference count support type.
+		typedef typename BaseT::RefCountSupportType SupportType;
 
-        /// @name Construction/Destruction
-        //@{
-        RefCountProxyContainer();
-        //@}
+		/// @name Construction/Destruction
+		//@{
+		RefCountProxyContainer();
+		//@}
 
-        /// @name Access
-        //@{
-        RefCountProxy< BaseT >* Get( BaseT* pObject );
-        //@}
+		/// @name Access
+		//@{
+		RefCountProxy< BaseT >* Get( BaseT* pObject );
+		//@}
 
-    private:
-        /// Reference counting proxy instance.
-        RefCountProxy< BaseT >* volatile m_pProxy;
-    };
+	private:
+		/// Reference counting proxy instance.
+		RefCountProxy< BaseT >* volatile m_pProxy;
+	};
 
-    /// Strong pointer for reference-counted objects.
-    template< typename PointerT >
-    class StrongPtr
-    {
-        friend class WeakPtr< PointerT >;
+	/// Strong pointer for reference-counted objects.
+	template< typename PointerT >
+	class StrongPtr
+	{
+		friend class WeakPtr< PointerT >;
 
-    public:
-        /// @name Construction/Destruction
-        //@{
-        StrongPtr();
-        StrongPtr( PointerT* pObject );
-        explicit StrongPtr( const WeakPtr< PointerT >& rPointer );
-        StrongPtr( const StrongPtr& rPointer );
-        ~StrongPtr();
-        //@}
+	public:
+		/// @name Construction/Destruction
+		//@{
+		StrongPtr();
+		StrongPtr( PointerT* pObject );
+		explicit StrongPtr( const WeakPtr< PointerT >& rPointer );
+		StrongPtr( const StrongPtr& rPointer );
+		~StrongPtr();
+		//@}
 
-        /// @name Object Referencing
-        //@{
-        PointerT* Get() const;
-        PointerT* Ptr() const;
-        void Set( PointerT* pObject );
-        void Release();
-        bool ReferencesObject() const;
-        //@}
+		/// @name Object Referencing
+		//@{
+		PointerT* Get() const;
+		PointerT* Ptr() const;
+		void Set( PointerT* pObject );
+		void Release();
+		bool ReferencesObject() const;
+		//@}
 
-        /// @name Overloaded Operators
-        //@{
-        operator PointerT*() const;
-        template< typename BaseT > operator const StrongPtr< BaseT >&() const;
+		/// @name Proxy Referencing
+		//@{
+		RefCountProxyBase< PointerT >* GetProxy() const;
+		void SetProxy( RefCountProxyBase< PointerT >* proxy );
+		//@}
 
-        PointerT& operator*() const;
-        PointerT* operator->() const;
+		/// @name Overloaded Operators
+		//@{
+		operator PointerT*() const;
+		template< typename BaseT > operator const StrongPtr< BaseT >&() const;
 
-        StrongPtr& operator=( PointerT* pObject );
-        StrongPtr& operator=( const WeakPtr< PointerT >& rOther );
-        StrongPtr& operator=( const StrongPtr& rOther );
+		PointerT& operator*() const;
+		PointerT* operator->() const;
 
-        bool operator==( const WeakPtr< PointerT >& rPointer ) const;
-        bool operator==( const StrongPtr& rPointer ) const;
-        bool operator!=( const WeakPtr< PointerT >& rPointer ) const;
-        bool operator!=( const StrongPtr& rPointer ) const;
-        //@}
+		StrongPtr& operator=( PointerT* pObject );
+		StrongPtr& operator=( const WeakPtr< PointerT >& rOther );
+		StrongPtr& operator=( const StrongPtr& rOther );
 
-    private:
-        /// Proxy object (cast to a RefCountProxyBase pointer to allow for declaring smart pointers to forward-declared types).
-        RefCountProxyBase< PointerT >* m_pProxy;
+		bool operator==( const WeakPtr< PointerT >& rPointer ) const;
+		bool operator==( const StrongPtr& rPointer ) const;
+		bool operator!=( const WeakPtr< PointerT >& rPointer ) const;
+		bool operator!=( const StrongPtr& rPointer ) const;
+		//@}
 
-        /// @name Conversion Utility Functions, Private
-        //@{
-        template< typename BaseT > const StrongPtr< BaseT >& ImplicitUpCast( const std::true_type& rIsProperBase ) const;
-        //@}
-    };
+	private:
+		/// Proxy object (cast to a RefCountProxyBase pointer to allow for declaring smart pointers to forward-declared types).
+		RefCountProxyBase< PointerT >* m_pProxy;
 
-    /// Weak pointer for reference-counted objects.
-    template< typename PointerT >
-    class WeakPtr
-    {
-        friend class StrongPtr< PointerT >;
+		/// @name Conversion Utility Functions, Private
+		//@{
+		template< typename BaseT > const StrongPtr< BaseT >& ImplicitUpCast( const std::true_type& rIsProperBase ) const;
+		//@}
+	};
 
-    public:
-        /// @name Construction/Destruction
-        //@{
-        WeakPtr();
-        WeakPtr( PointerT* pObject );
-        explicit WeakPtr( const StrongPtr< PointerT >& rPointer );
-        WeakPtr( const WeakPtr& rPointer );
-        ~WeakPtr();
-        //@}
+	/// Weak pointer for reference-counted objects.
+	template< typename PointerT >
+	class WeakPtr
+	{
+		friend class StrongPtr< PointerT >;
 
-        /// @name Object Referencing
-        //@{
-        PointerT* Get() const;
-        PointerT* Ptr() const;
-        void Set( PointerT* pObject );
-        void Release();
+	public:
+		/// @name Construction/Destruction
+		//@{
+		WeakPtr();
+		WeakPtr( PointerT* pObject );
+		explicit WeakPtr( const StrongPtr< PointerT >& rPointer );
+		WeakPtr( const WeakPtr& rPointer );
+		~WeakPtr();
+		//@}
 
-        bool ReferencesObject() const;
-        //@}
+		/// @name Object Referencing
+		//@{
+		PointerT* Get() const;
+		PointerT* Ptr() const;
+		void Set( PointerT* pObject );
+		void Release();
+		bool ReferencesObject() const;
+		//@}
 
-        /// @name Reference Count Proxy Matching
-        //@{
-        bool HasObjectProxy( const PointerT* pObject ) const;
-        //@}
+		/// @name Proxy Referencing
+		//@{
+		RefCountProxyBase< PointerT >* GetProxy() const;
+		void SetProxy( RefCountProxyBase< PointerT >* proxy );
+		//@}
 
-        /// @name Overloaded Operators
-        //@{
-        operator PointerT*() const;
-        template< typename BaseT > operator const WeakPtr< BaseT >&() const;
+		/// @name Reference Count Proxy Matching
+		//@{
+		bool HasObjectProxy( const PointerT* pObject ) const;
+		//@}
 
-        PointerT& operator*() const;
-        PointerT* operator->() const;
+		/// @name Overloaded Operators
+		//@{
+		operator PointerT*() const;
+		template< typename BaseT > operator const WeakPtr< BaseT >&() const;
 
-        WeakPtr& operator=( PointerT* pObject );
-        WeakPtr& operator=( const StrongPtr< PointerT >& rOther );
-        WeakPtr& operator=( const WeakPtr& rOther );
+		PointerT& operator*() const;
+		PointerT* operator->() const;
 
-        bool operator==( const StrongPtr< PointerT >& rPointer ) const;
-        bool operator==( const WeakPtr& rPointer ) const;
-        bool operator!=( const StrongPtr< PointerT >& rPointer ) const;
-        bool operator!=( const WeakPtr& rPointer ) const;
-        //@}
+		WeakPtr& operator=( PointerT* pObject );
+		WeakPtr& operator=( const StrongPtr< PointerT >& rOther );
+		WeakPtr& operator=( const WeakPtr& rOther );
 
-    private:
-        /// Proxy object (cast to a RefCountProxyBase pointer to allow for declaring smart pointers to forward-declared types).
-        RefCountProxyBase< PointerT >* m_pProxy;
+		bool operator==( const StrongPtr< PointerT >& rPointer ) const;
+		bool operator==( const WeakPtr& rPointer ) const;
+		bool operator!=( const StrongPtr< PointerT >& rPointer ) const;
+		bool operator!=( const WeakPtr& rPointer ) const;
+		//@}
 
-        /// @name Conversion Utility Functions, Private
-        //@{
-        template< typename BaseT > const WeakPtr< BaseT >& ImplicitUpCast( const std::true_type& rIsProperBase ) const;
-        //@}
-    };
+	private:
+		/// Proxy object (cast to a RefCountProxyBase pointer to allow for declaring smart pointers to forward-declared types).
+		RefCountProxyBase< PointerT >* m_pProxy;
+
+		/// @name Conversion Utility Functions, Private
+		//@{
+		template< typename BaseT > const WeakPtr< BaseT >& ImplicitUpCast( const std::true_type& rIsProperBase ) const;
+		//@}
+	};
 }
 
 #include "Foundation/ReferenceCounting.inl"

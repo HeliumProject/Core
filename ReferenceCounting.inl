@@ -20,6 +20,18 @@ BaseT* Helium::RefCountProxy< BaseT >::GetObject() const
     return static_cast< BaseT* >( m_pObject );
 }
 
+/// Set the pointer to the object (if it hasn't been setup already), used for deferred fixups.
+///
+/// @see GetObject()
+template< typename BaseT >
+void Helium::RefCountProxy< BaseT >::SetObject( BaseT* object )
+{
+	if ( HELIUM_VERIFY( m_pObject == NULL ) )
+	{
+		m_pObject = object;
+	}
+}
+
 /// Increment the strong reference count.
 ///
 /// @see RemoveStrongRef(), GetStrongRefCount(), AddWeakRef(), RemoveWeakRef(), GetWeakRefCount()
@@ -299,6 +311,28 @@ bool Helium::StrongPtr< PointerT >::ReferencesObject() const
         reinterpret_cast< RefCountProxy< typename PointerT::RefCountSupportType::BaseType >* >( m_pProxy )->GetObject() );
 
     return ( m_pProxy != NULL );
+}
+
+/// Get the proxy object in use by this pointer.
+///
+/// @return  The proxy object in use by this pointer.
+/// @see SetProxy()
+template< typename PointerT >
+Helium::RefCountProxyBase< PointerT >* Helium::StrongPtr< PointerT >::GetProxy() const
+{
+	return m_pProxy;
+}
+
+/// Set the proxy object in use by this pointer (if it hasn't been set already), used for deferred fixups.
+///
+/// @see GetProxy()
+template< typename PointerT >
+void Helium::StrongPtr< PointerT >::SetProxy( RefCountProxyBase< PointerT >* proxy )
+{
+	if ( HELIUM_VERIFY( m_pProxy == NULL ) )
+	{
+		m_pProxy = proxy;
+	}
 }
 
 /// Get the object referenced by this smart pointer.
@@ -636,6 +670,27 @@ bool Helium::WeakPtr< PointerT >::ReferencesObject() const
     return ( Get() != NULL );
 }
 
+/// Get the proxy object in use by this pointer.
+///
+/// @return  The proxy object in use by this pointer.
+/// @see SetProxy()
+template< typename PointerT >
+Helium::RefCountProxyBase< PointerT >* Helium::WeakPtr< PointerT >::GetProxy() const
+{
+	return m_pProxy;
+}
+
+/// Set the proxy object in use by this pointer (if it hasn't been set already), used for deferred fixups.
+///
+/// @see GetProxy()
+template< typename PointerT >
+void Helium::WeakPtr< PointerT >::SetProxy( RefCountProxyBase< PointerT >* proxy )
+{
+	if ( HELIUM_VERIFY( m_pProxy == NULL ) )
+	{
+		m_pProxy = proxy;
+	}
+}
 /// Get whether this weak pointer is holding onto the reference counting proxy object for the given object.
 ///
 /// @return  True if this object is holding onto the given object's reference counting proxy, false if not.
