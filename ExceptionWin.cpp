@@ -56,6 +56,8 @@ static BOOL CALLBACK EnumerateLoadedModulesProc(PCTSTR name, DWORD64 base, ULONG
 {
 	if (SymLoadModuleEx(GetCurrentProcess(), 0, name, 0, base, size, NULL, 0))
 	{
+		HELIUM_CONVERT_TO_CHAR( name, convertedName );
+
 		IMAGEHLP_MODULE64 moduleInfo;
 		ZeroMemory(&moduleInfo, sizeof(IMAGEHLP_MODULE64));
 		moduleInfo.SizeOfStruct = sizeof(IMAGEHLP_MODULE64);
@@ -63,16 +65,17 @@ static BOOL CALLBACK EnumerateLoadedModulesProc(PCTSTR name, DWORD64 base, ULONG
 		{
 			if ( moduleInfo.LoadedPdbName[0] != '\0' )
 			{
-				Print( TXT("Success loading symbols for module: %s, base: 0x%08I64X, size: %u: %s\n"), name, base, size, moduleInfo.LoadedPdbName );
+				HELIUM_CONVERT_TO_CHAR( moduleInfo.LoadedPdbName, convertedPdbName ); 
+				Print( TXT("Success loading symbols for module: %s, base: 0x%08I64X, size: %u: %s\n"), convertedName, base, size, convertedPdbName );
 			}
 			else
 			{
-				Print( TXT("Success loading symbols for module: %s, base: 0x%08I64X, size: %u\n"), name, base, size );
+				Print( TXT("Success loading symbols for module: %s, base: 0x%08I64X, size: %u\n"), convertedName, base, size );
 			}
 		}
 		else
 		{
-			Print( TXT("Failure loading symbols for module: %s: %s\n"), name, Helium::GetErrorString().c_str() );
+			Print( TXT("Failure loading symbols for module: %s: %s\n"), convertedName, Helium::GetErrorString().c_str() );
 		}
 	}
 
