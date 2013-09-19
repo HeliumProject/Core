@@ -117,6 +117,32 @@ ArchiveMode ArchiveReader::GetMode() const
 	return ArchiveModes::Read;
 }
 
+Reflect::ObjectPtr ArchiveReader::AllocateObject( const Reflect::MetaClass* type )
+{
+	Object* object = type->m_Creator();
+
+	// make a pointer to hold the object
+	m_Objects.Push( ObjectPtr () );
+
+	// if we pre-allocated a proxy, hook it up to the object
+	if ( m_Proxies.size() >= m_Objects.GetSize() )
+	{
+		// find the appropriate pre-allocated proxy
+		RefCountProxy< Object >* proxy = m_Proxies[ m_Objects.GetSize()-1 ];
+
+		// associate the object with the proxy
+		proxy->SetObject( object );
+
+		// associate the proxy with the object
+		object->SetRefCountProxy( proxy );
+	}
+
+	// keep a copy in the list for fixups later
+	m_Objects.GetLast() = object;
+
+	return object;
+}
+
 bool ArchiveReader::Resolve( const Name& identity, ObjectPtr& pointer, const MetaClass* pointerClass )
 {
 	if ( !m_Resolver || !m_Resolver->Resolve( identity, pointer, pointerClass ) )
@@ -134,7 +160,7 @@ bool ArchiveReader::Resolve( const Name& identity, ObjectPtr& pointer, const Met
 				"ArchiveReader::Resolve - Could not parse identity '%s' as a number!\n", 
 				*str);
 		}
-		else if ( index <= m_Objects.GetSize() )
+		else if ( index < m_Objects.GetSize() )
 		{
 			found = m_Objects.GetElement( index );
 		}
@@ -153,16 +179,17 @@ bool ArchiveReader::Resolve( const Name& identity, ObjectPtr& pointer, const Met
 		else // not found yet, must be later in the file, add a fixup to try again once the objects are done loading
 		{
 			// ensure our list of proxies is sufficient size for this index
-			if ( m_Proxies.GetSize() < index+1 )
+			if ( m_Proxies.size() < index+1 )
 			{
-				m_Proxies.Resize( index+1 );
+				m_Proxies.resize( index+1 );
 			}
 
 			// ensure that we have allocated a proxy for this object
-			RefCountProxyBase< void >* proxy = m_Proxies[ index ];
+			RefCountProxy< Reflect::Object >* proxy = m_Proxies[ index ];
 			if ( !proxy )
 			{
 				proxy = Object::RefCountSupportType::Allocate();
+				MemorySet( proxy, 0 , sizeof( *proxy ) );
 				m_Proxies[ index ] = proxy;
 			}
 

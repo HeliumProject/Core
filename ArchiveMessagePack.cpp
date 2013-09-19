@@ -475,7 +475,7 @@ bool ArchiveReaderMessagePack::ReadNext( ObjectPtr& object )
 
 		if ( !object && objectClass )
 		{
-			object = objectClass->m_Creator();
+			object = AllocateObject( objectClass );
 		}
 
 		if ( object.ReferencesObject() )
@@ -725,12 +725,12 @@ void ArchiveReaderMessagePack::DeserializeTranslator( Pointer pointer, Translato
 			AssociationTranslator* assocation = static_cast< AssociationTranslator* >( translator );
 			Translator* keyTranslator = assocation->GetKeyTranslator();
 			Translator* valueTranslator = assocation->GetValueTranslator();
-			Variable key ( keyTranslator );
-			Variable value ( valueTranslator );
 			uint32_t length = m_Reader.ReadMapLength();
 			m_Reader.BeginMap( length );
 			for ( uint32_t i=0; i<length; ++i )
 			{
+				Variable key ( keyTranslator );
+				Variable value ( valueTranslator );
 				DeserializeTranslator( key, keyTranslator, field, object );
 				DeserializeTranslator( value, valueTranslator, field, object );
 				assocation->SetItem( pointer, key, value );

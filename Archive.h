@@ -151,7 +151,9 @@ namespace Helium
 
 			virtual ArchiveMode GetMode() const HELIUM_OVERRIDE;
 			virtual void Read( Reflect::ObjectPtr& object ) = 0;
-			virtual bool Resolve( const Name& identity, Reflect::ObjectPtr& pointer, const Reflect::MetaClass* pointerClass ) HELIUM_OVERRIDE;
+
+			Reflect::ObjectPtr AllocateObject( const Reflect::MetaClass* type );
+			bool Resolve( const Name& identity, Reflect::ObjectPtr& pointer, const Reflect::MetaClass* pointerClass ) HELIUM_OVERRIDE;
 			
 			void Resolve();
 
@@ -171,10 +173,10 @@ namespace Helium
 				size_t                    m_Index;
 				const Reflect::MetaClass* m_PointerClass;
 			};
-			DynamicArray< Fixup >                    m_Fixups;
-			DynamicArray< RefCountProxyBase<void>* > m_Proxies;
-			DynamicArray< Reflect::ObjectPtr >       m_Objects;
-			Reflect::ObjectResolver*                 m_Resolver;
+			std::vector< RefCountProxy< Reflect::Object >* >  m_Proxies;
+			DynamicArray< Fixup >                             m_Fixups;
+			DynamicArray< Reflect::ObjectPtr >                m_Objects;
+			Reflect::ObjectResolver*                          m_Resolver;
 		};
 		typedef Helium::SmartPtr< ArchiveReader > ArchiveReaderPtr;
 

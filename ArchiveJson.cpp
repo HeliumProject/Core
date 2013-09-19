@@ -485,7 +485,7 @@ bool ArchiveReaderJson::ReadNext( Reflect::ObjectPtr& object )
 			
 			if ( !object && objectClass )
 			{
-				object = objectClass->m_Creator();
+				object = AllocateObject( objectClass );
 			}
 
 			if ( object.ReferencesObject() )
@@ -701,10 +701,10 @@ void ArchiveReaderJson::DeserializeTranslator( rapidjson::Value& value, Pointer 
 			AssociationTranslator* assocation = static_cast< AssociationTranslator* >( translator );
 			Translator* keyTranslator = assocation->GetKeyTranslator();
 			Translator* valueTranslator = assocation->GetValueTranslator();
-			Variable keyVariable ( keyTranslator );
-			Variable valueVariable ( valueTranslator );
 			for ( rapidjson::Value::MemberIterator itr = value.MemberBegin(), end = value.MemberEnd(); itr != end; ++itr )
 			{
+				Variable keyVariable ( keyTranslator );
+				Variable valueVariable ( valueTranslator );
 				DeserializeTranslator( itr->name, keyVariable, keyTranslator, field, object );
 				DeserializeTranslator( itr->value, valueVariable, valueTranslator, field, object );
 				assocation->SetItem( pointer, keyVariable, valueVariable );

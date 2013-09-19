@@ -556,7 +556,7 @@ bool ArchiveReaderBson::ReadNext( Reflect::ObjectPtr& object )
 
 		if ( !object && objectClass )
 		{
-			object = objectClass->m_Creator();
+			object = AllocateObject( objectClass );
 		}
 
 		if ( object.ReferencesObject() )
@@ -904,14 +904,14 @@ void ArchiveReaderBson::DeserializeTranslator( bson_iterator* i, Pointer pointer
 				AssociationTranslator* assocation = static_cast< AssociationTranslator* >( translator );
 				ScalarTranslator* keyTranslator = assocation->GetKeyTranslator();
 				Translator* valueTranslator = assocation->GetValueTranslator();
-				Variable keyVariable ( keyTranslator );
-				Variable valueVariable ( valueTranslator );
 
 				bson_iterator elem[1];
 				bson_iterator_subiterator( i, elem );
 
 				while( bson_iterator_next( elem ) )
 				{
+					Variable keyVariable ( keyTranslator );
+					Variable valueVariable ( valueTranslator );
 					String key ( bson_iterator_key( elem ) );
 					keyTranslator->Parse( key, keyVariable, m_Resolver );
 					DeserializeTranslator( elem, valueVariable, valueTranslator, field, object );
