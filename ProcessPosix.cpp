@@ -16,6 +16,10 @@
 #include <signal.h>
 #include <spawn.h>
 
+#if HELIUM_OS_MAC
+# include <mach-o/dyld.h>
+#endif
+
 using namespace Helium;
 
 int Helium::Execute( const std::string& command )
@@ -95,8 +99,15 @@ std::string Helium::GetProcessString()
 std::string Helium::GetProcessPath()
 {
 	char buf[ PATH_MAX ];
+
+#if HELIUM_OS_MAC
+	uint32_t size = sizeof(buf);
+	HELIUM_ASSERT( _NSGetExecutablePath(buf, &size) == 0 );
+#elif HELIUM_OS_LINUX
 	size_t len = readlink("/proc/self/exe", buf, sizeof(buf));
 	buf[len] = '\0';
+#endif
+
 	return buf;
 }
 
