@@ -12,6 +12,11 @@
 
 #if HELIUM_OS_WIN
 # include <iphlpapi.h>
+#elif HELIUM_OS_MAC
+# include <sys/types.h>
+# include <sys/socket.h>
+# include <ifaddrs.h>
+# include <net/if_dl.h>
 #elif HELIUM_OS_LINUX
 # include <sys/socket.h>
 # include <sys/ioctl.h>
@@ -149,6 +154,38 @@ void TUID::Generate( tuid& uid )
             throw Helium::Exception( TXT( "Could not get network adapter info to seed TUID generation." ) );
         }
 
+#elif HELIUM_OS_MAC
+
+        struct ifaddrs *ifap, *ifa;
+        bool gotAddress = 0 == getifaddrs(&ifap);
+        if ( HELIUM_VERIFY( gotAddress ) )
+        {
+            for (ifa = ifap; ifa != 0; ifa = ifa->ifa_next)
+            {
+                if ( ifa->ifa_addr->sa_family == AF_LINK && strcmp("en0",ifa->ifa_name) == 0 )
+                {
+                    struct sockaddr_dl* s = (struct sockaddr_dl*)ifa->ifa_addr;
+                    if (s)
+                    {
+                        HELIUM_ASSERT(s->sdl_alen == 6);
+                        uint64_t tempByte = 0;
+                        for ( int32_t address_byte = 5; address_byte >= 0; --address_byte )
+                        {
+                            tempByte = LLADDR(s)[ address_byte ];
+                            bits |= tempByte << ( 8 * address_byte );
+                        }
+                        break;
+                    }
+                }
+            }
+            freeifaddrs(ifap);
+        }
+
+        if ( !gotAddress )
+        {
+            throw Helium::Exception( TXT( "Could not get network adapter info to seed TUID generation." ) );
+        }
+
 #elif HELIUM_OS_LINUX
 
         int fd = socket(PF_INET, SOCK_DGRAM, IPPROTO_IP);
@@ -164,15 +201,14 @@ void TUID::Generate( tuid& uid )
                 tempByte = s.ifr_addr.sa_data[ address_byte ];
                 bits |= tempByte << ( 8 * address_byte );
             }
+            close( fd );
         }
-        shutdown( fd, 0 );
 
         if ( !gotAddress )
         {
             throw Helium::Exception( TXT( "Could not get network adapter info to seed TUID generation." ) );
         }
-#else
-        HELIUM_ASSERT( false );
+
 #endif
 
         s_CachedMacBits64 |= (bits << 8); // shift left 8 to center
