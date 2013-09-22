@@ -26,6 +26,13 @@ Helium::Delegate< ArgsType, RefCountBaseType >::Delegate( ClassType* instance, M
 }
 
 template< typename ArgsType, template< typename T > class RefCountBaseType >
+template < class OwnerType, class ClassType, typename MethodType >
+Helium::Delegate< ArgsType, RefCountBaseType >::Delegate( OwnerType* owner, ClassType* instance, MethodType method )
+{
+	m_Impl = new MemberMethod<OwnerType, ClassType> (owner, instance, method);
+}
+
+template< typename ArgsType, template< typename T > class RefCountBaseType >
 template < typename FunctionType >
 Helium::Delegate< ArgsType, RefCountBaseType > Helium::Delegate< ArgsType, RefCountBaseType >::Create( FunctionType function )
 {
@@ -72,6 +79,13 @@ void Helium::Delegate< ArgsType, RefCountBaseType >::Set( ClassType* instance, M
 }
 
 template< typename ArgsType, template< typename T > class RefCountBaseType >
+template < class OwnerType, class ClassType, typename MethodType >
+void Helium::Delegate< ArgsType, RefCountBaseType >::Set( OwnerType* owner, ClassType* instance, MethodType method )
+{
+	m_Impl = new MemberMethod<ClassType> (owner, instance, method);
+}
+
+template< typename ArgsType, template< typename T > class RefCountBaseType >
 bool Helium::Delegate< ArgsType, RefCountBaseType >::Equals( const Delegate& rhs ) const
 {
 	if (m_Impl.ReferencesObject() != rhs.m_Impl.ReferencesObject())
@@ -112,6 +126,22 @@ bool Helium::Delegate< ArgsType, RefCountBaseType >::Equals( const ClassType* in
 		Method<ClassType>* meth = static_cast<Method<ClassType>*>(m_Impl.Ptr());
 
 		return meth->m_Instance == instance && meth->m_Method == method;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+template< typename ArgsType, template< typename T > class RefCountBaseType >
+template< class OwnerType, class ClassType, typename MethodType >
+bool Helium::Delegate< ArgsType, RefCountBaseType >::Equals( const OwnerType* owner, const ClassType* instance, MethodType method ) const
+{
+	if (m_Impl.ReferencesObject() && m_Impl->GetType() == DelegateTypes::MemberMethod)
+	{
+		MemberMethod<OwnerType, ClassType>* meth = static_cast<MemberMethod<OwnerType, ClassType>*>(m_Impl.Ptr());
+
+		return meth->m_Owner == owner && meth->m_Instance == instance && meth->m_Method == method;
 	}
 	else
 	{
@@ -242,6 +272,52 @@ void Helium::Delegate< ArgsType, RefCountBaseType >::Method< ClassType >::Invoke
 }
 
 template< typename ArgsType, template< typename T > class RefCountBaseType >
+template< class OwnerType, class ClassType >
+Helium::Delegate< ArgsType, RefCountBaseType >::MemberMethod< OwnerType, ClassType >::MemberMethod( OwnerType *owner, ClassType* instance, MethodType method )
+	: m_Instance( instance )
+	, m_Method( method )
+	, m_Owner( owner )
+{
+	HELIUM_ASSERT( method );
+}
+
+template< typename ArgsType, template< typename T > class RefCountBaseType >
+template< class OwnerType, class ClassType >
+Helium::DelegateType Helium::Delegate< ArgsType, RefCountBaseType >::MemberMethod< OwnerType, ClassType >::GetType() const
+{
+	return DelegateTypes::MemberMethod;
+}
+
+template< typename ArgsType, template< typename T > class RefCountBaseType >
+template< class OwnerType, class ClassType >
+bool Helium::Delegate< ArgsType, RefCountBaseType >::MemberMethod< OwnerType, ClassType >::Equals( const DelegateImpl* rhs ) const
+{
+	if ( GetType() != rhs->GetType() )
+	{
+		return false;
+	}
+
+	const MemberMethod* m = static_cast<const MemberMethod*>(rhs);
+
+	return m_Owner.Get() == m->m_Owner.Get() && m_Instance == m->m_Instance && m_Method == m->m_Method;
+}
+
+template< typename ArgsType, template< typename T > class RefCountBaseType >
+template< class OwnerType, class ClassType >
+void Helium::Delegate< ArgsType, RefCountBaseType >::MemberMethod< OwnerType, ClassType >::Invoke( ArgsType parameter ) const
+{
+	(m_Instance->*m_Method)( parameter );
+}
+
+template< typename ArgsType, template< typename T > class RefCountBaseType >
+template< class OwnerType, class ClassType >
+void Helium::Delegate< ArgsType, RefCountBaseType >::MemberMethod< OwnerType, ClassType >::Invoke( void* parameter, void* instance ) const
+{
+	ClassType* i = instance ? static_cast< ClassType* >( instance ) : m_Instance;
+	_InvokeMethod( i, m_Method, parameter, std::is_reference< ArgsType >() );
+}
+
+template< typename ArgsType, template< typename T > class RefCountBaseType >
 uint32_t Helium::Event< ArgsType, RefCountBaseType >::Count() const
 {
 	return m_Impl.ReferencesObject() ? (uint32_t)m_Impl->Count() : 0;
@@ -289,6 +365,18 @@ void Helium::Event< ArgsType, RefCountBaseType >::AddMethod( ClassType* instance
 }
 
 template< typename ArgsType, template< typename T > class RefCountBaseType >
+template< class OwnerType, class ClassType, typename MethodType >
+void Helium::Event< ArgsType, RefCountBaseType >::AddMemberMethod( OwnerType* owner, ClassType* instance, MethodType method )
+{
+	if ( !m_Impl.ReferencesObject() )
+	{
+		m_Impl = new EventImpl;
+	}
+
+	m_Impl->AddMemberMethod( owner, instance, method );
+}
+
+template< typename ArgsType, template< typename T > class RefCountBaseType >
 void Helium::Event< ArgsType, RefCountBaseType >::Remove( const Delegate& delegate )
 {
 	if ( m_Impl.ReferencesObject() )
@@ -324,6 +412,21 @@ void Helium::Event< ArgsType, RefCountBaseType >::RemoveMethod( const ClassType*
 	if ( m_Impl.ReferencesObject() )
 	{
 		m_Impl->RemoveMethod( instance, method );
+
+		if (m_Impl->Count() == 0)
+		{
+			m_Impl = NULL;
+		}
+	}
+}
+
+template< typename ArgsType, template< typename T > class RefCountBaseType >
+template< class OwnerType, class ClassType, typename MethodType >
+void Helium::Event< ArgsType, RefCountBaseType >::RemoveMemberMethod( const OwnerType* owner, const ClassType* instance, MethodType method )
+{
+	if ( m_Impl.ReferencesObject() )
+	{
+		m_Impl->RemoveMemberMethod( owner, instance, method );
 
 		if (m_Impl->Count() == 0)
 		{
@@ -457,6 +560,23 @@ void Helium::Event< ArgsType, RefCountBaseType >::EventImpl::AddMethod( ClassTyp
 }
 
 template< typename ArgsType, template< typename T > class RefCountBaseType >
+template< class OwnerType, class ClassType, typename MethodType >
+void Helium::Event< ArgsType, RefCountBaseType >::EventImpl::AddMemberMethod( OwnerType* owner, ClassType* instance, MethodType method )
+{
+	typename std::vector<Delegate>::const_iterator itr = m_Delegates.begin();
+	typename std::vector<Delegate>::const_iterator end = m_Delegates.end();
+	for ( ; itr != end; ++itr )
+	{
+		if ( itr->Valid() && itr->Equals(owner, instance, method ))
+		{
+			return;
+		}
+	}
+
+	m_Delegates.push_back( Delegate (owner, instance, method) );
+}
+
+template< typename ArgsType, template< typename T > class RefCountBaseType >
 void Helium::Event< ArgsType, RefCountBaseType >::EventImpl::Remove( const Delegate& delegate )
 {
 	typename std::vector<Delegate>::iterator itr = m_Delegates.begin();
@@ -514,6 +634,30 @@ void Helium::Event< ArgsType, RefCountBaseType >::EventImpl::RemoveMethod( const
 	for ( ; itr != end; ++itr )
 	{
 		if ( itr->Valid() && itr->Equals(instance, method) )
+		{
+			if ( this->GetRefCount() == 1 )
+			{
+				m_Delegates.erase( itr );
+			}
+			else
+			{
+				m_EmptySlots++;
+				itr->Clear();
+			}
+			break;
+		}
+	}
+}
+
+template< typename ArgsType, template< typename T > class RefCountBaseType >
+template< class OwnerType, class ClassType, typename MethodType >
+void Helium::Event< ArgsType, RefCountBaseType >::EventImpl::RemoveMemberMethod( const OwnerType* owner, const ClassType* instance, MethodType method )
+{
+	typename std::vector<Delegate>::iterator itr = m_Delegates.begin();
+	typename std::vector<Delegate>::iterator end = m_Delegates.end();
+	for ( ; itr != end; ++itr )
+	{
+		if ( itr->Valid() && itr->Equals(owner, instance, method) )
 		{
 			if ( this->GetRefCount() == 1 )
 			{
