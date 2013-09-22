@@ -93,8 +93,8 @@ namespace Helium
 
             static void ConnectControlEvents( Interpreter* interpreter, Control* control )
             {
-                control->e_ControlChanging.AddMethod( &interpreter->PropertyChanging(), &ControlChangingSignature::Event::Raise );
-                control->e_ControlChanged.AddMethod( &interpreter->PropertyChanged(), &ControlChangedSignature::Event::Raise );
+				control->e_ControlChanging.AddMemberMethod( interpreter, &interpreter->PropertyChanging(), &ControlChangingSignature::Event::Raise );
+                control->e_ControlChanged.AddMemberMethod( interpreter, &interpreter->PropertyChanged(), &ControlChangedSignature::Event::Raise );
             }
 
             template <class T>
@@ -107,11 +107,11 @@ namespace Helium
 
             static void ConnectInterpreterEvents( Interpreter* parent, Interpreter* child )
             {
-                child->PropertyChanging().AddMethod( &parent->PropertyChanging(), &ControlChangingSignature::Event::Raise );
-                child->PropertyChanged().AddMethod( &parent->PropertyChanged(), &ControlChangedSignature::Event::Raise );
-                child->PopulateLink().AddMethod( &parent->PopulateLink(), &PopulateLinkSignature::Event::Raise );
-                child->SelectLink().AddMethod( &parent->SelectLink(), &SelectLinkSignature::Event::Raise );
-                child->PickLink().AddMethod( &parent->PickLink(), &PickLinkSignature::Event::Raise );
+                child->PropertyChanging().AddMemberMethod( parent, &parent->PropertyChanging(), &ControlChangingSignature::Event::Raise );
+                child->PropertyChanged().AddMemberMethod( parent, &parent->PropertyChanged(), &ControlChangedSignature::Event::Raise );
+                child->PopulateLink().AddMemberMethod( parent, &parent->PopulateLink(), &PopulateLinkSignature::Event::Raise );
+                child->SelectLink().AddMemberMethod( parent, &parent->SelectLink(), &SelectLinkSignature::Event::Raise );
+                child->PickLink().AddMemberMethod( parent, &parent->PickLink(), &PickLinkSignature::Event::Raise );
             }
 
             //
