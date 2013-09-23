@@ -22,6 +22,7 @@
 # include <sys/ioctl.h>
 # include <linux/if.h>
 # include <netdb.h>
+# include <unistd.h>
 #endif
 
 using namespace Helium;
