@@ -1,4 +1,4 @@
-#include "Mongo/MongoPch.h"
+#include "MongoPch.h"
 #include "Mongo/Mongo.h"
 
 #include "Foundation/Log.h"

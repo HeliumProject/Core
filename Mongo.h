@@ -1,12 +1,17 @@
 #pragma once
 
+#include "API.h"
+
 #include "Platform/Locks.h"
 #include "Platform/Thread.h"
+
 #include "Foundation/Log.h"
 #include "Foundation/String.h"
 #include "Foundation/ReferenceCounting.h"
+
 #include "Reflect/Object.h"
 #include "Reflect/TranslatorDeduction.h"
+
 #include "Persist/ArchiveBson.h"
 
 #include <mongo-c/src/mongo.h>
@@ -19,11 +24,11 @@ namespace Helium
 {
 	namespace Mongo
 	{
-		void        Initialize();
-		void        Cleanup();
-		const char* GetErrorString( int status );
+		HELIUM_MONGO_API void        Initialize();
+		HELIUM_MONGO_API void        Cleanup();
+		HELIUM_MONGO_API const char* GetErrorString( int status );
 
-		class Model : public Helium::Reflect::Object
+		class HELIUM_MONGO_API Model : public Helium::Reflect::Object
 		{
 		public:
 			// determines which collection in the database to use by default, declare a copy of this in derived
@@ -41,7 +46,7 @@ namespace Helium
 		class Database;
 
 		template< class T >
-		class Cursor : public Helium::NonCopyable
+		class HELIUM_MONGO_API Cursor : public Helium::NonCopyable
 		{
 		public:
 			Cursor( int options = 0x0 );
@@ -56,10 +61,10 @@ namespace Helium
 			// get a single result object from the cursor
 			Helium::StrongPtr< T > Next();
 
-	#if HELIUM_CPP11
+#if HELIUM_CPP11
 			// process each result object
 			void Process( std::function< void ( T* ) > function );
-	#endif
+#endif
 
 			inline int  GetOptions();
 			inline void SetOptions( int options );
@@ -70,7 +75,7 @@ namespace Helium
 			int           options; // options flags are defined in enum mongo_cursor_opts
 		};
 
-		class Database : public Helium::NonCopyable
+		class HELIUM_MONGO_API Database : public Helium::NonCopyable
 		{
 		public:
 			template< class >
