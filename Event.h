@@ -3,7 +3,6 @@
 #include "Platform/Types.h"
 #include "Platform/Assert.h"
 #include "Foundation/SmartPtr.h"
-#include "Foundation/ReferenceCounting.h"
 
 #include <vector>
 
@@ -82,7 +81,6 @@ namespace Helium
 		{
 			Function,
 			Method,
-			MemberMethod
 		};
 	}
 	typedef DelegateTypes::DelegateType DelegateType;
@@ -115,9 +113,6 @@ namespace Helium
 		template < class ClassType, typename MethodType >
 		Delegate( ClassType* instance, MethodType method );
 
-		template < class OwnerType, class ClassType, typename MethodType >
-		Delegate( OwnerType* owner, ClassType* instance, MethodType method );
-
 		template < typename FunctionType >
 		inline static Delegate Create( FunctionType function );
 
@@ -132,16 +127,12 @@ namespace Helium
 		void Set( FunctionType function );
 		template < class ClassType, typename MethodType >
 		void Set( ClassType* instance, MethodType method );
-		template < class OwnerType, class ClassType, typename MethodType >
-		void Set( OwnerType* owner, ClassType* instance, MethodType method );
 
 		bool Equals( const Delegate& rhs ) const;
 		template <typename FunctionType>
 		bool Equals( FunctionType function ) const;
 		template <class ClassType, typename MethodType>
 		bool Equals( const ClassType* instance, MethodType method ) const;
-		template <class OwnerType, class ClassType, typename MethodType>
-		bool Equals( const OwnerType* owner, const ClassType* instance, MethodType method ) const;
 
 		void Invoke( ArgsType parameter ) const;
 
@@ -212,27 +203,6 @@ namespace Helium
 			friend class Delegate;
 		};
 
-		template< class OwnerType, class ClassType >
-		class MemberMethod : public DelegateImpl
-		{
-		public:
-			typedef void (ClassType::*MethodType)(ArgsType);
-
-			MemberMethod( OwnerType* owner, ClassType* instance, MethodType method );
-
-			virtual DelegateType GetType() const;
-			virtual bool Equals( const DelegateImpl* rhs ) const;
-			virtual void Invoke( ArgsType parameter ) const;
-			virtual void Invoke( void* parameter, void* instance = NULL ) const;
-
-		private:
-			Helium::StrongPtr<OwnerType> m_Owner;
-			ClassType* m_Instance;
-			MethodType m_Method;
-
-			friend class Delegate;
-		};
-
 		Helium::SmartPtr< DelegateImpl > m_Impl;
 	};
 
@@ -254,16 +224,12 @@ namespace Helium
 		void AddFunction( FunctionType function );
 		template < class ClassType, typename MethodType >
 		void AddMethod( ClassType* instance, MethodType method );
-		template < class OwnerType, class ClassType, typename MethodType >
-		void AddMemberMethod( OwnerType *owner, ClassType* instance, MethodType method );
 
 		void Remove( const Delegate& delegate );
 		template < typename FunctionType >
 		void RemoveFunction( FunctionType function );
 		template < class ClassType, typename MethodType >
 		void RemoveMethod( const ClassType* instance, MethodType method );
-		template < class OwnerType, class ClassType, typename MethodType >
-		void RemoveMemberMethod( const OwnerType *owner, const ClassType* instance, MethodType method );
 
 		void Raise( ArgsType parameter );
 		void RaiseWithEmitter( ArgsType parameter, const Delegate& emitter );
@@ -292,8 +258,6 @@ namespace Helium
 			void AddFunction( FunctionType function );
 			template < class ClassType, typename MethodType >
 			void AddMethod( ClassType* instance, MethodType method );
-			template < class OwnerType, class ClassType, typename MethodType >
-			void AddMemberMethod( OwnerType *owner, ClassType* instance, MethodType method );
 
 			// Remove the delegate function from the list
 			void Remove( const Delegate& delegate );
@@ -301,8 +265,6 @@ namespace Helium
 			void RemoveFunction( FunctionType function );
 			template < class ClassType, typename MethodType >
 			void RemoveMethod( const ClassType* instance, MethodType method );
-			template < class OwnerType, class ClassType, typename MethodType >
-			void RemoveMemberMethod( const OwnerType *owner, const ClassType* instance, MethodType method );
 
 			// Invoke all of the delegates for this event occurrence. Pays no mind about the return value of the invocation
 			void Raise( ArgsType parameter, const Delegate& emitter );
