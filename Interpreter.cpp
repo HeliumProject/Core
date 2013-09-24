@@ -47,6 +47,17 @@ std::stack< ContainerPtr >& ContainerStackPointer::Get()
     return *pointer;
 }
 
+Interpreter::Interpreter(Container* container)
+    : m_Container (container) 
+{
+    HELIUM_ASSERT(container);
+}
+
+Interpreter::~Interpreter()
+{
+
+}
+
 void Interpreter::Add(Control* control)
 {
     m_ContainerStack.Get().top()->AddChild(control);

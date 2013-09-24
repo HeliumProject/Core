@@ -52,6 +52,45 @@ namespace Helium
 		};
 		typedef Helium::Signature< const ControlChangedArgs&> ControlChangedSignature;
 
+		struct PopulateItem
+		{
+			PopulateItem(const std::string& key, const std::string& data)
+			{
+				m_Key = key;
+				m_Data = data;
+			}
+
+			std::string m_Key;
+			std::string m_Data;
+		};
+
+		typedef std::vector<PopulateItem> V_PopulateItem;
+
+		struct PopulateLinkArgs
+		{
+			PopulateLinkArgs(uint32_t type) : m_Type (type) {}
+
+			uint32_t        m_Type;
+			V_PopulateItem  m_Items;
+		};
+		typedef Helium::Signature< PopulateLinkArgs&> PopulateLinkSignature;
+
+		struct SelectLinkArgs
+		{
+			SelectLinkArgs(const std::string& id) : m_ID (id) {}
+
+			const std::string& m_ID;
+		};
+		typedef Helium::Signature< const SelectLinkArgs&> SelectLinkSignature;
+
+		struct PickLinkArgs
+		{
+			PickLinkArgs(const DataBindingPtr& data) : m_DataBinding (data) {}
+
+			const DataBindingPtr& m_DataBinding;
+		};
+		typedef Helium::Signature< const PickLinkArgs&> PickLinkSignature;
+
 		//
 		// ClientData, this could be toolkit OR interpreter client data, there are two pointer in Control
 		//
@@ -275,20 +314,23 @@ namespace Helium
 			Attribute< bool >                       a_IsReadOnly;             // are we writable?
 			Attribute< bool >                       a_IsFrozen;               // is updating (polling, sorting, etc) disabled?
 			Attribute< bool >                       a_IsHidden;               // is rendering disabled?
-			Attribute< uint32_t >                        a_ForegroundColor;        // our colors for appearange
-			Attribute< uint32_t >                        a_BackgroundColor;
+			Attribute< uint32_t >                   a_ForegroundColor;        // our colors for appearange
+			Attribute< uint32_t >                   a_BackgroundColor;
 			Attribute< bool >                       a_IsFixedWidth;           // are we fixed along an axis?
 			Attribute< bool >                       a_IsFixedHeight;
-			Attribute< float32_t >                        a_ProportionalWidth;      // are we proportional along an axis?
-			Attribute< float32_t >                        a_ProportionalHeight;
-			Attribute< std::string >                    a_Default;                // the default value
-			Attribute< std::string >                    a_HelpText;               // the help text for this control
+			Attribute< float32_t >                  a_ProportionalWidth;      // are we proportional along an axis?
+			Attribute< float32_t >                  a_ProportionalHeight;
+			Attribute< std::string >                a_Default;                // the default value
+			Attribute< std::string >                a_HelpText;               // the help text for this control
 			
 			mutable ControlSignature::Event         e_Realized;               // upon realization of the control
 			mutable ControlSignature::Event         e_Unrealized;
 
 			mutable ControlChangingSignature::Event e_ControlChanging;        // these mean the *data state* of the control, not the appearance metrics
 			mutable ControlChangedSignature::Event  e_ControlChanged;
+			mutable PopulateLinkSignature::Event    e_PopulateLink;
+			mutable SelectLinkSignature::Event      e_SelectLink;
+			mutable PickLinkSignature::Event        e_PickLink;
 
 		protected:
 			// our context menu, if any

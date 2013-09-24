@@ -11,265 +11,206 @@
 
 namespace Helium
 {
-    namespace Inspect
-    {
-        struct PopulateItem
-        {
-            PopulateItem(const std::string& key, const std::string& data)
-            {
-                m_Key = key;
-                m_Data = data;
-            }
+	namespace Inspect
+	{
+		class HELIUM_INSPECT_API ContainerStackPointer : public ThreadLocalPointer
+		{
+		public:
+			ContainerStackPointer();
+			~ContainerStackPointer();
 
-            std::string m_Key;
-            std::string m_Data;
-        };
+			std::stack< ContainerPtr >& Get();
 
-        typedef std::vector<PopulateItem> V_PopulateItem;
+		private:
+			static std::multimap< uint32_t, std::stack< ContainerPtr >* > s_Stacks;
+		};
 
-        struct PopulateLinkArgs
-        {
-            PopulateLinkArgs(uint32_t type) : m_Type (type) {}
+		class HELIUM_INSPECT_API Interpreter HELIUM_ABSTRACT : public RefCountBase< Interpreter >
+		{
+		public:
+			Interpreter(Container* container);
+			~Interpreter();
 
-            uint32_t        m_Type;
-            V_PopulateItem  m_Items;
-        };
-        typedef Helium::Signature< PopulateLinkArgs&> PopulateLinkSignature;
+			//
+			// These helpers provide a pinch point for connecting nested interpreter events into this object's event emitters
+			//  It essentially keeps all the events emitted in nested interpreters emitting events in the parent interpreter
+			//
 
-        struct SelectLinkArgs
-        {
-            SelectLinkArgs(const std::string& id) : m_ID (id) {}
+			template <class T>
+			Helium::StrongPtr<T> CreateControl()
+			{
+				Helium::StrongPtr<T> control = new T ();
+				ConnectControlEvents( this, control );
+				return control;
+			}
 
-            const std::string& m_ID;
-        };
-        typedef Helium::Signature< const SelectLinkArgs&> SelectLinkSignature;
+			static void ConnectControlEvents( Interpreter* interpreter, Control* control )
+			{
+				control->e_ControlChanging.AddMethod( &interpreter->PropertyChanging(), &ControlChangingSignature::Event::Raise );
+				control->e_ControlChanged.AddMethod( &interpreter->PropertyChanged(), &ControlChangedSignature::Event::Raise );
+				control->e_PopulateLink.AddMethod( &interpreter->PopulateLink(), &PopulateLinkSignature::Event::Raise );
+				control->e_SelectLink.AddMethod( &interpreter->SelectLink(), &SelectLinkSignature::Event::Raise );
+				control->e_PickLink.AddMethod( &interpreter->PickLink(), &PickLinkSignature::Event::Raise );
+			}
 
-        struct PickLinkArgs
-        {
-            PickLinkArgs(const DataBindingPtr& data) : m_DataBinding (data) {}
+			//
+			// Panel/container state management
+			//
 
-            const DataBindingPtr& m_DataBinding;
-        };
-        typedef Helium::Signature< const PickLinkArgs&> PickLinkSignature;
+			std::stack< ContainerPtr >& GetContainerStack()
+			{
+				return m_ContainerStack.Get();
+			}
 
-        class HELIUM_INSPECT_API ContainerStackPointer : public ThreadLocalPointer
-        {
-        public:
-            ContainerStackPointer();
-            ~ContainerStackPointer();
+			Container* GetContainer()
+			{
+				return m_Container;
+			}
 
-            std::stack< ContainerPtr >& Get();
+			void Add(Control* control);
+			void Push(Container* container);
 
-        private:
-            static std::multimap< uint32_t, std::stack< ContainerPtr >* > s_Stacks;
-        };
+			Container* PushContainer( const std::string& name = TXT("") );
+			Container* Pop( bool setParent = true );
+			Container* Top();
 
-        class HELIUM_INSPECT_API Interpreter HELIUM_ABSTRACT : public Reflect::Object
-        {
-        public:
-            Interpreter (Container* container)
-                : m_Container (container) 
-            {
-                HELIUM_ASSERT(container);
-            }
+			// Label (no data binding)
+			Label* AddLabel(const std::string& name);
 
-            ~Interpreter()
-            {
+			// Button that notifies a listener when it is clicked
+			Button* AddButton( const ButtonClickedSignature::Delegate& listener );
 
-            }
+			template <class T>
+			CheckBox* AddCheckBox( const Helium::SmartPtr< Helium::Property<T> >& property )
+			{
+				CheckBoxPtr control = CreateControl<CheckBox>();
+				control->Bind( new PropertyStringFormatter<T> ( property ) );
+				m_ContainerStack.Get().top()->AddChild(control);
+				return control;
+			}
 
-            //
-            // These helpers provide a pinch point for connecting nested interpreter events into this object's event emitters
-            //  It essentially keeps all the events emitted in nested interpreters emitting events in the parent interpreter
-            //
+			template <class T>
+			Value* AddValue( const Helium::SmartPtr< Helium::Property<T> >& property )
+			{
+				ValuePtr control = CreateControl<Value>();
+				control->Bind( new PropertyStringFormatter<T> ( property ) );
+				m_ContainerStack.Get().top()->AddChild(control);
+				return control;
+			}
 
-            template <class T>
-            Helium::StrongPtr<T> CreateControl()
-            {
-                Helium::StrongPtr<T> control = new T ();
-                ConnectControlEvents( this, control );
-                return control;
-            }
+			template <class T>
+			Choice* AddChoice( const Helium::SmartPtr< Helium::Property<T> >& property )
+			{
+				ChoicePtr control = CreateControl<Choice>();
+				control->Bind( new PropertyStringFormatter<T> ( property ) );
+				m_ContainerStack.Get().top()->AddChild(control);
+				return control;
+			}
 
-            static void ConnectControlEvents( Interpreter* interpreter, Control* control )
-            {
-				control->e_ControlChanging.AddMemberMethod( interpreter, &interpreter->PropertyChanging(), &ControlChangingSignature::Event::Raise );
-                control->e_ControlChanged.AddMemberMethod( interpreter, &interpreter->PropertyChanged(), &ControlChangedSignature::Event::Raise );
-            }
+			template <class T>
+			Choice* AddChoice( const Reflect::MetaEnum* enumInfo, const Helium::SmartPtr< Helium::Property<T> >& property )
+			{
+				Choice* control = AddChoice<T>( property );
 
-            template <class T>
-            Helium::StrongPtr<T> CreateInterpreter(Container* container = NULL)
-            {
-                Helium::StrongPtr<T> interpreter = new T (container ? container : m_Container);
-                ConnectInterpreterEvents( this, interpreter );
-                return interpreter;
-            }
+				std::vector< ChoiceItem > items;
+				DynamicArray< Reflect::MetaEnum::Element >::ConstIterator itr = enumInfo->m_Elements.Begin();
+				DynamicArray< Reflect::MetaEnum::Element >::ConstIterator end = enumInfo->m_Elements.End();
+				for ( ; itr != end; ++itr )
+				{
+					std::ostringstream str;
+					str << itr->m_Value;
+					items.push_back( ChoiceItem ( itr->m_Name, str.str() ) );
+				}
+				control->a_Items.Set(items);
+				control->a_IsDropDown.Set(true);
 
-            static void ConnectInterpreterEvents( Interpreter* parent, Interpreter* child )
-            {
-                child->PropertyChanging().AddMemberMethod( parent, &parent->PropertyChanging(), &ControlChangingSignature::Event::Raise );
-                child->PropertyChanged().AddMemberMethod( parent, &parent->PropertyChanged(), &ControlChangedSignature::Event::Raise );
-                child->PopulateLink().AddMemberMethod( parent, &parent->PopulateLink(), &PopulateLinkSignature::Event::Raise );
-                child->SelectLink().AddMemberMethod( parent, &parent->SelectLink(), &SelectLinkSignature::Event::Raise );
-                child->PickLink().AddMemberMethod( parent, &parent->PickLink(), &PickLinkSignature::Event::Raise );
-            }
+				return control;        
+			}
 
-            //
-            // Panel/container state management
-            //
+			template <class T>
+			List* AddList( const Helium::SmartPtr< Helium::Property<T> >& property )
+			{
+				ListPtr control = CreateControl<List>();
+				control->Bind( new PropertyStringFormatter<T> ( property ) );
+				m_ContainerStack.Get().top()->AddChild(control);
+				return control;
+			}
 
-            std::stack< ContainerPtr >& GetContainerStack()
-            {
-                return m_ContainerStack.Get();
-            }
+			template <class T>
+			Slider* AddSlider( const Helium::SmartPtr< Helium::Property<T> >& property )
+			{
+				SliderPtr control = CreateControl<Slider>();
+				control->Bind( new PropertyStringFormatter<T> ( property ) );
+				m_ContainerStack.Get().top()->AddChild(control);
+				return control;
+			}
 
-            Container* GetContainer()
-            {
-                return m_Container;
-            }
+			template <class T>
+			ColorPicker* AddColorPicker( const Helium::SmartPtr< Helium::Property<T> >& property )
+			{
+				ColorPickerPtr control = CreateControl<ColorPicker>();
+				control->Bind( new PropertyStringFormatter<T> ( property ) );
+				m_ContainerStack.Get().top()->AddChild(control);
+				return control;
+			}
 
-            void Add(Control* control);
-            void Push(Container* container);
+			//
+			// Events
+			//
 
-            Container* PushContainer( const std::string& name = TXT("") );
-            Container* Pop( bool setParent = true );
-            Container* Top();
+		public:
+			ControlChangingSignature::Event& PropertyChanging() const
+			{
+				return m_PropertyChanging;
+			}
 
-            // Label (no data binding)
-            Label* AddLabel(const std::string& name);
+			ControlChangedSignature::Event& PropertyChanged() const
+			{
+				return m_PropertyChanged;
+			}
 
-            // Button that notifies a listener when it is clicked
-            Button* AddButton( const ButtonClickedSignature::Delegate& listener );
+			PopulateLinkSignature::Event& PopulateLink() const
+			{
+				return m_PopulateLink;
+			}
 
-            template <class T>
-            CheckBox* AddCheckBox( const Helium::SmartPtr< Helium::Property<T> >& property )
-            {
-                CheckBoxPtr control = CreateControl<CheckBox>();
-                control->Bind( new PropertyStringFormatter<T> ( property ) );
-                m_ContainerStack.Get().top()->AddChild(control);
-                return control;
-            }
+			SelectLinkSignature::Event& SelectLink() const
+			{
+				return m_SelectLink;
+			}
 
-            template <class T>
-            Value* AddValue( const Helium::SmartPtr< Helium::Property<T> >& property )
-            {
-                ValuePtr control = CreateControl<Value>();
-                control->Bind( new PropertyStringFormatter<T> ( property ) );
-                m_ContainerStack.Get().top()->AddChild(control);
-                return control;
-            }
+			PickLinkSignature::Event& PickLink() const
+			{
+				return m_PickLink;
+			}
 
-            template <class T>
-            Choice* AddChoice( const Helium::SmartPtr< Helium::Property<T> >& property )
-            {
-                ChoicePtr control = CreateControl<Choice>();
-                control->Bind( new PropertyStringFormatter<T> ( property ) );
-                m_ContainerStack.Get().top()->AddChild(control);
-                return control;
-            }
+		protected:
+			// the container to inject into (these are not long lived hard references)
+			//  this only stores pointers to GUI when generating UI (before they are added
+			//  to the canvas, which is where the controls live permanently)
+			Container* m_Container;
 
-            template <class T>
-            Choice* AddChoice( const Reflect::MetaEnum* enumInfo, const Helium::SmartPtr< Helium::Property<T> >& property )
-            {
-                Choice* control = AddChoice<T>( property );
+			// context for push/pop api
+			ContainerStackPointer m_ContainerStack;
 
-                std::vector< ChoiceItem > items;
-                DynamicArray< Reflect::MetaEnum::Element >::ConstIterator itr = enumInfo->m_Elements.Begin();
-                DynamicArray< Reflect::MetaEnum::Element >::ConstIterator end = enumInfo->m_Elements.End();
-                for ( ; itr != end; ++itr )
-                {
-                    std::ostringstream str;
-                    str << itr->m_Value;
-                    items.push_back( ChoiceItem ( itr->m_Name, str.str() ) );
-                }
-                control->a_Items.Set(items);
-                control->a_IsDropDown.Set(true);
+			// the changing event, emitted from Changing()
+			mutable ControlChangingSignature::Event m_PropertyChanging;
 
-                return control;        
-            }
+			// the changed event, emitted from Changed()
+			mutable ControlChangedSignature::Event m_PropertyChanged;
 
-            template <class T>
-            List* AddList( const Helium::SmartPtr< Helium::Property<T> >& property )
-            {
-                ListPtr control = CreateControl<List>();
-                control->Bind( new PropertyStringFormatter<T> ( property ) );
-                m_ContainerStack.Get().top()->AddChild(control);
-                return control;
-            }
+			// the find event, handlers should seek and select the contents
+			mutable PopulateLinkSignature::Event m_PopulateLink;
 
-            template <class T>
-            Slider* AddSlider( const Helium::SmartPtr< Helium::Property<T> >& property )
-            {
-                SliderPtr control = CreateControl<Slider>();
-                control->Bind( new PropertyStringFormatter<T> ( property ) );
-                m_ContainerStack.Get().top()->AddChild(control);
-                return control;
-            }
+			// the select event, handlers should seek and select the item linked by the data
+			mutable SelectLinkSignature::Event m_SelectLink;
 
-            template <class T>
-            ColorPicker* AddColorPicker( const Helium::SmartPtr< Helium::Property<T> >& property )
-            {
-                ColorPickerPtr control = CreateControl<ColorPicker>();
-                control->Bind( new PropertyStringFormatter<T> ( property ) );
-                m_ContainerStack.Get().top()->AddChild(control);
-                return control;
-            }
+			// the pick event, handlers should stash data and write descriptor when selection occurs
+			mutable PickLinkSignature::Event m_PickLink;
+		};
 
-            //
-            // Events
-            //
-
-        public:
-            ControlChangingSignature::Event& PropertyChanging() const
-            {
-                return m_PropertyChanging;
-            }
-
-            ControlChangedSignature::Event& PropertyChanged() const
-            {
-                return m_PropertyChanged;
-            }
-
-            PopulateLinkSignature::Event& PopulateLink() const
-            {
-                return m_PopulateLink;
-            }
-
-            SelectLinkSignature::Event& SelectLink() const
-            {
-                return m_SelectLink;
-            }
-
-            PickLinkSignature::Event& PickLink() const
-            {
-                return m_PickLink;
-            }
-
-        protected:
-            // the container to inject into (these are not long lived hard references)
-            //  this only stores pointers to GUI when generating UI (before they are added
-            //  to the canvas, which is where the controls live permanently)
-            Container* m_Container;
-
-            // context for push/pop api
-            ContainerStackPointer m_ContainerStack;
-
-            // the changing event, emitted from Changing()
-            mutable ControlChangingSignature::Event m_PropertyChanging;
-
-            // the changed event, emitted from Changed()
-            mutable ControlChangedSignature::Event m_PropertyChanged;
-
-            // the find event, handlers should seek and select the contents
-            mutable PopulateLinkSignature::Event m_PopulateLink;
-
-            // the select event, handlers should seek and select the item linked by the data
-            mutable SelectLinkSignature::Event m_SelectLink;
-
-            // the pick event, handlers should stash data and write descriptor when selection occurs
-            mutable PickLinkSignature::Event m_PickLink;
-        };
-
-        typedef Helium::StrongPtr<Interpreter> InterpreterPtr;
-    }
+		typedef Helium::SmartPtr<Interpreter> InterpreterPtr;
+	}
 }
+
+#include "Inspect/Interpreter.inl"
