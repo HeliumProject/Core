@@ -187,7 +187,7 @@ void ReflectInterpreter::InterpretType(const std::vector<Reflect::Object*>& inst
 				// Pointer support
 				//
 
-#if REFLECT_REFACTOR
+#if INSPECT_REFACTOR
 				if (field->m_DataClass == Reflect::GetMetaClass<Reflect::PointerData>())
 				{
 					if (field->m_Translator->)
@@ -592,7 +592,7 @@ void ReflectInterpreter::InterpretBitfieldField(const Field* field, const std::v
 
 void ReflectInterpreter::InterpretColorField( const Field* field, const std::vector<Reflect::Object*>& instances, Container* parent )
 {
-#if REFLECT_REFACTOR
+#if INSPECT_REFACTOR
     ContainerPtr container = CreateControl< Container >();
     parent->AddChild( container );
 
@@ -752,7 +752,7 @@ void ReflectInterpreter::InterpretColorField( const Field* field, const std::vec
 
 void ReflectInterpreter::InterpretFilePathField(const Field* field, const std::vector<Reflect::Object*>& instances, Container* parent)
 {
-#if REFLECT_REFACTOR
+#if INSPECT_REFACTOR
 	if (field->m_Flags & FieldFlags::Hide)
 	{
 		return;
@@ -944,7 +944,7 @@ void ReflectInterpreter::InterpretFilePathField(const Field* field, const std::v
 
 void ReflectInterpreter::FilePathDataChanging( const DataChangingArgs& args )
 {
-#if REFLECT_REFACTOR
+#if INSPECT_REFACTOR
 	std::string text;
 	Reflect::Data::GetValue( args.m_NewValue, text );
 
@@ -979,7 +979,7 @@ void ReflectInterpreter::FilePathEdit( const ButtonClickedArgs& args )
 
 void ReflectInterpreter::InterpretSequenceField(const Field* field, const std::vector<Reflect::Object*>& instances, Container* parent)
 {
-#if REFLECT_REFACTOR
+#if INSPECT_REFACTOR
     if (field->m_Flags & FieldFlags::Hide)
     {
         return;
@@ -1129,7 +1129,7 @@ void ReflectInterpreter::SequenceOnAdd( const ButtonClickedArgs& args )
 
 void ReflectInterpreter::SequenceOnRemove( const ButtonClickedArgs& args )
 {
-#if REFLECT_REFACTOR
+#if INSPECT_REFACTOR
     Reflect::ObjectPtr clientData = args.m_Control->GetClientData();
     if ( clientData.ReferencesObject() && clientData->IsA( Reflect::GetMetaClass<ClientData>() ) )
     {
@@ -1164,7 +1164,7 @@ void ReflectInterpreter::SequenceOnRemove( const ButtonClickedArgs& args )
 
 void ReflectInterpreter::SequenceOnMoveUp( const ButtonClickedArgs& args )
 {
-#if REFLECT_REFACTOR
+#if INSPECT_REFACTOR
     Reflect::ObjectPtr clientData = args.m_Control->GetClientData();
     if ( clientData.ReferencesObject() && clientData->IsA( Reflect::GetMetaClass<ClientData>() ) )
     {
@@ -1193,7 +1193,7 @@ void ReflectInterpreter::SequenceOnMoveUp( const ButtonClickedArgs& args )
 
 void ReflectInterpreter::SequenceOnMoveDown( const ButtonClickedArgs& args )
 {
-#if REFLECT_REFACTOR
+#if INSPECT_REFACTOR
     Reflect::ObjectPtr clientData = args.m_Control->GetClientData();
     if ( clientData.ReferencesObject() && clientData->IsA( Reflect::GetMetaClass<ClientData>() ) )
     {
@@ -1322,7 +1322,7 @@ void ReflectInterpreter::SetOnRemove( const ButtonClickedArgs& args )
             std::set< size_t >::const_reverse_iterator end = selectedItemIndices.rend();
             for ( ; itr != end; ++itr )
             {
-#if REFLECT_REFACTOR
+#if INSPECT_REFACTOR
                 // for each array in the selection set (the objects the array data is connected to)
                 std::vector< Data >::const_iterator serItr = m_Datas.begin();
                 std::vector< Data >::const_iterator serEnd = m_Datas.end();
