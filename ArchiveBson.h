@@ -18,7 +18,7 @@ namespace Helium
 	{
 		const char* GetBsonErrorString( int status );
 
-		struct BsonDate : Helium::Reflect::Struct
+		struct HELIUM_PERSIST_API BsonDate : Helium::Reflect::Struct
 		{
 			int64_t millis; // milliseconds since epoch UTC
 
@@ -36,7 +36,7 @@ namespace Helium
 		};
 		HELIUM_COMPILE_ASSERT( sizeof( bson_date_t ) == 8 );
 
-		struct BsonObjectId : Helium::Reflect::Struct
+		struct HELIUM_PERSIST_API BsonObjectId : Helium::Reflect::Struct
 		{
 			uint8_t bytes[12]; // uint32_t timestamp, uint8_t machine[3], uint8_t process[2], uint8_t counter[3]
 
