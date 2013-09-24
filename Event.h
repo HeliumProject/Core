@@ -107,7 +107,6 @@ namespace Helium
 	{
 	public:
 		Delegate();
-
 		Delegate( const Delegate& rhs );
 
 		template < typename FunctionType >
