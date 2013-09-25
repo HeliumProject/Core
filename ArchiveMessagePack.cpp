@@ -13,6 +13,13 @@ using namespace Helium;
 using namespace Helium::Reflect;
 using namespace Helium::Persist;
 
+void ArchiveWriterMessagePack::WriteToStream( Object* object, Stream& stream, ObjectIdentifier* identifier, uint32_t flags )
+{
+	ArchiveWriterMessagePack archive ( &stream, identifier, flags );
+	archive.Write( object );
+	archive.Close();
+}
+
 ArchiveWriterMessagePack::ArchiveWriterMessagePack( const FilePath& path, ObjectIdentifier* identifier, uint32_t flags )
 	: ArchiveWriter( path, identifier, flags )
 {
@@ -334,10 +341,10 @@ void ArchiveWriterMessagePack::SerializeTranslator( Pointer pointer, Translator*
 	}
 }
 
-void ArchiveWriterMessagePack::ToStream( Object* object, Stream& stream, ObjectIdentifier* identifier, uint32_t flags )
+void ArchiveReaderMessagePack::ReadFromStream( Stream& stream, ObjectPtr& object, ObjectResolver* resolver, uint32_t flags )
 {
-	ArchiveWriterMessagePack archive ( &stream, identifier, flags );
-	archive.Write( object );
+	ArchiveReaderMessagePack archive( &stream, resolver, flags );
+	archive.Read( object );
 	archive.Close();
 }
 
@@ -746,11 +753,4 @@ void ArchiveReaderMessagePack::DeserializeTranslator( Pointer pointer, Translato
 	{
 		m_Reader.Skip(); // no implicit conversion, discard data
 	}
-}
-
-void ArchiveReaderMessagePack::FromStream( Stream& stream, ObjectPtr& object, ObjectResolver* resolver, uint32_t flags )
-{
-	ArchiveReaderMessagePack archive( &stream, resolver, flags );
-	archive.Read( object );
-	archive.Close();
 }

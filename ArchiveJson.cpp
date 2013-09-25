@@ -14,6 +14,13 @@ using namespace Helium;
 using namespace Helium::Reflect;
 using namespace Helium::Persist;
 
+void ArchiveWriterJson::WriteToStream( Object* object, Stream& stream, ObjectIdentifier* identifier, uint32_t flags )
+{
+	ArchiveWriterJson archive ( &stream, identifier, flags );
+	archive.Write( object );
+	archive.Close();
+}
+
 ArchiveWriterJson::ArchiveWriterJson( const FilePath& path, ObjectIdentifier* identifier, uint32_t flags )
 	: ArchiveWriter( path, identifier, flags )
 	, m_Writer( m_Output )
@@ -315,10 +322,10 @@ void ArchiveWriterJson::SerializeTranslator( Pointer pointer, Translator* transl
 	}
 }
 
-void ArchiveWriterJson::ToStream( Object* object, Stream& stream, ObjectIdentifier* identifier, uint32_t flags )
+void ArchiveReaderJson::ReadFromStream( Stream& stream, ObjectPtr& object, ObjectResolver* resolver, uint32_t flags )
 {
-	ArchiveWriterJson archive ( &stream, identifier, flags );
-	archive.Write( object );
+	ArchiveReaderJson archive( &stream, resolver, flags );
+	archive.Read( object );
 	archive.Close();
 }
 
@@ -711,11 +718,4 @@ void ArchiveReaderJson::DeserializeTranslator( rapidjson::Value& value, Pointer 
 			}
 		}
 	}
-}
-
-void ArchiveReaderJson::FromStream( Stream& stream, ObjectPtr& object, ObjectResolver* resolver, uint32_t flags )
-{
-	ArchiveReaderJson archive( &stream, resolver, flags );
-	archive.Read( object );
-	archive.Close();
 }

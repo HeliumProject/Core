@@ -72,6 +72,19 @@ void BsonObjectId::PopulateMetaType( Reflect::MetaStruct& type )
 	type.AddField( &BsonObjectId::bytes, "bytes" );
 }
 
+void ArchiveWriterBson::WriteToStream( Object* object, Stream& stream, ObjectIdentifier* identifier, uint32_t flags )
+{
+	ArchiveWriterBson archive ( &stream, identifier, flags );
+	archive.Write( object );
+	archive.Close();
+}
+
+void ArchiveWriterBson::WriteToBson( Reflect::Object* object, bson* b, const char* name, Reflect::ObjectIdentifier* identifier, uint32_t flags )
+{
+	ArchiveWriterBson archive ( NULL, identifier, flags );
+	archive.SerializeInstance( b, name, object, object->GetMetaClass(), object );
+}
+
 ArchiveWriterBson::ArchiveWriterBson( const FilePath& path, ObjectIdentifier* identifier, uint32_t flags )
 	: ArchiveWriter( path, identifier, flags )
 {
@@ -411,17 +424,17 @@ void ArchiveWriterBson::SerializeTranslator( bson* b, const char* name, Pointer 
 	}
 }
 
-void ArchiveWriterBson::ToStream( Object* object, Stream& stream, ObjectIdentifier* identifier, uint32_t flags )
+void ArchiveReaderBson::ReadFromStream( Stream& stream, ObjectPtr& object, ObjectResolver* resolver, uint32_t flags )
 {
-	ArchiveWriterBson archive ( &stream, identifier, flags );
-	archive.Write( object );
+	ArchiveReaderBson archive( &stream, resolver, flags );
+	archive.Read( object );
 	archive.Close();
 }
 
-void ArchiveWriterBson::ToBson( Reflect::Object* object, bson* b, const char* name, Reflect::ObjectIdentifier* identifier, uint32_t flags )
+void ArchiveReaderBson::ReadFromBson( bson_iterator* i, ObjectPtr& object, ObjectResolver* resolver, uint32_t flags )
 {
-	ArchiveWriterBson archive ( NULL, identifier, flags );
-	archive.SerializeInstance( b, name, object, object->GetMetaClass(), object );
+	ArchiveReaderBson archive( NULL, resolver, flags );
+	archive.DeserializeInstance( i, object.Ptr(), object->GetMetaClass(), object );
 }
 
 ArchiveReaderBson::ArchiveReaderBson( const FilePath& path, ObjectResolver* resolver, uint32_t flags )
@@ -952,17 +965,4 @@ void ArchiveReaderBson::DeserializeTranslator( bson_iterator* i, Pointer pointer
 	default:
 		break;
 	}
-}
-
-void ArchiveReaderBson::FromStream( Stream& stream, ObjectPtr& object, ObjectResolver* resolver, uint32_t flags )
-{
-	ArchiveReaderBson archive( &stream, resolver, flags );
-	archive.Read( object );
-	archive.Close();
-}
-
-void ArchiveReaderBson::FromBson( bson_iterator* i, ObjectPtr& object, ObjectResolver* resolver, uint32_t flags )
-{
-	ArchiveReaderBson archive( NULL, resolver, flags );
-	archive.DeserializeInstance( i, object.Ptr(), object->GetMetaClass(), object );
 }

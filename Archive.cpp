@@ -51,6 +51,131 @@ Archive::~Archive()
 {
 }
 
+SmartPtr< ArchiveWriter > ArchiveWriter::GetWriter( const FilePath& path, ObjectIdentifier* identifier, ArchiveType archiveType )
+{
+	switch ( archiveType )
+	{
+	case ArchiveTypes::Auto:
+		{
+			if ( CaseInsensitiveCompareString( path.Extension().c_str(), ArchiveExtensions[ ArchiveTypes::Bson ] ) == 0 )
+			{
+				return new ArchiveWriterBson( path, identifier );
+			}
+			else if ( CaseInsensitiveCompareString( path.Extension().c_str(), ArchiveExtensions[ ArchiveTypes::Json ] ) == 0 )
+			{
+				return new ArchiveWriterJson( path, identifier );
+			}
+			else if ( CaseInsensitiveCompareString( path.Extension().c_str(), ArchiveExtensions[ ArchiveTypes::MessagePack ] ) == 0 )
+			{
+				return new ArchiveWriterMessagePack( path, identifier );
+			}
+			break;
+		}
+
+	case ArchiveTypes::Bson:
+		return new ArchiveWriterBson( path, identifier );
+
+	case ArchiveTypes::Json:
+		return new ArchiveWriterJson( path, identifier );
+
+	case ArchiveTypes::MessagePack:
+		return new ArchiveWriterMessagePack( path, identifier );
+
+	default:
+		HELIUM_ASSERT( false );
+		break;
+	}
+
+	throw Persist::StreamException( TXT( "Unknown archive type" ) );
+}
+
+bool ArchiveWriter::WriteToFile( const FilePath& path, ObjectPtr object, ObjectIdentifier* identifier, ArchiveType archiveType, std::string* error )
+{
+	HELIUM_ASSERT( !path.empty() );
+	PERSIST_SCOPE_TIMER( ( "%s", path.c_str() ) );
+	Log::Debug( TXT( "Generating '%s'\n" ), path.c_str() );
+
+	path.MakePath();
+
+	// build a path to a unique file for this process
+	FilePath safetyPath( path.Directory() + Helium::GetProcessString() );
+	safetyPath.ReplaceExtension( path.Extension() );
+
+	SmartPtr< ArchiveWriter > archive = GetWriter( safetyPath, identifier, archiveType );
+
+	// generate the file to the safety location
+	if ( Helium::IsDebuggerPresent() )
+	{
+		archive->Open();
+		archive->Write( object );
+		archive->Close();
+	}
+	else
+	{
+		bool open = false;
+
+		try
+		{
+			archive->Open();
+			open = true;
+			archive->Write( object );
+			archive->Close(); 
+		}
+		catch ( Helium::Exception& ex )
+		{
+			std::stringstream str;
+			str << "While writing '" << path.c_str() << "': " << ex.Get();
+
+			if ( error )
+			{
+				*error = str.str();
+			}
+
+			if ( open )
+			{
+				archive->Close();
+			}
+
+			safetyPath.Delete();
+			return false;
+		}
+		catch( ... )
+		{
+			if ( open )
+			{
+				archive->Close();
+			}
+
+			safetyPath.Delete();
+			throw;
+		}
+	}
+
+	try
+	{
+		// delete the destination file
+		path.Delete();
+
+		// move the written file to the destination location
+		safetyPath.Move( path );
+	}
+	catch ( Helium::Exception& ex )
+	{
+		std::stringstream str;
+		str << "While moving '" << safetyPath.c_str() << "' to '" << path.c_str() << "': " << ex.Get();
+
+		if ( error )
+		{
+			*error = str.str();
+		}
+
+		safetyPath.Delete();
+		return false;
+	}
+
+	return true;
+}
+
 ArchiveWriter::ArchiveWriter( ObjectIdentifier* identifier, uint32_t flags )
 	: Archive( flags )
 	, m_Identifier( identifier )
@@ -97,6 +222,107 @@ bool ArchiveWriter::Identify( Object* object, Name& identity )
 	}
 
 	return true;
+}
+
+SmartPtr< ArchiveReader > ArchiveReader::GetReader( const FilePath& path, ObjectResolver* resolver, ArchiveType archiveType )
+{
+	switch ( archiveType )
+	{
+	case ArchiveTypes::Auto:
+		{
+			if ( CaseInsensitiveCompareString( path.Extension().c_str(), ArchiveExtensions[ ArchiveTypes::Bson ] ) == 0 )
+			{
+				return new ArchiveReaderBson( path, resolver );
+			}
+			else if ( CaseInsensitiveCompareString( path.Extension().c_str(), ArchiveExtensions[ ArchiveTypes::Json ] ) == 0 )
+			{
+				return new ArchiveReaderJson( path, resolver );
+			}
+			else if ( CaseInsensitiveCompareString( path.Extension().c_str(), ArchiveExtensions[ ArchiveTypes::MessagePack ] ) == 0 )
+			{
+				return new ArchiveReaderMessagePack( path, resolver );
+			}
+			break;
+		}
+
+	case ArchiveTypes::Bson:
+		return new ArchiveReaderBson( path, resolver );
+
+	case ArchiveTypes::Json:
+		return new ArchiveReaderJson( path, resolver );
+
+	case ArchiveTypes::MessagePack:
+		return new ArchiveReaderMessagePack( path, resolver );
+
+	default:
+		HELIUM_ASSERT( false );
+		break;
+	}
+
+	throw Persist::StreamException( TXT( "Unknown archive type" ) );
+}
+
+bool ArchiveReader::ReadFromFile( const FilePath& path, ObjectPtr& object, ObjectResolver* resolver, ArchiveType archiveType, std::string* error )
+{
+	HELIUM_ASSERT( !path.empty() );
+	PERSIST_SCOPE_TIMER( ( "%s", path.c_str() ) );
+	Log::Debug( TXT( "Parsing '%s'\n" ), path.c_str() );
+
+	SmartPtr< ArchiveReader > archive = GetReader( path, resolver, archiveType );
+
+	if ( Helium::IsDebuggerPresent() )
+	{
+		archive->Open();
+		archive->Read( object );
+		archive->Close(); 
+	}
+	else
+	{
+		bool open = false;
+
+		try
+		{
+			archive->Open();
+			open = true;
+			archive->Read( object );
+			archive->Close(); 
+		}
+		catch ( Helium::Exception& ex )
+		{
+			std::stringstream str;
+			str << "While reading '" << path.c_str() << "': " << ex.Get();
+
+			if ( error )
+			{
+				*error = str.str();
+			}
+
+			if ( open )
+			{
+				archive->Close();
+			}
+
+			return false;
+		}
+		catch ( ... )
+		{
+			if ( open )
+			{
+				archive->Close();
+			}
+
+			throw;
+		}
+	}
+
+	return true;
+}
+
+ObjectPtr ArchiveReader::ReadFromFile( const FilePath& path, ObjectResolver* resolver, ArchiveType archiveType, std::string* error )
+{
+	ObjectPtr object;
+	ReadFromFile( path, object, resolver, archiveType, error );
+	return object;
 }
 
 ArchiveReader::ArchiveReader( ObjectResolver* resolver, uint32_t flags )
@@ -229,230 +455,4 @@ void ArchiveReader::Resolve()
 
 	info.m_State = ArchiveStates::Complete;
 	e_Status.Raise( info );
-}
-
-ArchiveWriterPtr Persist::GetWriter( const FilePath& path, ObjectIdentifier* identifier, ArchiveType archiveType )
-{
-	switch ( archiveType )
-	{
-	case ArchiveTypes::Auto:
-		{
-			if ( CaseInsensitiveCompareString( path.Extension().c_str(), ArchiveExtensions[ ArchiveTypes::Bson ] ) == 0 )
-			{
-				return new ArchiveWriterBson( path, identifier );
-			}
-			else if ( CaseInsensitiveCompareString( path.Extension().c_str(), ArchiveExtensions[ ArchiveTypes::Json ] ) == 0 )
-			{
-				return new ArchiveWriterJson( path, identifier );
-			}
-			else if ( CaseInsensitiveCompareString( path.Extension().c_str(), ArchiveExtensions[ ArchiveTypes::MessagePack ] ) == 0 )
-			{
-				return new ArchiveWriterMessagePack( path, identifier );
-			}
-			break;
-		}
-
-	case ArchiveTypes::Bson:
-		return new ArchiveWriterBson( path, identifier );
-
-	case ArchiveTypes::Json:
-		return new ArchiveWriterJson( path, identifier );
-
-	case ArchiveTypes::MessagePack:
-		return new ArchiveWriterMessagePack( path, identifier );
-
-	default:
-		HELIUM_ASSERT( false );
-		break;
-	}
-
-	throw Persist::StreamException( TXT( "Unknown archive type" ) );
-}
-
-ArchiveReaderPtr Persist::GetReader( const FilePath& path, ObjectResolver* resolver, ArchiveType archiveType )
-{
-	switch ( archiveType )
-	{
-	case ArchiveTypes::Auto:
-		{
-			if ( CaseInsensitiveCompareString( path.Extension().c_str(), ArchiveExtensions[ ArchiveTypes::Bson ] ) == 0 )
-			{
-				return new ArchiveReaderBson( path, resolver );
-			}
-			else if ( CaseInsensitiveCompareString( path.Extension().c_str(), ArchiveExtensions[ ArchiveTypes::Json ] ) == 0 )
-			{
-				return new ArchiveReaderJson( path, resolver );
-			}
-			else if ( CaseInsensitiveCompareString( path.Extension().c_str(), ArchiveExtensions[ ArchiveTypes::MessagePack ] ) == 0 )
-			{
-				return new ArchiveReaderMessagePack( path, resolver );
-			}
-			break;
-		}
-
-	case ArchiveTypes::Bson:
-		return new ArchiveReaderBson( path, resolver );
-
-	case ArchiveTypes::Json:
-		return new ArchiveReaderJson( path, resolver );
-
-	case ArchiveTypes::MessagePack:
-		return new ArchiveReaderMessagePack( path, resolver );
-
-	default:
-		HELIUM_ASSERT( false );
-		break;
-	}
-
-	throw Persist::StreamException( TXT( "Unknown archive type" ) );
-}
-
-bool Persist::ToArchive( const FilePath& path, ObjectPtr object, ObjectIdentifier* identifier, ArchiveType archiveType, std::string* error )
-{
-	HELIUM_ASSERT( !path.empty() );
-	PERSIST_SCOPE_TIMER( ( "%s", path.c_str() ) );
-	Log::Debug( TXT( "Generating '%s'\n" ), path.c_str() );
-
-	path.MakePath();
-
-	// build a path to a unique file for this process
-	FilePath safetyPath( path.Directory() + Helium::GetProcessString() );
-	safetyPath.ReplaceExtension( path.Extension() );
-
-	ArchiveWriterPtr archive = GetWriter( safetyPath, identifier, archiveType );
-
-	// generate the file to the safety location
-	if ( Helium::IsDebuggerPresent() )
-	{
-		archive->Open();
-		archive->Write( object );
-		archive->Close();
-	}
-	else
-	{
-		bool open = false;
-
-		try
-		{
-			archive->Open();
-			open = true;
-			archive->Write( object );
-			archive->Close(); 
-		}
-		catch ( Helium::Exception& ex )
-		{
-			std::stringstream str;
-			str << "While writing '" << path.c_str() << "': " << ex.Get();
-
-			if ( error )
-			{
-				*error = str.str();
-			}
-
-			if ( open )
-			{
-				archive->Close();
-			}
-
-			safetyPath.Delete();
-			return false;
-		}
-		catch( ... )
-		{
-			if ( open )
-			{
-				archive->Close();
-			}
-
-			safetyPath.Delete();
-			throw;
-		}
-	}
-
-	try
-	{
-		// delete the destination file
-		path.Delete();
-
-		// move the written file to the destination location
-		safetyPath.Move( path );
-	}
-	catch ( Helium::Exception& ex )
-	{
-		std::stringstream str;
-		str << "While moving '" << safetyPath.c_str() << "' to '" << path.c_str() << "': " << ex.Get();
-
-		if ( error )
-		{
-			*error = str.str();
-		}
-
-		safetyPath.Delete();
-		return false;
-	}
-
-	return true;
-}
-
-bool Persist::FromArchive( const FilePath& path, ObjectPtr& object, ObjectResolver* resolver, ArchiveType archiveType, std::string* error )
-{
-	HELIUM_ASSERT( !path.empty() );
-	PERSIST_SCOPE_TIMER( ( "%s", path.c_str() ) );
-	Log::Debug( TXT( "Parsing '%s'\n" ), path.c_str() );
-
-	ArchiveReaderPtr archive = GetReader( path, resolver, archiveType );
-
-	if ( Helium::IsDebuggerPresent() )
-	{
-		archive->Open();
-		archive->Read( object );
-		archive->Close(); 
-	}
-	else
-	{
-		bool open = false;
-
-		try
-		{
-			archive->Open();
-			open = true;
-			archive->Read( object );
-			archive->Close(); 
-		}
-		catch ( Helium::Exception& ex )
-		{
-			std::stringstream str;
-			str << "While reading '" << path.c_str() << "': " << ex.Get();
-
-			if ( error )
-			{
-				*error = str.str();
-			}
-
-			if ( open )
-			{
-				archive->Close();
-			}
-
-			return false;
-		}
-		catch ( ... )
-		{
-			if ( open )
-			{
-				archive->Close();
-			}
-
-			throw;
-		}
-	}
-
-	return true;
-}
-
-ObjectPtr Persist::FromArchive( const FilePath& path, ObjectResolver* resolver, ArchiveType archiveType, std::string* error )
-{
-	ObjectPtr object;
-	FromArchive( path, object, resolver, archiveType, error );
-	return object;
 }

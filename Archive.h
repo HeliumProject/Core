@@ -37,11 +37,11 @@ namespace Helium
 		{
 			enum ArchiveType
 			{
+				Auto = -1,
 				Bson,
 				Json,
 				MessagePack,
 				Count,
-				Auto = -1,
 			};
 		}
 		typedef ArchiveTypes::ArchiveType ArchiveType;
@@ -92,6 +92,10 @@ namespace Helium
 		};
 		typedef Helium::Signature< const ArchiveStatus& > ArchiveStatusSignature;
 
+		//
+		// Base class for Readers and Writers
+		//
+
 		class HELIUM_PERSIST_API Archive : public Helium::RefCountBase< Archive >
 		{
 		protected:
@@ -102,12 +106,12 @@ namespace Helium
 			~Archive();
 
 		public:
-			virtual ArchiveType GetType() const = 0;
-			virtual ArchiveMode GetMode() const = 0;
 			inline const Helium::FilePath& GetPath() const;
 
-			virtual void Open() = 0;
-			virtual void Close() = 0;
+			virtual ArchiveType GetType() const = 0;
+			virtual ArchiveMode GetMode() const = 0;
+			virtual void        Open() = 0;
+			virtual void        Close() = 0;
 
 			ArchiveStatusSignature::Event e_Status;
 
@@ -117,7 +121,6 @@ namespace Helium
 			const uint8_t      m_Flags;
 			FilePath           m_Path;
 		};
-		typedef Helium::SmartPtr< Archive > ArchivePtr;
 
 		//
 		// Writer
@@ -126,18 +129,21 @@ namespace Helium
 		class HELIUM_PERSIST_API ArchiveWriter : public Archive, public Reflect::ObjectIdentifier
 		{
 		public:
+			static SmartPtr< ArchiveWriter > GetWriter( const FilePath& path, Reflect::ObjectIdentifier* identifier = NULL, ArchiveType archiveType = ArchiveTypes::Auto );
+			static bool                      WriteToFile( const FilePath& path, Reflect::ObjectPtr object, Reflect::ObjectIdentifier* identifier = NULL, ArchiveType archiveType = ArchiveTypes::Auto, std::string* error = NULL );
+
 			ArchiveWriter( Reflect::ObjectIdentifier* identifier, uint32_t flags );
 			ArchiveWriter( const FilePath& path, Reflect::ObjectIdentifier* identifier, uint32_t flags );
 
 			virtual ArchiveMode GetMode() const HELIUM_OVERRIDE;
+
+		protected:
 			virtual void Write( Reflect::Object* object ) = 0;
 			virtual bool Identify( Reflect::Object* object, Name& identity ) HELIUM_OVERRIDE;
 
-		protected:
 			DynamicArray< Reflect::ObjectPtr > m_Objects;
 			Reflect::ObjectIdentifier*         m_Identifier;
 		};
-		typedef Helium::SmartPtr< ArchiveWriter > ArchiveWriterPtr;
 
 		//
 		// Reader
@@ -146,16 +152,22 @@ namespace Helium
 		class HELIUM_PERSIST_API ArchiveReader : public Archive, public Reflect::ObjectResolver
 		{
 		public:
+			static SmartPtr< ArchiveReader > GetReader( const FilePath& path, Reflect::ObjectResolver* resolver = NULL, ArchiveType archiveType = ArchiveTypes::Auto );
+			static bool                      ReadFromFile( const FilePath& path, Reflect::ObjectPtr& object, Reflect::ObjectResolver* resolver = NULL, ArchiveType archiveType = ArchiveTypes::Auto, std::string* error = NULL );
+			static Reflect::ObjectPtr        ReadFromFile( const FilePath& path, Reflect::ObjectResolver* resolver = NULL, ArchiveType archiveType = ArchiveTypes::Auto, std::string* error = NULL );
+
 			ArchiveReader( Reflect::ObjectResolver* resolver, uint32_t flags );
 			ArchiveReader( const FilePath& path, Reflect::ObjectResolver* resolver, uint32_t flags );
 
 			virtual ArchiveMode GetMode() const HELIUM_OVERRIDE;
-			virtual void Read( Reflect::ObjectPtr& object ) = 0;
 
+		protected:
+			virtual void       Read( Reflect::ObjectPtr& object ) = 0;
 			Reflect::ObjectPtr AllocateObject( const Reflect::MetaClass* type );
-			bool Resolve( const Name& identity, Reflect::ObjectPtr& pointer, const Reflect::MetaClass* pointerClass ) HELIUM_OVERRIDE;
-			
-			void Resolve();
+			bool               Resolve( const Name& identity, Reflect::ObjectPtr& pointer, const Reflect::MetaClass* pointerClass ) HELIUM_OVERRIDE;
+
+		public: // TEMP
+			void               Resolve();
 
 		protected:
 			struct Fixup
@@ -173,23 +185,12 @@ namespace Helium
 				size_t                    m_Index;
 				const Reflect::MetaClass* m_PointerClass;
 			};
+
 			std::vector< RefCountProxy< Reflect::Object >* >  m_Proxies;
 			DynamicArray< Fixup >                             m_Fixups;
 			DynamicArray< Reflect::ObjectPtr >                m_Objects;
 			Reflect::ObjectResolver*                          m_Resolver;
 		};
-		typedef Helium::SmartPtr< ArchiveReader > ArchiveReaderPtr;
-
-		//
-		// Static API, top level entry points
-		//
-
-		HELIUM_PERSIST_API ArchiveWriterPtr GetWriter( const FilePath& path, Reflect::ObjectIdentifier* identifier = NULL, ArchiveType archiveType = ArchiveTypes::Auto );
-		HELIUM_PERSIST_API ArchiveReaderPtr GetReader( const FilePath& path, Reflect::ObjectResolver* resolver = NULL, ArchiveType archiveType = ArchiveTypes::Auto );
-
-		HELIUM_PERSIST_API bool ToArchive( const FilePath& path, Reflect::ObjectPtr object, Reflect::ObjectIdentifier* identifier = NULL, ArchiveType archiveType = ArchiveTypes::Auto, std::string* error = NULL );
-		HELIUM_PERSIST_API bool FromArchive( const FilePath& path, Reflect::ObjectPtr& object, Reflect::ObjectResolver* resolver = NULL, ArchiveType archiveType = ArchiveTypes::Auto, std::string* error = NULL );
-		HELIUM_PERSIST_API Reflect::ObjectPtr FromArchive( const FilePath& path, Reflect::ObjectResolver* resolver = NULL, ArchiveType archiveType = ArchiveTypes::Auto, std::string* error = NULL );
 	}
 }
 
