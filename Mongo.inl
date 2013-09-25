@@ -37,7 +37,7 @@ bool Helium::Mongo::Cursor< T >::Get( Helium::DynamicArray< Helium::StrongPtr< T
 		Helium::StrongPtr< T > o = new T;
 		try
 		{
-			Helium::Persist::ArchiveReaderBson::FromBson( i, reinterpret_cast< Helium::Reflect::ObjectPtr& >( o ) );
+			Helium::Persist::ArchiveReaderBson::ReadFromBson( i, reinterpret_cast< Helium::Reflect::ObjectPtr& >( o ) );
 			objects.Add( o );
 		}
 		catch ( Helium::Exception& ex )
@@ -64,7 +64,7 @@ Helium::StrongPtr< T > Helium::Mongo::Cursor< T >::Next()
 		Helium::StrongPtr< T > o = new T;
 		try
 		{
-			Helium::Persist::ArchiveReaderBson::FromBson( i, reinterpret_cast< Helium::Reflect::ObjectPtr& >( o ) );
+			Helium::Persist::ArchiveReaderBson::ReadFromBson( i, reinterpret_cast< Helium::Reflect::ObjectPtr& >( o ) );
 			return o;
 		}
 		catch ( Helium::Exception& ex )
@@ -99,7 +99,7 @@ void Helium::Mongo::Cursor< T >::Process( std::function< void ( T* ) > function 
 		Helium::StrongPtr< T > o = new T;
 		try
 		{
-			Helium::Persist::ArchiveReaderBson::FromBson( i, reinterpret_cast< Helium::Reflect::ObjectPtr& >( o ) );
+			Helium::Persist::ArchiveReaderBson::ReadFromBson( i, reinterpret_cast< Helium::Reflect::ObjectPtr& >( o ) );
 			function( o );
 		}
 		catch ( Helium::Exception& ex )
