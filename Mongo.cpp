@@ -155,7 +155,7 @@ bool Database::Insert( const StrongPtr< Model >& object, const char* collection 
 	HELIUM_VERIFY( BSON_OK == bson_init( b ) );
 	try
 	{
-		ArchiveWriterBson::ToBson( object, b );
+		ArchiveWriterBson::WriteToBson( object, b );
 	}
 	catch ( Helium::Exception& )
 	{
@@ -206,7 +206,7 @@ bool Database::Update( const StrongPtr< Model >& object, const char* collection 
 	bool result = true;
 	try
 	{
-		ArchiveWriterBson::ToBson( object, op, "$set" );
+		ArchiveWriterBson::WriteToBson( object, op, "$set" );
 	}
 	catch ( Helium::Exception& )
 	{
@@ -279,7 +279,7 @@ bool Database::Get( const StrongPtr< Model >& object, const char* collection )
 		bson_iterator_init( i, out );
 		try
 		{
-			ArchiveReaderBson::FromBson( i, reinterpret_cast< Helium::StrongPtr< Object >& >( const_cast< StrongPtr< Model >& >( object ) ) );
+			ArchiveReaderBson::ReadFromBson( i, reinterpret_cast< Helium::StrongPtr< Object >& >( const_cast< StrongPtr< Model >& >( object ) ) );
 		}
 		catch ( Helium::Exception& )
 		{
@@ -332,7 +332,7 @@ bool Database::Insert( StrongPtr< Model >* objects, size_t count, const char* co
 
 		try
 		{
-			ArchiveWriterBson::ToBson( reinterpret_cast< ObjectPtr& >( objects[i] ), b );
+			ArchiveWriterBson::WriteToBson( reinterpret_cast< ObjectPtr& >( objects[i] ), b );
 		}
 		catch ( Helium::Exception& )
 		{
