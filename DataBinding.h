@@ -155,7 +155,7 @@ namespace Helium
 			{
 				std::string str;
 				Extract( stream, &str );
-				scalar->Parse( String( str.c_str() ), val->m_Pointer );
+				scalar->Parse( String( str.c_str() ), val->m_Pointer, NULL, true );
 			}
 		}
 
