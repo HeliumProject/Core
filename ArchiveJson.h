@@ -44,6 +44,8 @@ namespace Helium
 		{
 		public:
 			static void WriteToStream( Reflect::Object* object, Stream& stream, Reflect::ObjectIdentifier* identifier = NULL, uint32_t flags = 0 );
+			static void WriteToFile( Reflect::Object* objects, const FilePath& path, Reflect::ObjectIdentifier* identifier = NULL, uint32_t flags = 0 );
+			static void WriteToFile( DynamicArray<Reflect::Object* > &objects, const FilePath& path, Reflect::ObjectIdentifier* identifier = NULL, uint32_t flags = 0 );
 
 			ArchiveWriterJson( const FilePath& path, Reflect::ObjectIdentifier* identifier = NULL, uint32_t flags = 0x0 );
 			ArchiveWriterJson( Stream *stream, Reflect::ObjectIdentifier* identifier = NULL, uint32_t flags = 0x0 );
@@ -54,6 +56,8 @@ namespace Helium
 
 		protected:
 			virtual void Write( Reflect::Object* object ) HELIUM_OVERRIDE;
+			virtual void Write( const DynamicArray<Reflect::Object* > &object );
+			virtual void DoWrite();
 
 		private:
 			void SerializeInstance( void* instance, const Reflect::MetaStruct* structure, Reflect::Object* object );

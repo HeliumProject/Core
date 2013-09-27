@@ -21,10 +21,27 @@ void ArchiveWriterJson::WriteToStream( Object* object, Stream& stream, ObjectIde
 	archive.Close();
 }
 
+void ArchiveWriterJson::WriteToFile( Reflect::Object* object, const FilePath& path, Reflect::ObjectIdentifier* identifier /*= NULL*/, uint32_t flags /*= 0 */ )
+{
+	ArchiveWriterJson archive ( path, identifier, flags );
+	archive.Open();
+	archive.Write( object );
+	archive.Close();
+}
+
+void ArchiveWriterJson::WriteToFile( DynamicArray<Reflect::Object* > &objects, const FilePath& path, Reflect::ObjectIdentifier* identifier /*= NULL*/, uint32_t flags /*= 0 */ )
+{
+	ArchiveWriterJson archive ( path, identifier, flags );
+	archive.Open();
+	archive.Write( objects );
+	archive.Close();
+}
+
 ArchiveWriterJson::ArchiveWriterJson( const FilePath& path, ObjectIdentifier* identifier, uint32_t flags )
 	: ArchiveWriter( path, identifier, flags )
 	, m_Writer( m_Output )
 {
+	
 }
 
 ArchiveWriterJson::ArchiveWriterJson( Stream *stream, ObjectIdentifier* identifier, uint32_t flags )
@@ -62,14 +79,33 @@ void ArchiveWriterJson::Close()
 
 void ArchiveWriterJson::Write( Object* object )
 {
+	// the master object
+	m_Objects.Push( object );
+
+	DoWrite();
+
+}
+
+void ArchiveWriterJson::Write( const DynamicArray<Reflect::Object* > &objects )
+{
+	m_Objects.Reserve( objects.GetSize() );
+
+	for ( DynamicArray<Reflect::Object* >::ConstIterator iter = objects.Begin();
+		iter != objects.End(); ++iter )
+	{
+		m_Objects.Push( *iter );
+	}
+
+	DoWrite();
+}
+
+void ArchiveWriterJson::DoWrite()
+{
 	PERSIST_SCOPE_TIMER( ("Reflect - Json Write") );
 
 	// notify starting
 	ArchiveStatus info( *this, ArchiveStates::Starting );
 	e_Status.Raise( info );
-
-	// the master object
-	m_Objects.Push( object );
 
 	// begin top level array of objects
 	m_Writer.StartArray();
