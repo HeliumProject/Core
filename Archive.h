@@ -29,8 +29,7 @@ namespace Helium
 			enum ArchiveFlag
 			{
 				Notify      = 1 << 0, // Notify objects of changes
-				Compact     = 1 << 1, // Minify output, if possible
-				StringCrc   = 1 << 2, // Using string CRC-32 values for meta-data instead of full strings (for brevity)
+				StringCrc   = 1 << 1, // Using string CRC-32 values for meta-data instead of full strings (for brevity)
 			};
 		}
 

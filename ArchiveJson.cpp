@@ -30,21 +30,19 @@ void ArchiveWriterJson::WriteToStream( const ObjectPtr* objects, size_t count, S
 
 ArchiveWriterJson::ArchiveWriterJson( const FilePath& path, ObjectIdentifier* identifier, uint32_t flags )
 	: ArchiveWriter( path, identifier, flags )
-	, m_MinifiedWriter( m_Output )
-	, m_PrettyWriter( m_Output )
-	, m_Writer( ( flags & ArchiveFlags::Compact ) ? m_MinifiedWriter : m_PrettyWriter )
+	, m_Writer( m_Output )
 {
+	m_Writer.SetIndent('\t', 1);
 }
 
 ArchiveWriterJson::ArchiveWriterJson( Stream *stream, ObjectIdentifier* identifier, uint32_t flags )
 	: ArchiveWriter( identifier, flags )
-	, m_MinifiedWriter( m_Output )
-	, m_PrettyWriter( m_Output )
-	, m_Writer( ( flags & ArchiveFlags::Compact ) ? m_MinifiedWriter : m_PrettyWriter )
+	, m_Writer( m_Output )
 {
 	m_Stream.Reset( stream );
 	m_Stream.Orphan( true );
 	m_Output.SetStream( stream );
+	m_Writer.SetIndent('\t', 1);
 }
 
 ArchiveType ArchiveWriterJson::GetType() const

@@ -20,7 +20,6 @@
 
 #define RAPIDJSON_STATIC_ASSERT HELIUM_COMPILE_ASSERT
 
-#include "rapidjson/include/rapidjson/writer.h"
 #include "rapidjson/include/rapidjson/prettywriter.h"
 #include "rapidjson/include/rapidjson/document.h"
 
@@ -65,9 +64,7 @@ namespace Helium
 
 			AutoPtr< Stream >     m_Stream;
 			RapidJsonOutputStream m_Output;
-			RapidJsonWriter       m_MinifiedWriter;
-			RapidJsonPrettyWriter m_PrettyWriter;
-			RapidJsonWriter      &m_Writer;
+			RapidJsonPrettyWriter m_Writer;
 		};
 
 		class HELIUM_PERSIST_API ArchiveReaderJson : public ArchiveReader
