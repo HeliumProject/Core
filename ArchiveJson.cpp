@@ -14,39 +14,26 @@ using namespace Helium;
 using namespace Helium::Reflect;
 using namespace Helium::Persist;
 
-void ArchiveWriterJson::WriteToStream( Object* object, Stream& stream, ObjectIdentifier* identifier, uint32_t flags )
+void ArchiveWriterJson::WriteToStream( const ObjectPtr& object, Stream& stream, ObjectIdentifier* identifier, uint32_t flags )
 {
 	ArchiveWriterJson archive ( &stream, identifier, flags );
-	archive.Write( object );
-	archive.Close();
-}
-
-void ArchiveWriterJson::WriteToFile( Reflect::Object* object, const FilePath& path, Reflect::ObjectIdentifier* identifier /*= NULL*/, uint32_t flags /*= 0 */ )
-{
-	ArchiveWriterJson archive ( path, identifier, flags );
-	archive.Open();
-	archive.Write( object );
-	archive.Close();
-}
-
-void ArchiveWriterJson::WriteToFile( DynamicArray<Reflect::Object* > &objects, const FilePath& path, Reflect::ObjectIdentifier* identifier /*= NULL*/, uint32_t flags /*= 0 */ )
-{
-	ArchiveWriterJson archive ( path, identifier, flags );
-	archive.Open();
-	archive.Write( objects );
+	archive.Write( &object, 1 );
 	archive.Close();
 }
 
 ArchiveWriterJson::ArchiveWriterJson( const FilePath& path, ObjectIdentifier* identifier, uint32_t flags )
 	: ArchiveWriter( path, identifier, flags )
-	, m_Writer( m_Output )
+	, m_MinifiedWriter( m_Output )
+	, m_PrettyWriter( m_Output )
+	, m_Writer( ( flags & ArchiveFlags::Compact ) ? m_MinifiedWriter : m_PrettyWriter )
 {
-	
 }
 
 ArchiveWriterJson::ArchiveWriterJson( Stream *stream, ObjectIdentifier* identifier, uint32_t flags )
 	: ArchiveWriter( identifier, flags )
-	, m_Writer( m_Output )
+	, m_MinifiedWriter( m_Output )
+	, m_PrettyWriter( m_Output )
+	, m_Writer( ( flags & ArchiveFlags::Compact ) ? m_MinifiedWriter : m_PrettyWriter )
 {
 	m_Stream.Reset( stream );
 	m_Stream.Orphan( true );
@@ -77,35 +64,16 @@ void ArchiveWriterJson::Close()
 	m_Output.SetStream( NULL );
 }
 
-void ArchiveWriterJson::Write( Object* object )
-{
-	// the master object
-	m_Objects.Push( object );
-
-	DoWrite();
-
-}
-
-void ArchiveWriterJson::Write( const DynamicArray<Reflect::Object* > &objects )
-{
-	m_Objects.Reserve( objects.GetSize() );
-
-	for ( DynamicArray<Reflect::Object* >::ConstIterator iter = objects.Begin();
-		iter != objects.End(); ++iter )
-	{
-		m_Objects.Push( *iter );
-	}
-
-	DoWrite();
-}
-
-void ArchiveWriterJson::DoWrite()
+void ArchiveWriterJson::Write( const ObjectPtr* objects, size_t count )
 {
 	PERSIST_SCOPE_TIMER( ("Reflect - Json Write") );
 
 	// notify starting
 	ArchiveStatus info( *this, ArchiveStates::Starting );
 	e_Status.Raise( info );
+
+	// the master object
+	m_Objects.AddArray( objects, count );
 
 	// begin top level array of objects
 	m_Writer.StartArray();
@@ -360,8 +328,18 @@ void ArchiveWriterJson::SerializeTranslator( Pointer pointer, Translator* transl
 
 void ArchiveReaderJson::ReadFromStream( Stream& stream, ObjectPtr& object, ObjectResolver* resolver, uint32_t flags )
 {
+	DynamicArray< ObjectPtr > objects;
+	ReadFromStream( stream, objects, resolver, flags );
+	if ( !objects.IsEmpty() )
+	{
+		object = objects.GetFirst();
+	}
+}
+
+void ArchiveReaderJson::ReadFromStream( Stream& stream, DynamicArray< ObjectPtr >& objects, ObjectResolver* resolver, uint32_t flags )
+{
 	ArchiveReaderJson archive( &stream, resolver, flags );
-	archive.Read( object );
+	archive.Read( objects );
 	archive.Close();
 }
 
@@ -406,19 +384,21 @@ void ArchiveReaderJson::Close()
 	m_Stream->Close();
 }
 
-void ArchiveReaderJson::Read( Reflect::ObjectPtr& object )
+void ArchiveReaderJson::Read( DynamicArray< ObjectPtr >& objects )
 {
 	PERSIST_SCOPE_TIMER( ("Reflect - Json Read") );
 
 	Start();
 
+	m_Objects = objects;
+
 	if ( HELIUM_VERIFY( m_Document.IsArray() ) )
 	{
 		uint32_t length = m_Document.Size();
-		m_Objects.Reserve( length );
+		m_Objects.Resize( length );
 		for ( uint32_t i=0; i<length; i++ )
 		{
-			ObjectPtr object;
+			ObjectPtr& object ( m_Objects[ i ] );
 			ReadNext( object );
 
 			ArchiveStatus info( *this, ArchiveStates::ObjectProcessed );
@@ -434,10 +414,7 @@ void ArchiveReaderJson::Read( Reflect::ObjectPtr& object )
 
 	Resolve();
 
-	if ( !m_Objects.IsEmpty() )
-	{
-		object = m_Objects.GetFirst();
-	}
+	objects = m_Objects;
 }
 
 void ArchiveReaderJson::Start()
@@ -534,7 +511,6 @@ bool ArchiveReaderJson::ReadNext( Reflect::ObjectPtr& object )
 			if ( object.ReferencesObject() )
 			{
 				DeserializeInstance( member->value, object, object->GetMetaClass(), object );
-				m_Objects.Push( object );
 			}
 		}
 	}

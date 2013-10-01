@@ -72,14 +72,14 @@ void BsonObjectId::PopulateMetaType( Reflect::MetaStruct& type )
 	type.AddField( &BsonObjectId::bytes, "bytes" );
 }
 
-void ArchiveWriterBson::WriteToStream( Object* object, Stream& stream, ObjectIdentifier* identifier, uint32_t flags )
+void ArchiveWriterBson::WriteToStream( const ObjectPtr& object, Stream& stream, ObjectIdentifier* identifier, uint32_t flags )
 {
 	ArchiveWriterBson archive ( &stream, identifier, flags );
-	archive.Write( object );
+	archive.Write( &object, 1 );
 	archive.Close();
 }
 
-void ArchiveWriterBson::WriteToBson( Reflect::Object* object, bson* b, const char* name, Reflect::ObjectIdentifier* identifier, uint32_t flags )
+void ArchiveWriterBson::WriteToBson( const ObjectPtr& object, bson* b, const char* name, Reflect::ObjectIdentifier* identifier, uint32_t flags )
 {
 	ArchiveWriterBson archive ( NULL, identifier, flags );
 	archive.SerializeInstance( b, name, object, object->GetMetaClass(), object );
@@ -119,7 +119,7 @@ void ArchiveWriterBson::Close()
 	m_Stream->Close();
 }
 
-void ArchiveWriterBson::Write( Object* object )
+void ArchiveWriterBson::Write( const ObjectPtr* objects, size_t count )
 {
 	PERSIST_SCOPE_TIMER( ("Reflect - Bson Write") );
 
@@ -128,7 +128,7 @@ void ArchiveWriterBson::Write( Object* object )
 	e_Status.Raise( info );
 
 	// the master object
-	m_Objects.Push( object );
+	m_Objects.AddArray( objects, count );
 
 	bson b[1];
 	bson_init( b );
@@ -426,8 +426,18 @@ void ArchiveWriterBson::SerializeTranslator( bson* b, const char* name, Pointer 
 
 void ArchiveReaderBson::ReadFromStream( Stream& stream, ObjectPtr& object, ObjectResolver* resolver, uint32_t flags )
 {
+	DynamicArray< ObjectPtr > objects;
+	ReadFromStream( stream, objects, resolver, flags );
+	if ( !objects.IsEmpty() )
+	{
+		object = objects.GetFirst();
+	}
+}
+
+void ArchiveReaderBson::ReadFromStream( Stream& stream, DynamicArray< ObjectPtr >& objects, ObjectResolver* resolver, uint32_t flags )
+{
 	ArchiveReaderBson archive( &stream, resolver, flags );
-	archive.Read( object );
+	archive.Read( objects );
 	archive.Close();
 }
 
@@ -476,11 +486,13 @@ void ArchiveReaderBson::Close()
 	m_Stream->Close();
 }
 
-void ArchiveReaderBson::Read( Reflect::ObjectPtr& object )
+void ArchiveReaderBson::Read( DynamicArray< Reflect::ObjectPtr >& objects )
 {
 	PERSIST_SCOPE_TIMER( ("Reflect - Bson Read") );
 
 	Start();
+
+	m_Objects = objects;
 
 	bson_iterator i[1];
 	bson_iterator_init( i, m_Bson );
@@ -488,9 +500,14 @@ void ArchiveReaderBson::Read( Reflect::ObjectPtr& object )
 	if ( HELIUM_VERIFY( bson_iterator_type( i ) == BSON_ARRAY ) )
 	{
 		bson_iterator_subiterator( i, m_Next );
-		while ( bson_iterator_more( m_Next ) )
+		for ( size_t i=0; bson_iterator_more( m_Next ); ++i )
 		{
-			ObjectPtr object;
+			if ( i+1 > m_Objects.GetSize() )
+			{
+				m_Objects.Push( NULL );
+			}
+
+			ObjectPtr& object( m_Objects[i] );
 			ReadNext( object );
 
 			ArchiveStatus info( *this, ArchiveStates::ObjectProcessed );
@@ -506,10 +523,7 @@ void ArchiveReaderBson::Read( Reflect::ObjectPtr& object )
 
 	Resolve();
 
-	if ( !m_Objects.IsEmpty() )
-	{
-		object = m_Objects.GetFirst();
-	}
+	objects = m_Objects;
 
 	bson_destroy( m_Bson );
 }
@@ -577,7 +591,6 @@ bool ArchiveReaderBson::ReadNext( Reflect::ObjectPtr& object )
 			bson_iterator elem[1];
 			bson_iterator_subiterator( i, elem );
 			DeserializeInstance( elem, object, object->GetMetaClass(), object );
-			m_Objects.Push( object );
 		}
 	}
 

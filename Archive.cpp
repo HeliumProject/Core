@@ -89,7 +89,12 @@ SmartPtr< ArchiveWriter > ArchiveWriter::GetWriter( const FilePath& path, Object
 	throw Persist::StreamException( TXT( "Unknown archive type" ) );
 }
 
-bool ArchiveWriter::WriteToFile( const FilePath& path, ObjectPtr object, ObjectIdentifier* identifier, ArchiveType archiveType, std::string* error )
+bool ArchiveWriter::WriteToFile( const FilePath& path, const ObjectPtr& object, ObjectIdentifier* identifier, ArchiveType archiveType, std::string* error )
+{
+	return WriteToFile( path, &object, 1, identifier, archiveType, error );
+}
+
+bool ArchiveWriter::WriteToFile( const FilePath& path, const ObjectPtr* objects, size_t count, ObjectIdentifier* identifier, ArchiveType archiveType, std::string* error )
 {
 	HELIUM_ASSERT( !path.empty() );
 	PERSIST_SCOPE_TIMER( ( "%s", path.c_str() ) );
@@ -107,7 +112,7 @@ bool ArchiveWriter::WriteToFile( const FilePath& path, ObjectPtr object, ObjectI
 	if ( Helium::IsDebuggerPresent() )
 	{
 		archive->Open();
-		archive->Write( object );
+		archive->Write( objects, count );
 		archive->Close();
 	}
 	else
@@ -118,7 +123,7 @@ bool ArchiveWriter::WriteToFile( const FilePath& path, ObjectPtr object, ObjectI
 		{
 			archive->Open();
 			open = true;
-			archive->Write( object );
+			archive->Write( objects, count );
 			archive->Close(); 
 		}
 		catch ( Helium::Exception& ex )
@@ -264,6 +269,19 @@ SmartPtr< ArchiveReader > ArchiveReader::GetReader( const FilePath& path, Object
 
 bool ArchiveReader::ReadFromFile( const FilePath& path, ObjectPtr& object, ObjectResolver* resolver, ArchiveType archiveType, std::string* error )
 {
+	DynamicArray< ObjectPtr > objects;
+	if ( ReadFromFile( path, objects, resolver, archiveType, error ) )
+	{
+		HELIUM_ASSERT( !objects.IsEmpty() );
+		object = objects.GetFirst();
+		return true;
+	}
+
+	return false;
+}
+
+bool ArchiveReader::ReadFromFile( const FilePath& path, DynamicArray< ObjectPtr >& objects, ObjectResolver* resolver, ArchiveType archiveType, std::string* error )
+{
 	HELIUM_ASSERT( !path.empty() );
 	PERSIST_SCOPE_TIMER( ( "%s", path.c_str() ) );
 	Log::Debug( TXT( "Parsing '%s'\n" ), path.c_str() );
@@ -273,7 +291,7 @@ bool ArchiveReader::ReadFromFile( const FilePath& path, ObjectPtr& object, Objec
 	if ( Helium::IsDebuggerPresent() )
 	{
 		archive->Open();
-		archive->Read( object );
+		archive->Read( objects );
 		archive->Close(); 
 	}
 	else
@@ -284,7 +302,7 @@ bool ArchiveReader::ReadFromFile( const FilePath& path, ObjectPtr& object, Objec
 		{
 			archive->Open();
 			open = true;
-			archive->Read( object );
+			archive->Read( objects );
 			archive->Close(); 
 		}
 		catch ( Helium::Exception& ex )

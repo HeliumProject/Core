@@ -13,10 +13,10 @@ using namespace Helium;
 using namespace Helium::Reflect;
 using namespace Helium::Persist;
 
-void ArchiveWriterMessagePack::WriteToStream( Object* object, Stream& stream, ObjectIdentifier* identifier, uint32_t flags )
+void ArchiveWriterMessagePack::WriteToStream( const ObjectPtr& object, Stream& stream, ObjectIdentifier* identifier, uint32_t flags )
 {
 	ArchiveWriterMessagePack archive ( &stream, identifier, flags );
-	archive.Write( object );
+	archive.Write( &object, 1 );
 	archive.Close();
 }
 
@@ -56,7 +56,7 @@ void ArchiveWriterMessagePack::Close()
 	m_Stream->Close(); 
 }
 
-void ArchiveWriterMessagePack::Write( Reflect::Object* object )
+void ArchiveWriterMessagePack::Write( const Reflect::ObjectPtr* objects, size_t count )
 {
 	PERSIST_SCOPE_TIMER( ("Reflect - MessagePack Write") );
 
@@ -65,7 +65,7 @@ void ArchiveWriterMessagePack::Write( Reflect::Object* object )
 	e_Status.Raise( info );
 
 	// the master object
-	m_Objects.Push( object );
+	m_Objects.AddArray( objects, count );
 
 	// begin top level array of objects
 	m_Writer.BeginArray();
@@ -343,8 +343,18 @@ void ArchiveWriterMessagePack::SerializeTranslator( Pointer pointer, Translator*
 
 void ArchiveReaderMessagePack::ReadFromStream( Stream& stream, ObjectPtr& object, ObjectResolver* resolver, uint32_t flags )
 {
+	DynamicArray< ObjectPtr > objects;
+	ReadFromStream( stream, objects, resolver, flags );
+	if ( !objects.IsEmpty() )
+	{
+		object = objects.GetFirst();
+	}
+}
+
+void ArchiveReaderMessagePack::ReadFromStream( Stream& stream, DynamicArray< ObjectPtr >& objects, ObjectResolver* resolver, uint32_t flags )
+{
 	ArchiveReaderMessagePack archive( &stream, resolver, flags );
-	archive.Read( object );
+	archive.Read( objects );
 	archive.Close();
 }
 
@@ -388,23 +398,25 @@ void ArchiveReaderMessagePack::Close()
 	m_Stream->Close(); 
 }
 
-void ArchiveReaderMessagePack::Read( Reflect::ObjectPtr& object )
+void ArchiveReaderMessagePack::Read( DynamicArray< ObjectPtr >& objects )
 {
 	PERSIST_SCOPE_TIMER( ("Reflect - MessagePack Read") );
 
 	Start();
 
+	m_Objects = objects;
+
 	if ( HELIUM_VERIFY( m_Reader.IsArray() ) )
 	{
 		uint32_t length = m_Reader.ReadArrayLength();
 
-		m_Objects.Reserve( length );
+		m_Objects.Resize( length );
 
 		m_Reader.BeginArray( length );
 
 		for ( uint32_t i=0; i<length; i++ )
 		{
-			ObjectPtr object;
+			ObjectPtr& object( m_Objects[ i ] );
 			ReadNext( object );
 
 			ArchiveStatus info( *this, ArchiveStates::ObjectProcessed );
@@ -422,10 +434,7 @@ void ArchiveReaderMessagePack::Read( Reflect::ObjectPtr& object )
 
 	Resolve();
 
-	if ( !m_Objects.IsEmpty() )
-	{
-		object = m_Objects.GetFirst();
-	}
+	objects = m_Objects;
 }
 
 void ArchiveReaderMessagePack::Start()
@@ -488,7 +497,6 @@ bool ArchiveReaderMessagePack::ReadNext( ObjectPtr& object )
 		if ( object.ReferencesObject() )
 		{
 			DeserializeInstance( object, object->GetMetaClass(), object );
-			m_Objects.Push( object );
 		}
 		else // object.ReferencesObject()
 		{

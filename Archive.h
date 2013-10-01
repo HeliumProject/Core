@@ -29,7 +29,8 @@ namespace Helium
 			enum ArchiveFlag
 			{
 				Notify      = 1 << 0, // Notify objects of changes
-				StringCrc   = 1 << 1, // Using string CRC-32 values for meta-data instead of full strings (for brevity)
+				Compact     = 1 << 1, // Minify output, if possible
+				StringCrc   = 1 << 2, // Using string CRC-32 values for meta-data instead of full strings (for brevity)
 			};
 		}
 
@@ -130,7 +131,8 @@ namespace Helium
 		{
 		public:
 			static SmartPtr< ArchiveWriter > GetWriter( const FilePath& path, Reflect::ObjectIdentifier* identifier = NULL, ArchiveType archiveType = ArchiveTypes::Auto );
-			static bool                      WriteToFile( const FilePath& path, Reflect::ObjectPtr object, Reflect::ObjectIdentifier* identifier = NULL, ArchiveType archiveType = ArchiveTypes::Auto, std::string* error = NULL );
+			static bool                      WriteToFile( const FilePath& path, const Reflect::ObjectPtr& object, Reflect::ObjectIdentifier* identifier = NULL, ArchiveType archiveType = ArchiveTypes::Auto, std::string* error = NULL );
+			static bool                      WriteToFile( const FilePath& path, const Reflect::ObjectPtr* objects, size_t count, Reflect::ObjectIdentifier* identifier = NULL, ArchiveType archiveType = ArchiveTypes::Auto, std::string* error = NULL );
 
 			ArchiveWriter( Reflect::ObjectIdentifier* identifier, uint32_t flags );
 			ArchiveWriter( const FilePath& path, Reflect::ObjectIdentifier* identifier, uint32_t flags );
@@ -138,7 +140,7 @@ namespace Helium
 			virtual ArchiveMode GetMode() const HELIUM_OVERRIDE;
 
 		protected:
-			virtual void Write( Reflect::Object* object ) = 0;
+			virtual void Write( const Reflect::ObjectPtr* objects, size_t count ) = 0;
 			virtual bool Identify( Reflect::Object* object, Name& identity ) HELIUM_OVERRIDE;
 
 			DynamicArray< Reflect::ObjectPtr > m_Objects;
@@ -155,6 +157,7 @@ namespace Helium
 			static SmartPtr< ArchiveReader > GetReader( const FilePath& path, Reflect::ObjectResolver* resolver = NULL, ArchiveType archiveType = ArchiveTypes::Auto );
 			static bool                      ReadFromFile( const FilePath& path, Reflect::ObjectPtr& object, Reflect::ObjectResolver* resolver = NULL, ArchiveType archiveType = ArchiveTypes::Auto, std::string* error = NULL );
 			static Reflect::ObjectPtr        ReadFromFile( const FilePath& path, Reflect::ObjectResolver* resolver = NULL, ArchiveType archiveType = ArchiveTypes::Auto, std::string* error = NULL );
+			static bool                      ReadFromFile( const FilePath& path, DynamicArray< Reflect::ObjectPtr >& objects, Reflect::ObjectResolver* resolver = NULL, ArchiveType archiveType = ArchiveTypes::Auto, std::string* error = NULL );
 
 			ArchiveReader( Reflect::ObjectResolver* resolver, uint32_t flags );
 			ArchiveReader( const FilePath& path, Reflect::ObjectResolver* resolver, uint32_t flags );
@@ -162,14 +165,11 @@ namespace Helium
 			virtual ArchiveMode GetMode() const HELIUM_OVERRIDE;
 
 		protected:
-			virtual void       Read( Reflect::ObjectPtr& object ) = 0;
+			virtual void       Read( DynamicArray< Reflect::ObjectPtr >& objects ) = 0;
 			Reflect::ObjectPtr AllocateObject( const Reflect::MetaClass* type );
 			bool               Resolve( const Name& identity, Reflect::ObjectPtr& pointer, const Reflect::MetaClass* pointerClass ) HELIUM_OVERRIDE;
-
-		public: // TEMP
 			void               Resolve();
 
-		protected:
 			struct Fixup
 			{
 				Fixup( const Fixup& rhs )

@@ -14,7 +14,7 @@ namespace Helium
 		class HELIUM_PERSIST_API ArchiveWriterMessagePack : public ArchiveWriter
 		{
 		public:
-			static void WriteToStream( Reflect::Object* object, Stream& stream, Reflect::ObjectIdentifier* identifier = NULL, uint32_t flags = 0 );
+			static void WriteToStream( const Reflect::ObjectPtr& object, Stream& stream, Reflect::ObjectIdentifier* identifier = NULL, uint32_t flags = 0 );
 
 			ArchiveWriterMessagePack( const FilePath& path, Reflect::ObjectIdentifier* identifier = NULL, uint32_t flags = 0x0 );
 			ArchiveWriterMessagePack( Stream *stream, Reflect::ObjectIdentifier* identifier = NULL, uint32_t flags = 0x0 );
@@ -24,7 +24,7 @@ namespace Helium
 			virtual void Close() HELIUM_OVERRIDE; 
 
 		protected:
-			virtual void Write( Reflect::Object* object ) HELIUM_OVERRIDE;
+			virtual void Write( const Reflect::ObjectPtr* objects, size_t count );
 
 		private:
 			void SerializeInstance( void* instance, const Reflect::MetaStruct* structure, Reflect::Object* object );
@@ -39,6 +39,7 @@ namespace Helium
 		{
 		public:
 			static void ReadFromStream( Stream& stream, Reflect::ObjectPtr& object, Reflect::ObjectResolver* resolver = NULL, uint32_t flags = 0 );
+			static void ReadFromStream( Stream& stream, DynamicArray< Reflect::ObjectPtr >& objects, Reflect::ObjectResolver* resolver = NULL, uint32_t flags = 0 );
 
 			ArchiveReaderMessagePack( const FilePath& path, Reflect::ObjectResolver* resolver = NULL, uint32_t flags = 0x0 );
 			ArchiveReaderMessagePack( Stream *stream, Reflect::ObjectResolver* resolver = NULL, uint32_t flags = 0x0 );
@@ -48,7 +49,7 @@ namespace Helium
 			virtual void Close() HELIUM_OVERRIDE; 
 
 		protected:
-			virtual void Read( Reflect::ObjectPtr& object ) HELIUM_OVERRIDE;
+			virtual void Read( DynamicArray< Reflect::ObjectPtr >& objects ) HELIUM_OVERRIDE;
 
 		public: // TEMP, don't call these!
 			void Start();
