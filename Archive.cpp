@@ -361,15 +361,15 @@ ArchiveMode ArchiveReader::GetMode() const
 	return ArchiveModes::Read;
 }
 
-Reflect::ObjectPtr ArchiveReader::AllocateObject( const Reflect::MetaClass* type )
+Reflect::ObjectPtr ArchiveReader::AllocateObject( const Reflect::MetaClass* type, size_t index )
 {
 	Object* object = type->m_Creator();
 
 	// if we pre-allocated a proxy, hook it up to the object
-	if ( m_Proxies.size() > m_Objects.GetSize() )
+	if ( index < m_Proxies.size() )
 	{
 		// find the appropriate pre-allocated proxy
-		RefCountProxy< Object >* proxy = m_Proxies[ m_Objects.GetSize() ];
+		RefCountProxy< Object >* proxy = m_Proxies[ index ];
 
 		// associate the object with the proxy
 		proxy->SetObject( object );

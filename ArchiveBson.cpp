@@ -515,7 +515,7 @@ void ArchiveReaderBson::Read( DynamicArray< Reflect::ObjectPtr >& objects )
 			}
 
 			ObjectPtr& object( m_Objects[i] );
-			ReadNext( object );
+			ReadNext( object, i );
 
 			ArchiveStatus info( *this, ArchiveStates::ObjectProcessed );
 			info.m_Progress = (int)(((float)(m_Stream->Tell()) / (float)m_Size) * 100.0f);
@@ -563,7 +563,7 @@ void ArchiveReaderBson::Start()
 	}
 }
 
-bool ArchiveReaderBson::ReadNext( Reflect::ObjectPtr& object )
+bool ArchiveReaderBson::ReadNext( Reflect::ObjectPtr& object, size_t index )
 {
 	if ( !bson_iterator_more( m_Next ) )
 	{
@@ -590,7 +590,7 @@ bool ArchiveReaderBson::ReadNext( Reflect::ObjectPtr& object )
 
 		if ( !object && objectClass )
 		{
-			object = AllocateObject( objectClass );
+			object = AllocateObject( objectClass, index );
 		}
 
 		if ( object.ReferencesObject() )

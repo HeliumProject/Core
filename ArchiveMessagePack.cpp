@@ -424,7 +424,7 @@ void ArchiveReaderMessagePack::Read( DynamicArray< ObjectPtr >& objects )
 		for ( uint32_t i=0; i<length; i++ )
 		{
 			ObjectPtr& object( m_Objects[ i ] );
-			ReadNext( object );
+			ReadNext( object, i );
 
 			ArchiveStatus info( *this, ArchiveStates::ObjectProcessed );
 			info.m_Progress = (int)(((float)(m_Stream->Tell()) / (float)m_Size) * 100.0f);
@@ -465,7 +465,7 @@ void ArchiveReaderMessagePack::Start()
 	m_Reader.Advance();
 }
 
-bool ArchiveReaderMessagePack::ReadNext( ObjectPtr& object )
+bool ArchiveReaderMessagePack::ReadNext( ObjectPtr& object, size_t index )
 {
 	if ( m_Stream->Tell() == this->m_Size )
 	{
@@ -498,7 +498,7 @@ bool ArchiveReaderMessagePack::ReadNext( ObjectPtr& object )
 
 		if ( !object && objectClass )
 		{
-			object = AllocateObject( objectClass );
+			object = AllocateObject( objectClass, index );
 		}
 
 		if ( object.ReferencesObject() )

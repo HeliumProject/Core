@@ -166,7 +166,7 @@ namespace Helium
 
 		protected:
 			virtual void       Read( DynamicArray< Reflect::ObjectPtr >& objects ) = 0;
-			Reflect::ObjectPtr AllocateObject( const Reflect::MetaClass* type );
+			Reflect::ObjectPtr AllocateObject( const Reflect::MetaClass* type, size_t index );
 			bool               Resolve( const Name& identity, Reflect::ObjectPtr& pointer, const Reflect::MetaClass* pointerClass ) HELIUM_OVERRIDE;
 			void               Resolve();
 
