@@ -79,6 +79,13 @@ void ArchiveWriterBson::WriteToStream( const ObjectPtr& object, Stream& stream, 
 	archive.Close();
 }
 
+void ArchiveWriterBson::WriteToStream( const ObjectPtr* objects, size_t count, Stream& stream, ObjectIdentifier* identifier, uint32_t flags )
+{
+	ArchiveWriterBson archive ( &stream, identifier, flags );
+	archive.Write( objects, count );
+	archive.Close();
+}
+
 void ArchiveWriterBson::WriteToBson( const ObjectPtr& object, bson* b, const char* name, Reflect::ObjectIdentifier* identifier, uint32_t flags )
 {
 	ArchiveWriterBson archive ( NULL, identifier, flags );

@@ -20,6 +20,13 @@ void ArchiveWriterMessagePack::WriteToStream( const ObjectPtr& object, Stream& s
 	archive.Close();
 }
 
+void ArchiveWriterMessagePack::WriteToStream( const ObjectPtr* objects, size_t count, Stream& stream, ObjectIdentifier* identifier, uint32_t flags )
+{
+	ArchiveWriterMessagePack archive ( &stream, identifier, flags );
+	archive.Write( objects, count );
+	archive.Close();
+}
+
 ArchiveWriterMessagePack::ArchiveWriterMessagePack( const FilePath& path, ObjectIdentifier* identifier, uint32_t flags )
 	: ArchiveWriter( path, identifier, flags )
 {

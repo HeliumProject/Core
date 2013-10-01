@@ -21,6 +21,13 @@ void ArchiveWriterJson::WriteToStream( const ObjectPtr& object, Stream& stream, 
 	archive.Close();
 }
 
+void ArchiveWriterJson::WriteToStream( const ObjectPtr* objects, size_t count, Stream& stream, ObjectIdentifier* identifier, uint32_t flags )
+{
+	ArchiveWriterJson archive ( &stream, identifier, flags );
+	archive.Write( objects, count );
+	archive.Close();
+}
+
 ArchiveWriterJson::ArchiveWriterJson( const FilePath& path, ObjectIdentifier* identifier, uint32_t flags )
 	: ArchiveWriter( path, identifier, flags )
 	, m_MinifiedWriter( m_Output )
