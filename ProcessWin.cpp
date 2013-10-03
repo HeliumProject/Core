@@ -153,8 +153,21 @@ int Helium::Execute( const std::string& command, std::string& output )
 	return result;
 }
 
-ProcessHandle Helium::Spawn( const std::string& cmd )
+ProcessHandle Helium::Spawn( const std::string& cmd, bool autoKill )
 {
+	static HANDLE hJob = INVALID_HANDLE_VALUE;	
+	if ( autoKill && hJob == INVALID_HANDLE_VALUE )
+	{
+		hJob = CreateJobObject( NULL, NULL ); // GLOBAL
+		if( HELIUM_VERIFY( hJob ) )
+		{
+			// Configure all child processes associated with the job to terminate when the
+			JOBOBJECT_EXTENDED_LIMIT_INFORMATION jeli = { 0 };
+			jeli.BasicLimitInformation.LimitFlags = JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;
+			HELIUM_ASSERT( SetInformationJobObject( hJob, JobObjectExtendedLimitInformation, &jeli, sizeof(jeli)) );
+		}
+	}
+
 	STARTUPINFO startupInfo;
 	memset( &startupInfo, 0, sizeof( startupInfo ) );
 	startupInfo.cb = sizeof( startupInfo );
@@ -179,6 +192,11 @@ ProcessHandle Helium::Spawn( const std::string& cmd )
 
 		// release handles to our new process
 		::CloseHandle( procInfo.hThread );
+
+		if ( autoKill && hJob )
+		{
+			HELIUM_ASSERT( ::AssignProcessToJobObject( hJob, handle ) );
+		}
 	}
 
 	return handle;
