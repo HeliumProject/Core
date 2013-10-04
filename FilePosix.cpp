@@ -299,21 +299,31 @@ bool Helium::MakePath( const char* path )
 	std::vector< std::string > directories;
 	SplitDirectories( path, directories );
 
-	struct stat status;
-	std::string currentDirectory;
-	currentDirectory.reserve( PATH_MAX );
-	currentDirectory = directories[ 0 ];
-	for( std::vector< std::string >::const_iterator itr = directories.begin() + 1, end = directories.end(); itr != end; ++itr )
+	if ( directories.size() == 1 )
 	{
-		if ( !IsAbsolute( currentDirectory.c_str() ) && stat( currentDirectory.c_str(), &status ) != 0 )
+		if ( !mkdir( path, 0777 ) )
 		{
-			if ( !mkdir( currentDirectory.c_str(), 0777 ) )
-			{
-				return false;
-			}
+			return false;
 		}
+	}
+	else
+	{
+		struct stat status;
+		std::string currentDirectory;
+		currentDirectory.reserve( PATH_MAX );
+		currentDirectory = directories[ 0 ];
+		for( std::vector< std::string >::const_iterator itr = directories.begin() + 1, end = directories.end(); itr != end; ++itr )
+		{
+			if ( !IsAbsolute( currentDirectory.c_str() ) && stat( currentDirectory.c_str(), &status ) != 0 )
+			{
+				if ( !mkdir( currentDirectory.c_str(), 0777 ) )
+				{
+					return false;
+				}
+			}
 
-		currentDirectory += std::string( "/" ) + *itr;
+			currentDirectory += std::string( "/" ) + *itr;
+		}
 	}
 
 	return true;

@@ -342,23 +342,34 @@ bool Helium::MakePath( const char* path )
 	std::vector< std::string > directories;
 	SplitDirectories( path, directories );
 
-	struct _stati64 statInfo;
-	std::string currentDirectory;
-	currentDirectory.reserve( MAX_PATH );
-	currentDirectory = directories[ 0 ];
-	for( std::vector< std::string >::const_iterator itr = directories.begin() + 1, end = directories.end(); itr != end; ++itr )
+	if ( directories.size() == 1 )
 	{
-		HELIUM_TCHAR_TO_WIDE( currentDirectory.c_str(), convertedCurrentDirectory );
-
-		if ( ( (*currentDirectory.rbegin()) != TXT(':') ) && ( _wstat64( convertedCurrentDirectory, &statInfo ) != 0 ) )
+		HELIUM_TCHAR_TO_WIDE( path, convertedPath );
+		if ( !CreateDirectory( convertedPath, NULL ) )
 		{
-			if ( !CreateDirectory( convertedCurrentDirectory, NULL ) )
-			{
-				return false;
-			}
+			return false;
 		}
+	}
+	else
+	{
+		struct _stati64 statInfo;
+		std::string currentDirectory;
+		currentDirectory.reserve( MAX_PATH );
+		currentDirectory = directories[ 0 ];
+		for( std::vector< std::string >::const_iterator itr = directories.begin() + 1, end = directories.end(); itr != end; ++itr )
+		{
+			HELIUM_TCHAR_TO_WIDE( currentDirectory.c_str(), convertedCurrentDirectory );
 
-		currentDirectory += std::string( TXT("\\") ) + *itr;
+			if ( ( (*currentDirectory.rbegin()) != TXT(':') ) && ( _wstat64( convertedCurrentDirectory, &statInfo ) != 0 ) )
+			{
+				if ( !CreateDirectory( convertedCurrentDirectory, NULL ) )
+				{
+					return false;
+				}
+			}
+
+			currentDirectory += std::string( TXT("\\") ) + *itr;
+		}
 	}
 
 	return true;
