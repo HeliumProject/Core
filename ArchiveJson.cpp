@@ -476,7 +476,8 @@ void ArchiveReaderJson::Start()
 			++i;
 		}
 
-		throw Persist::Exception( "Error parsing JSON (%d,%d): %s", lineCount, charCount, m_Document.GetParseError() );
+		const char* error = m_Document.GetParseError();
+		throw Persist::Exception( "Error parsing JSON (%d,%d): %s", lineCount, charCount, error );
 	}
 }
 
