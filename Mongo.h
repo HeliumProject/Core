@@ -20,6 +20,8 @@
 # include <functional>
 #endif
 
+#define HELIUM_MONGO_DEFAULT_PORT ( 27017 )
+
 namespace Helium
 {
 	namespace Mongo
@@ -87,7 +89,7 @@ namespace Helium
 			// db ops/preferences
 			void SetName( const char* name );
 			void SetTimeout( int timeoutMilliseconds );
-			bool Connect( const char* addr, uint16_t port = 27017 );
+			bool Connect( const char* addr, uint16_t port = HELIUM_MONGO_DEFAULT_PORT );
 			inline bool IsConnected() const;
 			inline void SetThread( Helium::Thread::id_t threadId = Helium::GetCurrentThreadID() );
 			double GetCollectionCount( const char* name );
