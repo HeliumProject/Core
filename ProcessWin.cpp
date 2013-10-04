@@ -8,6 +8,7 @@
 
 #include <sstream>
 #include <shlobj.h>
+#include <aclapi.h>
 
 using namespace Helium;
 
@@ -31,22 +32,25 @@ int Helium::Execute( const std::string& command )
 
 	STARTUPINFO si;
 	memset( &si, 0, sizeof(si) );
+	si.cb = sizeof(si);
 
 	PROCESS_INFORMATION pi;
 	memset( &pi, 0, sizeof( pi ) );
 
+	HELIUM_TCHAR_TO_WIDE( command.c_str(), convertedCommand );
+
 	// Start the child process.
 	if( !CreateProcess(
-		NULL,                                                 // No module name (use command line)
-		(LPTSTR) command.c_str(),                             // Command line
-		NULL,                                                 // Process handle not inheritable
-		NULL,                                                 // Thread handle not inheritable
-		FALSE,                                                // Set handle inheritance to FALSE
-		NULL,                                                 // Creation flags
-		NULL,                                                 // Use parent's environment block
-		NULL,                                                 // Use parent's starting directory
-		&si,                                                  // Pointer to STARTUPINFO structure
-		&pi ) )                                               // Pointer to PROCESS_INFORMATION structure
+		NULL,             // No module name (use command line)
+		convertedCommand, // Command line
+		NULL,             // Process handle not inheritable
+		NULL,             // Thread handle not inheritable
+		FALSE,            // Set handle inheritance to FALSE
+		NULL,             // Creation flags
+		NULL,             // Use parent's environment block
+		NULL,             // Use parent's starting directory
+		&si,              // Pointer to STARTUPINFO structure
+		&pi ) )           // Pointer to PROCESS_INFORMATION structure
 	{
 		return -1;
 	}
@@ -67,21 +71,23 @@ int Helium::Execute( const std::string& command, std::string& output )
 {
 	HANDLE hReadPipe;
 	HANDLE hWritePipe;
+
 	SECURITY_ATTRIBUTES sa;
-	sa.nLength              = sizeof(sa);
+	memset( &sa, 0, sizeof( sa ) );
+	sa.nLength = sizeof(sa);
 	sa.lpSecurityDescriptor = NULL;
-	sa.bInheritHandle       = TRUE;
+	sa.bInheritHandle = TRUE;
 	if( !CreatePipe( &hReadPipe, &hWritePipe, &sa, 0 ) )
 	{
 		return -1;
 	}
 
-	STARTUPINFO          si;
+	STARTUPINFO si;
 	memset( &si, 0, sizeof(si) );
-	si.cb          = sizeof(si);
-	si.dwFlags     = STARTF_USESHOWWINDOW | STARTF_USESTDHANDLES;
-	si.hStdOutput  = hWritePipe;
-	si.hStdError   = hWritePipe;      
+	si.cb = sizeof(si);
+	si.dwFlags = STARTF_USESHOWWINDOW | STARTF_USESTDHANDLES;
+	si.hStdOutput = hWritePipe;
+	si.hStdError = hWritePipe;      
 
 	PROCESS_INFORMATION  pi;
 	memset( &pi, 0, sizeof( pi ) );
@@ -89,16 +95,16 @@ int Helium::Execute( const std::string& command, std::string& output )
 	HELIUM_TCHAR_TO_WIDE( command.c_str(), convertedCommand );
 
 	if( !::CreateProcess(
-		NULL,                                                 // filename
-		(LPWSTR)convertedCommand,                             // command line for child
-		NULL,                                                 // process security descriptor
-		NULL,                                                 // thread security descriptor
-		TRUE,                                                 // inherit handles?
-		NULL,                                                 // creation flags
-		NULL,                                                 // inherited environment address
-		NULL,                                                 // startup dir; NULL = start in current
-		&si,                                                  // pointer to startup info (input)
-		&pi ) )                                               // pointer to process info (output)
+		NULL,             // filename
+		convertedCommand, // command line for child
+		NULL,             // process security descriptor
+		NULL,             // thread security descriptor
+		TRUE,             // inherit handles?
+		NULL,             // creation flags
+		NULL,             // inherited environment address
+		NULL,             // startup dir; NULL = start in current
+		&si,              // pointer to startup info (input)
+		&pi ) )           // pointer to process info (output)
 	{
 		::CloseHandle( hReadPipe );
 		::CloseHandle( hWritePipe );
@@ -153,7 +159,7 @@ int Helium::Execute( const std::string& command, std::string& output )
 	return result;
 }
 
-ProcessHandle Helium::Spawn( const std::string& cmd, bool autoKill )
+ProcessHandle Helium::Spawn( const std::string& command, bool autoKill )
 {
 	static HANDLE hJob = INVALID_HANDLE_VALUE;	
 	if ( autoKill && hJob == INVALID_HANDLE_VALUE )
@@ -168,16 +174,31 @@ ProcessHandle Helium::Spawn( const std::string& cmd, bool autoKill )
 		}
 	}
 
-	STARTUPINFO startupInfo;
-	memset( &startupInfo, 0, sizeof( startupInfo ) );
-	startupInfo.cb = sizeof( startupInfo );
+	STARTUPINFO si;
+	memset( &si, 0, sizeof( si ) );
+	si.cb = sizeof( si );
 
-	PROCESS_INFORMATION procInfo;
-	memset( &procInfo, 0, sizeof( procInfo ) );
+	PROCESS_INFORMATION pi;
+	memset( &pi, 0, sizeof( pi ) );
 
-	DWORD flags = 0;
+	DWORD flags = 0x0;
 
-#ifdef _DEBUG
+	OSVERSIONINFO osvi;
+	memset(&osvi, 0, sizeof( OSVERSIONINFO ) );
+	osvi.dwOSVersionInfoSize = sizeof( OSVERSIONINFO );
+	::GetVersionEx(&osvi);
+	uint32_t version = 0x0;
+	version |= osvi.dwMajorVersion * 10;
+	version |= osvi.dwMinorVersion;
+
+	if ( version >= 60 && version <= 61 ) // vista and 7
+	{
+		// windows vista and beyond somtimes have system software that attach child processes to jobs,
+		//  and pre-windows 8 you can only attach a process to a single job
+		flags |= CREATE_BREAKAWAY_FROM_JOB;
+	}
+
+#ifdef HELIUM_DEBUG
 	flags |= CREATE_NEW_CONSOLE;
 #else
 	flags |= CREATE_NO_WINDOW;
@@ -185,18 +206,29 @@ ProcessHandle Helium::Spawn( const std::string& cmd, bool autoKill )
 
 	ProcessHandle handle = InvalidProcessHandle;
 
-	if ( ::CreateProcess( NULL, (LPTSTR) cmd.c_str(), NULL, NULL, FALSE, flags, NULL, NULL, &startupInfo, &procInfo ) )
-	{
-		// save this for query later
-		handle = procInfo.hProcess;
+	HELIUM_TCHAR_TO_WIDE( command.c_str(), convertedCommand );
 
-		// release handles to our new process
-		::CloseHandle( procInfo.hThread );
+	if ( ::CreateProcess(
+		NULL,             // filename
+		convertedCommand, // command line for child
+		NULL,             // process security descriptor
+		NULL,             // thread security descriptor
+		FALSE,            // inherit handles?
+		flags,            // creation flags
+		NULL,             // inherited environment address
+		NULL,             // startup dir; NULL = start in current
+		&si,              // pointer to startup info (input)
+		&pi ) )           // pointer to process info (output)
+	{
+		handle = pi.hProcess;
 
 		if ( autoKill && hJob )
 		{
-			HELIUM_ASSERT( ::AssignProcessToJobObject( hJob, handle ) );
+			HELIUM_ASSERT( ::AssignProcessToJobObject( hJob, pi.hProcess ) );
 		}
+
+		// release handles to our new process
+		::CloseHandle( pi.hThread );
 	}
 
 	return handle;
