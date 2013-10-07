@@ -347,7 +347,7 @@ bool Helium::MakePath( const char* path )
 		HELIUM_TCHAR_TO_WIDE( path, convertedPath );
 		if ( !CreateDirectory( convertedPath, NULL ) )
 		{
-			return false;
+			return ::GetLastError() != ERROR_ALREADY_EXISTS;
 		}
 	}
 	else
@@ -364,7 +364,10 @@ bool Helium::MakePath( const char* path )
 			{
 				if ( !CreateDirectory( convertedCurrentDirectory, NULL ) )
 				{
-					return false;
+					if ( ::GetLastError() != ERROR_ALREADY_EXISTS )
+					{
+						return false;
+					}
 				}
 			}
 
