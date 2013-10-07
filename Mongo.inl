@@ -173,10 +173,6 @@ bool Helium::Mongo::Database::Find( Cursor< T >& result, const bson* query, cons
 	{
 		result.Set( this, cursor );
 	}
-	else
-	{
-		Helium::Log::Error( "Mongo: %s\n", GetErrorString( conn->err ) );
-	}
 
 	return cursor != NULL;
 }
