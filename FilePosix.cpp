@@ -303,7 +303,7 @@ bool Helium::MakePath( const char* path )
 	{
 		if ( !mkdir( path, 0777 ) )
 		{
-			return errno != EEXIST;
+			return errno == EEXIST;
 		}
 	}
 	else
