@@ -68,6 +68,8 @@ namespace Helium
 		uint16_t GetWeakRefCount() const;
 		//@}
 
+		void Swap( Helium::RefCountProxy< BaseT >* object );
+
 	private:
 		/// @name Private Utility Functions
 		//@{
@@ -94,6 +96,8 @@ namespace Helium
 		RefCountProxy< BaseT >* Get( BaseT* pObject );
 		void Set( RefCountProxy< BaseT >* pProxy );
 		//@}
+
+		void Swap( RefCountProxyContainer< BaseT >* pOther );
 
 	private:
 		/// Reference counting proxy instance.

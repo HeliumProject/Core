@@ -105,6 +105,12 @@ uint16_t Helium::RefCountProxy< BaseT >::GetWeakRefCount() const
     return static_cast< uint16_t >( static_cast< uint32_t >( m_refCounts ) >> 16 );
 }
 
+template< typename BaseT >
+void Helium::RefCountProxy< BaseT >::Swap( Helium::RefCountProxy< BaseT >* other )
+{
+	Helium::Swap( m_pObject, other->m_pObject );
+}
+
 /// Helper function for performing proper object destruction upon its strong reference count reaching zero.
 template< typename BaseT >
 void Helium::RefCountProxy< BaseT >::DestroyObject()
@@ -166,6 +172,17 @@ template< typename BaseT >
 void Helium::RefCountProxyContainer< BaseT >::Set( RefCountProxy< BaseT >* pProxy )
 {
 	m_pProxy = pProxy;
+}
+
+/// Set the reference count proxy manually.
+///
+/// @param[in] proxy  The proxy to use for reference counting.
+///
+/// @return  Pointer to the reference count proxy instance.
+template< typename BaseT >
+void Helium::RefCountProxyContainer< BaseT >::Swap( RefCountProxyContainer< BaseT >* pOther )
+{
+	Helium::Swap( m_pProxy, pOther->m_pProxy );
 }
 
 /// Constructor.
