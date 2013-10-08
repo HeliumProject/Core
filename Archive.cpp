@@ -397,6 +397,7 @@ bool ArchiveReader::Resolve( const Name& identity, ObjectPtr& pointer, const Met
 				TraceLevels::Warning,
 				"ArchiveReader::Resolve - Could not parse identity '%s' as a number!\n", 
 				*str);
+			return false;
 		}
 		else if ( index < m_Objects.GetSize() )
 		{
