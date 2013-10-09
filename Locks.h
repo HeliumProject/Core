@@ -99,6 +99,8 @@ namespace Helium
 	private:
 		/// Number of threads with read access, or -1 if write access is currently being held.
 		volatile int32_t m_readLockCount;
+		Thread::id_t m_writeThread;
+		int32_t m_readLockCountWithinWrite;
 
 		/// Read-lock release event.
 		Condition m_readReleaseCondition;

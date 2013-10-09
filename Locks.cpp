@@ -8,6 +8,8 @@ using namespace Helium;
 /// Constructor.
 ReadWriteLock::ReadWriteLock()
     : m_readLockCount( 0 )
+	, m_readLockCountWithinWrite( 0 )
+	, m_writeThread( -1 )
     , m_readReleaseCondition( true, true )
     , m_writeReleaseCondition( true, true )
 {
@@ -23,6 +25,13 @@ ReadWriteLock::~ReadWriteLock()
 /// @see UnlockRead(), LockWrite(), UnlockWrite()
 void ReadWriteLock::LockRead()
 {
+	// If we have the write lock and it's us, we can just bail. No need to track Lock/Unlocks
+	if ( m_readLockCount == -1 && m_writeThread == Thread::GetCurrentId() )
+	{
+		++m_readLockCountWithinWrite;
+		return;
+	}
+
     int32_t currentLockCount = m_readLockCount;
     int32_t localLockCount;
     do 
@@ -50,6 +59,13 @@ void ReadWriteLock::LockRead()
 /// @see LockRead(), LockWrite(), UnlockWrite()
 void ReadWriteLock::UnlockRead()
 {
+	// If we have the write lock and it's us, we can just bail. No need to track Lock/Unlocks
+	if ( m_readLockCount == -1 && m_writeThread == Thread::GetCurrentId() )
+	{
+		--m_readLockCountWithinWrite;
+		return;
+	}
+
     HELIUM_ASSERT( m_readLockCount != -1 );
 
     int32_t newLockCount = AtomicDecrementRelease( m_readLockCount );
@@ -76,6 +92,7 @@ void ReadWriteLock::LockWrite()
         while( !m_writeReleaseCondition.Wait() );
     }
 
+	m_writeThread = Thread::GetCurrentId();
     m_writeReleaseCondition.Reset();
 }
 
@@ -84,6 +101,11 @@ void ReadWriteLock::LockWrite()
 /// @see LockWrite(), LockRead(), UnlockRead()
 void ReadWriteLock::UnlockWrite()
 {
+	HELIUM_ASSERT( m_writeThread == Thread::GetCurrentId() );
+	HELIUM_ASSERT( m_readLockCountWithinWrite == 0 );
+	m_writeThread = -1;
+	
+
     HELIUM_ASSERT( m_readLockCount == -1 );
 
     AtomicExchangeRelease( m_readLockCount, 0 );
