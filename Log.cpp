@@ -97,7 +97,7 @@ struct OutputFile
 {
 	Stream       m_StreamType;
 	int          m_RefCount;
-	Thread::id_t m_ThreadId;
+	ThreadId m_ThreadId;
 
 	OutputFile()
 		: m_StreamType( Streams::Normal )
@@ -215,7 +215,7 @@ void Redirect(const std::string& fileName, const char* str, bool stampNewLine = 
 			time += currentTime.dstflag ? 1 : 0;
 			uint32_t hour = time % 24;
 
-			length = StringPrint( temp, count, TXT("[%02d:%02d:%02d.%03d TID:%d] %s"), hour, min, sec, milli, GetCurrentThreadID(), str );
+			length = StringPrint( temp, count, TXT("[%02d:%02d:%02d.%03d TID:%d] %s"), hour, min, sec, milli, Thread::GetCurrentId(), str );
 		}
 		else
 		{
@@ -227,7 +227,7 @@ void Redirect(const std::string& fileName, const char* str, bool stampNewLine = 
 	}
 }
 
-bool AddFile( M_OutputFile& files, const std::string& fileName, Stream stream, Thread::id_t threadId, bool append )
+bool AddFile( M_OutputFile& files, const std::string& fileName, Stream stream, ThreadId threadId, bool append )
 {
 	Helium::MutexScopeLock mutex (g_Mutex);
 
@@ -294,7 +294,7 @@ void RemoveFile( M_OutputFile& files, const std::string& fileName )
 	}
 }
 
-bool Log::AddTraceFile( const std::string& fileName, Stream stream, Thread::id_t threadId, bool append )
+bool Log::AddTraceFile( const std::string& fileName, Stream stream, ThreadId threadId, bool append )
 {
 	return AddFile( g_TraceFiles, fileName, stream, threadId, append );
 }
@@ -306,7 +306,7 @@ void Log::RemoveTraceFile( const std::string& fileName )
 
 void Log::Indent(int col)
 {
-	if ( IsMainThread() )
+	if ( Thread::IsMain() )
 	{
 		g_Indent += (col < 0 ? 2 : col);
 	}
@@ -314,7 +314,7 @@ void Log::Indent(int col)
 
 void Log::UnIndent(int col)
 {
-	if ( IsMainThread() )
+	if ( Thread::IsMain() )
 	{
 		g_Indent -= (col < 0 ? 2 : col);
 		if (g_Indent < 0)
@@ -419,7 +419,7 @@ void Log::PrintString(const char* string, Stream stream, Level level, ConsoleCol
 	for( ; itr != end; ++itr )
 	{
 		if ( ( (*itr).second.m_StreamType & stream ) == stream
-			&& ( (*itr).second.m_ThreadId == Thread::id_t () || (*itr).second.m_ThreadId == GetCurrentThreadID() ) )
+			&& ( (*itr).second.m_ThreadId == ThreadId () || (*itr).second.m_ThreadId == Thread::GetCurrentId() ) )
 		{
 			trace = true;
 		}
@@ -485,7 +485,7 @@ void Log::PrintString(const char* string, Stream stream, Level level, ConsoleCol
 			for( ; itr != end; ++itr )
 			{
 				if ( ( (*itr).second.m_StreamType & stream ) == stream
-					&& ( (*itr).second.m_ThreadId == Thread::id_t () || (*itr).second.m_ThreadId == GetCurrentThreadID() ) )
+					&& ( (*itr).second.m_ThreadId == ThreadId () || (*itr).second.m_ThreadId == Thread::GetCurrentId() ) )
 				{
 					Redirect( (*itr).first, statement.m_String.c_str(), stampNewLine );
 				}
@@ -894,7 +894,7 @@ std::string Log::GetOutlineState()
 }
 
 Listener::Listener( uint32_t throttle, uint32_t* errorCount, uint32_t* warningCount, Log::V_Statement* consoleOutput )
-: m_Thread( GetCurrentThreadID() )
+: m_Thread( Thread::GetCurrentId() )
 , m_Throttle( throttle )
 , m_WarningCount( warningCount )
 , m_ErrorCount( errorCount )
@@ -943,7 +943,7 @@ uint32_t Listener::GetErrorCount()
 
 void Listener::Print( Log::PrintingArgs& args )
 {
-	if ( m_Thread == GetCurrentThreadID() )
+	if ( m_Thread == Thread::GetCurrentId() )
 	{
 		if ( args.m_Statement.m_Stream == Log::Streams::Warning && m_WarningCount )
 		{

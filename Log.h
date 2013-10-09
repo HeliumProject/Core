@@ -117,14 +117,14 @@ namespace Helium
 		//
 
 		// the trace file gets everything Console delivers to the console and more
-		HELIUM_FOUNDATION_API bool AddTraceFile( const std::string& fileName, Stream stream, Thread::id_t threadId = Thread::id_t (), bool append = false );
+		HELIUM_FOUNDATION_API bool AddTraceFile( const std::string& fileName, Stream stream, ThreadId threadId = ThreadId (), bool append = false );
 		HELIUM_FOUNDATION_API void RemoveTraceFile( const std::string& fileName );
 
-		template <bool (*AddFunc)(const std::string& fileName, Stream stream, Thread::id_t threadId, bool append), void (*RemoveFunc)(const std::string& fileName)>
+		template <bool (*AddFunc)(const std::string& fileName, Stream stream, ThreadId threadId, bool append), void (*RemoveFunc)(const std::string& fileName)>
 		class FileHandle
 		{
 		public:
-			inline FileHandle(const std::string& file, Stream stream, Thread::id_t threadId = Thread::id_t (), bool append = false );
+			inline FileHandle(const std::string& file, Stream stream, ThreadId threadId = ThreadId (), bool append = false );
 			inline ~FileHandle();
 
 			inline const std::string& GetFile();
@@ -268,7 +268,7 @@ namespace Helium
 			void Print( Log::PrintingArgs& args );
 
 		private:
-			Thread::id_t        m_Thread;
+			ThreadId        m_Thread;
 			uint32_t            m_Throttle;
 			uint32_t*           m_ErrorCount;
 			uint32_t*           m_WarningCount;
