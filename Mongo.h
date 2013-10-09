@@ -91,7 +91,7 @@ namespace Helium
 			void SetTimeout( int timeoutMilliseconds );
 			bool Connect( const char* addr, uint16_t port = HELIUM_MONGO_DEFAULT_PORT );
 			inline bool IsConnected() const;
-			inline void SetThread( Helium::Thread::id_t threadId = Helium::GetCurrentThreadID() );
+			inline void SetThread( Helium::ThreadId threadId = Thread::GetCurrentId() );
 			double GetCollectionCount( const char* name );
 			bool CreateCappedCollection( const char* name, int cappedSizeInBytes, int cappedMaxCount = 0 );
 
@@ -126,7 +126,7 @@ namespace Helium
 			Helium::String       name;
 			bool                 isConnected;
 			mongo                conn[1];
-			Helium::Thread::id_t threadId;
+			Helium::ThreadId threadId;
 		};
 	}
 }

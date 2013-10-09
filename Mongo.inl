@@ -23,7 +23,7 @@ void Helium::Mongo::Cursor< T >::Set( Database* db, mongo_cursor* cursor )
 template< class T >
 bool Helium::Mongo::Cursor< T >::Get( Helium::DynamicArray< Helium::StrongPtr< T > >& objects, size_t count )
 {
-	if ( !HELIUM_VERIFY( db ) || !HELIUM_VERIFY( cursor ) || !HELIUM_VERIFY_MSG( db->threadId == Helium::GetCurrentThreadID(), "Database access from improper thread" ) )
+	if ( !HELIUM_VERIFY( db ) || !HELIUM_VERIFY( cursor ) || !HELIUM_VERIFY_MSG( db->threadId == Thread::GetCurrentId(), "Database access from improper thread" ) )
 	{
 		return false;
 	}
@@ -52,7 +52,7 @@ bool Helium::Mongo::Cursor< T >::Get( Helium::DynamicArray< Helium::StrongPtr< T
 template< class T >
 Helium::StrongPtr< T > Helium::Mongo::Cursor< T >::Next()
 {
-	if ( !HELIUM_VERIFY( db ) || !HELIUM_VERIFY( cursor ) || !HELIUM_VERIFY_MSG( db->threadId == Helium::GetCurrentThreadID(), "Database access from improper thread" ) )
+	if ( !HELIUM_VERIFY( db ) || !HELIUM_VERIFY( cursor ) || !HELIUM_VERIFY_MSG( db->threadId == Thread::GetCurrentId(), "Database access from improper thread" ) )
 	{
 		return NULL;
 	}
@@ -80,7 +80,7 @@ Helium::StrongPtr< T > Helium::Mongo::Cursor< T >::Next()
 template< class T >
 void Helium::Mongo::Cursor< T >::Process( std::function< void ( T* ) > function )
 {
-	if ( !HELIUM_VERIFY( db ) || !HELIUM_VERIFY( cursor ) || !HELIUM_VERIFY_MSG( db->threadId == Helium::GetCurrentThreadID(), "Database access from improper thread" ) )
+	if ( !HELIUM_VERIFY( db ) || !HELIUM_VERIFY( cursor ) || !HELIUM_VERIFY_MSG( db->threadId == Thread::GetCurrentId(), "Database access from improper thread" ) )
 	{
 		return;
 	}
@@ -127,7 +127,7 @@ bool Helium::Mongo::Database::IsConnected() const
 	return isConnected;
 }
 
-void Helium::Mongo::Database::SetThread( Helium::Thread::id_t threadId )
+void Helium::Mongo::Database::SetThread( Helium::ThreadId threadId )
 {
 	this->threadId = threadId;
 }
@@ -159,7 +159,7 @@ bool Helium::Mongo::Database::Insert( Helium::StrongPtr< T >* objects, size_t co
 template< class T >
 bool Helium::Mongo::Database::Find( Cursor< T >& result, const bson* query, const bson* fields, const char* collection, int limit, int skip )
 {
-	if ( !HELIUM_VERIFY_MSG( this->threadId == Helium::GetCurrentThreadID(), "Database access from improper thread" ) )
+	if ( !HELIUM_VERIFY_MSG( this->threadId == Thread::GetCurrentId(), "Database access from improper thread" ) )
 	{
 		return false;
 	}

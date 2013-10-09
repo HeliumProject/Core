@@ -78,7 +78,7 @@ const char* Mongo::GetErrorString( int status )
 Database::Database( const char* name )
 	: name( name )
 	, isConnected( false )
-	, threadId( Helium::GetCurrentThreadID() )
+	, threadId( Thread::GetCurrentId() )
 {
 	mongo_init( conn );
 }
@@ -100,7 +100,7 @@ void Database::SetTimeout( int timeoutMilliseconds )
 
 bool Database::Connect( const char* addr, uint16_t port )
 {
-	this->threadId = Helium::GetCurrentThreadID();
+	this->threadId = Thread::GetCurrentId();
 
 	if ( MONGO_OK == mongo_client( conn, addr, port ) )
 	{
@@ -120,7 +120,7 @@ double Database::GetCollectionCount( const char* name )
 
 bool Database::CreateCappedCollection( const char* name, int cappedSizeInBytes, int cappedMaxCount )
 {
-	if ( !HELIUM_VERIFY( this->threadId == Helium::GetCurrentThreadID() ) )
+	if ( !HELIUM_VERIFY( this->threadId == Thread::GetCurrentId() ) )
 	{
 		return false;
 	}
@@ -140,7 +140,7 @@ bool Database::CreateCappedCollection( const char* name, int cappedSizeInBytes, 
 
 bool Database::Insert( const StrongPtr< Model >& object, const char* collection )
 {
-	if ( !HELIUM_VERIFY( object->id == BsonObjectId::Null ) || !HELIUM_VERIFY_MSG( this->threadId == Helium::GetCurrentThreadID(), "Database access from improper thread" ) )
+	if ( !HELIUM_VERIFY( object->id == BsonObjectId::Null ) || !HELIUM_VERIFY_MSG( this->threadId == Thread::GetCurrentId(), "Database access from improper thread" ) )
 	{
 		return false;
 	}
@@ -184,7 +184,7 @@ bool Database::Insert( const StrongPtr< Model >& object, const char* collection 
 
 bool Database::Update( const StrongPtr< Model >& object, const char* collection )
 {
-	if ( !HELIUM_VERIFY_MSG( object->id != BsonObjectId::Null, "Cannot update object with null id" ) || !HELIUM_VERIFY_MSG( this->threadId == Helium::GetCurrentThreadID(), "Database access from improper thread" ) )
+	if ( !HELIUM_VERIFY_MSG( object->id != BsonObjectId::Null, "Cannot update object with null id" ) || !HELIUM_VERIFY_MSG( this->threadId == Thread::GetCurrentId(), "Database access from improper thread" ) )
 	{
 		return false;
 	}
@@ -237,7 +237,7 @@ bool Database::Update( const StrongPtr< Model >& object, const char* collection 
 
 bool Database::Get( const StrongPtr< Model >& object, const char* collection )
 {
-	if ( !HELIUM_VERIFY_MSG( object->id != BsonObjectId::Null, "Cannot update object with null id" ) || !HELIUM_VERIFY_MSG( this->threadId == Helium::GetCurrentThreadID(), "Database access from improper thread" ) )
+	if ( !HELIUM_VERIFY_MSG( object->id != BsonObjectId::Null, "Cannot update object with null id" ) || !HELIUM_VERIFY_MSG( this->threadId == Thread::GetCurrentId(), "Database access from improper thread" ) )
 	{
 		return false;
 	}
@@ -295,7 +295,7 @@ bool Database::Get( const StrongPtr< Model >& object, const char* collection )
 
 bool Database::Insert( StrongPtr< Model >* objects, size_t count, const char* collection )
 {
-	if ( !HELIUM_VERIFY( objects ) || !HELIUM_VERIFY( count ) || !HELIUM_VERIFY_MSG( this->threadId == Helium::GetCurrentThreadID(), "Database access from improper thread" ) )
+	if ( !HELIUM_VERIFY( objects ) || !HELIUM_VERIFY( count ) || !HELIUM_VERIFY_MSG( this->threadId == Thread::GetCurrentId(), "Database access from improper thread" ) )
 	{
 		return false;
 	}
