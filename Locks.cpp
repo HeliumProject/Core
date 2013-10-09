@@ -9,7 +9,7 @@ using namespace Helium;
 ReadWriteLock::ReadWriteLock()
     : m_readLockCount( 0 )
 	, m_readLockCountWithinWrite( 0 )
-	, m_writeThread( reinterpret_cast< Thread::id_t >( ~0 ) )
+	, m_writeThread( -1 )
     , m_readReleaseCondition( true, true )
     , m_writeReleaseCondition( true, true )
 {
@@ -103,7 +103,7 @@ void ReadWriteLock::UnlockWrite()
 {
 	HELIUM_ASSERT( m_writeThread == Thread::GetCurrentId() );
 	HELIUM_ASSERT( m_readLockCountWithinWrite == 0 );
-	m_writeThread = reinterpret_cast< Thread::id_t >( ~0 );
+	m_writeThread = -1;
 	
 
     HELIUM_ASSERT( m_readLockCount == -1 );
