@@ -87,9 +87,9 @@ static void SetSchedParam(struct sched_param * params, ThreadPriority priority)
 }
 
 #if HELIUM_OS_LINUXs
-const pid_t InvalidThreadId = ~0;
+const pid_t Helium::InvalidThreadId = ~0;
 #elif HELIUM_OS_MAC
-const pthread_t InvalidThreadId = reinterpret_cast< pthread_t >( ~0 );
+const pthread_t Helium::InvalidThreadId = reinterpret_cast< pthread_t >( ~0 );
 #endif
 
 Thread::Thread()
