@@ -86,6 +86,12 @@ static void SetSchedParam(struct sched_param * params, ThreadPriority priority)
     }
 }
 
+#elif HELIUM_OS_LINUX
+const pid_t InvalidThreadId = ~0;
+#elif HELIUM_OS_MAC
+const pthread_t InvalidThreadId = ~0;
+#endif
+
 Thread::Thread()
     : m_Handle( 0 )
     , m_Valid( false )
@@ -197,12 +203,16 @@ void Thread::Yield()
     sched_yield();
 }
 
-/// Get the ID of the thread in which this function is called.
-///
-/// @return  Current thread ID.
-Thread::id_t Thread::GetCurrentId()
+ThreadId Thread::GetCurrentId()
 {
     return pthread_self();
+}
+
+static ThreadId g_MainThread = pthread_self();
+
+ThreadId Helium::GetMainThreadID()
+{
+    return g_MainThread;
 }
 
 void* Thread::ThreadCallback( void* pData )
@@ -247,16 +257,4 @@ void* ThreadLocalPointer::GetPointer() const
 void ThreadLocalPointer::SetPointer(void* pointer)
 {
     pthread_setspecific(m_Key, pointer);
-}
-
-static Thread::id_t g_MainThread = pthread_self();
-
-Thread::id_t Helium::GetMainThreadID()
-{
-    return g_MainThread;
-}
-
-Thread::id_t Helium::GetCurrentThreadID()
-{
-    return pthread_self();
 }

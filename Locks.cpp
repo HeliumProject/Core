@@ -7,11 +7,11 @@ using namespace Helium;
 
 /// Constructor.
 ReadWriteLock::ReadWriteLock()
-    : m_readLockCount( 0 )
+	: m_readLockCount( 0 )
 	, m_readLockCountWithinWrite( 0 )
-	, m_writeThread( -1 )
-    , m_readReleaseCondition( true, true )
-    , m_writeReleaseCondition( true, true )
+	, m_writeThread( InvalidThreadId )
+	, m_readReleaseCondition( true, true )
+	, m_writeReleaseCondition( true, true )
 {
 }
 
@@ -32,26 +32,26 @@ void ReadWriteLock::LockRead()
 		return;
 	}
 
-    int32_t currentLockCount = m_readLockCount;
-    int32_t localLockCount;
-    do 
-    {
-        localLockCount = currentLockCount;
-        while( localLockCount == -1 )
-        {
-            while( !m_writeReleaseCondition.Wait() );
-            localLockCount = m_readLockCount;
-        }
+	int32_t currentLockCount = m_readLockCount;
+	int32_t localLockCount;
+	do 
+	{
+		localLockCount = currentLockCount;
+		while( localLockCount == -1 )
+		{
+			while( !m_writeReleaseCondition.Wait() );
+			localLockCount = m_readLockCount;
+		}
 
-        HELIUM_ASSERT( localLockCount != -2 );
-        currentLockCount = AtomicCompareExchangeAcquire( m_readLockCount, localLockCount + 1, localLockCount );
-    }
-    while( currentLockCount != localLockCount );
+		HELIUM_ASSERT( localLockCount != -2 );
+		currentLockCount = AtomicCompareExchangeAcquire( m_readLockCount, localLockCount + 1, localLockCount );
+	}
+	while( currentLockCount != localLockCount );
 
-    if( localLockCount == 0 )
-    {
-        m_readReleaseCondition.Reset();
-    }
+	if( localLockCount == 0 )
+	{
+		m_readReleaseCondition.Reset();
+	}
 }
 
 /// Release a read-only lock previously acquired using LockRead().
@@ -66,13 +66,13 @@ void ReadWriteLock::UnlockRead()
 		return;
 	}
 
-    HELIUM_ASSERT( m_readLockCount != -1 );
+	HELIUM_ASSERT( m_readLockCount != -1 );
 
-    int32_t newLockCount = AtomicDecrementRelease( m_readLockCount );
-    if( newLockCount == 0 )
-    {
-        m_readReleaseCondition.Signal();
-    }
+	int32_t newLockCount = AtomicDecrementRelease( m_readLockCount );
+	if( newLockCount == 0 )
+	{
+		m_readReleaseCondition.Signal();
+	}
 }
 
 /// Acquire an exclusive, read-write lock for the current thread.
@@ -80,20 +80,20 @@ void ReadWriteLock::UnlockRead()
 /// @see UnlockWrite(), LockRead(), UnlockRead()
 void ReadWriteLock::LockWrite()
 {
-    for (;;)
-    {
-        int32_t currentLockCount = AtomicCompareExchangeAcquire( m_readLockCount, -1, 0 );
-        if( currentLockCount == 0 )
-        {
-            break;
-        }
+	for (;;)
+	{
+		int32_t currentLockCount = AtomicCompareExchangeAcquire( m_readLockCount, -1, 0 );
+		if( currentLockCount == 0 )
+		{
+			break;
+		}
 
-        while( !m_readReleaseCondition.Wait() );
-        while( !m_writeReleaseCondition.Wait() );
-    }
+		while( !m_readReleaseCondition.Wait() );
+		while( !m_writeReleaseCondition.Wait() );
+	}
 
 	m_writeThread = Thread::GetCurrentId();
-    m_writeReleaseCondition.Reset();
+	m_writeReleaseCondition.Reset();
 }
 
 /// Release a read-write lock previously acquired using LockWrite().
@@ -103,11 +103,9 @@ void ReadWriteLock::UnlockWrite()
 {
 	HELIUM_ASSERT( m_writeThread == Thread::GetCurrentId() );
 	HELIUM_ASSERT( m_readLockCountWithinWrite == 0 );
-	m_writeThread = -1;
-	
+	m_writeThread = InvalidThreadId;
 
-    HELIUM_ASSERT( m_readLockCount == -1 );
-
-    AtomicExchangeRelease( m_readLockCount, 0 );
-    m_writeReleaseCondition.Signal();
+	HELIUM_ASSERT( m_readLockCount == -1 );
+	AtomicExchangeRelease( m_readLockCount, 0 );
+	m_writeReleaseCondition.Signal();
 }

@@ -3,6 +3,11 @@
 
 using namespace Helium;
 
+bool Thread::IsMain()
+{
+	return GetMainId() == GetCurrentId();
+}
+
 /// Destructor.
 Runnable::~Runnable()
 {

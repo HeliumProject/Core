@@ -34,34 +34,41 @@ namespace Helium
 	}
 	typedef ThreadPriorities::Type ThreadPriority;
 
+#if HELIUM_OS_WIN
+	/// Thread ID type.
+	typedef uint32_t       ThreadId;
+	/// Invalid ThreadId
+	const extern uint32_t  InvalidThreadId;
+#elif HELIUM_OS_LINUX
+	/// Posix threads are identified as process IDs
+	typedef pid_t          ThreadId;
+	/// Invalid ThreadId
+	const extern pid_t     InvalidThreadId;
+#elif HELIUM_OS_MAC
+	/// Posix threads are identified as process IDs
+	typedef pthread_t      ThreadId;
+	/// Invalid ThreadId
+	const extern pthread_t InvalidThreadId;
+#endif
+
 	/// Thread interface.
 	class HELIUM_PLATFORM_API Thread : NonCopyable
 	{
-	public:
+	private:
 #if HELIUM_OS_WIN
 		/// Platform-specific thread handle type.
-		typedef HANDLE Handle;
-
-		/// Thread ID type.
-		typedef unsigned long id_t;
+		typedef HANDLE    Handle;
 #else
+
 		/// Posix threads handle
 		typedef pthread_t Handle;
-
-# if HELIUM_OS_LINUX
-		/// Posix threads are identified as process IDs
-		typedef pid_t id_t;
-# elif HELIUM_OS_MAC
-		/// Posix threads are identified as process IDs
-		typedef pthread_t id_t;
-# endif
 #endif
 
-	private:
 		/// Platform-specific thread handle.
 		Handle m_Handle;
+
 #if !HELIUM_OS_WIN
-		/// Validity of the handle
+		/// Validity of the handle value
 		bool m_Valid;
 #endif
 		/// Thread name.
@@ -85,7 +92,6 @@ namespace Helium
 
 		/// @name Data Access
 		//@{
-		inline const Handle& GetHandle() const;
 		inline const char* GetName() const;
 		//@}
 
@@ -105,9 +111,31 @@ namespace Helium
 		/// @name Static Functions
 		//@{
 		static void Sleep( uint32_t milliseconds );
+
+		/// Yield the remainder of the calling thread's time slice for other threads of equal priority.
+		///
+		/// If other threads of equal priority are awaiting execution, this will immediately yield execution to those
+		/// threads.  If no other threads of equal priority are waiting, the thread will continue execution immediately.
+		///
+		/// To yield control to lower-priority threads, Sleep() should be called instead with a non-zero amount of time.
+		///
+		/// @see Sleep()
 		static void Yield();
 
-		static id_t GetCurrentId();
+		/// Get the ID of the thread in which this function is called.
+		///
+		/// @return  Current thread ID.
+		static ThreadId GetCurrentId();
+
+		/// Get the ID of the thread in which main was called.
+		///
+		/// @return  Main thread ID.
+		static ThreadId GetMainId();
+
+		/// Check if the calling thread is the thread that called main().
+		///
+		/// @return  Returns true if the calling thread is the same thread that called main().
+		static bool IsMain();
 		//@}
 	};
 
@@ -235,14 +263,6 @@ namespace Helium
 		T* GetPointer() const;
 		void SetPointer(T* value);
 	};
-
-	HELIUM_PLATFORM_API Thread::id_t GetMainThreadID();
-	HELIUM_PLATFORM_API Thread::id_t GetCurrentThreadID();
-
-	inline bool IsMainThread()
-	{
-		return GetMainThreadID() == GetCurrentThreadID();
-	}
 }
 
 #include "Platform/Thread.inl"

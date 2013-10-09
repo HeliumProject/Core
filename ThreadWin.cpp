@@ -34,6 +34,8 @@ struct ThreadNameInfo
 	ULONG_PTR dwFlags;
 };
 
+const uint32_t Helium::InvalidThreadId = ~0;
+
 /// Constructor.
 ///
 /// @param[in] rName  Optional name to assign to the thread (for debugging purposes).
@@ -214,25 +216,21 @@ void Thread::Sleep( uint32_t milliseconds )
 	::Sleep( milliseconds );
 }
 
-/// Yield the remainder of the calling thread's time slice for other threads of equal priority.
-///
-/// If other threads of equal priority are awaiting execution, this will immediately yield execution to those
-/// threads.  If no other threads of equal priority are waiting, the thread will continue execution immediately.
-///
-/// To yield control to lower-priority threads, Sleep() should be called instead with a non-zero amount of time.
-///
-/// @see Sleep()
 void Thread::Yield()
 {
 	::Sleep( 0 );
 }
 
-/// Get the ID of the thread in which this function is called.
-///
-/// @return  Current thread ID.
-Thread::id_t Thread::GetCurrentId()
+ThreadId Thread::GetCurrentId()
 {
-	return GetCurrentThreadId();
+	return ::GetCurrentThreadId();
+}
+
+static ThreadId g_MainThreadID = ::GetCurrentThreadId();
+
+ThreadId Thread::GetMainId()
+{
+	return g_MainThreadID;
 }
 
 /// Thread callback function.
@@ -279,16 +277,4 @@ void* ThreadLocalPointer::GetPointer() const
 void ThreadLocalPointer::SetPointer(void* pointer)
 {
 	TlsSetValue(m_Key, pointer); 
-}
-
-Thread::id_t g_MainThreadID = ::GetCurrentThreadId();
-
-Thread::id_t Helium::GetMainThreadID()
-{
-	return g_MainThreadID;
-}
-
-Thread::id_t Helium::GetCurrentThreadID()
-{
-	return ::GetCurrentThreadId();
 }

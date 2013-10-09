@@ -8,14 +8,6 @@ const char* Helium::Thread::GetName() const
     return m_Name;
 }
 
-/// Get the platform-specific thread handle.
-///
-/// @return  Reference to the thread handle.
-const Helium::Thread::Handle& Helium::Thread::GetHandle() const
-{
-    return m_Handle;
-}
-
 // C++ helper (remember, it is valid to pass a member function pointer as a template parameter!)
 template< class ObjectT, void (ObjectT::*method)() >
 void Helium::CallbackThread::EntryHelper( void* param )

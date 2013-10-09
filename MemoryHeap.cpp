@@ -96,7 +96,7 @@ struct Helium::DynamicMemoryHeapVerboseTrackingData
     std::map< void*, DynamicMemoryHeap::AllocationBacktrace > allocationBacktraceMap;
 };
 
-static volatile Thread::id_t s_verboseTrackingCurrentThreadId = Thread::INVALID_ID;
+static volatile ThreadId s_verboseTrackingCurrentThreadId = Thread::INVALID_ID;
 
 static Mutex& GetVerboseTrackingMutex()
 {
@@ -107,7 +107,7 @@ static Mutex& GetVerboseTrackingMutex()
 
 static bool ConditionalVerboseTrackingLock()
 {
-    Thread::id_t threadId = Thread::GetCurrentId();
+    ThreadId threadId = Thread::GetCurrentId();
     if( s_verboseTrackingCurrentThreadId != threadId )
     {
         GetVerboseTrackingMutex().Lock();
