@@ -198,7 +198,7 @@ ProcessHandle Helium::Spawn( const std::string& command, bool autoKill )
 		flags |= CREATE_BREAKAWAY_FROM_JOB;
 	}
 
-#ifdef HELIUM_DEBUG
+#if !HELIUM_RELEASE
 	flags |= CREATE_NEW_CONSOLE;
 #else
 	flags |= CREATE_NO_WINDOW;
