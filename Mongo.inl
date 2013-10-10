@@ -122,8 +122,13 @@ void Helium::Mongo::Cursor< T >::SetOptions( int options )
 	this->options = options;
 }
 
-bool Helium::Mongo::Database::IsConnected() const
+bool Helium::Mongo::Database::IsConnected()
 {
+	if ( isConnected )
+	{
+		isConnected = MONGO_OK == mongo_check_connection( this->conn );
+	}
+
 	return isConnected;
 }
 
