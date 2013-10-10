@@ -111,11 +111,9 @@ static M_OutputFile g_TraceFiles;
 
 static uint32_t g_Streams = Streams::Normal | Streams::Warning | Streams::Error;
 static Level g_Level = Levels::Default;
-static int g_WarningCount = 0;
-static int g_ErrorCount = 0;
 static int g_Indent = 0;
 
-static LogSignature::Event g_LogEvent;
+static ListenerSignature::Event g_LogEvent;
 
 void Log::Statement::ApplyIndent( const char* string, std::string& output )
 {
@@ -159,14 +157,14 @@ void Log::Statement::ApplyIndent( const char* string, std::string& output )
 	}
 }
 
-void Log::AddLogListener(const LogSignature::Delegate& listener)
+void Log::AddListener(const ListenerSignature::Delegate& listener)
 {
 	Helium::MutexScopeLock mutex (g_Mutex);
 
 	g_LogEvent.Add(listener);
 }
 
-void Log::RemoveLogListener(const LogSignature::Delegate& listener)
+void Log::RemoveListener(const ListenerSignature::Delegate& listener)
 {
 	Helium::MutexScopeLock mutex (g_Mutex);
 
@@ -361,26 +359,6 @@ ConsoleColor Log::GetStreamColor( Log::Stream stream )
 	return ConsoleColors::None;
 }
 
-int Log::GetErrorCount()
-{
-	return g_ErrorCount;
-}
-
-int Log::GetWarningCount()
-{
-	return g_WarningCount;
-}
-
-void Log::ResetErrorCount()
-{
-	g_ErrorCount = 0;
-}
-
-void Log::ResetWarningCount()
-{
-	g_WarningCount = 0;
-}
-
 void Log::LockMutex()
 {
 	g_Mutex.Lock();
@@ -423,7 +401,7 @@ void Log::PrintString(const char* string, Stream stream, Level level, ConsoleCol
 		Statement statement ( string, stream, level, indent );
 
 		// construct the print statement
-		LogArgs args ( statement );
+		ListenerArgs args ( statement );
 
 		// is this statement to be output via normal channels
 		if ( display )
@@ -556,10 +534,14 @@ void Log::Debug(const char *fmt,...)
 {
 	Helium::MutexScopeLock mutex (g_Mutex);
 
+	static char format[MAX_PRINT_SIZE];
+	StringPrint(format, TXT( "DEBUG: " ));
+	AppendString(format, fmt);
+
 	va_list args;
 	va_start(args, fmt); 
 	static char string[MAX_PRINT_SIZE];
-	int size = StringPrintArgs(string, fmt, args);
+	int size = StringPrintArgs(string, format, args);
 	string[ sizeof(string)/sizeof(string[0]) - 1] = 0; 
 	HELIUM_ASSERT(size >= 0);
 
@@ -571,10 +553,14 @@ void Log::Debug(Level level, const char *fmt,...)
 {
 	Helium::MutexScopeLock mutex (g_Mutex);
 
+	static char format[MAX_PRINT_SIZE];
+	StringPrint(format, TXT( "DEBUG: " ));
+	AppendString(format, fmt);
+
 	va_list args;
 	va_start(args, fmt); 
 	static char string[MAX_PRINT_SIZE];
-	int size = StringPrintArgs(string, fmt, args);
+	int size = StringPrintArgs(string, format, args);
 	string[ sizeof(string)/sizeof(string[0]) - 1] = 0; 
 	HELIUM_ASSERT(size >= 0);
 
@@ -586,10 +572,14 @@ void Log::Profile(const char *fmt,...)
 {
 	Helium::MutexScopeLock mutex (g_Mutex);
 
+	static char format[MAX_PRINT_SIZE];
+	StringPrint(format, TXT( "PROFILE: " ));
+	AppendString(format, fmt);
+
 	va_list args;
 	va_start(args, fmt); 
 	static char string[MAX_PRINT_SIZE];
-	int size = StringPrintArgs(string, fmt, args);
+	int size = StringPrintArgs(string, format, args);
 	string[ sizeof(string)/sizeof(string[0]) - 1] = 0; 
 	HELIUM_ASSERT(size >= 0);
 
@@ -601,10 +591,14 @@ void Log::Profile(Level level, const char *fmt,...)
 {
 	Helium::MutexScopeLock mutex (g_Mutex);
 
+	static char format[MAX_PRINT_SIZE];
+	StringPrint(format, TXT( "PROFILE: " ));
+	AppendString(format, fmt);
+
 	va_list args;
 	va_start(args, fmt); 
 	static char string[MAX_PRINT_SIZE];
-	int size = StringPrintArgs(string, fmt, args);
+	int size = StringPrintArgs(string, format, args);
 	string[ sizeof(string)/sizeof(string[0]) - 1] = 0; 
 	HELIUM_ASSERT(size >= 0);
 
@@ -617,7 +611,7 @@ void Log::Warning(const char *fmt,...)
 	Helium::MutexScopeLock mutex (g_Mutex);
 
 	static char format[MAX_PRINT_SIZE];
-	StringPrint(format, TXT( "Warning (%d): " ), ++g_WarningCount);
+	StringPrint(format, TXT( "WARNING: " ));
 	AppendString(format, fmt);
 
 	va_list args;
@@ -636,14 +630,7 @@ void Log::Warning(Level level, const char *fmt,...)
 	Helium::MutexScopeLock mutex (g_Mutex);
 
 	static char format[MAX_PRINT_SIZE];
-	if (level == Levels::Default)
-	{
-		StringPrint(format, TXT( "Warning (%d): " ), ++g_WarningCount);
-	}
-	else
-	{
-		format[0] = '\0';
-	}
+	StringPrint(format, TXT( "WARNING: " ));
 	AppendString(format, fmt);
 
 	va_list args;
@@ -662,7 +649,7 @@ void Log::Error(const char *fmt,...)
 	Helium::MutexScopeLock mutex (g_Mutex);
 
 	static char format[MAX_PRINT_SIZE];
-	StringPrint(format, TXT( "Error (%d): " ), ++g_ErrorCount);
+	StringPrint(format, TXT( "ERROR: " ));
 	AppendString(format, fmt);
 
 	va_list args;
@@ -681,14 +668,7 @@ void Log::Error(Level level, const char *fmt,...)
 	Helium::MutexScopeLock mutex (g_Mutex);
 
 	static char format[MAX_PRINT_SIZE];
-	if (level == Levels::Default)
-	{
-		StringPrint(format, TXT( "Error (%d): " ), ++g_ErrorCount);
-	}
-	else
-	{
-		format[0] = '\0';
-	}
+	StringPrint(format, TXT( "ERROR: " ));
 	AppendString(format, fmt);
 
 	va_list args;
@@ -890,12 +870,12 @@ Listener::~Listener()
 
 void Listener::Start()
 {
-	Log::AddLogListener( Log::LogSignature::Delegate( this, &Listener::Print ) );
+	Log::AddListener( Log::ListenerSignature::Delegate( this, &Listener::Print ) );
 }
 
 void Listener::Stop()
 {
-	Log::RemoveLogListener( Log::LogSignature::Delegate( this, &Listener::Print ) );
+	Log::RemoveListener( Log::ListenerSignature::Delegate( this, &Listener::Print ) );
 }
 
 void Listener::Dump(bool stop)
@@ -921,7 +901,7 @@ uint32_t Listener::GetErrorCount()
 	return *m_ErrorCount;
 }
 
-void Listener::Print( Log::LogArgs& args )
+void Listener::Print( ListenerArgs& args )
 {
 	if ( m_Thread == Thread::GetCurrentId() )
 	{

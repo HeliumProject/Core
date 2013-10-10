@@ -28,14 +28,13 @@ namespace Helium
 		{
 			enum Stream
 			{
-				Normal   = 1 << 0,
-				Debug    = 1 << 1,
-				Profile  = 1 << 2,
-				Warning  = 1 << 3,
-				Error    = 1 << 4,
-
+				Error    = 1 << 0,
+				Warning  = 1 << 1,
+				Normal   = 1 << 2,
+				Debug    = 1 << 3,
+				Profile  = 1 << 4,
 				Count    = 5, // careful, this needs to be updated based on the number of streams
-				All      = 0xFFFFFFFF,
+				All      = 0xffffffff,
 			};
 		}
 
@@ -81,18 +80,18 @@ namespace Helium
 		// Log event
 		//
 
-		struct HELIUM_FOUNDATION_API LogArgs : NonCopyable
+		struct HELIUM_FOUNDATION_API ListenerArgs : NonCopyable
 		{
-			inline LogArgs( const Statement& statement );
+			inline ListenerArgs( const Statement& statement );
 			
 			const Statement&  m_Statement;
 			bool              m_Skip;
 		};
 
-		typedef Helium::Signature< LogArgs&, Helium::AtomicRefCountBase > LogSignature;
+		typedef Helium::Signature< ListenerArgs&, Helium::AtomicRefCountBase > ListenerSignature;
 
-		HELIUM_FOUNDATION_API void AddLogListener(const LogSignature::Delegate& listener);
-		HELIUM_FOUNDATION_API void RemoveLogListener(const LogSignature::Delegate& listener);
+		HELIUM_FOUNDATION_API void AddListener(const ListenerSignature::Delegate& listener);
+		HELIUM_FOUNDATION_API void RemoveListener(const ListenerSignature::Delegate& listener);
 
 		//
 		// Tracing API handles echoing all output to the trace text file associated with the process
@@ -247,7 +246,7 @@ namespace Helium
 			uint32_t GetErrorCount();
 
 		private:
-			void Print( LogArgs& args );
+			void Print( ListenerArgs& args );
 
 		private:
 			ThreadId                  m_Thread;
