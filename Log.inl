@@ -14,15 +14,9 @@ void Helium::Log::Statement::ApplyIndent()
     m_String = indented;
 }
 
-Helium::Log::PrintingArgs::PrintingArgs( const Statement& statement )
+Helium::Log::LogArgs::LogArgs( const Statement& statement )
     : m_Statement ( statement )
     , m_Skip( false )
-{
-
-}
-
-Helium::Log::PrintedArgs::PrintedArgs( const Statement& statement )
-    : m_Statement ( statement )
 {
 
 }

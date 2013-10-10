@@ -77,40 +77,22 @@ namespace Helium
 			void ApplyIndent( const char* string, std::string& output );
 		};
 
-		typedef std::vector< Statement > V_Statement;
-
 		//
-		// Printing event
+		// Log event
 		//
 
-		struct HELIUM_FOUNDATION_API PrintingArgs : NonCopyable
+		struct HELIUM_FOUNDATION_API LogArgs : NonCopyable
 		{
-			inline PrintingArgs( const Statement& statement );
+			inline LogArgs( const Statement& statement );
 			
 			const Statement&  m_Statement;
 			bool              m_Skip;
 		};
 
-		typedef Helium::Signature< PrintingArgs&, Helium::AtomicRefCountBase > PrintingSignature;
+		typedef Helium::Signature< LogArgs&, Helium::AtomicRefCountBase > LogSignature;
 
-		HELIUM_FOUNDATION_API void AddPrintingListener(const PrintingSignature::Delegate& listener);
-		HELIUM_FOUNDATION_API void RemovePrintingListener(const PrintingSignature::Delegate& listener);
-
-		//
-		// Printed event
-		//
-
-		struct HELIUM_FOUNDATION_API PrintedArgs : NonCopyable
-		{
-			inline PrintedArgs( const Statement& statement );
-			
-			const Statement&  m_Statement;
-		};
-
-		typedef Helium::Signature< PrintedArgs&, Helium::AtomicRefCountBase > PrintedSignature;
-
-		HELIUM_FOUNDATION_API void AddPrintedListener(const PrintedSignature::Delegate& listener);
-		HELIUM_FOUNDATION_API void RemovePrintedListener(const PrintedSignature::Delegate& listener);
+		HELIUM_FOUNDATION_API void AddLogListener(const LogSignature::Delegate& listener);
+		HELIUM_FOUNDATION_API void RemoveLogListener(const LogSignature::Delegate& listener);
 
 		//
 		// Tracing API handles echoing all output to the trace text file associated with the process
@@ -189,7 +171,7 @@ namespace Helium
 		HELIUM_FOUNDATION_API void PrintStatement(const Statement& statement);
 
 		// print several statements
-		HELIUM_FOUNDATION_API void PrintStatements(const V_Statement& statements, uint32_t streams = Streams::All);
+		HELIUM_FOUNDATION_API void PrintStatements(const std::vector< Statement >& statements, uint32_t streams = Streams::All);
 
 		// simple way to print a particular color
 		HELIUM_FOUNDATION_API void PrintColor(ConsoleColor color, const char* fmt, ...);
@@ -254,7 +236,7 @@ namespace Helium
 		class HELIUM_FOUNDATION_API Listener
 		{
 		public:
-			Listener( uint32_t throttle = Log::Streams::All, uint32_t* errorCount = NULL, uint32_t* warningCount = NULL, Log::V_Statement* consoleOutput = NULL );
+			Listener( uint32_t throttle = Streams::All, uint32_t* errorCount = NULL, uint32_t* warningCount = NULL, std::vector< Statement >* consoleOutput = NULL );
 			~Listener();
 
 			void Start();
@@ -265,14 +247,14 @@ namespace Helium
 			uint32_t GetErrorCount();
 
 		private:
-			void Print( Log::PrintingArgs& args );
+			void Print( LogArgs& args );
 
 		private:
-			ThreadId        m_Thread;
-			uint32_t            m_Throttle;
-			uint32_t*           m_ErrorCount;
-			uint32_t*           m_WarningCount;
-			Log::V_Statement*	m_LogOutput;
+			ThreadId                  m_Thread;
+			uint32_t                  m_Throttle;
+			uint32_t*                 m_ErrorCount;
+			uint32_t*                 m_WarningCount;
+			std::vector< Statement >* m_LogOutput;
 		};
 	}
 }

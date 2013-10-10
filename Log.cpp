@@ -6,6 +6,7 @@
 #include "Platform/Thread.h"
 #include "Platform/File.h"
 #include "Platform/Console.h"
+#include "Platform/Encoding.h"
 
 #include "Foundation/String.h"
 
@@ -17,18 +18,15 @@
 #include <iostream>
 #include <map>
 
-#if defined(HELIUM_OS_WIN)
-#include <crtdbg.h>
-#include <shlobj.h>
+#if HELIUM_OS_WIN
+# include <crtdbg.h>
+# include <shlobj.h>
 #endif
 
 using namespace Helium;
 using namespace Helium::Log;
 
-#define NTFS_PATH_MAX (0x7FFF)
-
-static uint32_t g_LogFileCount = 20;
-
+static uint32_t      g_LogFileCount = 20;
 static Helium::Mutex g_Mutex;
 
 typedef std::map<std::string, File*> M_Files;
@@ -117,8 +115,7 @@ static int g_WarningCount = 0;
 static int g_ErrorCount = 0;
 static int g_Indent = 0;
 
-static PrintingSignature::Event g_PrintingEvent;
-static PrintedSignature::Event g_PrintedEvent;
+static LogSignature::Event g_LogEvent;
 
 void Log::Statement::ApplyIndent( const char* string, std::string& output )
 {
@@ -162,32 +159,18 @@ void Log::Statement::ApplyIndent( const char* string, std::string& output )
 	}
 }
 
-void Log::AddPrintingListener(const PrintingSignature::Delegate& listener)
+void Log::AddLogListener(const LogSignature::Delegate& listener)
 {
 	Helium::MutexScopeLock mutex (g_Mutex);
 
-	g_PrintingEvent.Add(listener);
+	g_LogEvent.Add(listener);
 }
 
-void Log::RemovePrintingListener(const PrintingSignature::Delegate& listener)
+void Log::RemoveLogListener(const LogSignature::Delegate& listener)
 {
 	Helium::MutexScopeLock mutex (g_Mutex);
 
-	g_PrintingEvent.Remove(listener);
-}
-
-void Log::AddPrintedListener(const PrintedSignature::Delegate& listener)
-{
-	Helium::MutexScopeLock mutex (g_Mutex);
-
-	g_PrintedEvent.Add(listener);
-}
-
-void Log::RemovePrintedListener(const PrintedSignature::Delegate& listener)
-{
-	Helium::MutexScopeLock mutex (g_Mutex);
-
-	g_PrintedEvent.Remove(listener);
+	g_LogEvent.Remove(listener);
 }
 
 void Redirect(const std::string& fileName, const char* str, bool stampNewLine = true )
@@ -440,13 +423,13 @@ void Log::PrintString(const char* string, Stream stream, Level level, ConsoleCol
 		Statement statement ( string, stream, level, indent );
 
 		// construct the print statement
-		PrintingArgs args ( statement );
+		LogArgs args ( statement );
 
 		// is this statement to be output via normal channels
 		if ( display )
 		{
 			// raise the printing event
-			g_PrintingEvent.Raise( args );
+			g_LogEvent.Raise( args );
 		}
 
 		// only process this string if it was not handled by a handler
@@ -467,15 +450,12 @@ void Log::PrintString(const char* string, Stream stream, Level level, ConsoleCol
 
 				// print the statement to the window
 				Helium::PrintString(color, stream == Streams::Error ? stderr : stdout, statement.m_String);
-
-				// raise the printed event
-				PrintedArgs pa(statement);
-				g_PrintedEvent.Raise( pa );
 			}
 
 			// send the text to the debugger, if no debugger nothing happens
 #if HELIUM_OS_WIN
-			OutputDebugStringA(statement.m_String.c_str());
+			HELIUM_CONVERT_TO_WIDE( statement.m_String.c_str(), convertedStatement );
+			OutputDebugStringW( convertedStatement );
 #endif
 			// output to trace file(s)
 			static bool stampNewLine = true;
@@ -513,12 +493,12 @@ void Log::PrintStatement(const Statement& statement)
 	PrintString( statement.m_String.c_str(), statement.m_Stream, statement.m_Level, GetStreamColor( statement.m_Stream ), statement.m_Indent );
 }
 
-void Log::PrintStatements(const V_Statement& statements, uint32_t streamFilter)
+void Log::PrintStatements(const std::vector< Statement >& statements, uint32_t streamFilter)
 {
 	Helium::MutexScopeLock mutex (g_Mutex);
 
-	V_Statement::const_iterator itr = statements.begin();
-	V_Statement::const_iterator end = statements.end();
+	std::vector< Statement >::const_iterator itr = statements.begin();
+	std::vector< Statement >::const_iterator end = statements.end();
 	for ( ; itr != end; ++itr )
 	{
 		if ( itr->m_Stream & streamFilter )
@@ -893,7 +873,7 @@ std::string Log::GetOutlineState()
 	return state;
 }
 
-Listener::Listener( uint32_t throttle, uint32_t* errorCount, uint32_t* warningCount, Log::V_Statement* consoleOutput )
+Listener::Listener( uint32_t throttle, uint32_t* errorCount, uint32_t* warningCount, std::vector< Statement >* consoleOutput )
 : m_Thread( Thread::GetCurrentId() )
 , m_Throttle( throttle )
 , m_WarningCount( warningCount )
@@ -910,12 +890,12 @@ Listener::~Listener()
 
 void Listener::Start()
 {
-	Log::AddPrintingListener( Log::PrintingSignature::Delegate( this, &Listener::Print ) );
+	Log::AddLogListener( Log::LogSignature::Delegate( this, &Listener::Print ) );
 }
 
 void Listener::Stop()
 {
-	Log::RemovePrintingListener( Log::PrintingSignature::Delegate( this, &Listener::Print ) );
+	Log::RemoveLogListener( Log::LogSignature::Delegate( this, &Listener::Print ) );
 }
 
 void Listener::Dump(bool stop)
@@ -941,7 +921,7 @@ uint32_t Listener::GetErrorCount()
 	return *m_ErrorCount;
 }
 
-void Listener::Print( Log::PrintingArgs& args )
+void Listener::Print( Log::LogArgs& args )
 {
 	if ( m_Thread == Thread::GetCurrentId() )
 	{
