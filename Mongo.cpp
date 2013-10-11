@@ -131,6 +131,8 @@ bool Database::CreateCappedCollection( const char* name, int cappedSizeInBytes, 
 		if ( MONGO_OK != result && MONGO_COMMAND_FAILED != conn->err )
 		{
 			Log::Error( "mongo_create_capped_collection failed: %s\n", GetErrorString( conn->err ) );
+			// call IsConnected to update the value of the isConnected flag.
+			IsConnected( true );
 			return false;
 		}
 	}
@@ -174,6 +176,8 @@ bool Database::Insert( const StrongPtr< Model >& object, const char* collection 
 		if ( MONGO_OK != mongo_insert( conn, ns.GetData(), b, NULL ) )
 		{
 			Log::Error( "mongo_insert failed: %s\n", GetErrorString( conn->err ) );
+			// call IsConnected to update the value of the isConnected flag.
+			IsConnected( true );
 			result = false;
 		}
 	}
@@ -226,6 +230,8 @@ bool Database::Update( const StrongPtr< Model >& object, const char* collection 
 		if ( MONGO_OK != mongo_update( conn, ns.GetData(), cond, op, MONGO_UPDATE_BASIC, NULL ) )
 		{
 			Log::Error( "mongo_update failed: %s\n", GetErrorString( conn->err ) );
+			// call IsConnected to update the value of the isConnected flag.
+			IsConnected( true );
 			result = false;
 		}
 	}
@@ -269,6 +275,8 @@ bool Database::Get( const StrongPtr< Model >& object, const char* collection )
 		if ( MONGO_OK != mongo_find_one( conn, ns.GetData(), query, NULL, out ) )
 		{
 			Log::Error( "mongo_find_one failed: %s\n", GetErrorString( conn->err ) );
+			// call IsConnected to update the value of the isConnected flag.
+			IsConnected( true );
 			result = false;
 		}
 	}
@@ -352,6 +360,8 @@ bool Database::Insert( StrongPtr< Model >* objects, size_t count, const char* co
 		if ( MONGO_OK != mongo_insert_batch( conn, ns.GetData(), const_cast< const bson** >( pointers.GetData() ), static_cast< int >( pointers.GetSize() ), NULL, 0x0 ) )
 		{
 			Log::Error( "mongo_insert_batch failed: %s\n", GetErrorString( conn->err ) );
+			// call IsConnected to update the value of the isConnected flag.
+			IsConnected( true );
 			result = false;
 		}
 	}

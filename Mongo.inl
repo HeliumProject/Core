@@ -122,9 +122,9 @@ void Helium::Mongo::Cursor< T >::SetOptions( int options )
 	this->options = options;
 }
 
-bool Helium::Mongo::Database::IsConnected()
+bool Helium::Mongo::Database::IsConnected( bool pingServer )
 {
-	if ( isConnected )
+	if ( isConnected && pingServer && HELIUM_VERIFY_MSG( this->threadId == Thread::GetCurrentId(), "Database access from improper thread" ) )
 	{
 		isConnected = MONGO_OK == mongo_check_connection( this->conn );
 	}

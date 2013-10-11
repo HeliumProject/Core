@@ -90,7 +90,7 @@ namespace Helium
 			void SetName( const char* name );
 			void SetTimeout( int timeoutMilliseconds );
 			bool Connect( const char* addr, uint16_t port = HELIUM_MONGO_DEFAULT_PORT );
-			inline bool IsConnected();
+			inline bool IsConnected( bool pingServer );
 			inline void SetThread( Helium::ThreadId threadId = Thread::GetCurrentId() );
 			double GetCollectionCount( const char* name );
 			bool CreateCappedCollection( const char* name, int cappedSizeInBytes, int cappedMaxCount = 0 );
