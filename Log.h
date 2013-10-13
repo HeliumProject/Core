@@ -141,14 +141,6 @@ namespace Helium
 		// get the print color for the given stream
 		HELIUM_FOUNDATION_API ConsoleColor GetStreamColor(Stream stream);
 
-		// get the current counts
-		HELIUM_FOUNDATION_API int GetErrorCount();
-		HELIUM_FOUNDATION_API int GetWarningCount();
-
-		// reset the counts to zero
-		HELIUM_FOUNDATION_API void ResetErrorCount();
-		HELIUM_FOUNDATION_API void ResetWarningCount();
-
 		// enter/leave this library's section
 		HELIUM_FOUNDATION_API void LockMutex();
 		HELIUM_FOUNDATION_API void UnlockMutex();
