@@ -170,7 +170,7 @@ ProcessHandle Helium::Spawn( const std::string& command, bool autoKill )
 			// Configure all child processes associated with the job to terminate when the
 			JOBOBJECT_EXTENDED_LIMIT_INFORMATION jeli = { 0 };
 			jeli.BasicLimitInformation.LimitFlags = JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;
-			HELIUM_ASSERT( SetInformationJobObject( hJob, JobObjectExtendedLimitInformation, &jeli, sizeof(jeli)) );
+			HELIUM_VERIFY( SetInformationJobObject( hJob, JobObjectExtendedLimitInformation, &jeli, sizeof(jeli)) );
 		}
 	}
 
