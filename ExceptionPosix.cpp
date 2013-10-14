@@ -17,6 +17,13 @@
 # include <sys/sysctl.h>
 #endif
 
+#if HELIUM_OS_LINUX
+static void* test_trace(void* ignored)
+{
+  return (void*)ptrace(PTRACE_TRACEME, 0, NULL, NULL);
+}
+#endif
+
 bool Helium::IsDebuggerPresent()
 {
 #if HELIUM_OS_MAC
@@ -49,51 +56,30 @@ bool Helium::IsDebuggerPresent()
 
   return ( (info.kp_proc.p_flag & P_TRACED) != 0 );
 
-#else
+#elif HELIUM_OS_LINUX
 
-  // http://stackoverflow.com/questions/3596781/detect-if-gdb-is-running
-  int pid = fork();
-  int status;
-  int res;
+  pthread_attr_t attr;
+  void* result;
+  pthread_t thread;
 
-  if (pid == -1)
+  pthread_attr_init(&attr);
+  pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
+  if (pthread_create(&thread, &attr, test_trace, NULL) != 0)
   {
-    perror("fork");
-    return -1;
+    pthread_attr_destroy(&attr);
+    return false;
+  }
+  pthread_attr_destroy(&attr);
+  if (pthread_join(thread, &result) != 0)
+  {
+    return false;
   }
 
-  if (pid == 0)
-  {
-    int ppid = getppid();
+  return result != NULL;
 
-    /* Child */
-    if (ptrace(PTRACE_ATTACH, ppid, NULL, 0) == 0)
-    {
-        /* Wait for the parent to stop and continue it */
-      waitpid(ppid, NULL, 0);
-      ptrace(PTRACE_CONT, ppid, NULL, 0);
-
-        /* Detach */
-      ptrace(PTRACE_DETACH, getppid(), NULL, 0);
-
-        /* We were the tracers, so gdb is not present */
-      res = 0;
-    }
-    else
-    {
-        /* Trace failed so gdb is present */
-      res = 1;
-    }
-    exit(res);
-  }
-  else
-  {
-    waitpid(pid, &status, 0);
-    res = WEXITSTATUS(status);
-  }
-
-  return res == 1;
 #endif
+
+  return false;
 }
 
 #if !HELIUM_RELEASE && !HELIUM_PROFILE
