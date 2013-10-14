@@ -6,20 +6,52 @@
 #include "Platform/Console.h"
 #include "Platform/Process.h"
 
+#include <assert.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/ptrace.h>
 #include <sys/wait.h>
 
 #if HELIUM_OS_MAC
-# define PTRACE_ATTACH PT_ATTACH
-# define PTRACE_CONT PT_CONTINUE
-# define PTRACE_DETACH PT_DETACH
+# include <stdbool.h>
+# include <sys/sysctl.h>
 #endif
 
 bool Helium::IsDebuggerPresent()
 {
-	// http://stackoverflow.com/questions/3596781/detect-if-gdb-is-running
+#if HELIUM_OS_MAC
+
+  int                 junk;
+  int                 mib[4];
+  struct kinfo_proc   info;
+  size_t              size;
+
+  // Initialize the flags so that, if sysctl fails for some bizarre 
+  // reason, we get a predictable result.
+
+  info.kp_proc.p_flag = 0;
+
+  // Initialize mib, which tells sysctl the info we want, in this case
+  // we're looking for information about a specific process ID.
+
+  mib[0] = CTL_KERN;
+  mib[1] = KERN_PROC;
+  mib[2] = KERN_PROC_PID;
+  mib[3] = getpid();
+
+  // Call sysctl.
+
+  size = sizeof(info);
+  junk = sysctl(mib, sizeof(mib) / sizeof(*mib), &info, &size, NULL, 0);
+  assert(junk == 0);
+
+  // We're being debugged if the P_TRACED flag is set.
+
+  return ( (info.kp_proc.p_flag & P_TRACED) != 0 );
+
+#else
+
+  // http://stackoverflow.com/questions/3596781/detect-if-gdb-is-running
   int pid = fork();
   int status;
   int res;
@@ -61,6 +93,7 @@ bool Helium::IsDebuggerPresent()
   }
 
   return res == 1;
+#endif
 }
 
 #if !HELIUM_RELEASE && !HELIUM_PROFILE

@@ -116,7 +116,6 @@ bool Thread::Start( const char* pName, ThreadPriority priority )
     HELIUM_VERIFY( pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE) == 0 );
     if ( priority != ThreadPriorities::Inherit )
     {
-        HELIUM_ASSERT( !Helium::IsDebuggerPresent() ); // following lines break gdb 7.5, see http://sourceware.org/bugzilla/show_bug.cgi?id=12203
         HELIUM_VERIFY( pthread_attr_setinheritsched(&attr, PTHREAD_EXPLICIT_SCHED) == 0 );
         HELIUM_VERIFY( pthread_attr_setschedpolicy(&attr, SCHED_RR) == 0 );
 
