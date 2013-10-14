@@ -187,11 +187,7 @@ ProcessHandle Helium::Spawn( const std::string& command, bool autoKill )
 	memset(&osvi, 0, sizeof( OSVERSIONINFO ) );
 	osvi.dwOSVersionInfoSize = sizeof( OSVERSIONINFO );
 	::GetVersionEx(&osvi);
-	uint32_t version = 0x0;
-	version |= osvi.dwMajorVersion * 10;
-	version |= osvi.dwMinorVersion;
-
-	if ( version >= 60 && version <= 61 ) // vista and 7
+	if ( osvi.dwMajorVersion == 6 && ( osvi.dwMinorVersion == 0 || osvi.dwMinorVersion == 1 ) ) // vista and 7
 	{
 		// windows vista and beyond somtimes have system software that attach child processes to jobs,
 		//  and pre-windows 8 you can only attach a process to a single job
@@ -201,7 +197,7 @@ ProcessHandle Helium::Spawn( const std::string& command, bool autoKill )
 #if !HELIUM_RELEASE
 	flags |= CREATE_NEW_CONSOLE;
 #else
-	flags |= CREATE_NO_WINDOW;
+	flags |= DETACHED_PROCESS;
 #endif
 
 	ProcessHandle handle = InvalidProcessHandle;
@@ -224,7 +220,7 @@ ProcessHandle Helium::Spawn( const std::string& command, bool autoKill )
 
 		if ( autoKill && hJob )
 		{
-			HELIUM_ASSERT( ::AssignProcessToJobObject( hJob, pi.hProcess ) );
+			HELIUM_VERIFY( ::AssignProcessToJobObject( hJob, pi.hProcess ) );
 		}
 
 		// release handles to our new process
