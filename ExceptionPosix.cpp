@@ -123,7 +123,10 @@ void GetAddressSymbol( std::string& rSymbol, void* pAddress )
 /// @param[in] pMessage  Message string to write to the debug log.
 void Helium::DebugLog( const char* pMessage )
 {
-	Print( ConsoleColors::Red, stderr, pMessage );
+  if ( IsDebuggerPresent() )
+  {
+    fprintf( stderr, "%s", pMessage );
+  }
 }
 
 #endif  // !HELIUM_RELEASE && !HELIUM_PROFILE
