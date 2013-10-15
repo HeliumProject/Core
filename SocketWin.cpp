@@ -61,8 +61,8 @@ Socket::Socket()
 : m_Handle( INVALID_SOCKET )
 {
     memset(&m_Overlapped, 0, sizeof(m_Overlapped));
-    m_Overlapped.hEvent = ::CreateEvent(0, true, false, 0);
-    m_TerminateIo = ::CreateEvent(0, true, false, 0);
+    m_Overlapped.hEvent = ::CreateEvent(0, TRUE, FALSE, 0);
+    m_TerminateIo = ::CreateEvent(0, TRUE, FALSE, 0);
 }
 
 Socket::~Socket()
@@ -196,6 +196,7 @@ bool Socket::Read( void* buffer, uint32_t bytes, uint32_t& read, sockaddr_in* pe
     sockaddr_in addr;
     INT addrSize = sizeof(addr);
     bool udp = m_Protocol == SocketProtocols::Udp;
+    ::ResetEvent( m_Overlapped.hEvent );
     int wsa_result = udp ? ::WSARecvFrom(m_Handle, &buf, 1, &read_local, &flags, (SOCKADDR*)(peer ? peer : &addr), &addrSize, &m_Overlapped, NULL) :
                            ::WSARecv    (m_Handle, &buf, 1, &read_local, &flags, &m_Overlapped, NULL);
     if ( wsa_result != 0 )
@@ -209,8 +210,6 @@ bool Socket::Read( void* buffer, uint32_t bytes, uint32_t& read, sockaddr_in* pe
         }
         else
         {
-            ::ResetEvent( m_TerminateIo );
-            ::ResetEvent( m_Overlapped.hEvent );
             HANDLE events[] = { m_TerminateIo, m_Overlapped.hEvent };
             DWORD result = ::WSAWaitForMultipleEvents(2, events, FALSE, INFINITE, FALSE);
 
@@ -270,6 +269,7 @@ bool Socket::Write( void* buffer, uint32_t bytes, uint32_t& wrote, const char* i
         ::setsockopt( m_Handle, SOL_SOCKET, SO_BROADCAST, (char*)&opt, sizeof(opt) );
     }
 
+    ::ResetEvent( m_Overlapped.hEvent );
     int wsa_result = udp ? ::WSASendTo(m_Handle, &buf, 1, &wrote_local, 0, (SOCKADDR *)&addr, sizeof(sockaddr_in), &m_Overlapped, NULL) :
                            ::WSASend  (m_Handle, &buf, 1, &wrote_local, 0, &m_Overlapped, NULL);
     if ( wsa_result != 0 )
@@ -284,8 +284,6 @@ bool Socket::Write( void* buffer, uint32_t bytes, uint32_t& wrote, const char* i
         }
         else
         {
-            ::ResetEvent( m_TerminateIo );
-            ::ResetEvent( m_Overlapped.hEvent );
             HANDLE events[] = { m_TerminateIo, m_Overlapped.hEvent };
             DWORD result = ::WSAWaitForMultipleEvents(2, events, FALSE, INFINITE, FALSE);
 
