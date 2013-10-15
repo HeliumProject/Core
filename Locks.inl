@@ -110,7 +110,16 @@ Helium::Locker< T, LockType >::Handle::~Handle()
 ///
 /// @return  Pointer to the locked data.
 template< typename T, typename LockType >
-T* Helium::Locker< T, LockType >::Handle::operator->()
+T* Helium::Locker< T, LockType >::Handle::operator->() const
 {
     return &m_Locker.m_Data;
+}
+
+/// Access the data locked via this handle.
+///
+/// @return  Reference to the locked data.
+template< typename T, typename LockType >
+T& Helium::Locker< T, LockType >::Handle::operator*() const
+{
+	return m_Locker.m_Data;
 }

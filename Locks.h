@@ -173,7 +173,8 @@ namespace Helium
 
 			/// @name Overloaded Operators
 			//@{
-			inline T* operator->();
+			inline T* operator->() const;
+			inline T& operator*() const;
 			//@}
 
 		private:
