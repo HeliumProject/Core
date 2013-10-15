@@ -15,25 +15,22 @@ namespace Helium
 	// 
 
 	template <typename T>
-	struct AutoPtr
+	class AutoPtr
 	{
 		HELIUM_COMPILE_ASSERT( sizeof( T ) > 1 );
+		template< typename U > friend class AutoPtr;
 
 	public:
 		AutoPtr( T* ptr = NULL );
 		AutoPtr( const AutoPtr& rhs );
+		template< typename U > AutoPtr( const AutoPtr< U >& rhs );
 		~AutoPtr();
 
-		T* Ptr();
-		const T* Ptr() const;
-
-		const T* operator->() const;
-		T* operator->();
-
-		const T& operator*() const;
-		T& operator*();
-		
-		operator bool() const;
+		T* Ptr() const;
+		T* operator->() const;
+		T& operator*() const;
+		operator T*() const;
+		AutoPtr& operator=( const AutoPtr& rhs );
 
 		bool IsOrphan();
 		void Orphan( bool orphan = true );
@@ -41,7 +38,7 @@ namespace Helium
 		T* Release();
 
 	private: 
-		mutable uintptr_t m_Ptr;
+		mutable T* m_Ptr;
 	};
 	
 	//
@@ -54,17 +51,17 @@ namespace Helium
 	// 
 
 	template <typename T>
-	struct ArrayPtr
+	class ArrayPtr
 	{
 	public: 
 		ArrayPtr( T* ptr = NULL );
 		ArrayPtr( const ArrayPtr& rhs );
 		~ArrayPtr();
 
-		T* Ptr();
-
-		const T& operator[]( size_t i ) const;
-		T& operator[]( size_t i );
+		T* Ptr() const;
+		T& operator[]( size_t i ) const;
+		operator T*() const;
+		ArrayPtr& operator=( const ArrayPtr& rhs );
 
 	private: 
 		mutable T* m_Ptr; 

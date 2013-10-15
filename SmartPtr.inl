@@ -1,15 +1,22 @@
 template< typename T >
 Helium::AutoPtr< T >::AutoPtr( T* ptr )
-	: m_Ptr( 0 )
+	: m_Ptr( ptr )
 {
-	Reset( ptr );
+	m_Ptr = ptr;
 }
 
 template< typename T >
 Helium::AutoPtr< T >::AutoPtr( const AutoPtr& rhs )
-	: m_Ptr( 0 )
 {
-	m_Ptr = reinterpret_cast< uintptr_t >( AtomicExchange<void>( *reinterpret_cast<void**>( &rhs.m_Ptr ), 0 ) );
+	m_Ptr = AtomicExchange<T>( rhs.m_Ptr, NULL );
+}
+
+template< typename T >
+template< typename U >
+Helium::AutoPtr< T >::AutoPtr( const AutoPtr< U >& rhs )
+{
+	m_Ptr = rhs.m_Ptr;
+	m_Ptr = reinterpret_cast< T* >( AtomicExchange<void>( *reinterpret_cast<void**>( &rhs.m_Ptr ), 0 ) );
 }
 
 template< typename T >
@@ -22,51 +29,40 @@ Helium::AutoPtr< T >::~AutoPtr()
 }
 
 template< typename T >
-T* Helium::AutoPtr< T >::Ptr()
+T* Helium::AutoPtr< T >::Ptr() const
 {
-	return reinterpret_cast< T* >( m_Ptr & ~1 );
+	return reinterpret_cast< T* >( reinterpret_cast< uintptr_t >( m_Ptr ) & ~1 );
 }
 
 template< typename T >
-const T* Helium::AutoPtr< T >::Ptr() const
-{
-	return reinterpret_cast< T* >( m_Ptr & ~1 );
-}
-
-template< typename T >
-const T* Helium::AutoPtr< T >::operator->() const
+T* Helium::AutoPtr< T >::operator->() const
 {
 	return Ptr();
 }
 
 template< typename T >
-T* Helium::AutoPtr< T >::operator->()
+T& Helium::AutoPtr< T >::operator*() const
+{
+	return *Ptr();
+}
+
+template< typename T >
+Helium::AutoPtr< T >::operator T*() const
 {
 	return Ptr();
 }
 
 template< typename T >
-const T& Helium::AutoPtr< T >::operator*() const
+Helium::AutoPtr< T >& Helium::AutoPtr< T >::operator=( const AutoPtr& rhs )
 {
-	return *Ptr();
-}
-
-template< typename T >
-T& Helium::AutoPtr< T >::operator*()
-{
-	return *Ptr();
-}
-
-template< typename T >
-Helium::AutoPtr< T >::operator bool() const
-{
-	return Ptr() != 0;
+	m_Ptr = AtomicExchange<T>( rhs.m_Ptr, NULL );
+	return *this;
 }
 
 template< typename T >
 bool Helium::AutoPtr< T >::IsOrphan()
 {
-	return ( m_Ptr & 1 ) != 0;
+	return ( reinterpret_cast< uintptr_t >( m_Ptr ) & 1 ) != 0;
 }
 
 template< typename T >
@@ -74,11 +70,11 @@ void Helium::AutoPtr< T >::Orphan( bool orphan )
 {
 	if ( orphan )
 	{
-		m_Ptr |= 1;
+		m_Ptr = reinterpret_cast< T* >( reinterpret_cast< uintptr_t >( m_Ptr ) | 1 );
 	}
 	else
 	{
-		m_Ptr &= ~1;
+		m_Ptr = reinterpret_cast< T* >( reinterpret_cast< uintptr_t >( m_Ptr ) & ~1 );
 	}
 }
 
@@ -93,7 +89,7 @@ void Helium::AutoPtr< T >::Reset(T* ptr, bool carryOrphan)
 	}
 	uintptr_t next = reinterpret_cast<uintptr_t>( ptr );
 	HELIUM_ASSERT( ( next & 1 ) == 0 ); // this class only works for non-single-byte-aligned allocations!
-	m_Ptr = next;
+	m_Ptr = reinterpret_cast< T* >( next );
 	if ( carryOrphan )
 	{
 		Orphan( orphan );
@@ -104,7 +100,7 @@ template< typename T >
 T* Helium::AutoPtr< T >::Release()
 {
 	T* return_value = Ptr();
-	m_Ptr = 0;
+	m_Ptr = NULL;
 	return return_value;
 }
 
@@ -112,13 +108,12 @@ template< typename T >
 Helium::ArrayPtr< T >::ArrayPtr( T* ptr )
 	: m_Ptr( ptr )
 {
-
 }
 
 template< typename T >
 Helium::ArrayPtr< T >::ArrayPtr( const ArrayPtr& rhs )
 {
-	m_Ptr = AtomicExchange( rhs.m_Ptr, 0 );
+	m_Ptr = AtomicExchange<T>( rhs.m_Ptr, NULL );
 }
 
 template< typename T >
@@ -128,21 +123,28 @@ Helium::ArrayPtr< T >::~ArrayPtr()
 }
 
 template< typename T >
-T* Helium::ArrayPtr< T >::Ptr()
+T* Helium::ArrayPtr< T >::Ptr() const
 {
 	return m_Ptr; 
 }
 
 template< typename T >
-const T& Helium::ArrayPtr< T >::operator[]( size_t i ) const
+T& Helium::ArrayPtr< T >::operator[]( size_t i ) const
 {
 	return m_Ptr[i];
 }
 
 template< typename T >
-T& Helium::ArrayPtr< T >::operator[]( size_t i )
+Helium::ArrayPtr< T >::operator T*() const
 {
-	return m_Ptr[i];
+	return Ptr();
+}
+
+template< typename T >
+Helium::ArrayPtr< T >& Helium::ArrayPtr< T >::operator=( const ArrayPtr& rhs )
+{
+	m_Ptr = AtomicExchange<T>( rhs.m_Ptr, NULL );
+	return *this;
 }
 
 /// Constructor.
