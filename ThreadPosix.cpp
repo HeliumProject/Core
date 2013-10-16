@@ -109,7 +109,7 @@ bool Thread::Start( const char* pName, ThreadPriority priority )
     HELIUM_ASSERT( priority >= ThreadPriorities::Lowest && priority <= ThreadPriorities::Inherit );
 
     // Cache the name
-    MemoryCopy( m_Name, pName, sizeof( m_Name ) / sizeof( char ) );
+    CopyString( m_Name, pName );
 
     pthread_attr_t attr;
     HELIUM_VERIFY( pthread_attr_init(&attr) == 0 );

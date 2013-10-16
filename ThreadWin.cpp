@@ -21,19 +21,6 @@ static const int WIN32_THREAD_PRIORITY_MAP[] =
 	THREAD_PRIORITY_HIGHEST,       // PRIORITY_HIGHEST
 };
 
-// Thread name assignment exception information.
-struct ThreadNameInfo
-{
-	/// Info type (must be set to 0x1000).
-	ULONG_PTR dwType;
-	/// Thread name.
-	LPCSTR szName;
-	/// Thread ID (-1 = caller thread).
-	ULONG_PTR dwThreadId;
-	/// Reserved (must be set to zero).
-	ULONG_PTR dwFlags;
-};
-
 const uint32_t Helium::InvalidThreadId = ~0;
 
 /// Constructor.
@@ -65,7 +52,7 @@ bool Thread::Start( const char* pName, ThreadPriority priority )
 	HELIUM_ASSERT( priority >= ThreadPriorities::Lowest && priority <= ThreadPriorities::Inherit );
 
 	// Cache the name
-	MemoryCopy( m_Name, pName, sizeof( m_Name ) / sizeof( char ) );
+	CopyString( m_Name, pName );
 
 	// Make sure a thread hasn't already been started.
 	HELIUM_ASSERT( m_Handle == 0 );
@@ -81,30 +68,6 @@ bool Thread::Start( const char* pName, ThreadPriority priority )
 	HELIUM_ASSERT( m_Handle != 0 );
 	if( m_Handle != 0 )
 	{
-		// Assign the thread name.
-		if( m_Name && m_Name[ 0 ] != TXT( '\0' ) )
-		{
-			size_t charCount = StringLength( m_Name );
-
-			ThreadNameInfo nameInfo;
-			nameInfo.dwType = 0x1000;
-			nameInfo.dwThreadId = threadId;
-			nameInfo.dwFlags = 0;
-			nameInfo.szName = m_Name;
-
-			__try
-			{
-				RaiseException(
-					0x406D1388,
-					0,
-					sizeof( nameInfo ) / sizeof( ULONG_PTR ),
-					reinterpret_cast< ULONG_PTR* >( &nameInfo ) );
-			}
-			__except( EXCEPTION_CONTINUE_EXECUTION )
-			{
-			}
-		}
-
 		if ( priority != ThreadPriorities::Inherit )
 		{
 			// Set the thread priority.
@@ -201,7 +164,6 @@ bool Thread::IsValid() const
 	return ( m_Handle != 0 );
 }
 
-
 /// @fn void Helium::Thread::Run()
 /// Execute the thread code.
 
@@ -243,6 +205,42 @@ unsigned int __stdcall Thread::ThreadCallback( void* pData )
 	HELIUM_ASSERT( pData );
 
 	Thread* pThread = static_cast< Thread* >( pData );
+
+	// Assign the thread name.
+	if( pThread->m_Name && pThread->m_Name[ 0 ] != '\0' )
+	{
+		// Thread name assignment exception information.
+		struct ThreadNameInfo
+		{
+			/// Info type (must be set to 0x1000).
+			ULONG_PTR dwType;
+			/// Thread name.
+			LPCSTR szName;
+			/// Thread ID (-1 = caller thread).
+			ULONG_PTR dwThreadId;
+			/// Reserved (must be set to zero).
+			ULONG_PTR dwFlags;
+		};
+
+		ThreadNameInfo nameInfo;
+		nameInfo.dwType = 0x1000;
+		nameInfo.dwThreadId = ::GetCurrentThreadId();
+		nameInfo.dwFlags = 0;
+		nameInfo.szName = pThread->m_Name;
+
+		__try
+		{
+			RaiseException(
+				0x406D1388,
+				0,
+				sizeof( nameInfo ) / sizeof( ULONG_PTR ),
+				reinterpret_cast< ULONG_PTR* >( &nameInfo ) );
+		}
+		__except( EXCEPTION_CONTINUE_EXECUTION )
+		{
+		}
+	}
+
 	pThread->Run();
 
 	ThreadLocalStackAllocator::ReleaseMemoryHeap();
