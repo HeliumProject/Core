@@ -531,6 +531,201 @@ size_t Helium::StringLength( const T* pString )
 	return static_cast< size_t >( pEnd - pString );
 }
 
+/// Copy a string from a pointer to a static array of characters.
+///
+/// @param[out]    dest   The destination array.
+/// @param[in]     src    The string to copy from.
+/// @param[in]     count  The number of characters to copy.
+template < class T, size_t N >
+void Helium::CopyString( T (&dest)[N], const T* src, size_t count )
+{
+	CopyString( dest, N, src, count );
+}
+
+/// Copy a string from a pointer to another region of memory.
+///
+/// @param[out]    dest   The destination memory.
+/// @param[in]     src    The string to copy from.
+/// @param[in]     count  The number of characters to copy.
+template< class T >
+void Helium::CopyString( T* dest, size_t destCount, const T* src, size_t count )
+{
+	size_t length = StringLength( src );
+
+	if ( count && count < length )
+	{
+		length = count;
+	}
+
+	if ( destCount < length + 1 )
+	{
+		length = destCount - 1;
+	}
+
+	memcpy( dest, src, sizeof( T ) * length );
+	dest[ length ] = static_cast< T >( 0 );
+}
+
+/// Append a string from a pointer to a static array of characters.
+///
+/// @param[out]    dest   The destination array.
+/// @param[in]     src    The string to copy from.
+/// @param[in]     count  The number of characters to append.
+template < class T, size_t N >
+void Helium::AppendString( T (&dest)[N], const T* src, size_t count )
+{
+	size_t destLength = StringLength( dest );
+	CopyString( dest + destLength, N - destLength - 1, src, count );
+}
+
+/// Append a string from a pointer to another region of memory.
+///
+/// @param[out]    dest   The destination memory.
+/// @param[in]     src    The string to copy from.
+/// @param[in]     count  The number of characters to append.
+template< class T >
+void Helium::AppendString( T* dest, size_t destCount, const T* src, size_t count )
+{
+	size_t destLength = StringLength( dest );
+	CopyString( dest + destLength, destCount - destLength - 1, src, count );
+}
+
+namespace Helium
+{
+	template< class T >
+	int _CaseSensitiveCompare( T a, T b )
+	{
+		return a - b;
+	}
+
+	template< class T >
+	int _CaseInsensitiveCompare( T a, T b )
+	{
+		HELIUM_COMPILE_ASSERT( 'a' > 'A' );
+		const static int offset = 'a' - 'A';
+		if ( a >= 'A' && a <= 'Z' )
+		{
+			a += offset;
+		}
+		if ( b >= 'A' && b <= 'Z' )
+		{
+			b += offset;
+		}
+		return a - b;
+	}
+
+	template< class T, int (*C)( T a, T b ) >
+	int _CompareString( const T* a, const T* b, size_t count )
+	{
+		size_t lenA = StringLength( a );
+		size_t lenB = StringLength( b );
+		size_t min = lenA < lenB ? lenA : lenB;
+
+		count = count > 0 ? count : min+1; // Include null terminator in min
+	
+		int result;
+		const T *pA = a, *pB = b;
+		for ( size_t i=0; i<=min && i<count; i++ ) // note: compare against the null terminator
+		{
+			result = C( *pA++, *pB++ );
+			if ( result != 0 )
+			{
+				return result;
+			}
+		}
+
+		return 0;
+	}
+}
+
+/// Compare two strings (case-sensitive).
+///
+/// @param[out]    a      String a.
+/// @param[in]     b      String b.
+/// @param[in]     count  The number of characters to compare (at most).
+/// @return               Zero if the strings are equal, less than zero if a is less than b, etc...
+template < class T >
+int Helium::CompareString( const T* a, const T* b, size_t count )
+{
+	return _CompareString< T, _CaseSensitiveCompare >( a, b, count );
+}
+
+/// Compare two strings (case-insensitive).
+///
+/// @param[out]    a      String a.
+/// @param[in]     b      String b.
+/// @param[in]     count  The number of characters to compare (at most).
+/// @return               Zero if the strings are equal, less than zero if a is less than b, etc...
+template < class T >
+int Helium::CaseInsensitiveCompareString( const T* a, const T* b, size_t count )
+{
+	return _CompareString< T, _CaseInsensitiveCompare >( a, b, count );
+}
+
+/// Find the location of the specified character within a string.
+///
+/// @param[out]    data   The string to search within.
+/// @param[in]     value  The character to look for.
+/// @param[in]     count  The number of characters to search (at most).
+/// @return               The pointer to the found character, or NULL If not found.
+template< class T >
+const T* Helium::FindCharacter( const T* data, const T value, size_t count )
+{
+	size_t length = StringLength( data );
+	if ( count > 0 && count < length )
+	{
+		length = count;
+	}
+
+	size_t i=0;
+	const T* p=data;
+	while ( i<length && *p != value )
+	{
+		i++;
+		p++;
+	}
+	
+	return i == length ? NULL : p;
+}
+
+/// Find the location of the specified token (delimited by a character) within a string.
+///
+/// @param[out]    data   The string to search within.
+/// @param[in]     delim  The delimiter to mark the start of the next token.
+/// @param[in]     count  The number of characters to search (at most).
+/// @return               The pointer to the found token, or NULL If not found.
+template< class T >
+const T* Helium::FindNextToken( const T* data, const T delim, size_t count )
+{
+	size_t length = StringLength( data );
+	if ( count && count < length )
+	{
+		length = count;
+	}
+
+	size_t i=0;
+	const T* p=data;
+	while ( i<length && *p != delim )
+	{
+		i++;
+		p++;
+	}
+	
+	if ( i == length )
+	{
+		return NULL;
+	}
+
+	p++;
+	
+	if ( *p == static_cast<T>( 0 ) )
+	{
+		return NULL;
+	}
+
+	return p;
+}
+
 /// Get the invalid index value for the template integer type.
 ///
 /// @return  Invalid index value.

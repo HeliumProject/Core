@@ -84,7 +84,27 @@ namespace Helium
     //@{
     template< typename T > uint32_t StringHash( const T* pString );
     template< typename T > size_t StringLength( const T* pString );
-    //@}
+
+	template< class T, size_t N >
+	inline void CopyString( T (&dest)[N], const T* src, size_t count = 0 );
+	template< class T >
+	inline void CopyString( T* dest, size_t destCount, const T* src, size_t count = 0 );
+
+	template< class T, size_t N >
+	inline void AppendString( T (&dest)[N], const T* src, size_t count = 0 );
+	template< class T >
+	inline void AppendString( T* dest, size_t destCount, const T* src, size_t count = 0 );
+
+	template < class T >
+	inline int CompareString( const T* a, const T* b, size_t count = 0 );
+	template < class T >
+	inline int CaseInsensitiveCompareString( const T* a, const T* b, size_t count = 0 );
+
+	template< class T >
+	inline const T* FindCharacter( const T* data, const T value, size_t count = 0 );
+	template< class T >
+	inline const T* FindNextToken( const T* data, const T delim, size_t count = 0 );
+	//@}
 
     /// @defgroup utilityindex Index Utility Functions
     //@{
