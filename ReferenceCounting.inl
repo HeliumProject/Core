@@ -1,3 +1,12 @@
+/// Fetch the references counts for an objects.
+///
+/// @return The reference counts, high short are weak references, low short are strong references
+template< typename T >
+int32_t Helium::RefCountProxyBase< T >::GetRefCounts() const
+{
+	return m_refCounts;
+}
+
 /// Initialize this reference count proxy object.
 ///
 /// @param[in] pObject           Object for which to manage reference counting.

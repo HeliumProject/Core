@@ -34,6 +34,9 @@ namespace Helium
 	template< typename T >
 	class RefCountProxyBase
 	{
+	public:
+		int32_t GetRefCounts() const;
+
 	protected:
 		/// Reference-counted object.
 		T* volatile m_pObject;
