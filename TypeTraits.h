@@ -39,7 +39,7 @@ namespace std
 
 #if HELIUM_CC_GCC
 
-#if HELIUM_GCC_VERSION >= 40800
+#if HELIUM_CC_GCC_VERSION >= 40800
 
 namespace std
 {
