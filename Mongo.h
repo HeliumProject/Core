@@ -47,6 +47,12 @@ namespace Helium
 
 		class Database;
 
+		struct ObjectRequest
+		{
+			Persist::BsonObjectId id;
+			StrongPtr< Model > object;
+		};
+
 		template< class T >
 		class HELIUM_MONGO_API Cursor : public Helium::NonCopyable
 		{
@@ -56,6 +62,9 @@ namespace Helium
 
 			// set the state of the cursor (used by the database class)
 			void Set( Database* db, mongo_cursor* cursor );
+
+			// update the state of an existing object that the caller and find via id
+			bool Get( Delegate< ObjectRequest& > delegate );
 
 			// get a bunch of result objects from the cursor
 			bool Get( Helium::DynamicArray< Helium::StrongPtr< T > >& objects, size_t maxCount = ~0 );

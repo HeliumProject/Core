@@ -21,6 +21,55 @@ void Helium::Mongo::Cursor< T >::Set( Database* db, mongo_cursor* cursor )
 }
 
 template< class T >
+bool Helium::Mongo::Cursor< T >::Get( Delegate< ObjectRequest& > delegate )
+{
+	if ( !HELIUM_VERIFY( db ) || !HELIUM_VERIFY( cursor ) || !HELIUM_VERIFY_MSG( db->threadId == Thread::GetCurrentId(), "Database access from improper thread" ) )
+	{
+		return false;
+	}
+
+	bool result = false;
+
+	if ( mongo_cursor_next( cursor ) == MONGO_OK )
+	{
+		bson_iterator i[1];
+		if ( HELIUM_VERIFY( BSON_OID == bson_find( i, &cursor->current, "_id" ) ) )
+		{
+			bson_oid_t* oid = HELIUM_VERIFY( bson_iterator_oid( i ) );
+
+			Persist::BsonObjectId id;
+			MemoryCopy( id.bytes, oid->bytes, sizeof( bson_oid_t ) );
+
+			ObjectRequest request;
+			request.id = id;
+			delegate.Invoke( request );
+			
+			if ( request.object.ReferencesObject() )
+			{
+				HELIUM_ASSERT( request.object->id == id );
+			}
+			else
+			{
+				request.object = new T;
+			}
+
+			bson_iterator_init( i, &cursor->current );
+			try
+			{
+				Helium::Persist::ArchiveReaderBson::ReadFromBson( i, reinterpret_cast< Helium::Reflect::ObjectPtr& >( request.object ) );
+				result = true;
+			}
+			catch ( Helium::Exception& ex )
+			{
+				Helium::Log::Error( "Failed to generate BSON for object: %s\n", ex.What() );
+			}
+		}
+	}
+
+	return result;
+}
+
+template< class T >
 bool Helium::Mongo::Cursor< T >::Get( Helium::DynamicArray< Helium::StrongPtr< T > >& objects, size_t count )
 {
 	if ( !HELIUM_VERIFY( db ) || !HELIUM_VERIFY( cursor ) || !HELIUM_VERIFY_MSG( db->threadId == Thread::GetCurrentId(), "Database access from improper thread" ) )
