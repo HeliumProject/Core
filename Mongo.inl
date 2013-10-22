@@ -35,7 +35,8 @@ bool Helium::Mongo::Cursor< T >::Get( Delegate< ObjectRequest& > delegate )
 		bson_iterator i[1];
 		if ( HELIUM_VERIFY( BSON_OID == bson_find( i, &cursor->current, "_id" ) ) )
 		{
-			bson_oid_t* oid = HELIUM_VERIFY( bson_iterator_oid( i ) );
+			bson_oid_t* oid = bson_iterator_oid( i );
+			HELIUM_ASSERT( oid );
 
 			Persist::BsonObjectId id;
 			MemoryCopy( id.bytes, oid->bytes, sizeof( bson_oid_t ) );
