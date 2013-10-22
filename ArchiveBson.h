@@ -89,7 +89,7 @@ namespace Helium
 		public:
 			static void ReadFromStream( Stream& stream, Reflect::ObjectPtr& object, Reflect::ObjectResolver* resolver = NULL, uint32_t flags = 0 );
 			static void ReadFromStream( Stream& stream, DynamicArray< Reflect::ObjectPtr > & objects, Reflect::ObjectResolver* resolver = NULL, uint32_t flags = 0 );
-			static void ReadFromBson( bson_iterator* i, Reflect::ObjectPtr& object, Reflect::ObjectResolver* resolver = NULL, uint32_t flags = 0 );
+			static void ReadFromBson( bson_iterator* i, const Reflect::ObjectPtr& object, Reflect::ObjectResolver* resolver = NULL, uint32_t flags = 0 );
 
 			ArchiveReaderBson( const FilePath& path, Reflect::ObjectResolver* resolver = NULL, uint32_t flags = 0x0 );
 			ArchiveReaderBson( Stream *stream, Reflect::ObjectResolver* resolver = NULL, uint32_t flags = 0x0 );

@@ -448,7 +448,7 @@ void ArchiveReaderBson::ReadFromStream( Stream& stream, DynamicArray< ObjectPtr 
 	archive.Close();
 }
 
-void ArchiveReaderBson::ReadFromBson( bson_iterator* i, ObjectPtr& object, ObjectResolver* resolver, uint32_t flags )
+void ArchiveReaderBson::ReadFromBson( bson_iterator* i, const ObjectPtr& object, ObjectResolver* resolver, uint32_t flags )
 {
 	ArchiveReaderBson archive( NULL, resolver, flags );
 	archive.DeserializeInstance( i, object.Ptr(), object->GetMetaClass(), object );
