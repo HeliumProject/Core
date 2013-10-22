@@ -11,7 +11,33 @@ using namespace Helium::Reflect;
 using namespace Helium::Persist;
 using namespace Helium::Mongo;
 
-const char* Model::defaultCollection = NULL;
+static String GetNamespace( const String& dbName, const char* collection, const MetaClass* metaClass )
+{
+	String ns ( dbName );
+	ns += ".";
+
+	if ( collection )
+	{
+		ns += collection;
+		return ns;
+	}
+
+	std::string defaultCollection;
+	if ( metaClass->GetProperty( "defaultCollection", defaultCollection ) )
+	{
+		ns += defaultCollection.c_str();
+		return ns;
+	}
+
+	String metaClassName ( metaClass->m_Name );
+	for ( size_t startIndex = 0, foundIndex = Invalid<size_t>(); ( foundIndex = metaClassName.Find( ':', startIndex ) ) != Invalid<size_t>(); )
+	{
+		metaClassName.Remove( foundIndex, 1 );
+	}
+
+	ns += metaClassName;
+	return ns;
+}
 
 void Model::PopulateMetaType( Helium::Reflect::MetaStruct& type )
 {
@@ -75,6 +101,97 @@ const char* Mongo::GetErrorString( int status )
 	return "Unknown error";
 }
 
+Cursor::Cursor( Database* db, mongo_cursor* cursor )
+	: db( db )
+	, cursor( cursor )
+{
+}
+
+Cursor::Cursor( const Cursor& rhs )
+	: db( rhs.db )
+	, cursor( rhs.cursor )
+{
+	rhs.db = NULL;
+	rhs.cursor = NULL;
+}
+
+Cursor::~Cursor()
+{
+	if ( this->cursor )
+	{
+		mongo_cursor_destroy( this->cursor );
+	}
+}
+
+Helium::StrongPtr< Model > Cursor::Next()
+{
+	if ( !HELIUM_VERIFY( db ) || !HELIUM_VERIFY( cursor ) || !HELIUM_VERIFY_MSG( db->IsCorrectThread(), "Database access from improper thread" ) )
+	{
+		return NULL;
+	}
+
+	Helium::StrongPtr< Model > object;
+
+	if ( mongo_cursor_next( cursor ) == MONGO_OK )
+	{
+		bson_iterator i[1];
+		if ( HELIUM_VERIFY( BSON_STRING == bson_find( i, &cursor->current, "_type" ) ) )
+		{
+			const char* typeName = bson_iterator_string( i );
+			HELIUM_ASSERT( typeName );
+
+			const Reflect::MetaClass* type = Reflect::Registry::GetInstance()->GetMetaClass( typeName );
+			if ( type )
+			{
+				object = Reflect::AssertCast< Model >( type->m_Creator() );
+			}
+		}
+
+		if ( object.ReferencesObject() )
+		{
+			bson_iterator_init( i, &cursor->current );
+
+			try
+			{
+				Helium::Persist::ArchiveReaderBson::ReadFromBson( i, reinterpret_cast< Helium::Reflect::ObjectPtr& >( object ) );
+			}
+			catch ( Helium::Exception& ex )
+			{
+				Helium::Log::Error( "Failed to parse BSON for object: %s\n", ex.What() );
+			}
+		}
+	}
+
+	return object;
+}
+
+bool Cursor::Next( const Helium::StrongPtr< Model >& object )
+{
+	if ( !HELIUM_VERIFY( db ) || !HELIUM_VERIFY( cursor ) || !HELIUM_VERIFY_MSG( db->IsCorrectThread(), "Database access from improper thread" ) )
+	{
+		return NULL;
+	}
+
+	bool result = true;
+
+	if ( mongo_cursor_next( cursor ) == MONGO_OK )
+	{
+		bson_iterator i[1];
+		bson_iterator_init( i, &cursor->current );
+		try
+		{
+			Helium::Persist::ArchiveReaderBson::ReadFromBson( i, reinterpret_cast< const Helium::Reflect::ObjectPtr& >( object ) );
+		}
+		catch ( Helium::Exception& ex )
+		{
+			Helium::Log::Error( "Failed to generate BSON for object: %s\n", ex.What() );
+			result = false;
+		}
+	}
+
+	return result;
+}
+
 Database::Database( const char* name )
 	: name( name )
 	, isConnected( false )
@@ -120,7 +237,7 @@ double Database::GetCollectionCount( const char* name )
 
 bool Database::CreateCappedCollection( const char* name, int cappedSizeInBytes, int cappedMaxCount )
 {
-	if ( !HELIUM_VERIFY( this->threadId == Thread::GetCurrentId() ) )
+	if ( !HELIUM_VERIFY( IsCorrectThread() ) )
 	{
 		return false;
 	}
@@ -142,7 +259,7 @@ bool Database::CreateCappedCollection( const char* name, int cappedSizeInBytes, 
 
 bool Database::Insert( const StrongPtr< Model >& object, const char* collection )
 {
-	if ( !HELIUM_VERIFY( object->id == BsonObjectId::Null ) || !HELIUM_VERIFY_MSG( this->threadId == Thread::GetCurrentId(), "Database access from improper thread" ) )
+	if ( !HELIUM_VERIFY( object->id == BsonObjectId::Null ) || !HELIUM_VERIFY_MSG( IsCorrectThread(), "Database access from improper thread" ) )
 	{
 		return false;
 	}
@@ -157,6 +274,7 @@ bool Database::Insert( const StrongPtr< Model >& object, const char* collection 
 	HELIUM_VERIFY( BSON_OK == bson_init( b ) );
 	try
 	{
+		HELIUM_VERIFY( BSON_OK == bson_append_string( b, "_type", object->GetMetaClass()->m_Name ) );
 		ArchiveWriterBson::WriteToBson( object, b );
 	}
 	catch ( Helium::Exception& )
@@ -167,12 +285,7 @@ bool Database::Insert( const StrongPtr< Model >& object, const char* collection 
 
 	if ( result )
 	{
-		const MetaClass* metaClass = object->GetMetaClass();
-
-		String ns ( name );
-		ns += ".";
-		ns += collection ? collection : metaClass->m_Name;
-
+		String ns = GetNamespace( name, collection, object->GetMetaClass() );
 		if ( MONGO_OK != mongo_insert( conn, ns.GetData(), b, NULL ) )
 		{
 			Log::Error( "mongo_insert failed: %s\n", GetErrorString( conn->err ) );
@@ -188,7 +301,7 @@ bool Database::Insert( const StrongPtr< Model >& object, const char* collection 
 
 bool Database::Update( const StrongPtr< Model >& object, const char* collection )
 {
-	if ( !HELIUM_VERIFY_MSG( object->id != BsonObjectId::Null, "Cannot update object with null id" ) || !HELIUM_VERIFY_MSG( this->threadId == Thread::GetCurrentId(), "Database access from improper thread" ) )
+	if ( !HELIUM_VERIFY_MSG( object->id != BsonObjectId::Null, "Cannot update object with null id" ) || !HELIUM_VERIFY_MSG( IsCorrectThread(), "Database access from improper thread" ) )
 	{
 		return false;
 	}
@@ -210,7 +323,10 @@ bool Database::Update( const StrongPtr< Model >& object, const char* collection 
 	bool result = true;
 	try
 	{
-		ArchiveWriterBson::WriteToBson( object, op, "$set" );
+		HELIUM_VERIFY( BSON_OK == bson_append_start_object( op, "$set" ) );
+		HELIUM_VERIFY( BSON_OK == bson_append_string( op, "_type", object->GetMetaClass()->m_Name ) );
+		ArchiveWriterBson::WriteToBson( object, op );
+		HELIUM_VERIFY( BSON_OK == bson_append_finish_object( op ) );
 	}
 	catch ( Helium::Exception& )
 	{
@@ -221,12 +337,7 @@ bool Database::Update( const StrongPtr< Model >& object, const char* collection 
 
 	if ( result )
 	{
-		const MetaClass* metaClass = object->GetMetaClass();
-
-		String ns ( name );
-		ns += ".";
-		ns += collection ? collection : metaClass->m_Name;
-
+		String ns = GetNamespace( name, collection, object->GetMetaClass() );
 		if ( MONGO_OK != mongo_update( conn, ns.GetData(), cond, op, MONGO_UPDATE_BASIC, NULL ) )
 		{
 			Log::Error( "mongo_update failed: %s\n", GetErrorString( conn->err ) );
@@ -243,7 +354,7 @@ bool Database::Update( const StrongPtr< Model >& object, const char* collection 
 
 bool Database::Get( const StrongPtr< Model >& object, const char* collection )
 {
-	if ( !HELIUM_VERIFY_MSG( object->id != BsonObjectId::Null, "Cannot update object with null id" ) || !HELIUM_VERIFY_MSG( this->threadId == Thread::GetCurrentId(), "Database access from improper thread" ) )
+	if ( !HELIUM_VERIFY_MSG( object->id != BsonObjectId::Null, "Cannot update object with null id" ) || !HELIUM_VERIFY_MSG( IsCorrectThread(), "Database access from improper thread" ) )
 	{
 		return false;
 	}
@@ -266,12 +377,7 @@ bool Database::Get( const StrongPtr< Model >& object, const char* collection )
 	bson_init_zero( out );
 
 	{
-		const MetaClass* metaClass = object->GetMetaClass();
-
-		String ns ( name );
-		ns += ".";
-		ns += collection ? collection : metaClass->m_Name;
-
+		String ns = GetNamespace( name, collection, object->GetMetaClass() );
 		if ( MONGO_OK != mongo_find_one( conn, ns.GetData(), query, NULL, out ) )
 		{
 			Log::Error( "mongo_find_one failed: %s\n", GetErrorString( conn->err ) );
@@ -303,7 +409,7 @@ bool Database::Get( const StrongPtr< Model >& object, const char* collection )
 
 bool Database::Insert( StrongPtr< Model >* objects, size_t count, const char* collection )
 {
-	if ( !HELIUM_VERIFY( objects ) || !HELIUM_VERIFY( count ) || !HELIUM_VERIFY_MSG( this->threadId == Thread::GetCurrentId(), "Database access from improper thread" ) )
+	if ( !HELIUM_VERIFY( objects ) || !HELIUM_VERIFY( count ) || !HELIUM_VERIFY_MSG( IsCorrectThread(), "Database access from improper thread" ) )
 	{
 		return false;
 	}
@@ -340,6 +446,7 @@ bool Database::Insert( StrongPtr< Model >* objects, size_t count, const char* co
 
 		try
 		{
+			HELIUM_VERIFY( BSON_OK == bson_append_string( b, "_type", objects[i]->GetMetaClass()->m_Name ) );
 			ArchiveWriterBson::WriteToBson( reinterpret_cast< ObjectPtr& >( objects[i] ), b );
 		}
 		catch ( Helium::Exception& )
@@ -353,10 +460,7 @@ bool Database::Insert( StrongPtr< Model >* objects, size_t count, const char* co
 
 	if ( result )
 	{
-		String ns ( name );
-		ns += ".";
-		ns += collection ? collection : metaClass->m_Name;
-
+		String ns = GetNamespace( name, collection, metaClass );
 		if ( MONGO_OK != mongo_insert_batch( conn, ns.GetData(), const_cast< const bson** >( pointers.GetData() ), static_cast< int >( pointers.GetSize() ), NULL, 0x0 ) )
 		{
 			Log::Error( "mongo_insert_batch failed: %s\n", GetErrorString( conn->err ) );
@@ -372,4 +476,28 @@ bool Database::Insert( StrongPtr< Model >* objects, size_t count, const char* co
 	}
 
 	return result;
+}
+
+Cursor Database::Find( const char* collection, const bson* query, int limit, int skip, int options )
+{
+	if ( !HELIUM_VERIFY_MSG( IsCorrectThread(), "Database access from improper thread" ) )
+	{
+		return Cursor();
+	}
+
+	Helium::String ns ( name );
+	ns += ".";
+	ns += collection;
+
+	// we don't currently support specifying fields because we need to ensure _type is sent back, and
+	//  merging bson documents is difficult/impossible with the current version of the bson api
+	mongo_cursor* c = mongo_find( conn, ns.GetData(), query, NULL, limit, skip, options );
+	if ( c )
+	{
+		return Cursor( this, c );
+	}
+	else
+	{
+		return Cursor();
+	}
 }
