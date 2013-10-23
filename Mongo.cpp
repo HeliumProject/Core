@@ -169,7 +169,7 @@ bool Cursor::Next( const Helium::StrongPtr< Model >& object )
 {
 	if ( !HELIUM_VERIFY( db ) || !HELIUM_VERIFY( cursor ) || !HELIUM_VERIFY_MSG( db->IsCorrectThread(), "Database access from improper thread" ) )
 	{
-		return NULL;
+		return false;
 	}
 
 	bool result = true;
