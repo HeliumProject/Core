@@ -41,7 +41,8 @@ static String GetNamespace( const String& dbName, const char* collection, const 
 
 void Model::PopulateMetaType( Helium::Reflect::MetaStruct& type )
 {
-	type.AddField( &Model::id, "_id" );
+	// some db interactions require _id NOT be set (update), so discard the value but load it if we find it in data
+	type.AddField( &Model::id, "_id", Reflect::FieldFlags::Discard );
 }
 
 namespace Helium
@@ -274,6 +275,9 @@ bool Database::Insert( const StrongPtr< Model >& object, const char* collection 
 	HELIUM_VERIFY( BSON_OK == bson_init( b ) );
 	try
 	{
+		bson_oid_t oid[1];
+		MemoryCopy( oid, object->id.bytes, sizeof( bson_oid_t ) );	
+		HELIUM_VERIFY( BSON_OK == bson_append_oid( b, "_id", oid ) );
 		HELIUM_VERIFY( BSON_OK == bson_append_string( b, "_type", object->GetMetaClass()->m_Name ) );
 		ArchiveWriterBson::WriteToBson( object, b );
 	}
@@ -324,7 +328,6 @@ bool Database::Update( const StrongPtr< Model >& object, const char* collection 
 	try
 	{
 		HELIUM_VERIFY( BSON_OK == bson_append_start_object( op, "$set" ) );
-		HELIUM_VERIFY( BSON_OK == bson_append_string( op, "_type", object->GetMetaClass()->m_Name ) );
 		ArchiveWriterBson::WriteToBson( object, op );
 		HELIUM_VERIFY( BSON_OK == bson_append_finish_object( op ) );
 	}
@@ -446,6 +449,9 @@ bool Database::Insert( StrongPtr< Model >* objects, size_t count, const char* co
 
 		try
 		{
+			bson_oid_t oid[1];
+			MemoryCopy( oid, objects[i]->id.bytes, sizeof( bson_oid_t ) );
+			HELIUM_VERIFY( BSON_OK == bson_append_oid( b, "_id", oid ) );
 			HELIUM_VERIFY( BSON_OK == bson_append_string( b, "_type", objects[i]->GetMetaClass()->m_Name ) );
 			ArchiveWriterBson::WriteToBson( reinterpret_cast< ObjectPtr& >( objects[i] ), b );
 		}
