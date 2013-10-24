@@ -636,16 +636,16 @@ void ArchiveReaderBson::DeserializeInstance( bson_iterator* i, void* instance, c
 			if ( key )
 			{
 				HELIUM_TRACE(
-					TraceLevels::Warning, 
-					"ArchiveReaderBson::DeserializeInstance - Could not find field '%s' (CRC-32 = %d)\n", 
-					key, 
+					TraceLevels::Debug,
+					"ArchiveReaderBson::DeserializeInstance - Could not find field '%s' (CRC-32 = %" PRIu32 ")\n",
+					key,
 					fieldCrc);
 			}
 			else
 			{
 				HELIUM_TRACE(
-					TraceLevels::Warning, 
-					"ArchiveReaderBson::DeserializeInstance - Could not find field with CRC-32 %d)\n", 
+					TraceLevels::Debug,
+					"ArchiveReaderBson::DeserializeInstance - Could not find field with CRC-32 %" PRIu32 ")\n",
 					fieldCrc);
 			}
 				
