@@ -74,7 +74,7 @@ void ReflectInterpreter::InterpretType(const std::vector<Reflect::Object*>& inst
 
 	if ( labelText.empty() )
 	{
-		labelText = *composite->m_Name;
+		labelText = composite->m_Name;
 	}
 
 	container->a_Name.Set( labelText );
