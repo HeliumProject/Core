@@ -28,14 +28,7 @@ namespace Helium
 
 		struct ControlChangingArgs
 		{
-			ControlChangingArgs( class Control* control, Reflect::Data newValue, bool preview )
-				: m_Control( control )
-				, m_NewValue( newValue )
-				, m_Preview( preview )
-				, m_Veto( false )
-			{
-
-			}
+			inline ControlChangingArgs( class Control* control, Reflect::Data newValue, bool preview );
 
 			Control*      m_Control;
 			Reflect::Data m_NewValue;
@@ -46,7 +39,7 @@ namespace Helium
 
 		struct ControlChangedArgs
 		{
-			ControlChangedArgs(class Control* control) : m_Control (control) {}
+			inline ControlChangedArgs(class Control* control);
 
 			Control* m_Control;
 		};
@@ -54,11 +47,7 @@ namespace Helium
 
 		struct PopulateItem
 		{
-			PopulateItem(const std::string& key, const std::string& data)
-			{
-				m_Key = key;
-				m_Data = data;
-			}
+			inline PopulateItem(const std::string& key, const std::string& data);
 
 			std::string m_Key;
 			std::string m_Data;
@@ -68,7 +57,7 @@ namespace Helium
 
 		struct PopulateLinkArgs
 		{
-			PopulateLinkArgs(uint32_t type) : m_Type (type) {}
+			inline PopulateLinkArgs(uint32_t type);
 
 			uint32_t        m_Type;
 			V_PopulateItem  m_Items;
@@ -77,7 +66,7 @@ namespace Helium
 
 		struct SelectLinkArgs
 		{
-			SelectLinkArgs(const std::string& id) : m_ID (id) {}
+			inline SelectLinkArgs(const std::string& id);
 
 			const std::string& m_ID;
 		};
@@ -85,7 +74,7 @@ namespace Helium
 
 		struct PickLinkArgs
 		{
-			PickLinkArgs(const DataBindingPtr& data) : m_DataBinding (data) {}
+			inline PickLinkArgs(const DataBindingPtr& data);
 
 			const DataBindingPtr& m_DataBinding;
 		};
@@ -100,31 +89,10 @@ namespace Helium
 		public:
 			HELIUM_DECLARE_ABSTRACT( ClientData, Reflect::Object );
 
-			ClientData( Control* control = NULL )
-				: m_Control ( control )
-			{
+			inline ClientData( Control* control = NULL );
 
-			}
-
-			virtual ~ClientData()
-			{
-
-			}
-
-			Control* GetControl()
-			{
-				return m_Control;
-			}
-
-			const Control* GetControl() const
-			{
-				return m_Control;
-			}
-
-			void SetControl( Control* control )
-			{
-				m_Control = control;
-			}
+			inline Control* GetControl() const;
+			inline void SetControl( Control* control );
 
 		protected:
 			Control* m_Control;
@@ -140,27 +108,16 @@ namespace Helium
 		public:
 			HELIUM_DECLARE_ABSTRACT( Widget, Reflect::Object );
 
-			Widget()
-				: m_Control( NULL )
-			{
+			inline Widget();
 
-			}
-
-			Inspect::Control* GetControl()
-			{
-				return m_Control;
-			}
-
-			void SetControl( Inspect::Control* control )
-			{
-				m_Control = control;
-			}
+			inline Control* GetControl() const;
+			inline void SetControl( Control* control );
 
 			virtual void Read() = 0;
 			virtual bool Write() = 0;
 
 		protected:
-			Inspect::Control* m_Control;
+			Control* m_Control;
 		};
 		typedef Helium::StrongPtr<Widget> WidgetPtr;
 
@@ -180,63 +137,37 @@ namespace Helium
 
 			int GetDepth();
 
-			Canvas* GetCanvas()
-			{
-				return m_Canvas;
-			}
+			// every control knows what canvas its on
+			inline Canvas* GetCanvas() const;
 			void SetCanvas(Canvas* canvas);
 
-			Container* GetParent()
-			{
-				return m_Parent;
-			}
+			// every control has a parent (which may be the canvas)
+			inline Container* GetParent() const;
 			void SetParent( Container* parent );
 
-			// 
-			// Client data
-			// 
+			// the widget is the interface to the actual ui
+			inline Widget* GetWidget() const;
+			inline void SetWidget( Widget* widget );
 
-			Widget* GetWidget()
-			{
-				return m_Widget;
-			}
-			void SetWidget( Widget* widget )
-			{
-				m_Widget = widget;
-			}
+			// client data is metadata about this control
+			inline ClientData* GetClientData() const;
+			inline void SetClientData( ClientData* clientData );
 
-			// 
-			// Client data
-			// 
+			// get a specified property as a string
+			inline const std::string& GetProperty( const std::string& key ) const;
 
-			ClientData* GetClientData()
-			{
-				return m_ClientData;
-			}
-			void SetClientData( ClientData* clientData )
-			{
-				m_ClientData = clientData;
-			}
+			// access to properties as typed data
+			template<class T> bool GetProperty( const std::string& key, T& value ) const;
+			template<class T> void SetProperty( const std::string& key, const T& value );
 
-			//
-			// Data Binding
-			//
+			// access to properties as string data
+			template<> bool GetProperty( const std::string& key, std::string& value ) const;
+			template<> void SetProperty( const std::string& key, const std::string& value );
 
-			bool IsBound() const
-			{
-				return m_DataBinding.ReferencesObject();
-			}
-
-			const DataBinding* GetBinding() const
-			{
-				return m_DataBinding;
-			}
-
+			// data binding governs the data state of the ui
+			inline bool IsBound() const;
+			inline const DataBinding* GetBinding() const;
 			virtual void Bind(const DataBindingPtr& data);
-
-			//
-			// Defaults
-			//
 
 			// queries if value is at default
 			virtual bool IsDefault() const;
@@ -264,7 +195,7 @@ namespace Helium
 			virtual void Unrealize();
 
 			// populated cachend UI state (drop down lists, etc)
-			virtual void Populate() {}
+			virtual void Populate();
 
 			//
 			// Read
@@ -322,7 +253,7 @@ namespace Helium
 			Attribute< float32_t >                  a_ProportionalHeight;
 			Attribute< std::string >                a_Default;                // the default value
 			Attribute< std::string >                a_HelpText;               // the help text for this control
-			
+
 			mutable ControlSignature::Event         e_Realized;               // upon realization of the control
 			mutable ControlSignature::Event         e_Unrealized;
 
@@ -357,123 +288,11 @@ namespace Helium
 			// client-configurable data
 			ClientDataPtr       m_ClientData;
 
-			//
 			// Properties System
-			//
-		private:
 			mutable std::map< std::string, std::string > m_Properties;
-
-		public:
-
-			template<class T>
-			inline void SetProperty( const std::string& key, const T& value )
-			{
-				std::ostringstream str;
-				str << value;
-
-				if ( !str.fail() )
-				{
-					SetProperty<std::string>( key, str.str() );
-				}
-			}
-
-			template<class T>
-			inline bool GetProperty( const std::string& key, T& value ) const
-			{
-				std::string strValue;
-				bool result = GetProperty<std::string>( key, strValue );
-
-				if ( result )
-				{
-					std::istringstream str( strValue );
-					str >> value;
-					return !str.fail();
-				}
-
-				return false;
-			}
-
-			inline const std::string& GetProperty( const std::string& key ) const
-			{
-				std::map< std::string, std::string >::const_iterator found = m_Properties.find( key );
-				if ( found != m_Properties.end() )
-				{
-					return found->second;
-				}
-
-				static std::string empty;
-				return empty;
-			}
 		};
 
 		typedef Helium::StrongPtr<Control> ControlPtr;
-		typedef std::vector<ControlPtr> V_Control;
-
-		template<class T>
-		inline bool Control::ReadTypedData(const typename DataBindingTemplate<T>::Ptr& data, T& val)
-		{
-			if (data)
-			{
-				T currentValue;
-				data->Get( currentValue );
-			}
-
-			HELIUM_BREAK(); // you should not call this, your control is using custom data
-			return false;
-		}
-
-		template<class T>
-		inline bool Control::WriteTypedData(const T& val, const typename DataBindingTemplate<T>::Ptr& dataBinding, bool preview)
-		{
-			if (dataBinding)
-			{
-				T currentValue;
-				dataBinding->Get( currentValue );
-				if ( val == currentValue )
-				{
-					return true;
-				}
-
-				AutoPtr< Reflect::Translator > translator( Reflect::AllocateTranslator< T >() );
-				if ( !PreWrite( Reflect::Data( Reflect::Pointer( &currentValue ), translator.Ptr() ), preview ) )
-				{
-					Read();
-					return false;
-				}
-
-				m_IsWriting = true;
-				bool result = dataBinding->Set( val );
-				m_IsWriting = false;
-
-				if (result)
-				{
-					PostWrite();
-					return true;
-				}
-			}
-
-			HELIUM_BREAK(); // you should not call this, your control is using custom data
-			return false;
-		}
-
-		template<>
-		inline void Control::SetProperty( const std::string& key, const std::string& value )
-		{
-			m_Properties[key] = value;
-		}
-
-		template<>
-		inline bool Control::GetProperty( const std::string& key, std::string& value ) const
-		{
-			std::map< std::string, std::string >::const_iterator found = m_Properties.find( key ); 
-			if ( found != m_Properties.end() )
-			{
-				value = found->second;
-				return true;
-			}
-
-			return false;
-		}
 
 #ifdef PROFILE_ACCUMULATION
 		HELIUM_INSPECT_API extern Profile::Accumulator g_RealizeAccumulator;
@@ -481,3 +300,5 @@ namespace Helium
 #endif
 	}
 }
+
+#include "Inspect/Control.inl"

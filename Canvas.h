@@ -5,54 +5,39 @@
 
 namespace Helium
 {
-    namespace Inspect
-    {
-        struct CanvasShowArgs
-        {
-            CanvasShowArgs(bool show)
-                : m_Show(show)
-            {
+	namespace Inspect
+	{
+		struct CanvasShowArgs
+		{
+			inline CanvasShowArgs(bool show);
 
-            }
+			bool m_Show;
+		};
+		typedef Helium::Signature< const CanvasShowArgs&> CanvasShowSignature;
 
-            bool m_Show;
-        };
-        typedef Helium::Signature< const CanvasShowArgs&> CanvasShowSignature;
+		class HELIUM_INSPECT_API Canvas : public Container
+		{
+		public:
+			HELIUM_DECLARE_ABSTRACT( Canvas, Container );
 
-        class HELIUM_INSPECT_API Canvas : public Container
-        {
-        public:
-            HELIUM_DECLARE_ABSTRACT( Canvas, Container );
+			Canvas();
+			~Canvas();
 
-            Canvas();
-            ~Canvas();
+			virtual void RealizeControl(Control* control) = 0;
+			virtual void UnrealizeControl(Control* control) = 0;
 
-            virtual void RealizeControl(Control* control) = 0;
-            virtual void UnrealizeControl(Control* control) = 0;
+			inline int GetDefaultSize(Axis axis);
+			inline int GetBorder();
+			inline int GetPad();
 
-            int GetDefaultSize(Axis axis)
-            {
-                return m_DefaultSize[axis];
-            }
+			CanvasShowSignature::Event e_Show;
 
-            int GetBorder()
-            {
-                return m_Border;
-            }
-
-            int GetPad()
-            {
-                return m_Pad;
-            }
-
-            CanvasShowSignature::Event e_Show;
-
-        protected:
-            Point m_DefaultSize;  // standard control size
-            int m_Border;               // standard border width
-            int m_Pad;                  // standard pad b/t controls
-        };
-
-        typedef Helium::SmartPtr<Canvas> CanvasPtr;
-    }
+		protected:
+			Point m_DefaultSize;  // standard control size
+			int   m_Border;       // standard border width
+			int   m_Pad;          // standard pad b/t controls
+		};
+	}
 }
+
+#include "Inspect/Canvas.inl"

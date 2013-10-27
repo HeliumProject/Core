@@ -1,5 +1,5 @@
 #include "InspectPch.h"
-#include "Interpreter.h"
+#include "Inspect/Interpreter.h"
 
 #include "Inspect/Canvas.h"
 #include "Inspect/Container.h"
@@ -18,39 +18,39 @@ ContainerStackPointer::ContainerStackPointer()
 
 ContainerStackPointer::~ContainerStackPointer()
 {
-    std::multimap< uint32_t, std::stack< ContainerPtr >* >::const_iterator itr = s_Stacks.lower_bound( m_Key );
-    std::multimap< uint32_t, std::stack< ContainerPtr >* >::const_iterator end = s_Stacks.upper_bound( m_Key );
-    for ( ; itr != end; ++itr )
-    {
-        delete itr->second;
-    }
+	std::multimap< uint32_t, std::stack< ContainerPtr >* >::const_iterator itr = s_Stacks.lower_bound( m_Key );
+	std::multimap< uint32_t, std::stack< ContainerPtr >* >::const_iterator end = s_Stacks.upper_bound( m_Key );
+	for ( ; itr != end; ++itr )
+	{
+		delete itr->second;
+	}
 
-    std::multimap< uint32_t, std::stack< ContainerPtr >* >::iterator item;
-    while ( ( item = s_Stacks.find( m_Key ) ) != s_Stacks.end() )
-    {
-        s_Stacks.erase( item );
-    }
+	std::multimap< uint32_t, std::stack< ContainerPtr >* >::iterator item;
+	while ( ( item = s_Stacks.find( m_Key ) ) != s_Stacks.end() )
+	{
+		s_Stacks.erase( item );
+	}
 }                
 
 std::stack< ContainerPtr >& ContainerStackPointer::Get()
 {
-    std::stack< ContainerPtr >* pointer = (std::stack< ContainerPtr >*)GetPointer();
-    
-    if ( !pointer )
-    {
-        static Helium::Mutex mutex;
-        Helium::MutexScopeLock lock ( mutex );
-        SetPointer( pointer = new std::stack< ContainerPtr > );
-        s_Stacks.insert( std::multimap< uint32_t, std::stack< ContainerPtr >* >::value_type( m_Key, pointer ) );
-    }
+	std::stack< ContainerPtr >* pointer = (std::stack< ContainerPtr >*)GetPointer();
 
-    return *pointer;
+	if ( !pointer )
+	{
+		static Helium::Mutex mutex;
+		Helium::MutexScopeLock lock ( mutex );
+		SetPointer( pointer = new std::stack< ContainerPtr > );
+		s_Stacks.insert( std::multimap< uint32_t, std::stack< ContainerPtr >* >::value_type( m_Key, pointer ) );
+	}
+
+	return *pointer;
 }
 
 Interpreter::Interpreter(Container* container)
-    : m_Container (container) 
+	: m_Container (container) 
 {
-    HELIUM_ASSERT(container);
+	HELIUM_ASSERT(container);
 }
 
 Interpreter::~Interpreter()
@@ -60,72 +60,77 @@ Interpreter::~Interpreter()
 
 void Interpreter::Add(Control* control)
 {
-    m_ContainerStack.Get().top()->AddChild(control);
+	m_ContainerStack.Get().top()->AddChild(control);
 }
 
 void Interpreter::Push(Container* container)
 {
-    m_ContainerStack.Get().push(container);
+	m_ContainerStack.Get().push(container);
+}
+
+Container* Interpreter::GetContainer()
+{
+	return m_Container;
 }
 
 Container* Interpreter::PushContainer( const std::string& name )
 {
-    ContainerPtr container = CreateControl<Container>();
-    container->a_Name.Set( name );
+	ContainerPtr container = CreateControl<Container>();
+	container->a_Name.Set( name );
 
-    m_ContainerStack.Get().push( container );
-    return container;
+	m_ContainerStack.Get().push( container );
+	return container;
 }
 
 Container* Interpreter::Pop( bool setParent )
 {
-    ContainerPtr child = m_ContainerStack.Get().top();
+	ContainerPtr child = m_ContainerStack.Get().top();
 
-    m_ContainerStack.Get().pop();
+	m_ContainerStack.Get().pop();
 
-    if ( setParent )
-    {
-        if ( m_ContainerStack.Get().empty() )
-        {
-            m_Container->AddChild(child);
-        }
-        else
-        {
-            Container* parent = m_ContainerStack.Get().top();
+	if ( setParent )
+	{
+		if ( m_ContainerStack.Get().empty() )
+		{
+			m_Container->AddChild(child);
+		}
+		else
+		{
+			Container* parent = m_ContainerStack.Get().top();
 
-            parent->AddChild(child);
-        }
-    }
+			parent->AddChild(child);
+		}
+	}
 
-    return child;
+	return child;
 }
 
 Container* Interpreter::Top()
 {
-    if ( !m_ContainerStack.Get().empty() )
-    {
-        return m_ContainerStack.Get().top();
-    }
+	if ( !m_ContainerStack.Get().empty() )
+	{
+		return m_ContainerStack.Get().top();
+	}
 
-    return NULL;
+	return NULL;
 }
 
 Label* Interpreter::AddLabel(const std::string& name)
 {
-    LabelPtr control = new Label ();
-    control->Bind( new StringFormatter<std::string>( new std::string( name ), true ) );
+	LabelPtr control = new Label ();
+	control->Bind( new StringFormatter<std::string>( new std::string( name ), true ) );
 
-    m_ContainerStack.Get().top()->AddChild(control);
+	m_ContainerStack.Get().top()->AddChild(control);
 
-    return control;
+	return control;
 }
 
 Button* Interpreter::AddButton( const ButtonClickedSignature::Delegate& listener )
 {
-    ButtonPtr control = new Button ();
-    control->ButtonClickedEvent().Add( listener );
+	ButtonPtr control = new Button ();
+	control->ButtonClickedEvent().Add( listener );
 
-    m_ContainerStack.Get().top()->AddChild(control);
+	m_ContainerStack.Get().top()->AddChild(control);
 
-    return control;
+	return control;
 }

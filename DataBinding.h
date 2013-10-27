@@ -12,29 +12,29 @@
 #include <iomanip>
 
 #define INSPECT_BASE(__ID, __Type) \
-  public: \
-	typedef __Type This; \
-	virtual int GetType() const \
-	{ \
-	  return __ID; \
-	} \
-	virtual bool HasType(int id) const \
-	{ \
-	  return __ID == id; \
-	}
+public: \
+typedef __Type This; \
+virtual int GetType() const \
+{ \
+	return __ID; \
+} \
+virtual bool HasType(int id) const \
+{ \
+	return __ID == id; \
+}
 
 #define INSPECT_TYPE(__ID, __Type, __Base) \
-  public: \
-	typedef __Type This; \
-	typedef __Base Base; \
-	virtual int GetType() const \
-	{ \
-	  return __ID; \
-	} \
-	virtual bool HasType(int id) const \
-	{ \
-	  return __ID == id || Base::HasType(id); \
-	}
+public: \
+typedef __Type This; \
+typedef __Base Base; \
+virtual int GetType() const \
+{ \
+	return __ID; \
+} \
+virtual bool HasType(int id) const \
+{ \
+	return __ID == id || Base::HasType(id); \
+}
 
 namespace Helium
 {
@@ -48,145 +48,50 @@ namespace Helium
 		const char MULTI_VALUE_STRING[] = TXT( "Multi" );
 
 		//
-		// DataBinding conversion
+		// Extract and Insert are template functions that go between a sting buffer and typed data
 		//
 
-		template<class T>
-		inline void Extract(std::istream& stream, T* val)
-		{
-			stream >> *val;
-		}
-
-		template<class T>
-		inline void Insert(std::ostream& stream, const T* val)
-		{
-			stream << *val;
-		}
+		template< class T > void Extract(std::istream& stream, T* val);
+		template< class T > void Insert(std::ostream& stream, const T* val);
 
 		//
-		// Empty string support
+		// Specialize std::string data as this requires special support for empty strings
 		//
 
 		template<>
-		inline void Extract(std::istream& stream, std::string* val)
-		{
-			std::streamsize size = stream.rdbuf()->in_avail();
-			if ( size == 0 )
-			{
-				val->clear();
-			}
-			else
-			{
-				HELIUM_ASSERT(size < 0xFFFFFFFFL);
-				val->resize( std::string::size_type(size) );
-				stream.read( const_cast< char* >( val->c_str() ), size );
-			}
-		}
+		HELIUM_INSPECT_API void Extract(std::istream& stream, std::string* val);
 
 		//
 		// Treat chars as numbers
 		//
 
 		template<>
-		inline void Extract(std::istream& stream, uint8_t* val)
-		{
-			uint16_t tmp;
-			stream >> tmp;
-
-			if (!stream.fail())
-			{
-				*val = (uint8_t)tmp;
-			}
-		}
+		HELIUM_INSPECT_API void Extract(std::istream& stream, uint8_t* val);
+		template<>
+		HELIUM_INSPECT_API void Insert(std::ostream& stream, const uint8_t* val);
 
 		template<>
-		inline void Insert(std::ostream& stream, const uint8_t* val)
-		{
-			uint16_t tmp = *val;
-			stream << tmp;
-		}
-
+		HELIUM_INSPECT_API void Extract(std::istream& stream, int8_t* val);
 		template<>
-		inline void Extract(std::istream& stream, int8_t* val)
-		{
-			int16_t tmp;
-			stream >> tmp;
-
-			if (!stream.fail())
-			{
-				*val = (uint8_t)tmp;
-			}
-		}
-
-		template<>
-		inline void Insert(std::ostream& stream, const int8_t* val)
-		{
-			int16_t tmp = *val;
-			stream << tmp;
-		}
+		HELIUM_INSPECT_API void Insert(std::ostream& stream, const int8_t* val);
 
 		//
 		// Used fixed notation for floating point
 		//
 
 		template<>
-		inline void Insert(std::ostream& stream, const float32_t* val)
-		{
-			float32_t tmp = *val;
-			stream << std::fixed << std::setprecision(6) << tmp;
-		}
-
+		HELIUM_INSPECT_API void Insert(std::ostream& stream, const float32_t* val);
 		template<>
-		inline void Insert(std::ostream& stream, const float64_t* val)
-		{
-			float64_t tmp = *val;
-			stream << std::fixed << std::setprecision(6) << tmp;
-		}
+		HELIUM_INSPECT_API void Insert(std::ostream& stream, const float64_t* val);
 
 		//
-		// Data support
+		// Reflect Data support
 		//
 
 		template<>
-		inline void Extract(std::istream& stream, Reflect::Data* val)
-		{
-			Reflect::ScalarTranslator* scalar = Reflect::ReflectionCast< Reflect::ScalarTranslator >( val->m_Translator );
-			if ( scalar )
-			{
-				std::string str;
-				Extract( stream, &str );
-				scalar->Parse( String( str.c_str() ), val->m_Pointer, NULL, true );
-			}
-		}
-
+		HELIUM_INSPECT_API void Extract(std::istream& stream, Reflect::Data* val);
 		template<>
-		inline void Insert(std::ostream& stream, const Reflect::Data* val)
-		{
-			Reflect::ScalarTranslator* scalar = Reflect::ReflectionCast< Reflect::ScalarTranslator >( val->m_Translator );
-			if ( scalar )
-			{
-				String str;
-				scalar->Print( val->m_Pointer, str );
-				std::string str2 ( str.GetData() );
-				Insert( stream, &str2 );
-			}
-		}
-
-		//
-		// Event support
-		//
-
-		template<>
-		inline void Extract(std::istream& stream, Helium::Void* val)
-		{
-
-		}
-
-		template<>
-		inline void Insert(std::ostream& stream, const Helium::Void* val)
-		{
-
-		}
+		HELIUM_INSPECT_API void Insert(std::ostream& stream, const Reflect::Data* val);
 
 		//
 		// DataBinding base class
@@ -196,13 +101,7 @@ namespace Helium
 
 		struct DataChangingArgs
 		{
-			DataChangingArgs( const DataBinding* data, Reflect::Data value )
-				: m_Data ( data )
-				, m_NewValue( value )
-				, m_Veto ( false )
-			{
-			
-			}
+			inline DataChangingArgs( const DataBinding* data, Reflect::Data value );
 
 			const DataBinding* m_Data;
 			Reflect::Data      m_NewValue;
@@ -212,7 +111,7 @@ namespace Helium
 
 		struct DataChangedArgs
 		{
-			DataChangedArgs( const DataBinding* data ) : m_Data (data) {}
+			inline DataChangedArgs( const DataBinding* data );
 
 			const DataBinding* m_Data;
 		};
@@ -228,70 +127,47 @@ namespace Helium
 			};
 		}
 
+		//
+		// Base class for all types of data binding with undo, event signaling, and virtual desruction
+		//
+
 		class DataBinding : public Helium::RefCountBase< DataBinding >
 		{
 		public:
 			INSPECT_BASE( DataBindingTypes::Custom, DataBinding );
 
-			DataBinding()
-				: m_Significant(true)
-			{
-
-			}
-
-			virtual ~DataBinding()
-			{
-
-			}
-
+			inline DataBinding();
+			inline virtual ~DataBinding();
 			virtual void Refresh() = 0;
-
 			virtual UndoCommandPtr GetUndoCommand() const = 0;
 
 		protected: 
 			bool m_Significant; 
 		public: 
-			void SetSignificant(bool significant)
-			{
-				m_Significant = significant; 
-			}
-			bool IsSignificant() const
-			{
-				return m_Significant; 
-			}
+			inline void SetSignificant(bool significant);
+			inline bool IsSignificant() const;
 
 		protected:
 			mutable DataChangingSignature::Event m_Changing;
 		public:
-			void AddChangingListener( const DataChangingSignature::Delegate& listener ) const
-			{
-				m_Changing.Add( listener );
-			}
-			void RemoveChangingListener( const DataChangingSignature::Delegate& listener ) const
-			{
-				m_Changing.Remove( listener );
-			}
+			inline void AddChangingListener( const DataChangingSignature::Delegate& listener ) const;
+			inline void RemoveChangingListener( const DataChangingSignature::Delegate& listener ) const;
 
 		protected:
 			mutable DataChangedSignature::Event m_Changed;
 		public:
-			void AddChangedListener( const DataChangedSignature::Delegate& listener ) const
-			{
-				m_Changed.Add( listener );
-			}
-			void RemoveChangedListener( const DataChangedSignature::Delegate& listener ) const
-			{
-				m_Changed.Remove( listener );
-			}
+			inline void AddChangedListener( const DataChangedSignature::Delegate& listener ) const;
+			inline void RemoveChangedListener( const DataChangedSignature::Delegate& listener ) const;
 		};
 
 		typedef Helium::SmartPtr<DataBinding> DataBindingPtr;
 
+		//
+		// Casting function for different classes for data bindings
+		//
+
 		template< typename T, DataBindingTypes::DataBindingType type >
-		T* CastDataBinding( DataBinding* data )
-		{
-			return data ? (data->HasType( type ) ? static_cast<T*>( data ) : NULL) : NULL;
-		}
+		inline T* CastDataBinding( DataBinding* data );
 
 		//
 		// Base template for data, V is the value container, which may or may not be equal to T
@@ -308,42 +184,14 @@ namespace Helium
 			typedef Helium::SmartPtr< DataBindingTemplate > Ptr;
 
 		public:
-			virtual void Refresh() HELIUM_OVERRIDE
-			{
-				T temp;
-				Get( temp );
-				Set( temp );
-			}
+			virtual void Refresh() HELIUM_OVERRIDE;
+			virtual UndoCommandPtr GetUndoCommand() const HELIUM_OVERRIDE;
 
-			virtual UndoCommandPtr GetUndoCommand() const HELIUM_OVERRIDE
-			{
-				return new DataBindingCommand<T>( this );
-			}
-
-			// set data
 			virtual bool Set(const T& s, const DataChangedSignature::Delegate& emitter = DataChangedSignature::Delegate ()) = 0;
+			virtual bool SetAll(const std::vector<T>& s, const DataChangedSignature::Delegate& emitter = DataChangedSignature::Delegate ());
 
-			virtual bool SetAll(const std::vector<T>& s, const DataChangedSignature::Delegate& emitter = DataChangedSignature::Delegate ())
-			{
-				bool result = false;
-				HELIUM_ASSERT( s.size() == 1 ); // this means you did not HELIUM_OVERRIDE this function for data objects that support multi
-				if ( s.size() > 0 )
-				{
-					result = Set( s.back(), emitter );
-				}
-				return result;
-			}
-
-			// get data
 			virtual void Get(T& s) const = 0;
-
-			virtual void GetAll(std::vector<T>& s) const
-			{
-				s.clear();
-				T value;
-				Get( value );
-				s.push_back( value );
-			}
+			virtual void GetAll(std::vector<T>& s) const;
 		};
 
 		//
@@ -362,51 +210,14 @@ namespace Helium
 			std::vector<T> m_Values;
 
 		public:
-			DataBindingCommand( const typename DataBindingTemplate<T>::Ptr& data )
-				: m_Data ( data )
-			{
-				if ( m_Data.ReferencesObject() )
-				{
-					m_Data->GetAll(m_Values);
-				}
-			}
+			DataBindingCommand( const typename DataBindingTemplate<T>::Ptr& data );
 
-			void Undo() HELIUM_OVERRIDE
-			{
-				Swap();
-			}
-
-			void Redo() HELIUM_OVERRIDE
-			{
-				Swap();
-			}
-
-			virtual bool IsSignificant() const
-			{
-				if( m_Data )
-				{
-					return m_Data->IsSignificant(); 
-				}
-				else
-				{
-					return false; 
-				}
-			}
+			virtual void Undo() HELIUM_OVERRIDE;
+			virtual void Redo() HELIUM_OVERRIDE;
+			virtual bool IsSignificant() const;
 
 		private:
-			void Swap()
-			{
-				std::vector<T> temp;
-
-				// read current state into temp
-				m_Data->GetAll( temp );
-
-				// set previous state
-				m_Data->SetAll( m_Values );
-
-				// cache previously current state
-				m_Values = temp;
-			}
+			void Swap();
 		};
 
 
@@ -439,46 +250,11 @@ namespace Helium
 			bool m_Perishable;
 
 		public:
-			StringFormatter(T* data, bool perishable = false)
-				: m_Data (data)
-				, m_Perishable (perishable)
-			{
+			StringFormatter(T* data, bool perishable = false);
+			virtual ~StringFormatter();
 
-			}
-
-			virtual ~StringFormatter()
-			{
-				if (m_Perishable)
-				{
-					delete m_Data;
-				}
-			}
-
-			virtual bool Set(const std::string& s, const DataChangedSignature::Delegate& emitter = NULL) HELIUM_OVERRIDE
-			{
-				bool result = false;
-
-				AutoPtr< Reflect::Translator > translator( Reflect::AllocateTranslator< std::string >() );
-				Reflect::Data data ( Reflect::Pointer( const_cast< std::string* >( &s ) ), translator.Ptr() );
-				DataChangingArgs args ( this, data );
-				m_Changing.Raise( args );
-				if ( !args.m_Veto )
-				{
-					std::stringstream str ( s );
-					Extract< T >( str, m_Data );
-					m_Changed.RaiseWithEmitter( this, emitter );
-					result = true;
-				}
-
-				return result;
-			}
-
-			virtual void Get(std::string& s) const HELIUM_OVERRIDE
-			{
-				std::stringstream stream;
-				Insert<T>(stream, m_Data);
-				s = stream.str();
-			}
+			virtual bool Set(const std::string& s, const DataChangedSignature::Delegate& emitter = NULL) HELIUM_OVERRIDE;
+			virtual void Get(std::string& s) const HELIUM_OVERRIDE;
 		};
 
 		//
@@ -499,154 +275,14 @@ namespace Helium
 			bool m_Perishable;
 
 		public:
-			MultiStringFormatter( const std::vector<T*>& data, bool perishable = false)
-				: m_Data (data)
-				, m_Perishable (perishable)
-			{
+			MultiStringFormatter( const std::vector<T*>& data, bool perishable = false);
+			virtual ~MultiStringFormatter();
 
-			}
+			virtual bool Set(const std::string& s, const DataChangedSignature::Delegate& emitter = NULL) HELIUM_OVERRIDE;
+			virtual bool SetAll(const std::vector< std::string >& values, const DataChangedSignature::Delegate& emitter = NULL) HELIUM_OVERRIDE;
 
-			virtual ~MultiStringFormatter()
-			{
-				if (m_Perishable)
-				{
-					typename std::vector<T*>::iterator itr = m_Data.begin();
-					typename std::vector<T*>::iterator end = m_Data.end();
-					for ( ; itr != end; ++itr )
-					{
-						delete (*itr);
-					}
-				}
-			}
-
-			virtual bool Set(const std::string& s, const DataChangedSignature::Delegate& emitter = NULL) HELIUM_OVERRIDE
-			{
-				bool result = false;
-
-				AutoPtr< Reflect::Translator > translator( Reflect::AllocateTranslator< std::string >() );
-				Reflect::Data data ( Reflect::Pointer( const_cast< std::string* >( &s ) ), translator.Ptr() );
-				DataChangingArgs args ( this, data );
-				m_Changing.Raise( args );
-				if ( !args.m_Veto )
-				{
-					typename std::vector<T*>::iterator itr = m_Data.begin();
-					typename std::vector<T*>::iterator end = m_Data.end();
-					for ( ; itr != end; ++itr )
-					{
-						std::stringstream str ( s );
-						Extract<T>( str, *itr );
-						result = true;
-					}
-
-					m_Changed.RaiseWithEmitter( this, emitter );
-				}
-
-				return result;
-			}
-
-			virtual bool SetAll(const std::vector< std::string >& values, const DataChangedSignature::Delegate& emitter = NULL) HELIUM_OVERRIDE
-			{
-				bool result = false;
-
-				if ( values.size() == m_Data.size() )
-				{
-					std::vector< std::string >::const_iterator itr = values.begin();
-					std::vector< std::string >::const_iterator end = values.end();
-					for ( size_t index = 0; itr != end; ++itr, ++index )
-					{
-						AutoPtr< Reflect::Translator > translator( Reflect::AllocateTranslator< std::string >() );
-						Reflect::Data data ( Reflect::Pointer( const_cast< std::string* >( &*itr ) ), translator.Ptr() );
-						DataChangingArgs args ( this, data );
-						m_Changing.Raise( args );
-						if ( !args.m_Veto )
-						{
-							std::stringstream str ( *itr );
-							Extract<T>( str, m_Data[ index ] );
-							result = true;
-						}
-					}
-
-					m_Changed.RaiseWithEmitter( this, emitter );
-				}
-				else
-				{
-					HELIUM_BREAK();
-				}
-
-				return result;
-			}
-
-			virtual void Get(std::string& s) const HELIUM_OVERRIDE
-			{
-				T* value = NULL;
-				std::stringstream stream;
-
-				//
-				// Scan for equality
-				//
-
-				typename std::vector<T*>::const_iterator itr = m_Data.begin();
-				typename std::vector<T*>::const_iterator end = m_Data.end();
-				for ( ; itr != end; ++itr )
-				{
-					// grab the first one if we don't have a value yet
-					if (value == NULL)
-					{
-						value = *itr;
-						continue;
-					}
-
-					// do equality
-					if (*value != *(*itr))
-					{
-						// we are not equal, break
-						value = NULL;
-						break;
-					}
-				}
-
-				// if we were equal
-				if (value != NULL)
-				{
-					// do insert
-					Insert<T>(stream, value);
-				}
-				// else we are unequal
-				else
-				{
-					HELIUM_ASSERT( m_Data.size() );
-
-					// if we have data
-					if (m_Data.size() > 0)
-					{
-						// we are a multi
-						stream << MULTI_VALUE_STRING;
-					}
-					// we have no data
-					else
-					{
-						// god help you if you hit this!
-						stream << UNDEF_VALUE_STRING;
-					}
-				}
-
-				// set the result
-				s = stream.str();
-			}
-
-			virtual void GetAll(std::vector< std::string >& s) const HELIUM_OVERRIDE
-			{
-				s.resize( m_Data.size() );
-				typename std::vector<T*>::const_iterator itr = m_Data.begin();
-				typename std::vector<T*>::const_iterator end = m_Data.end();
-				for ( size_t index = 0; itr != end; ++itr, ++index )
-				{
-					T* value = *itr;
-					std::stringstream stream;
-					Insert<T>( stream, value );
-					s[ index ] = stream.str();
-				}
-			}
+			virtual void Get(std::string& s) const HELIUM_OVERRIDE;
+			virtual void GetAll(std::vector< std::string >& s) const HELIUM_OVERRIDE;
 		};
 
 		//
@@ -663,45 +299,11 @@ namespace Helium
 			Helium::SmartPtr< Helium::Property<T> > m_Property;
 
 		public:
-			PropertyStringFormatter(const Helium::SmartPtr< Helium::Property<T> >& property)
-				: m_Property(property)
-			{
+			PropertyStringFormatter(const Helium::SmartPtr< Helium::Property<T> >& property);
+			virtual ~PropertyStringFormatter();
 
-			}
-
-			virtual ~PropertyStringFormatter()
-			{
-
-			}
-
-			virtual bool Set(const std::string& s, const DataChangedSignature::Delegate& emitter = NULL) HELIUM_OVERRIDE
-			{
-				bool result = false;
-
-				AutoPtr< Reflect::Translator > translator( Reflect::AllocateTranslator< std::string >() );
-				Reflect::Data data ( Reflect::Pointer( const_cast< std::string* >( &s ) ), translator.Ptr() );
-				DataChangingArgs args ( this, data );
-				m_Changing.Raise( args );
-				if ( !args.m_Veto )
-				{
-					T value;
-					std::stringstream str ( s );
-					Extract< T >( str, &value );
-					m_Property->Set( value );
-					m_Changed.RaiseWithEmitter( this, emitter );
-					result = true;
-				}
-
-				return result;
-			}
-
-			virtual void Get(std::string& s) const HELIUM_OVERRIDE
-			{
-				std::stringstream stream;
-				T val = m_Property->Get();
-				Insert<T>( stream, &val );
-				s = stream.str();
-			}
+			virtual bool Set(const std::string& s, const DataChangedSignature::Delegate& emitter = NULL) HELIUM_OVERRIDE;
+			virtual void Get(std::string& s) const HELIUM_OVERRIDE;
 		};
 
 		//
@@ -718,146 +320,14 @@ namespace Helium
 			std::vector< Helium::SmartPtr< Helium::Property<T> > > m_Properties;
 
 		public:
-			MultiPropertyStringFormatter(const std::vector< Helium::SmartPtr< Helium::Property<T> > >& properties)
-				: m_Properties (properties)
-			{
+			MultiPropertyStringFormatter(const std::vector< Helium::SmartPtr< Helium::Property<T> > >& properties);
+			virtual ~MultiPropertyStringFormatter();
 
-			}
+			virtual bool Set(const std::string& s, const DataChangedSignature::Delegate& emitter = NULL) HELIUM_OVERRIDE;
+			virtual bool SetAll(const std::vector< std::string >& s, const DataChangedSignature::Delegate& emitter = NULL) HELIUM_OVERRIDE;
 
-			virtual ~MultiPropertyStringFormatter()
-			{
-
-			}
-
-			virtual bool Set(const std::string& s, const DataChangedSignature::Delegate& emitter = NULL) HELIUM_OVERRIDE
-			{
-				bool result = false;
-
-				AutoPtr< Reflect::Translator > translator( Reflect::AllocateTranslator< std::string >() );
-				Reflect::Data data ( Reflect::Pointer( const_cast< std::string* >( &s ) ), translator.Ptr() );
-				DataChangingArgs args ( this, data );
-				m_Changing.Raise( args );
-				if ( !args.m_Veto )
-				{
-					T value;
-					std::stringstream str ( s );
-					Extract< T >( str, &value );
-
-					typename std::vector< Helium::SmartPtr< Helium::Property<T> > >::iterator itr = m_Properties.begin();
-					typename std::vector< Helium::SmartPtr< Helium::Property<T> > >::iterator end = m_Properties.end();
-					for ( ; itr != end; ++itr )
-					{
-						(*itr)->Set( value );
-						result = true;
-					}
-
-					m_Changed.RaiseWithEmitter( this, emitter );
-				}
-
-				return result;
-			}
-
-			virtual bool SetAll(const std::vector< std::string >& s, const DataChangedSignature::Delegate& emitter = NULL) HELIUM_OVERRIDE
-			{
-				bool result = false;
-
-				if ( s.size() == m_Properties.size() )
-				{
-					std::vector< std::string >::const_iterator itr = s.begin();
-					std::vector< std::string >::const_iterator end = s.end();
-					for ( size_t index = 0; itr != end; ++itr, ++index )
-					{
-						AutoPtr< Reflect::Translator > translator( Reflect::AllocateTranslator< std::string >() );
-						Reflect::Data data ( Reflect::Pointer( const_cast< std::string* >( &*itr ) ), translator.Ptr() );
-						DataChangingArgs args ( this, data );
-						m_Changing.Raise( args );
-						if ( !args.m_Veto )
-						{
-							T value;
-							std::stringstream str ( *itr );
-							Extract<T>( str, &value );
-							m_Properties[ index ]->Set(value);
-							result = true;
-						}
-					}
-
-					m_Changed.RaiseWithEmitter( this, emitter );
-				}
-				else
-				{
-					HELIUM_BREAK();
-				}
-
-				return result;
-			}
-
-			virtual void Get(std::string& s) const HELIUM_OVERRIDE
-			{
-				std::stringstream stream;
-
-				//
-				// Scan for equality
-				//
-
-				typename std::vector< Helium::SmartPtr< Helium::Property<T> > >::const_iterator itr = m_Properties.begin();
-				typename std::vector< Helium::SmartPtr< Helium::Property<T> > >::const_iterator end = m_Properties.end();
-				for ( ; itr != end; ++itr )
-				{
-					// grab the first one if we don't have a value yet
-					if ( itr == m_Properties.begin() )
-					{
-						T val = (*itr)->Get();
-						Insert<T>( stream, &val );
-						continue;
-					}
-					else
-					{
-						T val = (*itr)->Get();
-						std::stringstream temp;
-						Insert<T>( temp, &val );
-
-						if (temp.str() != stream.str())
-						{
-							break;
-						}
-					}
-				}
-
-				// if we were not equal
-				if (itr == end)
-				{
-					s = stream.str();
-				}
-				else
-				{
-					// if we have data
-					if (m_Properties.size() > 0)
-					{
-						// we are a multi
-						s = MULTI_VALUE_STRING;
-					}
-					// we have no data
-					else
-					{
-						// god help you if you hit this!
-						s = UNDEF_VALUE_STRING;
-					}
-				}
-			}
-
-			virtual void GetAll(std::vector< std::string >& s) const HELIUM_OVERRIDE
-			{
-				s.resize( m_Properties.size() );
-				typename std::vector< Helium::SmartPtr< Helium::Property<T> > >::const_iterator itr = m_Properties.begin();
-				typename std::vector< Helium::SmartPtr< Helium::Property<T> > >::const_iterator end = m_Properties.end();
-				for ( size_t index = 0 ; itr != end; ++itr, ++index )
-				{
-					T val = (*itr)->Get();
-					std::stringstream stream;
-					Insert<T>( stream, &val );
-					s[ index ] = stream.str();
-				}
-			}
+			virtual void Get(std::string& s) const HELIUM_OVERRIDE;
+			virtual void GetAll(std::vector< std::string >& s) const HELIUM_OVERRIDE;
 		};
 
 
@@ -883,39 +353,13 @@ namespace Helium
 			Helium::SmartPtr< Helium::Property< T > > m_Property;
 
 		public:
-			TypedPropertyFormatter(const Helium::SmartPtr< Helium::Property< T > >& property)
-				: m_Property(property)
-			{
+			TypedPropertyFormatter(const Helium::SmartPtr< Helium::Property< T > >& property);
+			virtual ~TypedPropertyFormatter();
 
-			}
-
-			virtual ~TypedPropertyFormatter()
-			{
-
-			}
-
-			virtual bool Set(const T& value, const DataChangedSignature::Delegate& emitter = NULL) HELIUM_OVERRIDE
-			{
-				bool result = false;
-
-				AutoPtr< Reflect::Translator > translator( Reflect::AllocateTranslator< T >() );
-				Reflect::Data data ( Reflect::Pointer( const_cast< T* >( &value ) ), translator.Ptr() );
-				DataChangingArgs args ( this, data );
-				this->m_Changing.Raise( args );
-				if ( !args.m_Veto )
-				{
-					m_Property->Set( value );
-					this->m_Changed.RaiseWithEmitter( this, emitter );
-					result = true;
-				}
-
-				return result;
-			}
-
-			virtual void Get(T& value) const HELIUM_OVERRIDE
-			{
-				value = m_Property->Get();
-			}
+			virtual bool Set(const T& value, const DataChangedSignature::Delegate& emitter = NULL) HELIUM_OVERRIDE;
+			virtual void Get(T& value) const HELIUM_OVERRIDE;
 		};
 	}
 }
+
+#include "Inspect/DataBinding.inl"

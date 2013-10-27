@@ -10,9 +10,23 @@ namespace Helium
 {
 	namespace Inspect
 	{
-        class Button;
-        class List;
-        typedef Helium::StrongPtr<Button> ButtonPtr;
+		class Button;
+		class List;
+		typedef Helium::StrongPtr<Button> ButtonPtr;
+
+		struct EditFilePathArgs
+		{
+			std::string m_File;
+
+			EditFilePathArgs( const std::string& file )
+				: m_File( file )
+			{
+
+			}
+		};
+		typedef Helium::Signature< const EditFilePathArgs&> EditFilePathSignature;
+
+		extern HELIUM_INSPECT_API EditFilePathSignature::Event g_EditFilePath;
 
 		class HELIUM_INSPECT_API ReflectInterpreter : public Interpreter
 		{

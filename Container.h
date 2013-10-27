@@ -5,114 +5,88 @@
 
 namespace Helium
 {
-    namespace Inspect
-    {
-        const static char CONTAINER_ATTR_NAME[] = TXT( "name" );
-        const static char CONTAINER_ATTR_ICON[] = TXT( "icon" );
+	namespace Inspect
+	{
+		const static char CONTAINER_ATTR_NAME[] = TXT( "name" );
+		const static char CONTAINER_ATTR_ICON[] = TXT( "icon" );
 
-        ///////////////////////////////////////////////////////////////////////
-        namespace UIHint
-        {
-            enum UIHints
-            {
-                Advanced = 1 << 0,
-                Popup = 1 << 1,
-            };
+		///////////////////////////////////////////////////////////////////////
+		namespace UIHint
+		{
+			enum UIHints
+			{
+				Advanced = 1 << 0,
+				Popup = 1 << 1,
+			};
 
-            const uint32_t Default = 0;
-        }
-        typedef uint32_t UIHints;
+			const uint32_t Default = 0;
+		}
+		typedef uint32_t UIHints;
 
-        ///////////////////////////////////////////////////////////////////////
-        // Contains other controls and distributes layout logic
-        //
-        class HELIUM_INSPECT_API Container : public Control
-        {
-        public:
-            HELIUM_DECLARE_CLASS( Container, Control );
+		///////////////////////////////////////////////////////////////////////
+		// Contains other controls and distributes layout logic
+		//
+		class HELIUM_INSPECT_API Container : public Control
+		{
+		public:
+			HELIUM_DECLARE_CLASS( Container, Control );
 
-            Container();
-            ~Container();
+			Container();
+			~Container();
 
-            const V_Control& GetChildren() const
-            {
-                return m_Children;
-            }
+			inline const std::vector< ControlPtr >& GetChildren() const;
+			inline std::vector< ControlPtr > ReleaseChildren();
 
-            inline V_Control ReleaseChildren()
-            {
-                HELIUM_ASSERT( !this->IsRealized() );
-                V_Control children = m_Children;
-                Clear();
-                return children;
-            }
+			virtual void AddChild( Control* control );
+			virtual void InsertChild( int index, Control* control );
+			virtual void RemoveChild( Control* control );
+			virtual void Clear();
 
-            virtual void AddChild( Control* control );
-            virtual void InsertChild( int index, Control* control );
-            virtual void RemoveChild( Control* control );
-            virtual void Clear();
+			inline const std::string& GetPath() const;
+			inline void BuildPath(std::string& path) const;
 
-            const std::string& GetPath() const
-            {
-                if ( m_Path.empty() )
-                {
-                    BuildPath( m_Path );
-                }
+			UIHints GetUIHints() const;
+			void SetUIHints( const UIHints hints );
 
-                return m_Path;
-            }
+			// recusively binds contained controls to data
+			virtual void Bind(const DataBindingPtr& data) HELIUM_OVERRIDE;
 
-            void BuildPath(std::string& path) const
-            {
-                if (m_Parent)
-                {
-                    m_Parent->BuildPath(path);
-                }
+			// process properties coming from script
+			virtual bool Process(const std::string& key, const std::string& value) HELIUM_OVERRIDE;
 
-                path += TXT( "|" ) + a_Name.Get();
-            }
+			// populate
+			virtual void Populate() HELIUM_OVERRIDE;
 
-            UIHints GetUIHints() const;
-            void SetUIHints( const UIHints hints );
+			// refreshes the UI state from data
+			virtual void Read() HELIUM_OVERRIDE;
 
-            // recusively binds contained controls to data
-            virtual void Bind(const DataBindingPtr& data) HELIUM_OVERRIDE;
+			// updates the data based on the state of the UI
+			virtual bool Write() HELIUM_OVERRIDE;
 
-            // process properties coming from script
-            virtual bool Process(const std::string& key, const std::string& value) HELIUM_OVERRIDE;
+			Attribute< std::string > a_Name;
+			Attribute< std::string > a_Icon;
 
-            // populate
-            virtual void Populate() HELIUM_OVERRIDE;
+			mutable ControlSignature::Event     e_ControlAdded;
+			mutable ControlSignature::Event     e_ControlRemoved;
 
-            // refreshes the UI state from data
-            virtual void Read() HELIUM_OVERRIDE;
+		private:
+			void IsEnabledChanged( const Attribute<bool>::ChangeArgs& args );
+			void IsReadOnlyChanged( const Attribute<bool>::ChangeArgs& args );
+			void IsFrozenChanged( const Attribute<bool>::ChangeArgs& args );
+			void IsHiddenChanged( const Attribute<bool>::ChangeArgs& args );
 
-            // updates the data based on the state of the UI
-            virtual bool Write() HELIUM_OVERRIDE;
+		protected:
+			// the children controls
+			std::vector< ControlPtr > m_Children;
 
-            Attribute< std::string > a_Name;
-            Attribute< std::string > a_Icon;
+			// the path of the container
+			mutable std::string m_Path;
 
-            mutable ControlSignature::Event     e_ControlAdded;
-            mutable ControlSignature::Event     e_ControlRemoved;
+			UIHints m_UIHints;
+		};
 
-        private:
-            void IsEnabledChanged( const Attribute<bool>::ChangeArgs& args );
-            void IsReadOnlyChanged( const Attribute<bool>::ChangeArgs& args );
-            void IsFrozenChanged( const Attribute<bool>::ChangeArgs& args );
-            void IsHiddenChanged( const Attribute<bool>::ChangeArgs& args );
-
-        protected:
-            // the children controls
-            V_Control m_Children;
-
-            // the path of the container
-            mutable std::string m_Path;
-
-            UIHints m_UIHints;
-        };
-
-        typedef Helium::StrongPtr<Container> ContainerPtr;
-        typedef std::vector<ContainerPtr> V_Container;
-    }
+		typedef Helium::StrongPtr<Container> ContainerPtr;
+	}
 }
+
+#include "Inspect/Container.inl"

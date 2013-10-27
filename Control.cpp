@@ -1,5 +1,6 @@
 #include "InspectPch.h"
 #include "Inspect/Control.h"
+
 #include "Inspect/Canvas.h"
 
 HELIUM_DEFINE_ABSTRACT( Helium::Inspect::ClientData );
@@ -15,20 +16,20 @@ Profile::Accumulator Inspect::g_UnrealizeAccumulator( "Inspect Unrealize Accumul
 #endif
 
 Control::Control()
-: a_IsEnabled( true )
-, a_IsReadOnly( false )
-, a_IsFrozen( false )
-, a_IsHidden( false )
-, a_ForegroundColor( 0 )
-, a_BackgroundColor( 0 )
-, a_IsFixedWidth( false )
-, a_IsFixedHeight( false )
-, a_ProportionalWidth( 0.f )
-, a_ProportionalHeight( 0.f )
-, m_Canvas( NULL )
-, m_Parent( NULL )
-, m_IsWriting( false )
-, m_IsRealized( false )
+	: a_IsEnabled( true )
+	, a_IsReadOnly( false )
+	, a_IsFrozen( false )
+	, a_IsHidden( false )
+	, a_ForegroundColor( 0 )
+	, a_BackgroundColor( 0 )
+	, a_IsFixedWidth( false )
+	, a_IsFixedHeight( false )
+	, a_ProportionalWidth( 0.f )
+	, a_ProportionalHeight( 0.f )
+	, m_Canvas( NULL )
+	, m_Parent( NULL )
+	, m_IsWriting( false )
+	, m_IsRealized( false )
 {
 
 }
@@ -190,6 +191,10 @@ void Control::Unrealize()
 	}
 }
 
+void Control::Populate()
+{
+}
+
 void Control::Read()
 {
 	if ( m_Widget )
@@ -314,4 +319,23 @@ void Control::PostWrite()
 
 	// data validator could change our value, so re-read the value
 	Read();
+}
+
+template<>
+bool Control::GetProperty( const std::string& key, std::string& value ) const
+{
+	std::map< std::string, std::string >::const_iterator found = m_Properties.find( key ); 
+	if ( found != m_Properties.end() )
+	{
+		value = found->second;
+		return true;
+	}
+
+	return false;
+}
+
+template<>
+void Control::SetProperty( const std::string& key, const std::string& value )
+{
+	m_Properties[key] = value;
 }
