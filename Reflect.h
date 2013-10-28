@@ -33,21 +33,33 @@ namespace Helium
 		public:
 			ReflectInterpreter (Container* container);
 
-			void Interpret(const std::vector<Reflect::Object*>& instances, int32_t includeFlags = 0xFFFFFFFF, int32_t excludeFlags = 0x0, bool expandPanel = true);
-			void InterpretType(const std::vector<Reflect::Object*>& instances, Container* parent, int32_t includeFlags = 0xFFFFFFFF, int32_t excludeFlags = 0x0, bool expandPanel = true);
+			void Interpret(
+				const std::vector< Reflect::Object* >& objects,
+				const Reflect::MetaClass* commonType,
+				Container* parent = NULL
+				);
+
+			void Interpret(
+				const std::vector< void* >& instances,
+				const Reflect::MetaStruct* commonType,
+				const std::vector< Reflect::Object* >& objects,
+				Container* parent = NULL
+				);
 
 		private:
-			void InterpretValueField(const Reflect::Field* field, const std::vector<Reflect::Object*>& instances, Container* parent);
-			void InterpretBitfieldField( const Reflect::Field* field, const std::vector<Reflect::Object*>& instances, Container* parent );
-			void InterpretColorField( const Reflect::Field* field, const std::vector<Reflect::Object*>& instances, Container* parent );
+			void InterpretField( const std::vector< Reflect::Pointer >& pointers, Reflect::Translator* translator, const Reflect::Field* field, Container* parent );
 
-			void InterpretFilePathField(const Reflect::Field* field, const std::vector<Reflect::Object*>& instances, Container* parent);
+			void InterpretValueField( const std::vector< Reflect::Pointer >& pointers, Reflect::Translator* translator, const Reflect::Field* field, Container* parent );
+			void InterpretBitfieldField( const std::vector< Reflect::Pointer >& pointers, Reflect::Translator* translator, const Reflect::Field* field, Container* parent );
+			void InterpretColorField( const std::vector< Reflect::Pointer >& pointers, Reflect::Translator* translator, const Reflect::Field* field, Container* parent );
+
+			void InterpretFilePathField( const std::vector< Reflect::Pointer >& pointers, Reflect::Translator* translator, const Reflect::Field* field, Container* parent );
 			void FilePathDataChanging( const DataChangingArgs& args );
 			void FilePathEdit( const ButtonClickedArgs& args );
 			FileDialogSignature::Delegate d_FindMissingFile;
 			std::string m_FileFilter;
 
-			void InterpretSequenceField(const Reflect::Field* field, const std::vector<Reflect::Object*>& instances, Container* parent);
+			void InterpretSequenceField( const std::vector< Reflect::Pointer >& pointers, Reflect::Translator* translator, const Reflect::Field* field, Container* parent );
 			ButtonPtr SequenceAddAddButton( List* list );
 			ButtonPtr SequenceAddRemoveButton( List* list );
 			ButtonPtr SequenceAddMoveUpButton( List* list );
@@ -57,7 +69,7 @@ namespace Helium
 			void SequenceOnMoveUp( const ButtonClickedArgs& args );
 			void SequenceOnMoveDown( const ButtonClickedArgs& args );
 
-			void InterpretSetField( const Reflect::Field* field, const std::vector<Reflect::Object*>& instances, Container* parent );
+			void InterpretSetField( const std::vector< Reflect::Pointer >& pointers, Reflect::Translator* translator, const Reflect::Field* field, Container* parent );
 			void SetOnAdd( const ButtonClickedArgs& args );
 			void SetOnRemove( const ButtonClickedArgs& args );
 		};

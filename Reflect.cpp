@@ -26,27 +26,34 @@ ReflectInterpreter::ReflectInterpreter (Container* container)
 
 }
 
-void ReflectInterpreter::Interpret(const std::vector<Reflect::Object*>& instances, int32_t includeFlags, int32_t excludeFlags, bool expandPanel)
+void ReflectInterpreter::Interpret( const std::vector<Reflect::Object*>& objects, const Reflect::MetaClass* commonType, Container* parent )
 {
-	InterpretType(instances, m_Container, includeFlags, excludeFlags, expandPanel);
+	for ( std::vector<Reflect::Object*>::const_iterator itr = objects.begin(), end = objects.end(); itr != end; ++itr )
+	{
+		if ( !HELIUM_VERIFY( (*itr)->IsA( commonType ) ) )
+		{
+			HELIUM_BREAK();
+			return;
+		}
+	}
+
+	Interpret( reinterpret_cast< const std::vector< void* >& >( objects ), commonType, objects, parent );
 }
 
-void ReflectInterpreter::InterpretType(const std::vector<Reflect::Object*>& instances, Container* parent, int32_t includeFlags, int32_t excludeFlags, bool expandPanel)
+void ReflectInterpreter::Interpret( const std::vector< void* >& instances, const Reflect::MetaStruct* commonType, const std::vector< Reflect::Object* >& objects, Container* parent )
 {
-	const Reflect::Object *pObject = instances[0];
-	const MetaStruct* composite = pObject->GetMetaClass();
+	if ( parent == NULL )
+	{
+		parent = m_Container;
+	}
 
-	// create a container
 	ContainerPtr container = CreateControl<Container>();
 
-	// parse
-	ContainerPtr scriptOutput = CreateControl<Container>();
-
 	std::string labelText;
-	composite->GetProperty( TXT( "UIName" ), labelText );
+	commonType->GetProperty( TXT( "UIName" ), labelText );
 	if ( labelText.empty() )
 	{
-		labelText = composite->m_Name;
+		labelText = commonType->m_Name;
 	}
 
 	container->a_Name.Set( labelText );
@@ -55,7 +62,7 @@ void ReflectInterpreter::InterpretType(const std::vector<Reflect::Object*>& inst
 	containersMap.insert( std::make_pair( TXT( "" ), container) );
 
 	std::stack< const MetaStruct* > bases;
-	for ( const MetaStruct* current = composite; current != NULL; current = current->m_Base )
+	for ( const MetaStruct* current = commonType; current != NULL; current = current->m_Base )
 	{
 		bases.push( current );
 	}
@@ -72,186 +79,107 @@ void ReflectInterpreter::InterpretType(const std::vector<Reflect::Object*>& inst
 		{
 			const Field* field = &*itr;
 
-			bool noFlags = ( field->m_Flags == 0 && includeFlags == 0xFFFFFFFF );
-			bool doInclude = ( field->m_Flags & includeFlags ) != 0;
-			bool dontExclude = ( excludeFlags == 0 ) || !(field->m_Flags & excludeFlags );
 			bool hidden = (field->m_Flags & Reflect::FieldFlags::Hide) != 0; 
-
-			// if we don't have flags (or we are included, and we aren't excluded) then make UI
-			if ( ( noFlags || doInclude ) && ( dontExclude ) )
+			if (hidden)
 			{
-				std::string fieldUIGroup;
-				field->GetProperty( TXT( "UIGroup" ), fieldUIGroup );
-				if ( !fieldUIGroup.empty() )
+				continue; 
+			}
+
+			std::string fieldUIGroup;
+			if ( field->GetProperty( TXT( "UIGroup" ), fieldUIGroup ) && !fieldUIGroup.empty() )
+			{
+				std::map< std::string, ContainerPtr >::iterator itr = containersMap.find( fieldUIGroup );
+				if ( itr == containersMap.end() )
 				{
-					std::map< std::string, ContainerPtr >::iterator itr = containersMap.find( fieldUIGroup );
-					if ( itr == containersMap.end() )
+					// This container isn't in our list so make a new one
+					ContainerPtr newContainer = CreateControl<Container>();
+					containersMap.insert( std::make_pair(fieldUIGroup, newContainer) );
+
+					ContainerPtr parent;
+					std::string groupName;
+					size_t idx = fieldUIGroup.find_last_of( TXT( "/" ) );
+					if ( idx != std::string::npos )
 					{
-						// This container isn't in our list so make a new one
-						ContainerPtr newContainer = CreateControl<Container>();
-						containersMap.insert( std::make_pair(fieldUIGroup, newContainer) );
+						std::string parentName = fieldUIGroup.substr( 0, idx );
+						groupName = fieldUIGroup.substr( idx+1 );
+						if ( containersMap.find( parentName ) == containersMap.end() )
+						{          
+							parent = CreateControl<Container>();
 
-						ContainerPtr parent;
-						std::string groupName;
-						size_t idx = fieldUIGroup.find_last_of( TXT( "/" ) );
-						if ( idx != std::string::npos )
-						{
-							std::string parentName = fieldUIGroup.substr( 0, idx );
-							groupName = fieldUIGroup.substr( idx+1 );
-							if ( containersMap.find( parentName ) == containersMap.end() )
-							{          
-								parent = CreateControl<Container>();
-
-								// create the parent hierarchy since it hasn't already been made
-								std::string currentParent = parentName;
-								for (;;)
+							// create the parent hierarchy since it hasn't already been made
+							std::string currentParent = parentName;
+							for (;;)
+							{
+								idx = currentParent.find_last_of( TXT( "/" ) );
+								if ( idx == std::string::npos )
 								{
-									idx = currentParent.find_last_of( TXT( "/" ) );
-									if ( idx == std::string::npos )
+									// no more parents so we add it to the root
+									containersMap.insert( std::make_pair(currentParent, parent) );
+									parent->a_Name.Set( currentParent );
+									containersMap[ TXT( "" ) ]->AddChild( parent );
+									break;
+								}
+								else
+								{
+									parent->a_Name.Set( currentParent.substr( idx+1 ) );
+
+									if ( containersMap.find( currentParent ) != containersMap.end() )
 									{
-										// no more parents so we add it to the root
-										containersMap.insert( std::make_pair(currentParent, parent) );
-										parent->a_Name.Set( currentParent );
-										containersMap[ TXT( "" ) ]->AddChild( parent );
 										break;
 									}
 									else
 									{
-										parent->a_Name.Set( currentParent.substr( idx+1 ) );
+										ContainerPtr grandParent = CreateControl<Container>();
+										grandParent->AddChild( parent );
+										containersMap.insert( std::make_pair(currentParent, parent) );
 
-										if ( containersMap.find( currentParent ) != containersMap.end() )
-										{
-											break;
-										}
-										else
-										{
-											ContainerPtr grandParent = CreateControl<Container>();
-											grandParent->AddChild( parent );
-											containersMap.insert( std::make_pair(currentParent, parent) );
-
-											parent = grandParent;
-										}
-										currentParent = currentParent.substr( 0, idx );
+										parent = grandParent;
 									}
+									currentParent = currentParent.substr( 0, idx );
 								}
-								containersMap.insert( std::make_pair(parentName, parent) );
 							}
-							parent = containersMap[parentName];
+							containersMap.insert( std::make_pair(parentName, parent) );
 						}
-						else
-						{
-							parent = containersMap[ TXT( "" )];
-							groupName = fieldUIGroup;
-						}
-						newContainer->a_Name.Set( groupName );
-						parent->AddChild( newContainer );
+						parent = containersMap[parentName];
 					}
-
-					container = containersMap[fieldUIGroup];
-				}
-				else
-				{
-					container = containersMap[ TXT( "" )];
-				}
-
-
-				//
-				// Pointer support
-				//
-
-#if INSPECT_REFACTOR
-				if (field->m_DataClass == Reflect::GetMetaClass<Reflect::PointerData>())
-				{
-					if (field->m_Translator->)
+					else
 					{
-						if (hidden)
-						{
-							continue; 
-						}        
-
-						std::vector<Reflect::Object*> fieldInstances;
-
-						std::vector<Reflect::Object*>::const_iterator elementItr = instances.begin();
-						std::vector<Reflect::Object*>::const_iterator elementEnd = instances.end();
-						for ( ; elementItr != elementEnd; ++elementItr )
-						{
-							uintptr_t fieldAddress = (uintptr_t)(*elementItr) + itr->m_Offset;
-
-							Object* element = *((ObjectPtr*)(fieldAddress));
-
-							if ( element )
-							{
-								fieldInstances.push_back( element );
-							}
-						}
-
-						if ( !fieldInstances.empty() && fieldInstances.size() == instances.size() )
-						{
-							InterpretType(fieldInstances, container);
-						}
-
-						continue;
+						parent = containersMap[TXT( "" )];
+						groupName = fieldUIGroup;
 					}
+					newContainer->a_Name.Set( groupName );
+					parent->AddChild( newContainer );
 				}
 
-				//
-				// ElementArray support
-				//
+				container = containersMap[fieldUIGroup];
+			}
+			else
+			{
+				container = containersMap[TXT( "" )];
+			}
 
-				if (field->m_DataClass == Reflect::GetMetaClass<ObjectStlVectorData>())
+			if ( field->m_Count > 1 )
+			{
+				for ( uint32_t i=0; i<field->m_Count; ++i )
 				{
-					if (hidden)
+					std::vector< Reflect::Pointer > pointers;
+					for ( size_t j=0; j<instances.size(); ++j )
 					{
-						continue;
+						pointers.push_back( Pointer ( field, instances[ j ], objects[ j ], i ) );
 					}
 
-					if ( instances.size() == 1 )
-					{
-						uintptr_t fieldAddress = (uintptr_t)(instances.front()) + itr->m_Offset;
-
-						std::vector< ObjectPtr >* elements = (std::vector< ObjectPtr >*)fieldAddress;
-
-						if ( elements->size() > 0 )
-						{
-							ContainerPtr childContainer = CreateControl<Container>();
-
-							std::string temp;
-							field->GetProperty( TXT( "UIName" ), temp );
-							if ( temp.empty() )
-							{
-								bool converted = Helium::ConvertString( field->m_Name, temp );
-								HELIUM_ASSERT( converted );
-							}
-
-							childContainer->a_Name.Set( temp );
-
-							std::vector< ObjectPtr >::const_iterator elementItr = elements->begin();
-							std::vector< ObjectPtr >::const_iterator elementEnd = elements->end();
-							for ( ; elementItr != elementEnd; ++elementItr )
-							{
-								std::vector<Reflect::Object*> childInstances;
-								childInstances.push_back(*elementItr);
-								InterpretType(childInstances, childContainer);
-							}
-
-							container->AddChild( childContainer );
-						}
-					}
-
-					continue;
+					InterpretField( pointers, field->m_Translator, field, container );
 				}
-#endif
-
-				//
-				// Lastly fall back to the value interpreter
-				//
-
-				HELIUM_ASSERT( field->m_Translator );
-				if ( field->m_Translator->IsA( MetaIds::SimpleTranslator ) )
+			}
+			else
+			{
+				std::vector< Reflect::Pointer > pointers;
+				for ( size_t i=0; i<instances.size(); ++i )
 				{
-					InterpretValueField( field, instances, container );
-					continue;
+					pointers.push_back( Pointer ( field, instances[ i ], objects[ i ] ) );
 				}
+
+				InterpretField( pointers, field->m_Translator, field, container );
 			}
 		}
 	}
@@ -265,7 +193,27 @@ void ReflectInterpreter::InterpretType(const std::vector<Reflect::Object*>& inst
 	}
 }
 
-void ReflectInterpreter::InterpretValueField(const Field* field, const std::vector<Reflect::Object*>& instances, Container* parent)
+void ReflectInterpreter::InterpretField( const std::vector< Reflect::Pointer >& pointers, Reflect::Translator* translator, const Reflect::Field* field, Container* parent )
+{
+	if ( translator->IsA( MetaIds::SimpleTranslator ) )
+	{
+		InterpretValueField( pointers, translator, field, parent );
+	}
+	else if ( translator->IsA( MetaIds::EnumerationTranslator ) )
+	{
+		const MetaEnum* metaEnum = ReflectionCast< MetaEnum >( field->m_ValueType );
+		if ( metaEnum->m_IsBitfield )
+		{
+			InterpretBitfieldField( pointers, translator, field, parent );
+		}
+		else
+		{
+			InterpretValueField( pointers, translator, field, parent );
+		}
+	}
+}
+
+void ReflectInterpreter::InterpretValueField( const std::vector< Reflect::Pointer >& pointers, Reflect::Translator* translator, const Field* field, Container* parent )
 {
 	if (field->m_Flags & FieldFlags::Hide)
 	{
@@ -366,19 +314,13 @@ void ReflectInterpreter::InterpretValueField(const Field* field, const std::vect
 	// Bind data
 	//
 
-	std::vector<Data*> ser;
-
+	std::vector<Data*> datas;
+	for ( std::vector< Reflect::Pointer >::const_iterator itr = pointers.begin(), end = pointers.end(); itr != end; ++itr )
 	{
-		std::vector<Reflect::Object*>::const_iterator itr = instances.begin();
-		std::vector<Reflect::Object*>::const_iterator end = instances.end();
-		for ( ; itr != end; ++itr )
-		{
-			ser.push_back( new Data ( Pointer( field, *itr ), field->m_Translator ) );
-		}
+		datas.push_back( new Data ( *itr, translator ) );
 	}
 
-	Helium::SmartPtr< MultiStringFormatter<Data> > data = new MultiStringFormatter<Data>( ser, true );
-
+	Helium::SmartPtr< MultiStringFormatter<Data> > data = new MultiStringFormatter<Data>( datas, true );
 	container->Bind( data );
 
 	//
@@ -477,7 +419,7 @@ private:
 	const Reflect::MetaEnum::Element* m_EnumerationElement;
 };
 
-void ReflectInterpreter::InterpretBitfieldField(const Field* field, const std::vector<Reflect::Object*>& instances, Container* parent)
+void ReflectInterpreter::InterpretBitfieldField( const std::vector< Reflect::Pointer >& pointers, Reflect::Translator* translator, const Reflect::Field* field, Container* parent )
 {
 	bool isEnumeration = field->m_Translator->IsA( Reflect::MetaIds::EnumerationTranslator );
 
@@ -509,12 +451,10 @@ void ReflectInterpreter::InterpretBitfieldField(const Field* field, const std::v
 	parent->AddChild(container);
 
 	// create the data objects
-	std::vector< Data* > datas;
-	std::vector<Reflect::Object*>::const_iterator itr = instances.begin();
-	std::vector<Reflect::Object*>::const_iterator end = instances.end();
-	for ( ; itr != end; ++itr )
+	std::vector<Data*> datas;
+	for ( std::vector< Reflect::Pointer >::const_iterator itr = pointers.begin(), end = pointers.end(); itr != end; ++itr )
 	{
-		datas.push_back( new Data( Reflect::Pointer( field, *itr ), field->m_Translator ) );
+		datas.push_back( new Data ( *itr, translator ) );
 	}
 
 	String defaultStr;
@@ -551,7 +491,7 @@ void ReflectInterpreter::InterpretBitfieldField(const Field* field, const std::v
 	}
 }
 
-void ReflectInterpreter::InterpretColorField( const Field* field, const std::vector<Reflect::Object*>& instances, Container* parent )
+void ReflectInterpreter::InterpretColorField( const std::vector< Reflect::Pointer >& pointers, Reflect::Translator* translator, const Reflect::Field* field, Container* parent )
 {
 #if INSPECT_REFACTOR
 	ContainerPtr container = CreateControl< Container >();
@@ -578,9 +518,9 @@ void ReflectInterpreter::InterpretColorField( const Field* field, const std::vec
 
 	if ( color3 || color4 )
 	{
-		std::vector<Data*> ser;
-		std::vector<Reflect::Object*>::const_iterator itr = instances.begin();
-		std::vector<Reflect::Object*>::const_iterator end = instances.end();
+		std::vector<Data*> datas;
+		std::vector<Reflect::Object*>::const_iterator itr = objects.begin();
+		std::vector<Reflect::Object*>::const_iterator end = objects.end();
 		for ( ; itr != end; ++itr )
 		{
 			Data s;
@@ -598,7 +538,7 @@ void ReflectInterpreter::InterpretColorField( const Field* field, const std::vec
 			if (s.ReferencesObject())
 			{
 				s->ConnectField( *itr, field );
-				ser.push_back( s );
+				datas.push_back( s );
 				m_Datas.push_back( s );
 			}
 		}
@@ -613,7 +553,7 @@ void ReflectInterpreter::InterpretColorField( const Field* field, const std::vec
 			bool readOnly = ( field->m_Flags & FieldFlags::ReadOnly ) == FieldFlags::ReadOnly;
 			colorPicker->a_IsReadOnly.Set( readOnly );
 
-			DataBindingPtr data = new MultiStringFormatter<Data>( ser );
+			DataBindingPtr data = new MultiStringFormatter<Data>( datas );
 			colorPicker->Bind( data );
 
 			if ( color3 )
@@ -638,8 +578,8 @@ void ReflectInterpreter::InterpretColorField( const Field* field, const std::vec
 				value->a_HelpText.Set( TXT( "Sets the alpha value for the color." ) );
 
 				std::vector<Data*> alphaSer;
-				std::vector<Reflect::Object*>::const_iterator itr = instances.begin();
-				std::vector<Reflect::Object*>::const_iterator end = instances.end();
+				std::vector<Reflect::Object*>::const_iterator itr = objects.begin();
+				std::vector<Reflect::Object*>::const_iterator end = objects.end();
 				for ( ; itr != end; ++itr )
 				{
 					Data s = new UInt8Data ();
@@ -675,8 +615,8 @@ void ReflectInterpreter::InterpretColorField( const Field* field, const std::vec
 				value->a_HelpText.Set( TXT( "Adjusts the HDR value of the color." ) );
 
 				std::vector<Data*> intensitySer;
-				std::vector<Reflect::Object*>::const_iterator itr = instances.begin();
-				std::vector<Reflect::Object*>::const_iterator end = instances.end();
+				std::vector<Reflect::Object*>::const_iterator itr = objects.begin();
+				std::vector<Reflect::Object*>::const_iterator end = objects.end();
 				for ( ; itr != end; ++itr )
 				{
 					Data s = new Float32Data();
@@ -711,7 +651,7 @@ void ReflectInterpreter::InterpretColorField( const Field* field, const std::vec
 #endif
 }
 
-void ReflectInterpreter::InterpretFilePathField(const Field* field, const std::vector<Reflect::Object*>& instances, Container* parent)
+void ReflectInterpreter::InterpretFilePathField( const std::vector< Reflect::Pointer >& pointers, Reflect::Translator* translator, const Reflect::Field* field, Container* parent )
 {
 #if INSPECT_REFACTOR
 	if (field->m_Flags & FieldFlags::Hide)
@@ -773,7 +713,7 @@ void ReflectInterpreter::InterpretFilePathField(const Field* field, const std::v
 				value->SetProperty( TXT( "FileFilter" ), m_FileFilter );
 			}
 
-			if ( instances.size() == 1 )
+			if ( objects.size() == 1 )
 			{
 				// File edit button
 				ButtonPtr editButton = CreateControl< Button >();
@@ -831,14 +771,14 @@ void ReflectInterpreter::InterpretFilePathField(const Field* field, const std::v
 	}
 
 	//
-	// Create type m_FinderSpecific data bound to this and additional instances
+	// Create type m_FinderSpecific data bound to this and additional objects
 	//
 
-	std::vector<Data*> ser;
+	std::vector<Data*> datas;
 
 	{
-		std::vector<Reflect::Object*>::const_iterator itr = instances.begin();
-		std::vector<Reflect::Object*>::const_iterator end = instances.end();
+		std::vector<Reflect::Object*>::const_iterator itr = objects.begin();
+		std::vector<Reflect::Object*>::const_iterator end = objects.end();
 		for ( ; itr != end; ++itr )
 		{
 			Data s = field->CreateData();
@@ -850,7 +790,7 @@ void ReflectInterpreter::InterpretFilePathField(const Field* field, const std::v
 
 			s->ConnectField(*itr, field);
 
-			ser.push_back(s);
+			datas.push_back(s);
 
 			m_Datas.push_back(s);
 		}
@@ -860,7 +800,7 @@ void ReflectInterpreter::InterpretFilePathField(const Field* field, const std::v
 	// Create data and bind
 	//
 
-	Helium::SmartPtr< MultiStringFormatter<Data> > data = new MultiStringFormatter<Data>( ser );
+	Helium::SmartPtr< MultiStringFormatter<Data> > data = new MultiStringFormatter<Data>( datas );
 
 	if (changingDelegate.Valid())
 	{
@@ -938,7 +878,7 @@ void ReflectInterpreter::FilePathEdit( const ButtonClickedArgs& args )
 	}
 }
 
-void ReflectInterpreter::InterpretSequenceField(const Field* field, const std::vector<Reflect::Object*>& instances, Container* parent)
+void ReflectInterpreter::InterpretSequenceField( const std::vector< Reflect::Pointer >& pointers, Reflect::Translator* translator, const Reflect::Field* field, Container* parent )
 {
 #if INSPECT_REFACTOR
 	if (field->m_Flags & FieldFlags::Hide)
@@ -1004,8 +944,8 @@ void ReflectInterpreter::InterpretSequenceField(const Field* field, const std::v
 	}
 
 	// create the data objects
-	std::vector<Reflect::Object*>::const_iterator itr = instances.begin();
-	std::vector<Reflect::Object*>::const_iterator end = instances.end();
+	std::vector<Reflect::Object*>::const_iterator itr = objects.begin();
+	std::vector<Reflect::Object*>::const_iterator end = objects.end();
 	for ( ; itr != end; ++itr )
 	{
 		Data s = field->CreateData();
@@ -1181,7 +1121,7 @@ void ReflectInterpreter::SequenceOnMoveDown( const ButtonClickedArgs& args )
 #endif
 }
 
-void ReflectInterpreter::InterpretSetField( const Reflect::Field* field, const std::vector<Reflect::Object*>& instances, Container* parent )
+void ReflectInterpreter::InterpretSetField( const std::vector< Reflect::Pointer >& pointers, Reflect::Translator* translator, const Reflect::Field* field, Container* parent )
 {
 	if ( field->m_Flags & Reflect::FieldFlags::Hide )
 	{
@@ -1203,12 +1143,10 @@ void ReflectInterpreter::InterpretSetField( const Reflect::Field* field, const s
 	container->a_Name.Set( temp );
 
 	// create the data objects
-	std::vector<Data*> ser;
-	std::vector< Reflect::Object* >::const_iterator itr = instances.begin();
-	std::vector< Reflect::Object* >::const_iterator end = instances.end();
-	for ( ; itr != end; ++itr )
+	std::vector<Data*> datas;
+	for ( std::vector< Reflect::Pointer >::const_iterator itr = pointers.begin(), end = pointers.end(); itr != end; ++itr )
 	{
-		ser.push_back( new Data ( Pointer( field, *itr ), field->m_Translator ) );
+		datas.push_back( new Data ( *itr, translator ) );
 	}
 
 	// create the list
@@ -1217,7 +1155,7 @@ void ReflectInterpreter::InterpretSetField( const Reflect::Field* field, const s
 	container->AddChild( list );
 
 	// bind the ui to the serialiers
-	list->Bind( new MultiStringFormatter< Reflect::Data >( ser, true ) );
+	list->Bind( new MultiStringFormatter< Reflect::Data >( datas, true ) );
 
 	// create the buttons if we are not read only
 	if ( !( field->m_Flags & Reflect::FieldFlags::ReadOnly ) )
@@ -1241,7 +1179,7 @@ void ReflectInterpreter::InterpretSetField( const Reflect::Field* field, const s
 	}
 
 	// for now let's just disable this container if there is more than one item selected. I'm not sure if it will behave properly in this case.
-	if ( instances.size() > 1 )
+	if ( pointers.size() > 1 )
 	{
 		container->a_IsEnabled.Set( false );
 	}
