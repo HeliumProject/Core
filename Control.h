@@ -160,10 +160,6 @@ namespace Helium
 			template<class T> bool GetProperty( const std::string& key, T& value ) const;
 			template<class T> void SetProperty( const std::string& key, const T& value );
 
-			// access to properties as string data
-			template<> bool GetProperty( const std::string& key, std::string& value ) const;
-			template<> void SetProperty( const std::string& key, const std::string& value );
-
 			// data binding governs the data state of the ui
 			inline bool IsBound() const;
 			inline const DataBinding* GetBinding() const;
@@ -293,6 +289,10 @@ namespace Helium
 		};
 
 		typedef Helium::StrongPtr<Control> ControlPtr;
+
+		// access to properties as string data
+		template<> bool Control::GetProperty( const std::string& key, std::string& value ) const;
+		template<> void Control::SetProperty( const std::string& key, const std::string& value );
 
 #ifdef PROFILE_ACCUMULATION
 		HELIUM_INSPECT_API extern Profile::Accumulator g_RealizeAccumulator;
