@@ -5,6 +5,15 @@ Helium::Inspect::ContextMenuEventArgs::ContextMenuEventArgs(Control* control, co
 
 }
 
+Helium::Inspect::ContextMenu::ContextMenu(Control* control)
+	: m_Control (control)
+{
+}
+
+Helium::Inspect::ContextMenu::~ContextMenu()
+{
+}
+
 const std::vector< std::string >& Helium::Inspect::ContextMenu::GetItems()
 {
 	return m_Items;

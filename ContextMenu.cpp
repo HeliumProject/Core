@@ -7,17 +7,6 @@
 
 using namespace Helium::Inspect;
 
-ContextMenu::ContextMenu(Control* control)
-	: m_Control (control)
-{
-
-}
-
-ContextMenu::~ContextMenu()
-{
-
-}
-
 void ContextMenu::AddItem(const std::string& item, ContextMenuSignature::Delegate delegate)
 {
 	M_ContextMenuDelegate::iterator found = m_Delegates.find(item);

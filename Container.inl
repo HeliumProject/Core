@@ -30,3 +30,14 @@ void Helium::Inspect::Container::BuildPath(std::string& path) const
 
 	path += TXT( "|" ) + a_Name.Get();
 }
+
+Helium::Inspect::UIHints Helium::Inspect::Container::GetUIHints() const
+{
+	return m_UIHints;
+}
+
+void Helium::Inspect::Container::SetUIHints( const UIHints hints )
+{
+	m_UIHints = hints;
+}
+

@@ -10,7 +10,6 @@ namespace Helium
 		const static char CONTAINER_ATTR_NAME[] = TXT( "name" );
 		const static char CONTAINER_ATTR_ICON[] = TXT( "icon" );
 
-		///////////////////////////////////////////////////////////////////////
 		namespace UIHint
 		{
 			enum UIHints
@@ -23,9 +22,10 @@ namespace Helium
 		}
 		typedef uint32_t UIHints;
 
-		///////////////////////////////////////////////////////////////////////
+		//
 		// Contains other controls and distributes layout logic
 		//
+
 		class HELIUM_INSPECT_API Container : public Control
 		{
 		public:
@@ -45,8 +45,8 @@ namespace Helium
 			inline const std::string& GetPath() const;
 			inline void BuildPath(std::string& path) const;
 
-			UIHints GetUIHints() const;
-			void SetUIHints( const UIHints hints );
+			inline UIHints GetUIHints() const;
+			inline void SetUIHints( const UIHints hints );
 
 			// recusively binds contained controls to data
 			virtual void Bind(const DataBindingPtr& data) HELIUM_OVERRIDE;

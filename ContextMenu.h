@@ -50,13 +50,13 @@ namespace Helium
 		class HELIUM_INSPECT_API ContextMenu : public Helium::RefCountBase<ContextMenu>
 		{
 		public:
-			ContextMenu(Control* control);
-			~ContextMenu();
+			inline ContextMenu(Control* control);
+			inline ~ContextMenu();
 
+			inline const std::vector< std::string >& GetItems();
 			void AddItem(const std::string& item, ContextMenuSignature::Delegate delegate);
 			void AddSeperator();
 
-			inline const std::vector< std::string >& GetItems();
 			inline const M_ContextMenuDelegate& GetDelegates();
 
 		private:

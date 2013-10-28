@@ -85,16 +85,6 @@ void Container::Clear()
 	}
 }
 
-UIHints Container::GetUIHints() const
-{
-	return m_UIHints;
-}
-
-void Container::SetUIHints( const UIHints hints )
-{
-	m_UIHints = hints;
-}
-
 void Container::Bind(const DataBindingPtr& data)
 {
 	Base::Bind( data );
