@@ -671,10 +671,12 @@ void ArchiveReaderBson::DeserializeField( bson_iterator* i, void* instance, cons
 			uint32_t index = 0;
 			while( bson_iterator_next( elem ) )
 			{
-				if ( index++ < field->m_Count )
+				if ( index >= field->m_Count )
 				{
-					DeserializeTranslator( elem, Pointer ( field, instance, object, index ), field->m_Translator, field, object );
+					break;
 				}
+
+				DeserializeTranslator( elem, Pointer ( field, instance, object, index++ ), field->m_Translator, field, object );
 			}
 		}
 		else
