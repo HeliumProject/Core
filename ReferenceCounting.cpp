@@ -49,7 +49,7 @@ public:
 
 struct ObjectRefCountSupport::StaticTranslator
 {
-	static const size_t POOL_BLOCK_SIZE = 1024;
+	static const size_t POOL_BLOCK_SIZE = 1024*1024;
 
 	ObjectPool< RefCountProxy< Object > > proxyPool;
 
