@@ -265,8 +265,15 @@ const char Helium::PathSeparator = TXT('/');
 void Helium::GetFullPath( const char* path, std::string& fullPath )
 {
 	char* p = realpath( path, NULL );
-	fullPath = p;
-	free( p );
+	if (p)
+	{
+	  fullPath = p;
+	  free( p );
+	}
+	else
+	{
+	  fullPath = "";
+	}
 }
 
 bool Helium::IsAbsolute( const char* path )

@@ -48,7 +48,7 @@ ProcessHandle Helium::Spawn( const std::string& cmd, bool autoKill )
 	if ( autoKill )
 	{
 		// NYI: http://stackoverflow.com/questions/284325/how-to-make-child-process-die-after-parent-exits
-		HELIUM_ASSERT( false );
+		return 0;
 	}
 	else
 	{
