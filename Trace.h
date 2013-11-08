@@ -41,37 +41,28 @@ namespace Helium
 		/// Default size for formatted trace message buffers without requiring dynamic memory allocation.
 		static const size_t DEFAULT_MESSAGE_BUFFER_SIZE = 1024;
 
-		/// @name Construction/Destruction
-		//@{
-		Trace();
-		virtual ~Trace();
-		//@}
-
 		/// @name Logging Interface
 		//@{
-		void SetLevel( TraceLevel level );
-		inline TraceLevel GetLevel() const;
+		static void SetLevel( TraceLevel level );
+		static inline TraceLevel GetLevel();
 
-		void Output( TraceLevel level, const char* pFormat, ... );
-		void OutputVa( TraceLevel level, const char* pFormat, va_list argList );
+		static void Output( TraceLevel level, const char* pFormat, ... );
+		static void OutputVa( TraceLevel level, const char* pFormat, va_list argList );
 		//@}
 
 	protected:
-		/// Synchronization mutex.
-		Mutex m_mutex;
-
 		/// Current logging level.
-		TraceLevel m_level;
+		static TraceLevel sm_level;
 
 		/// Logging level of the last message.
-		TraceLevel m_lastMessageLevel;
+		static TraceLevel sm_lastMessageLevel;
 
 		/// True if logging just started a fresh line.
-		bool m_bNewLine;
+		static bool sm_bNewLine;
 
 		/// @name Logging Implementation
 		//@{
-		void OutputImplementation( const char* pMessage );
+		static void OutputImplementation( const char* pMessage );
 		//@}
 
 		/// @name Static Utility Functions
@@ -79,16 +70,13 @@ namespace Helium
 		static const char* GetLevelString( TraceLevel level );
 		//@}
 	};
-
-	/// Global trace instance.
-	HELIUM_PLATFORM_API extern Trace g_Trace;
 }
 
 /// Write out a message to the trace output.
 ///
 /// @param[in] LEVEL  Trace level.
 /// @param[in] ...    Message.  This can be a "printf"-style format string and arguments or a Helium::String.
-#define HELIUM_TRACE( LEVEL, ... ) Helium::g_Trace.Output( LEVEL, __VA_ARGS__ )
+#define HELIUM_TRACE( LEVEL, ... ) Helium::Trace::Output( LEVEL, __VA_ARGS__ )
 
 /// Write out a formatted message to the trace output using a variable argument list.
 ///
@@ -96,21 +84,21 @@ namespace Helium
 /// @param[in] FORMAT    Format string.
 /// @param[in] ARG_LIST  Variable argument list initialized to the format arguments (va_start() should have already been
 ///                      called.
-#define HELIUM_TRACE_VA( LEVEL, FORMAT, ARG_LIST ) Helium::g_Trace.OutputVa( LEVEL, FORMAT, ARG_LIST )
+#define HELIUM_TRACE_VA( LEVEL, FORMAT, ARG_LIST ) Helium::Trace::OutputVa( LEVEL, FORMAT, ARG_LIST )
 
 /// Set the current trace level.
 ///
 /// @param[in] LEVEL  Level to set.
 ///
 /// @see HELIUM_TRACE_GET_LEVEL()
-#define HELIUM_TRACE_SET_LEVEL( LEVEL ) Helium::g_Trace.SetLevel( LEVEL )
+#define HELIUM_TRACE_SET_LEVEL( LEVEL ) Helium::Trace::SetLevel( LEVEL )
 
 /// Get the current trace level.
 ///
 /// @return  Current trace level.
 ///
 /// @see HELIUM_TRACE_SET_LEVEL()
-#define HELIUM_TRACE_GET_LEVEL() Helium::g_Trace.GetLevel()
+#define HELIUM_TRACE_GET_LEVEL() Helium::Trace::GetLevel()
 
 #else  // HELIUM_ENABLE_TRACE
 

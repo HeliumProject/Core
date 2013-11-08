@@ -10,31 +10,18 @@
 
 using namespace Helium;
 
-Helium::Trace Helium::g_Trace;
-
-/// Constructor.
-Helium::Trace::Trace()
-	: m_level( TraceLevels::Info )
-	, m_lastMessageLevel( TraceLevels::Debug )
-	, m_bNewLine( true )
-{
-}
-
-/// Destructor.
-Helium::Trace::~Trace()
-{
-}
+TraceLevel Trace::sm_level = TraceLevels::Info;
+TraceLevel Trace::sm_lastMessageLevel = TraceLevels::Debug;
+bool Trace::sm_bNewLine = true;
 
 /// Set the current logging level.
 ///
 /// @param[in] level  Logging level.
 ///
 /// @see GetLevel()
-void Helium::Trace::SetLevel( TraceLevel level )
+void Trace::SetLevel( TraceLevel level )
 {
-	MutexScopeLock scopeLock( m_mutex );
-
-	m_level = level;
+	sm_level = level;
 }
 
 /// Write out a formatted message to this log.
@@ -42,7 +29,7 @@ void Helium::Trace::SetLevel( TraceLevel level )
 /// @param[in] level    Logging level.
 /// @param[in] pFormat  Format string.
 /// @param[in] ...      Format arguments.
-void Helium::Trace::Output( TraceLevel level, const char* pFormat, ... )
+void Trace::Output( TraceLevel level, const char* pFormat, ... )
 {
 	va_list argList;
 	va_start( argList, pFormat );
@@ -56,24 +43,26 @@ void Helium::Trace::Output( TraceLevel level, const char* pFormat, ... )
 /// @param[in] pFormat  Format string.
 /// @param[in] argList  Initialized variable argument list for the format arguments (va_start() should have already
 ///                     been called on this as necessary).
-void Helium::Trace::OutputVa( TraceLevel level, const char* pFormat, va_list argList )
+void Trace::OutputVa( TraceLevel level, const char* pFormat, va_list argList )
 {
 	HELIUM_ASSERT( pFormat );
 
-	MutexScopeLock scopeLock( m_mutex );
+	static uint8_t mutexStorage[ sizeof( Mutex ) ];
+	Mutex* pMutex = new ( mutexStorage ) Mutex;
+	MutexScopeLock scopeLock( *pMutex );
 
-	if( level < m_level )
+	if( level < sm_level )
 	{
 		return;
 	}
 
-	if( m_bNewLine || level != m_lastMessageLevel )
+	if( sm_bNewLine || level != sm_lastMessageLevel )
 	{
 		OutputImplementation( GetLevelString( level ) );
 	}
 
-	m_bNewLine = false;
-	m_lastMessageLevel = level;
+	sm_bNewLine = false;
+	sm_lastMessageLevel = level;
 
 	char buffer[ DEFAULT_MESSAGE_BUFFER_SIZE ];
 
@@ -88,7 +77,7 @@ void Helium::Trace::OutputVa( TraceLevel level, const char* pFormat, va_list arg
 	if( static_cast< unsigned int >( result ) < HELIUM_ARRAY_COUNT( buffer ) )
 	{
 		OutputImplementation( buffer );
-		m_bNewLine = ( buffer[ result - 1 ] == TXT( '\n' ) );
+		sm_bNewLine = ( buffer[ result - 1 ] == TXT( '\n' ) );
 
 		return;
 	}
@@ -124,7 +113,7 @@ void Helium::Trace::OutputVa( TraceLevel level, const char* pFormat, va_list arg
 
 		HELIUM_ASSERT( result == static_cast< int >( bufferSize - 1 ) );
 		OutputImplementation( pBuffer );
-		m_bNewLine = ( pBuffer[ result - 1 ] == TXT( '\n' ) );
+		sm_bNewLine = ( pBuffer[ result - 1 ] == TXT( '\n' ) );
 
 #if HELIUM_HEAP
 		allocator.Free( pBuffer );
@@ -137,7 +126,7 @@ void Helium::Trace::OutputVa( TraceLevel level, const char* pFormat, va_list arg
 /// Write out a message to this log.
 ///
 /// @param[in] pMessage  Message text.
-void Helium::Trace::OutputImplementation( const char* pMessage )
+void Trace::OutputImplementation( const char* pMessage )
 {
 	HELIUM_ASSERT( pMessage );
 
@@ -151,7 +140,7 @@ void Helium::Trace::OutputImplementation( const char* pMessage )
 /// @param[in] level  Logging level.
 ///
 /// @return  Logging level string.
-const char* Helium::Trace::GetLevelString( TraceLevel level )
+const char* Trace::GetLevelString( TraceLevel level )
 {
 	switch( level )
 	{
