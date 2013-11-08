@@ -48,7 +48,7 @@ void Trace::OutputVa( TraceLevel level, const char* pFormat, va_list argList )
 	HELIUM_ASSERT( pFormat );
 
 	static uint8_t mutexStorage[ sizeof( Mutex ) ];
-	Mutex* pMutex = new ( mutexStorage ) Mutex;
+	static Mutex* pMutex = new ( mutexStorage ) Mutex;
 	MutexScopeLock scopeLock( *pMutex );
 
 	if( level < sm_level )
