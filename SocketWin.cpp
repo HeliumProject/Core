@@ -116,21 +116,15 @@ bool Socket::Create( SocketProtocol protocol )
 	return true;
 }
 
-bool Socket::Close()
+void Socket::Close()
 {
 	::SetEvent( m_TerminateIo );
-	if ( m_Handle == INVALID_SOCKET )
+	if ( m_Handle != INVALID_SOCKET )
 	{
-		return true;
-	}
-
-	if ( HELIUM_VERIFY( 0 == ::shutdown( m_Handle, SD_BOTH ) ) && HELIUM_VERIFY( 0 == ::closesocket( m_Handle ) ) )
-	{
+		::shutdown( m_Handle, SD_BOTH );
+		HELIUM_VERIFY( 0 == ::closesocket( m_Handle ) );
 		m_Handle = INVALID_SOCKET;
-		return true;
 	}
-
-	return false;
 }
 
 bool Socket::Bind( uint16_t port )
@@ -145,7 +139,7 @@ bool Socket::Bind( uint16_t port )
 	if ( ::bind( m_Handle, (sockaddr*)&service, sizeof(sockaddr_in) ) == SOCKET_ERROR )
 	{
 		Helium::Print( TXT("Failed to bind socket (%d)\n"), WSAGetLastError() );
-		HELIUM_VERIFY( 0 == ::shutdown( m_Handle, SD_BOTH ) );
+		::shutdown( m_Handle, SD_BOTH );
 		HELIUM_VERIFY( 0 == ::closesocket( m_Handle ) );
 		m_Handle = INVALID_SOCKET;
 		return false;
@@ -156,42 +150,50 @@ bool Socket::Bind( uint16_t port )
 
 bool Socket::Listen()
 {
-	HELIUM_ASSERT( m_Protocol == Helium::SocketProtocols::Tcp );
-	if ( ::listen( m_Handle, SOMAXCONN) == SOCKET_ERROR )
+	if ( HELIUM_VERIFY( m_Protocol == Helium::SocketProtocols::Tcp ) )
 	{
-		Helium::Print( TXT("Failed to listen socket (%d)\n"), WSAGetLastError() );
-		HELIUM_VERIFY( 0 == ::shutdown( m_Handle, SD_BOTH ) );
-		HELIUM_VERIFY( 0 == ::closesocket( m_Handle ) );
-		m_Handle = INVALID_SOCKET;
-		return false;
+		if ( ::listen( m_Handle, SOMAXCONN ) != SOCKET_ERROR )
+		{
+			return true;
+		}
+		else
+		{
+			Helium::Print( TXT("Failed to listen socket (%d)\n"), WSAGetLastError() );
+			::shutdown( m_Handle, SD_BOTH );
+			HELIUM_VERIFY( 0 == ::closesocket( m_Handle ) );
+			m_Handle = INVALID_SOCKET;
+			return false;
+		}
 	}
 
-	return true;
+	return false;
 }
 
 bool Socket::Connect( uint16_t port, const char* ip )
 {
-	HELIUM_ASSERT( m_Protocol == Helium::SocketProtocols::Tcp );
+	if ( HELIUM_VERIFY( m_Protocol == Helium::SocketProtocols::Tcp ) )
+	{
+		struct sockaddr_in addr;
+		addr.sin_family = AF_INET;
+		addr.sin_addr.s_addr = ip ? inet_addr(ip) : htonl(INADDR_BROADCAST);
+		addr.sin_port = htons(port);
+		return ::connect( m_Handle, (SOCKADDR*)&addr, sizeof(sockaddr_in)) != SOCKET_ERROR;
+	}
 
-	struct sockaddr_in addr;
-	addr.sin_family = AF_INET;
-	addr.sin_addr.s_addr = ip ? inet_addr(ip) : htonl(INADDR_BROADCAST);
-	addr.sin_port = htons(port);
-	return ::connect( m_Handle, (SOCKADDR*)&addr, sizeof(sockaddr_in)) != SOCKET_ERROR;
+	return false;
 }
 
 bool Socket::Accept( Socket& server_socket, sockaddr_in* client_info )
 {
-	HELIUM_ASSERT( m_Protocol == Helium::SocketProtocols::Tcp );
+	if ( HELIUM_VERIFY( m_Protocol == Helium::SocketProtocols::Tcp ) )
+	{
+		int lengthname = sizeof(sockaddr_in);
+		m_Protocol = Helium::SocketProtocols::Tcp;
+		m_Handle = ::accept( server_socket.m_Handle, (struct sockaddr *)client_info, &lengthname);
+		return m_Handle != INVALID_SOCKET;
+	}
 
-	int lengthname = sizeof(sockaddr_in);
-
-	m_Protocol = Helium::SocketProtocols::Tcp;
-	m_Handle = ::accept( server_socket.m_Handle, (struct sockaddr *)client_info, &lengthname);
-
-	int error = WSAGetLastError();
-
-	return m_Handle != SOCKET_ERROR;
+	return false;
 }
 
 bool Socket::Read( void* buffer, uint32_t bytes, uint32_t& read, sockaddr_in* peer )

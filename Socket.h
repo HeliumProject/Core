@@ -61,7 +61,7 @@ namespace Helium
 
         // Create/close sockets
         bool Create(SocketProtocol protocol);
-        bool Close();
+        void Close();
 
         // Associate the socket with a particular port
         bool Bind(uint16_t port);
