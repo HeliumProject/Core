@@ -15,10 +15,13 @@ bool Helium::Mongo::Database::IsConnected( bool pingServer )
 
 void Helium::Mongo::Database::SetThread( Helium::ThreadId threadId )
 {
-	this->threadId = threadId;
+	if ( this->threadId != threadId )
+	{
+		this->threadId = threadId;
+	}
 }
 
-bool Helium::Mongo::Database::IsCorrectThread()
+bool Helium::Mongo::Database::IsCorrectThread() const
 {
 	return this->threadId == Thread::GetCurrentId();
 }

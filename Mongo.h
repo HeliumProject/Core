@@ -78,7 +78,7 @@ namespace Helium
 
 			// thread verification
 			inline void SetThread( Helium::ThreadId threadId = Thread::GetCurrentId() );
-			inline bool IsCorrectThread();
+			inline bool IsCorrectThread() const;
 
 			// collection routines
 			double GetCollectionCount( const char* name );
