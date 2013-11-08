@@ -159,19 +159,18 @@ void TCPConnection::ServerThread()
 				return;
 			}
 
-			int result;
 			socklen_t buf_size = IPC_TCP_BUFFER_SIZE;
 			socklen_t size_size = sizeof(IPC_TCP_BUFFER_SIZE);
-			result = setsockopt(m_ReadSocket, SOL_SOCKET, SO_RCVBUF, (const char*)&buf_size, size_size);
-			result = setsockopt(m_ReadSocket, SOL_SOCKET, SO_SNDBUF, (const char*)&buf_size, size_size);
-			result = setsockopt(m_WriteSocket, SOL_SOCKET, SO_RCVBUF, (const char*)&buf_size, size_size);
-			result = setsockopt(m_WriteSocket, SOL_SOCKET, SO_SNDBUF, (const char*)&buf_size, size_size);
+			HELIUM_VERIFY( 0 == setsockopt(m_ReadSocket, SOL_SOCKET, SO_RCVBUF, (const char*)&buf_size, size_size) );
+			HELIUM_VERIFY( 0 == setsockopt(m_ReadSocket, SOL_SOCKET, SO_SNDBUF, (const char*)&buf_size, size_size) );
+			HELIUM_VERIFY( 0 == setsockopt(m_WriteSocket, SOL_SOCKET, SO_RCVBUF, (const char*)&buf_size, size_size) );
+			HELIUM_VERIFY( 0 == setsockopt(m_WriteSocket, SOL_SOCKET, SO_SNDBUF, (const char*)&buf_size, size_size) );
 			Helium::Print( TXT( "%s: Accepted connection (%dk/%dk)\n" ), m_Name, IPC_TCP_BUFFER_SIZE >> 10, IPC_TCP_BUFFER_SIZE >> 10);
 
 #ifdef IPC_TCP_NO_DELAY
 			int flag = 1;
-			result = setsockopt(m_ReadSocket, IPPROTO_TCP, TCP_NODELAY, (const char*)&flag, sizeof(int));
-			result = setsockopt(m_WriteSocket, IPPROTO_TCP, TCP_NODELAY, (const char*)&flag, sizeof(int));
+			HELIUM_VERIFY( 0 == setsockopt(m_ReadSocket, IPPROTO_TCP, TCP_NODELAY, (const char*)&flag, sizeof(int)) );
+			HELIUM_VERIFY( 0 == setsockopt(m_WriteSocket, IPPROTO_TCP, TCP_NODELAY, (const char*)&flag, sizeof(int)) );
 #endif
 
 			// do connection
@@ -254,19 +253,18 @@ void TCPConnection::ClientThread()
 
 		if (!m_Terminating)
 		{
-			int result;
 			socklen_t buf_size = IPC_TCP_BUFFER_SIZE;
 			socklen_t size_size = sizeof(IPC_TCP_BUFFER_SIZE);
-			result = setsockopt(m_ReadSocket, SOL_SOCKET, SO_RCVBUF, (const char*)&buf_size, size_size);
-			result = setsockopt(m_ReadSocket, SOL_SOCKET, SO_SNDBUF, (const char*)&buf_size, size_size);
-			result = setsockopt(m_WriteSocket, SOL_SOCKET, SO_RCVBUF, (const char*)&buf_size, size_size);
-			result = setsockopt(m_WriteSocket, SOL_SOCKET, SO_SNDBUF, (const char*)&buf_size, size_size);
+			HELIUM_VERIFY( 0 == setsockopt(m_ReadSocket, SOL_SOCKET, SO_RCVBUF, (const char*)&buf_size, size_size) );
+			HELIUM_VERIFY( 0 == setsockopt(m_ReadSocket, SOL_SOCKET, SO_SNDBUF, (const char*)&buf_size, size_size) );
+			HELIUM_VERIFY( 0 == setsockopt(m_WriteSocket, SOL_SOCKET, SO_RCVBUF, (const char*)&buf_size, size_size) );
+			HELIUM_VERIFY( 0 == setsockopt(m_WriteSocket, SOL_SOCKET, SO_SNDBUF, (const char*)&buf_size, size_size) );
 			Helium::Print( TXT( "%s: Connection established (%dk/%dk)\n" ), m_Name, IPC_TCP_BUFFER_SIZE / 1024, IPC_TCP_BUFFER_SIZE / 1024);
 
 #ifdef IPC_TCP_NO_DELAY
 			int flag = 1;
-			result = setsockopt(m_ReadSocket, IPPROTO_TCP, TCP_NODELAY, (const char*) &flag, sizeof(int));
-			result = setsockopt(m_WriteSocket, IPPROTO_TCP, TCP_NODELAY, (const char*) &flag, sizeof(int));
+			HELIUM_VERIFY( 0 == setsockopt(m_ReadSocket, IPPROTO_TCP, TCP_NODELAY, (const char*) &flag, sizeof(int)) );
+			HELIUM_VERIFY( 0 == setsockopt(m_WriteSocket, IPPROTO_TCP, TCP_NODELAY, (const char*) &flag, sizeof(int)) );
 #endif
 
 			// do connection
