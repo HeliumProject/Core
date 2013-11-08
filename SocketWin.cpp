@@ -119,8 +119,18 @@ bool Socket::Create( SocketProtocol protocol )
 bool Socket::Close()
 {
 	::SetEvent( m_TerminateIo );
-	HELIUM_VERIFY( 0 == ::shutdown( m_Handle, SD_BOTH ) );
-	return HELIUM_VERIFY( 0 == ::closesocket( m_Handle ) );
+	if ( m_Handle == INVALID_SOCKET )
+	{
+		return true;
+	}
+
+	if ( HELIUM_VERIFY( 0 == ::shutdown( m_Handle, SD_BOTH ) ) && HELIUM_VERIFY( 0 == ::closesocket( m_Handle ) ) )
+	{
+		m_Handle = INVALID_SOCKET;
+		return true;
+	}
+
+	return false;
 }
 
 bool Socket::Bind( uint16_t port )
@@ -137,6 +147,7 @@ bool Socket::Bind( uint16_t port )
 		Helium::Print( TXT("Failed to bind socket (%d)\n"), WSAGetLastError() );
 		HELIUM_VERIFY( 0 == ::shutdown( m_Handle, SD_BOTH ) );
 		HELIUM_VERIFY( 0 == ::closesocket( m_Handle ) );
+		m_Handle = INVALID_SOCKET;
 		return false;
 	}
 
@@ -151,6 +162,7 @@ bool Socket::Listen()
 		Helium::Print( TXT("Failed to listen socket (%d)\n"), WSAGetLastError() );
 		HELIUM_VERIFY( 0 == ::shutdown( m_Handle, SD_BOTH ) );
 		HELIUM_VERIFY( 0 == ::closesocket( m_Handle ) );
+		m_Handle = INVALID_SOCKET;
 		return false;
 	}
 
