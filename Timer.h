@@ -11,31 +11,24 @@
 
 namespace Helium
 {
-    /// Application timer support.
-    class HELIUM_PLATFORM_API Timer
-    {
-    public:
-        /// @name Static Timing Support
-        //@{
-        static void StaticInitialize();
-        static bool IsInitialized();
+	/// Application timer support.
+	class HELIUM_PLATFORM_API Timer
+	{
+	public:
+		/// @name Static Timing Support
+		//@{
+		static uint64_t GetTickCount();
+		static uint64_t GetTicksPerSecond();
+		static float64_t GetSecondsPerTick();
+		static float64_t TicksToMilliseconds( uint64_t ticks );
+		//@}
 
-        static uint64_t GetTickCount();
-        static float64_t TicksToMilliseconds( uint64_t ticks );
-        static float64_t GetSeconds();
-
-        inline static uint64_t GetTicksPerSecond();
-        inline static float64_t GetSecondsPerTick();
-        //@}
-
-    private:
-        /// Tick count on static initialization.
-        static uint64_t sm_startTickCount;
-        /// Performance counter frequency.
-        static uint64_t sm_ticksPerSecond;
-        /// Seconds per performance counter tick.
-        static float64_t sm_secondsPerTick;
-    };
+	private:
+		/// Performance counter frequency.
+		static uint64_t sm_ticksPerSecond;
+		/// Seconds per performance counter tick.
+		static float64_t sm_secondsPerTick;
+	};
 
 	/// Simple timer object.
 	class HELIUM_PLATFORM_API SimpleTimer : NonCopyable
@@ -55,5 +48,3 @@ namespace Helium
 		uint64_t m_StartTime;
 	};
 }
-
-#include "Platform/Timer.inl"

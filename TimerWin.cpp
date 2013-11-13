@@ -1,35 +1,10 @@
 #include "PlatformPch.h"
+#include "Platform/Timer.h"
 
 #include "Platform/System.h"
-#include "Platform/Timer.h"
 #include "Platform/Assert.h"
 
 using namespace Helium;
-
-static bool s_IsInitialized = false;
-uint64_t Timer::sm_ticksPerSecond = 0;
-uint64_t Timer::sm_startTickCount = 0;
-float64_t Timer::sm_secondsPerTick = 0.0;
-
-/// Perform static initialization necessary to enable timing support.
-void Timer::StaticInitialize()
-{
-    LARGE_INTEGER perfQuery;
-    HELIUM_VERIFY( QueryPerformanceFrequency( &perfQuery ) );
-    HELIUM_ASSERT( perfQuery.QuadPart != 0 );
-
-    sm_ticksPerSecond = perfQuery.QuadPart;
-    sm_secondsPerTick = 1.0 / static_cast< float64_t >( perfQuery.QuadPart );
-
-    HELIUM_VERIFY( QueryPerformanceCounter( &perfQuery ) );
-    sm_startTickCount = perfQuery.QuadPart;
-    s_IsInitialized = true;
-}
-
-bool Timer::IsInitialized()
-{
-    return s_IsInitialized;
-}
 
 /// Get the current application timer tick count.
 ///
@@ -47,15 +22,38 @@ uint64_t Timer::GetTickCount()
     return perfCounter.QuadPart;
 }
 
-/// Get the number of seconds elapsed since StaticInitialize() was called.
+/// Get the number of timer ticks per second.
 ///
-/// @return  Elapsed seconds since static initialization.
+/// @return  Timer tick frequency, in ticks per second.
 ///
-/// @see GetSecondsPerTick(), GetTickCount(), GetTicksPerSecond()
-float64_t Timer::GetSeconds()
+/// @see GetTickCount(), GetSecondsPerTick(), GetSeconds()
+uint64_t Timer::GetTicksPerSecond()
 {
-    LARGE_INTEGER perfCounter;
-    QueryPerformanceCounter( &perfCounter );
+	if ( sm_ticksPerSecond == 0 )
+	{
+		LARGE_INTEGER perfQuery;
+		HELIUM_VERIFY( QueryPerformanceFrequency( &perfQuery ) );
+		HELIUM_ASSERT( perfQuery.QuadPart != 0 );
+		sm_ticksPerSecond = perfQuery.QuadPart;
+	}
 
-    return ( static_cast< float64_t >( perfCounter.QuadPart - sm_startTickCount ) * sm_secondsPerTick );
+	return sm_ticksPerSecond;
+}
+
+/// Get the number of seconds per tick.
+///
+/// @return  Seconds per tick.
+///
+/// @see GetSeconds(), GetTickCount(), GetTicksPerSecond()
+float64_t Timer::GetSecondsPerTick()
+{
+	if ( sm_secondsPerTick == 0 )
+	{
+		LARGE_INTEGER perfQuery;
+		HELIUM_VERIFY( QueryPerformanceFrequency( &perfQuery ) );
+		HELIUM_ASSERT( perfQuery.QuadPart != 0 );
+		sm_secondsPerTick = 1.0 / static_cast< float64_t >( perfQuery.QuadPart );
+	}
+
+	return sm_secondsPerTick;
 }

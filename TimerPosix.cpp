@@ -3,39 +3,11 @@
 
 #include "Platform/System.h"
 #include "Platform/Assert.h"
-#include "Platform/Thread.h"
-#include "Platform/Locks.h"
 
 #include <unistd.h>
 #include <sys/times.h>
 
 using namespace Helium;
-
-static bool s_IsInitialized = false;
-uint64_t Timer::sm_ticksPerSecond = 0;
-uint64_t Timer::sm_startTickCount = 0;
-float64_t Timer::sm_secondsPerTick = 0.0;
-
-/// Perform static initialization necessary to enable timing support.
-void Timer::StaticInitialize()
-{
-    uint64_t ticksPerSecond = sysconf(_SC_CLK_TCK);
-    HELIUM_ASSERT( ticksPerSecond != 0 );
-    sm_ticksPerSecond = ticksPerSecond;
-    sm_secondsPerTick = 1.0 / static_cast< float64_t >( ticksPerSecond );
-
-    struct tms timing = { 0 };
-    clock_t ticks = times( &timing );
-    HELIUM_VERIFY( ticks );
-    sm_startTickCount = ticks;
-
-    s_IsInitialized = true;
-}
-
-bool Timer::IsInitialized()
-{
-    return s_IsInitialized;
-}
 
 /// Get the current application timer tick count.
 ///
@@ -51,14 +23,36 @@ uint64_t Timer::GetTickCount()
     return times( &timing );
 }
 
-/// Get the number of seconds elapsed since StaticInitialize() was called.
+/// Get the number of timer ticks per second.
 ///
-/// @return  Elapsed seconds since static initialization.
+/// @return  Timer tick frequency, in ticks per second.
 ///
-/// @see GetSecondsPerTick(), GetTickCount(), GetTicksPerSecond()
-float64_t Timer::GetSeconds()
+/// @see GetTickCount(), GetSecondsPerTick(), GetSeconds()
+uint64_t Timer::GetTicksPerSecond()
 {
-    struct tms timing = { 0 };
-    clock_t ticks = times( &timing );
-    return ( static_cast< float64_t >( ticks - sm_startTickCount ) * sm_secondsPerTick );
+	if ( sm_ticksPerSecond == 0 )
+	{
+		uint64_t ticksPerSecond = sysconf(_SC_CLK_TCK);
+		HELIUM_ASSERT( ticksPerSecond != 0 );
+		sm_ticksPerSecond = ticksPerSecond;
+	}
+
+	return sm_ticksPerSecond;
+}
+
+/// Get the number of seconds per tick.
+///
+/// @return  Seconds per tick.
+///
+/// @see GetSeconds(), GetTickCount(), GetTicksPerSecond()
+float64_t Timer::GetSecondsPerTick()
+{
+	if ( sm_secondsPerTick == 0 )
+	{
+		uint64_t ticksPerSecond = sysconf(_SC_CLK_TCK);
+		HELIUM_ASSERT( ticksPerSecond != 0 );
+		sm_secondsPerTick = 1.0 / static_cast< float64_t >( ticksPerSecond );
+	}
+
+	return sm_secondsPerTick;
 }
