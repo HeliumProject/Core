@@ -133,7 +133,7 @@ Helium::StrongPtr< Model > Cursor::Next()
 
 	Helium::StrongPtr< Model > object;
 
-	while ( mongo_cursor_next( cursor ) == MONGO_OK && !object.ReferencesObject() )
+	while ( !object.ReferencesObject() && mongo_cursor_next( cursor ) == MONGO_OK )
 	{
 		bson_iterator i[1];
 		if ( BSON_STRING == bson_find( i, &cursor->current, "_type" ) )
