@@ -1,7 +1,8 @@
 #pragma once 
 
 #include "Platform/Types.h"
-#include "Platform/Profile.h"
+#include "Platform/File.h"
+#include "Platform/Timer.h"
 
 #include "Foundation/API.h"
 
@@ -139,7 +140,7 @@ namespace Helium
         class HELIUM_FOUNDATION_API Context
         {
         public:
-            Helium::TraceFile   m_TraceFile; 
+            File                m_TraceFile; 
             uint32_t            m_UniqueID; 
             uint32_t            m_StackDepth; 
             uint32_t            m_PacketBufferOffset; 
@@ -181,7 +182,9 @@ namespace Helium
 #endif
 
 // master profile enable
-#define PROFILE_ENABLE
+#if HELIUM_PROFILE
+# define PROFILE_ENABLE
+#endif
 
 //
 // Accumulation API stashes time taken in each profile tag over the course of the entire profile interval
@@ -223,18 +226,12 @@ namespace Helium
 
 // instrumentation api enable
 #ifdef PROFILE_ENABLE
-// uncomment this to enable instrumentation
-//# define PROFILE_INSTRUMENTATION
+# define PROFILE_INSTRUMENTATION
 #endif
 
 // flag to instrument all code possible
 #ifdef PROFILE_INSTRUMENTATION
-// uncomment this to enable instrumentation everywhere
-//# define PROFILE_INSTRUMENT_ALL
-#endif
-
-#if defined(PROFILE_INSTRUMENTATION) && defined(WIN32)
-# pragma message (" Profile Instrumentation Enabled")
+# define PROFILE_INSTRUMENT_ALL
 #endif
 
 // instrumentation macros

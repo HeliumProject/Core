@@ -187,7 +187,7 @@ ScopeTimer::ScopeTimer(Accumulator* accum, const char* func, uint32_t line, cons
     }
 
     m_Accum       = accum; 
-    m_StartTicks  = Helium::TimerGetClock(); 
+    m_StartTicks  = Timer::GetTickCount(); 
     m_Print       = desc != NULL; 
 
 #if defined(PROFILE_INSTRUMENTATION)
@@ -207,7 +207,7 @@ ScopeTimer::ScopeTimer(Accumulator* accum, const char* func, uint32_t line, cons
 
         init->m_Version    = PROFILE_PROTOCOL_VERSION;
         init->m_Signature  = PROFILE_SIGNATURE; 
-        init->m_Conversion = Helium::CyclesToMillis(PROFILE_CYCLES_FOR_CONVERSION); 
+        init->m_Conversion = static_cast< float32_t >( Timer::TicksToMilliseconds(PROFILE_CYCLES_FOR_CONVERSION) ); 
     }
 
     ScopeEnterPacket* enter = context->AllocPacket<ScopeEnterPacket>(PROFILE_CMD_SCOPE_ENTER); 
@@ -234,10 +234,10 @@ ScopeTimer::ScopeTimer(Accumulator* accum, const char* func, uint32_t line, cons
 
 ScopeTimer::~ScopeTimer()
 {
-    uint64_t stopTicks = Helium::TimerGetClock();  
+    uint64_t stopTicks = Timer::GetTickCount();  
 
     uint64_t   taken  = stopTicks - m_StartTicks; 
-    float millis = Helium::CyclesToMillis(taken); 
+    float millis = static_cast< float32_t >( Timer::TicksToMilliseconds(taken) ); 
 
     if ( m_Print && m_Description[0] != '\0' )
     {
@@ -283,7 +283,7 @@ Context::Context()
 , m_StackDepth(0)
 , m_PacketBufferOffset(0)
 {
-    m_TraceFile.Open( TraceFile::GetFilePath() ); 
+	m_TraceFile.Open( "profile.bin", FileModes::Write ); 
     memset(m_AccumStack, 0, sizeof(m_AccumStack)); 
 }
 
@@ -294,7 +294,7 @@ Context::~Context()
 
 void Context::FlushFile()
 {
-    uint64_t startTicks = Helium::TimerGetClock(); 
+    uint64_t startTicks = Timer::GetTickCount(); 
 
     // make a scope enter packet for flushing the file
     ScopeEnterPacket* enter = (ScopeEnterPacket*) (m_PacketBuffer + m_PacketBufferOffset); 
@@ -331,7 +331,7 @@ void Context::FlushFile()
 
     exit->m_UniqueID   = 0; 
     exit->m_StackDepth = 0; 
-    exit->m_Duration   = Helium::TimerGetClock() - startTicks; 
+    exit->m_Duration   = Timer::GetTickCount() - startTicks; 
 
     // return to filling out the packet buffer
 }
