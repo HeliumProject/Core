@@ -133,10 +133,10 @@ Helium::StrongPtr< Model > Cursor::Next()
 
 	Helium::StrongPtr< Model > object;
 
-	if ( mongo_cursor_next( cursor ) == MONGO_OK )
+	while ( !object.ReferencesObject() && mongo_cursor_next( cursor ) == MONGO_OK )
 	{
 		bson_iterator i[1];
-		if ( HELIUM_VERIFY( BSON_STRING == bson_find( i, &cursor->current, "_type" ) ) )
+		if ( BSON_STRING == bson_find( i, &cursor->current, "_type" ) )
 		{
 			const char* typeName = bson_iterator_string( i );
 			HELIUM_ASSERT( typeName );
@@ -146,6 +146,10 @@ Helium::StrongPtr< Model > Cursor::Next()
 			{
 				object = Reflect::AssertCast< Model >( type->m_Creator() );
 			}
+		}
+		else
+		{
+			Helium::Log::Warning( "Malformed BSON in query result: missing '_type'\n" );
 		}
 
 		if ( object.ReferencesObject() )
@@ -158,7 +162,8 @@ Helium::StrongPtr< Model > Cursor::Next()
 			}
 			catch ( Helium::Exception& ex )
 			{
-				Helium::Log::Error( "Failed to parse BSON for object: %s\n", ex.What() );
+				Helium::Log::Error( "Failed to parse BSON in query result: %s\n", ex.What() );
+				object = NULL;
 			}
 		}
 	}
