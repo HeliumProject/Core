@@ -484,6 +484,22 @@ bool Database::Insert( StrongPtr< Model >* objects, size_t count, const char* co
 	return result;
 }
 
+bool Database::DropCollection( const char* collection )
+{
+	if ( !HELIUM_VERIFY_MSG( IsCorrectThread(), "Database access from improper thread" ) )
+	{
+		return false;
+	}
+
+	if ( MONGO_OK != mongo_cmd_drop_collection( conn, name.GetData(), collection, NULL ) )
+	{
+		Log::Error( "mongo_cmd_drop_collection failed: %s\n", GetErrorString( conn->err ) );
+		return false;
+	}
+
+	return true;
+}
+
 Cursor Database::Find( const char* collection, const bson* query, int limit, int skip, int options )
 {
 	if ( !HELIUM_VERIFY_MSG( IsCorrectThread(), "Database access from improper thread" ) )

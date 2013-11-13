@@ -96,6 +96,8 @@ namespace Helium
 			// single fetch
 			bool Get( const Helium::StrongPtr< Model >& object, const char* collection = NULL );
 
+			bool DropCollection( const char* collection );
+
 			// find
 			//  query == NULL will return all objects by default
 			//  fields == NULL will populate all fields in result objects, populate to determine which fields are updated
