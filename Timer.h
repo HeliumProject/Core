@@ -21,6 +21,7 @@ namespace Helium
         static bool IsInitialized();
 
         static uint64_t GetTickCount();
+        static float64_t TicksToMilliseconds( uint64_t ticks );
         static float64_t GetSeconds();
 
         inline static uint64_t GetTicksPerSecond();
@@ -35,6 +36,24 @@ namespace Helium
         /// Seconds per performance counter tick.
         static float64_t sm_secondsPerTick;
     };
+
+	/// Simple timer object.
+	class HELIUM_PLATFORM_API SimpleTimer : NonCopyable
+	{
+	public:
+		/// Initialize the timer (start timing).
+		SimpleTimer();
+
+		/// Restart the timer.
+		void Reset();
+
+		/// Get elapsed time in milliseconds.
+		float64_t Elapsed();
+
+	private:
+		/// Tick count since the last time the timer was reset.
+		uint64_t m_StartTime;
+	};
 }
 
 #include "Platform/Timer.inl"
