@@ -1,4 +1,4 @@
-#include "Platform/Profile.h"
+#include "Platform/Timer.h"
 #include "Platform/Assert.h"
 
 #include <pthread.h>
