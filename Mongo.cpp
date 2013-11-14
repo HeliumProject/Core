@@ -124,7 +124,7 @@ Cursor::~Cursor()
 	}
 }
 
-Helium::StrongPtr< Model > Cursor::Next()
+Helium::StrongPtr< Model > Cursor::Next( const Reflect::MetaClass* defaultType )
 {
 	if ( !HELIUM_VERIFY( db ) || !HELIUM_VERIFY( cursor ) || !HELIUM_VERIFY_MSG( db->IsCorrectThread(), "Database access from improper thread" ) )
 	{
@@ -135,21 +135,24 @@ Helium::StrongPtr< Model > Cursor::Next()
 
 	while ( !object.ReferencesObject() && mongo_cursor_next( cursor ) == MONGO_OK )
 	{
+		const Reflect::MetaClass* type = defaultType;
+
+		// if we have type info encoded in the BSON, use it instead of the defaultType
 		bson_iterator i[1];
 		if ( BSON_STRING == bson_find( i, &cursor->current, "_type" ) )
 		{
 			const char* typeName = bson_iterator_string( i );
 			HELIUM_ASSERT( typeName );
-
-			const Reflect::MetaClass* type = Reflect::Registry::GetInstance()->GetMetaClass( typeName );
-			if ( type )
+			const Reflect::MetaClass* storedType = Reflect::Registry::GetInstance()->GetMetaClass( typeName );
+			if ( storedType )
 			{
-				object = Reflect::AssertCast< Model >( type->m_Creator() );
+				type = storedType;
 			}
 		}
-		else
+
+		if ( type )
 		{
-			Helium::Log::Warning( "Malformed BSON in query result: missing '_type'\n" );
+			object = Reflect::AssertCast< Model >( type->m_Creator() );
 		}
 
 		if ( object.ReferencesObject() )

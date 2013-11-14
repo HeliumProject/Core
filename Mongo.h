@@ -53,8 +53,12 @@ namespace Helium
 			// test if our find succeeded
 			inline bool IsValid();
 
-			// get a single result object from the cursor
-			Helium::StrongPtr< Model > Next();
+			// get a single result of an expected type
+			template< class DefaultType >
+			Helium::StrongPtr< DefaultType > Next();
+
+			// get a single result object from the cursor, specifying the type to allocate if one is not specified in the data
+			Helium::StrongPtr< Model > Next( const Reflect::MetaClass* defaultType );
 
 			// read a single object into an existing instance
 			bool Next( const Helium::StrongPtr< Model >& object );
