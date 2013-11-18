@@ -239,6 +239,33 @@ bool Database::Connect( const char* addr, uint16_t port )
 	}
 }
 
+int64_t Database::GetServerTime()
+{
+	bson b[1];
+	HELIUM_VERIFY( BSON_OK == bson_init( b ) );
+	HELIUM_VERIFY( BSON_OK == bson_append_int( b, "hostInfo", 1 ) );
+	HELIUM_VERIFY( BSON_OK == bson_finish( b ) );
+
+	bson out[1];
+	HELIUM_VERIFY( BSON_OK == bson_init( out ) );
+	if ( MONGO_OK == mongo_run_command( conn, "admin", b, out ) )
+	{
+		bson_iterator i[1];
+		if ( BSON_OBJECT == bson_find( i, out, "system" ) )
+		{
+			bson systemBson[1];
+			HELIUM_VERIFY( BSON_OK == bson_init( systemBson ) );
+			bson_iterator_subobject_init( i, systemBson, false );
+			if ( BSON_DATE == bson_find( i, systemBson, "currentTime" ) )
+			{
+				return bson_iterator_date( i );
+			}
+		}
+	}
+
+	return ~0;
+}
+
 double Database::GetCollectionCount( const char* name )
 {
 	return mongo_count( conn, this->name.GetData(), name, NULL );

@@ -84,6 +84,9 @@ namespace Helium
 			inline void SetThread( Helium::ThreadId threadId = Thread::GetCurrentId() );
 			inline bool IsCorrectThread() const;
 
+			// server routines
+			int64_t GetServerTime();
+
 			// collection routines
 			double GetCollectionCount( const char* name );
 			bool CreateCappedCollection( const char* name, int cappedSizeInBytes, int cappedMaxCount = 0 );
