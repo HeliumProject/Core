@@ -266,6 +266,23 @@ int64_t Database::GetServerTime( bool inMilliseconds )
 	return -1;
 }
 
+bool Database::Drop()
+{
+	bson b[1];
+	HELIUM_VERIFY( BSON_OK == bson_init( b ) );
+	HELIUM_VERIFY( BSON_OK == bson_append_int( b, "dropDatabase", 1 ) );
+	HELIUM_VERIFY( BSON_OK == bson_finish( b ) );
+
+	bson out[1];
+	HELIUM_VERIFY( BSON_OK == bson_init( out ) );
+	if ( MONGO_OK == mongo_run_command( conn, name.GetData(), b, out ) )
+	{
+		return true;
+	}
+
+	return false;
+}
+
 double Database::GetCollectionCount( const char* name )
 {
 	return mongo_count( conn, this->name.GetData(), name, NULL );

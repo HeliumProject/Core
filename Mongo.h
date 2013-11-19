@@ -87,6 +87,9 @@ namespace Helium
 			// server routines
 			int64_t GetServerTime( bool inMilliseconds = false );
 
+			// database routines
+			bool Drop();
+
 			// collection routines
 			double GetCollectionCount( const char* name );
 			bool CreateCappedCollection( const char* name, int cappedSizeInBytes, int cappedMaxCount = 0 );
