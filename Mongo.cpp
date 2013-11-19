@@ -239,7 +239,7 @@ bool Database::Connect( const char* addr, uint16_t port )
 	}
 }
 
-int64_t Database::GetServerTime()
+int64_t Database::GetServerTime( bool inMilliseconds )
 {
 	bson b[1];
 	HELIUM_VERIFY( BSON_OK == bson_init( b ) );
@@ -258,12 +258,12 @@ int64_t Database::GetServerTime()
 			bson_iterator_subobject_init( i, systemBson, false );
 			if ( BSON_DATE == bson_find( i, systemBson, "currentTime" ) )
 			{
-				return bson_iterator_date( i );
+				return inMilliseconds ? bson_iterator_date( i ) : bson_iterator_date( i ) / 1000;
 			}
 		}
 	}
 
-	return ~0;
+	return -1;
 }
 
 double Database::GetCollectionCount( const char* name )

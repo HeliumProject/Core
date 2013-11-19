@@ -85,7 +85,7 @@ namespace Helium
 			inline bool IsCorrectThread() const;
 
 			// server routines
-			int64_t GetServerTime();
+			int64_t GetServerTime( bool inMilliseconds = false );
 
 			// collection routines
 			double GetCollectionCount( const char* name );
