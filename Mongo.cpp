@@ -246,24 +246,30 @@ int64_t Database::GetServerTime( bool inMilliseconds )
 	HELIUM_VERIFY( BSON_OK == bson_append_int( b, "hostInfo", 1 ) );
 	HELIUM_VERIFY( BSON_OK == bson_finish( b ) );
 
+	bson_date_t result = -1;
+
 	bson out[1];
-	HELIUM_VERIFY( BSON_OK == bson_init( out ) );
+	bson_init_zero( out );
 	if ( MONGO_OK == mongo_run_command( conn, "admin", b, out ) )
 	{
 		bson_iterator i[1];
 		if ( BSON_OBJECT == bson_find( i, out, "system" ) )
 		{
 			bson systemBson[1];
-			HELIUM_VERIFY( BSON_OK == bson_init( systemBson ) );
+			bson_init_zero( systemBson );
 			bson_iterator_subobject_init( i, systemBson, false );
 			if ( BSON_DATE == bson_find( i, systemBson, "currentTime" ) )
 			{
-				return inMilliseconds ? bson_iterator_date( i ) : bson_iterator_date( i ) / 1000;
+				result = inMilliseconds ? bson_iterator_date( i ) : bson_iterator_date( i ) / 1000;
 			}
+			bson_destroy( systemBson );
 		}
 	}
 
-	return -1;
+	bson_destroy( b );
+	bson_destroy( out );
+
+	return result;
 }
 
 bool Database::Drop()
@@ -273,14 +279,19 @@ bool Database::Drop()
 	HELIUM_VERIFY( BSON_OK == bson_append_int( b, "dropDatabase", 1 ) );
 	HELIUM_VERIFY( BSON_OK == bson_finish( b ) );
 
+	bool result = false;
+
 	bson out[1];
-	HELIUM_VERIFY( BSON_OK == bson_init( out ) );
+	bson_init_zero( out );
 	if ( MONGO_OK == mongo_run_command( conn, name.GetData(), b, out ) )
 	{
-		return true;
+		result = true;
 	}
 
-	return false;
+	bson_destroy( b );
+	bson_destroy( out );
+
+	return result;
 }
 
 double Database::GetCollectionCount( const char* name )
