@@ -14,6 +14,8 @@ namespace Helium
 	public:
 #if HELIUM_OS_WIN
 		typedef void* Handle;
+#elif HELIUM_OS_MAC
+		typedef sem_t* Handle;
 #else
 		typedef sem_t Handle;
 #endif
