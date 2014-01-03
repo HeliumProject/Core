@@ -35,7 +35,7 @@
 # if HELIUM_CC_GCC
 #  define HELIUM_ISSUE_BREAK() __builtin_trap()
 # elif HELIUM_CC_CLANG
-#  define HELIUM_ISSUE_BREAK() __builtin_trap()
+#  define HELIUM_ISSUE_BREAK() __builtin_debugtrap()
 # elif HELIUM_CC_SNC
 #  define HELIUM_ISSUE_BREAK() __builtin_snpause()
 # else
