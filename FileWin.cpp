@@ -325,18 +325,6 @@ bool Helium::IsAbsolute( const char* path )
 	return false;
 }
 
-static void SplitDirectories( const std::string& path, std::vector< std::string >& output )
-{
-	std::string::size_type start = 0; 
-	std::string::size_type end = 0; 
-	while ( ( end = path.find( Helium::PathSeparator, start ) ) != std::string::npos )
-	{ 
-		output.push_back( path.substr( start, end - start ) ); 
-		start = end + 1;
-	}
-	output.push_back( path.substr( start ) ); 
-}
-
 bool Helium::MakePath( const char* path )
 {
 	std::vector< std::string > directories;

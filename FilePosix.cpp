@@ -265,10 +265,10 @@ const char Helium::PathSeparator = TXT('/');
 void Helium::GetFullPath( const char* path, std::string& fullPath )
 {
 	char* p = realpath( path, NULL );
-	if (p)
+	if ( p )
 	{
-	  fullPath = p;
-	  free( p );
+		fullPath = p;
+		free( p );
 	}
 	else
 	{
@@ -289,22 +289,13 @@ bool Helium::IsAbsolute( const char* path )
 	return false;
 }
 
-static void SplitDirectories( const std::string& path, std::vector< std::string >& output )
-{
-	std::string::size_type start = 0; 
-	std::string::size_type end = 0; 
-	while ( ( end = path.find( Helium::PathSeparator, start ) ) != std::string::npos )
-	{ 
-		output.push_back( path.substr( start, end - start ) ); 
-		start = end + 1;
-	}
-	output.push_back( path.substr( start ) ); 
-}
-
 bool Helium::MakePath( const char* path )
 {
+	std::string fullPath;
+	GetFullPath( path, fullPath );
+
 	std::vector< std::string > directories;
-	SplitDirectories( path, directories );
+	SplitDirectories( fullPath, directories );
 
 	if ( directories.size() == 1 )
 	{
