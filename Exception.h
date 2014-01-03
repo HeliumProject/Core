@@ -77,7 +77,6 @@ namespace Helium
 		std::string                 m_Callstack;
 		std::vector< std::string >  m_Threads;
 		std::string                 m_State;
-		std::string                 m_Dump;
 
 		// CPP-specific info
 		std::string                 m_CPPClass;

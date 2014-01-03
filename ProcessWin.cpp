@@ -311,7 +311,7 @@ std::string Helium::GetMachineName()
 	return computername;
 }
 
-std::string Helium::GetPreferencesDirectory()
+std::string Helium::GetHomeDirectory()
 {
 	std::string profileDirectory;
 
@@ -325,37 +325,4 @@ std::string Helium::GetPreferencesDirectory()
 	}
 
 	return profileDirectory;
-}
-
-std::string Helium::GetAppDataDirectory()
-{
-	std::string appDataDirectory;
-
-	wchar_t path[ MAX_PATH ];
-	HRESULT result = SHGetFolderPath( NULL, CSIDL_LOCAL_APPDATA, NULL, SHGFP_TYPE_CURRENT, path );
-	bool bSuccess = ( result == S_OK );
-	if ( bSuccess )
-	{
-		HELIUM_WIDE_TO_TCHAR( path, convertedPath );
-		appDataDirectory = convertedPath;
-	}
-
-	return appDataDirectory;
-}
-
-std::string Helium::GetDumpDirectory()
-{
-	wchar_t tempDir[ MAX_PATH ];
-	size_t result = ::GetTempPath( MAX_PATH, tempDir );
-	if ( result == 0 || result > MAX_PATH )
-	{
-		return TXT("");
-	}
-
-	// Make sure that the directory exists
-	wchar_t directory[ MAX_PATH ] = { 0 };
-	_snwprintf( directory, sizeof( directory ) - 1, L"%s\\dumps", &tempDir );
-
-	HELIUM_WIDE_TO_TCHAR( directory, convertedDirectory );
-	return convertedDirectory;
 }

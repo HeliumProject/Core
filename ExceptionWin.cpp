@@ -767,63 +767,6 @@ std::string Helium::GetExceptionInfo(LPEXCEPTION_POINTERS info)
 	return buffer;
 }
 
-std::string Helium::WriteDump(LPEXCEPTION_POINTERS info, bool full)
-{
-	std::string directory = GetDumpDirectory();
-	if ( directory.empty() )
-	{
-		Print( TXT( "Could not determine crash dump directory, failed to generate dump." ) );
-		return TXT( "" );
-	}
-
-	HELIUM_TCHAR_TO_WIDE( directory.c_str(), convertedDirectory );
-
-	SHCreateDirectoryEx( NULL, convertedDirectory, NULL );
-
-	// Tack time (in seconds since UTC) onto end of file name
-	time_t now;
-	time( &now );
-
-	wchar_t module[ MAX_PATH ];
-	wchar_t file[ MAX_PATH ];
-	GetModuleFileName( 0, module, MAX_PATH );
-	_tsplitpath( module, NULL, NULL, file, NULL );
-
-	wchar_t dmpFile[ MAX_PATH ] = { L'\0' };
-	_sntprintf( dmpFile, sizeof( dmpFile ) - 1, L"%s\\%s_%ld.dmp", convertedDirectory, file, now );
-
-	HANDLE dmp = CreateFile( dmpFile, FILE_ALL_ACCESS, FILE_SHARE_READ, 0, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0 );
-	if ( dmp!=INVALID_HANDLE_VALUE )
-	{
-		MINIDUMP_EXCEPTION_INFORMATION ex;
-		ex.ClientPointers = true;
-		ex.ExceptionPointers = info;
-		ex.ThreadId = GetCurrentThreadId();
-
-		_MINIDUMP_TYPE type;
-
-		if ( full )
-		{
-			type = MiniDumpWithFullMemory;
-		}
-		else
-		{
-			type = MiniDumpNormal;
-		}
-
-		// generate the minidump
-		MiniDumpWriteDump( GetCurrentProcess(), GetCurrentProcessId(), dmp, type, &ex, 0, 0 );
-
-		// close the file
-		CloseHandle( dmp );
-
-		HELIUM_WIDE_TO_TCHAR( dmpFile, convertedDmpFile );
-		return convertedDmpFile;
-	}
-
-	return TXT("");
-}
-
 #if !HELIUM_RELEASE && !HELIUM_PROFILE
 
 static Mutex& GetStackWalkMutex()

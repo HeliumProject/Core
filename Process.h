@@ -51,11 +51,5 @@ namespace Helium
 	HELIUM_PLATFORM_API std::string GetMachineName();
 	
 	/// Location for user preferences on disk
-	HELIUM_PLATFORM_API std::string GetPreferencesDirectory();
-
-	/// Location for app cache data on disk
-	HELIUM_PLATFORM_API std::string GetAppDataDirectory();
-
-	/// Location for crash dumps
-	HELIUM_PLATFORM_API std::string GetDumpDirectory();
+	HELIUM_PLATFORM_API std::string GetHomeDirectory();
 }
