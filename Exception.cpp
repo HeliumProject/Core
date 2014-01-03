@@ -169,8 +169,6 @@ uint32_t Helium::ProcessException(LPEXCEPTION_POINTERS info, bool print, bool fa
             Helium::Print( Helium::ConsoleColors::Red, stderr, TXT( "%s" ), GetExceptionInfo( info ).c_str() );
         }
 
-        args.m_Dump = Helium::WriteDump(info, false);
-
         g_ExceptionOccurred.Invoke( args );
 
         if ( fatal )
