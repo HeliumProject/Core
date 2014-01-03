@@ -64,7 +64,4 @@ namespace Helium
 	HELIUM_PLATFORM_API std::string GetExceptionInfo( LPEXCEPTION_POINTERS info );
 	HELIUM_PLATFORM_API const char* GetExceptionClass( uint32_t exceptionCode );
 	HELIUM_PLATFORM_API void GetExceptionDetails( LPEXCEPTION_POINTERS info, ExceptionArgs& args );
-
-	// Core dumps (full dumps include process heaps)
-	HELIUM_PLATFORM_API std::string WriteDump( LPEXCEPTION_POINTERS info, bool full );
 }

@@ -154,32 +154,13 @@ std::string Helium::GetMachineName()
 	return "";
 }
 
-std::string Helium::GetPreferencesDirectory()
+std::string Helium::GetHomeDirectory()
 {
-	const char* home = getenv( "HOME" );
-	std::string path = home;
-	path += "/.";
-	path += GetProcessName();
-	path += "/preferences/";
-	return path;
-}
-
-std::string Helium::GetAppDataDirectory()
-{
-	const char* home = getenv( "HOME" );
-	std::string path = home;
-	path += "/.";
-	path += GetProcessName();
-	path += "/data/";
-	return path;
-}
-
-std::string Helium::GetDumpDirectory()
-{
-	const char* home = getenv( "HOME" );
-	std::string path = home;
-	path += "/.";
-	path += GetProcessName();
-	path += "/dumps/";
-	return path;
+	const char* user = getenv( "HOME" );
+	if ( user )
+	{
+		return user;
+	}
+	HELIUM_ASSERT( false );
+	return "";
 }
