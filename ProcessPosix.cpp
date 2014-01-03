@@ -122,7 +122,7 @@ std::string Helium::GetProcessPath()
 std::string Helium::GetProcessName()
 {
 	std::string path = GetProcessPath();
-	size_t pos = path.find( Helium::PathSeparator );
+	size_t pos = path.rfind( Helium::PathSeparator );
 	if ( pos != std::string::npos )
 	{ 
 		return path.substr( pos );
