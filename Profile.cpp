@@ -25,17 +25,12 @@ using namespace Helium;
 using namespace Helium::Profile;
 
 static uint32_t           g_AccumulatorCount = 0;
-static Accumulator*  g_Accumulators[ PROFILE_ACCUMULATOR_MAX ];
+static Accumulator*  g_Accumulators[ HELIUM_PROFILE_ACCUMULATOR_MAX ];
 
 static uint32_t           g_ContextCount = 0; 
-static Context*      g_Contexts[ PROFILE_CONTEXTS_MAX ];
+static Context*      g_Contexts[ HELIUM_PROFILE_CONTEXTS_MAX ];
 
 static bool          g_Enabled = false;
-
-bool Profile::Settings::Enabled()
-{
-    return g_Enabled;
-}
 
 void Profile::Initialize()
 {
@@ -51,6 +46,11 @@ void Profile::Cleanup()
     }
     g_ContextCount = 0; 
     g_Enabled = false;
+}
+
+bool Profile::Enabled()
+{
+    return g_Enabled;
 }
 
 Accumulator::Accumulator()
@@ -98,7 +98,7 @@ void Accumulator::Init(const char* name)
         HELIUM_ASSERT(m_Name[0] != '\0');
     }
 
-    if (m_Index < 0 && g_AccumulatorCount < PROFILE_ACCUMULATOR_MAX)
+    if (m_Index < 0 && g_AccumulatorCount < HELIUM_PROFILE_ACCUMULATOR_MAX)
     {
         g_Accumulators[ g_AccumulatorCount ] = this;
         m_Index = g_AccumulatorCount++;
@@ -179,6 +179,11 @@ Helium::ThreadLocalPointer g_ProfileContext;
 
 ScopeTimer::ScopeTimer(Accumulator* accum, const char* func, uint32_t line, const char* desc)
 {
+	if ( !Profile::Enabled() )
+	{
+		desc = NULL;
+	}
+
     HELIUM_ASSERT(func); 
     m_Description[0] = '\0'; 
     if(desc)
@@ -190,7 +195,7 @@ ScopeTimer::ScopeTimer(Accumulator* accum, const char* func, uint32_t line, cons
     m_StartTicks  = Timer::GetTickCount(); 
     m_Print       = desc != NULL; 
 
-#if defined(PROFILE_INSTRUMENTATION)
+#if defined(HELIUM_PROFILE_INSTRUMENTATION)
 
     Context* context = (Context*)g_ProfileContext.GetPointer(); 
 
@@ -203,14 +208,14 @@ ScopeTimer::ScopeTimer(Accumulator* accum, const char* func, uint32_t line, cons
         g_Contexts[ g_ContextCount ] = context; 
         g_ContextCount++; 
 
-        InitPacket* init = context->AllocPacket<InitPacket>(PROFILE_CMD_INIT); 
+        InitPacket* init = context->AllocPacket<InitPacket>(HELIUM_PROFILE_CMD_INIT); 
 
-        init->m_Version    = PROFILE_PROTOCOL_VERSION;
-        init->m_Signature  = PROFILE_SIGNATURE; 
-        init->m_Conversion = static_cast< float32_t >( Timer::TicksToMilliseconds(PROFILE_CYCLES_FOR_CONVERSION) ); 
+        init->m_Version    = HELIUM_PROFILE_PROTOCOL_VERSION;
+        init->m_Signature  = HELIUM_PROFILE_SIGNATURE; 
+        init->m_Conversion = static_cast< float32_t >( Timer::TicksToMilliseconds(HELIUM_PROFILE_CYCLES_FOR_CONVERSION) ); 
     }
 
-    ScopeEnterPacket* enter = context->AllocPacket<ScopeEnterPacket>(PROFILE_CMD_SCOPE_ENTER); 
+    ScopeEnterPacket* enter = context->AllocPacket<ScopeEnterPacket>(HELIUM_PROFILE_CMD_SCOPE_ENTER); 
 
     enter->m_UniqueID   = context->m_UniqueID++; 
     enter->m_StackDepth = context->m_StackDepth; 
@@ -244,12 +249,12 @@ ScopeTimer::~ScopeTimer()
         Log::Profile( TXT( "[%12.3f] %s\n" ), millis, m_Description);
     }
 
-#if defined(PROFILE_INSTRUMENTATION)
+#if defined(HELIUM_PROFILE_INSTRUMENTATION)
 
     Context* context = (Context*)g_ProfileContext.GetPointer(); 
     HELIUM_ASSERT(context); 
 
-    ScopeExitPacket* packet = context->AllocPacket<ScopeExitPacket>(PROFILE_CMD_SCOPE_EXIT); 
+    ScopeExitPacket* packet = context->AllocPacket<ScopeExitPacket>(HELIUM_PROFILE_CMD_SCOPE_EXIT); 
 
     packet->m_UniqueID   = context->m_UniqueID++; 
     packet->m_StackDepth = --context->m_StackDepth;
@@ -267,7 +272,7 @@ ScopeTimer::~ScopeTimer()
         m_Accum->m_Hits++; 
     }
 
-#elif defined(PROFILE_ACCUMULATION)
+#elif defined(HELIUM_PROFILE_ACCUMULATION)
 
     if(m_Accum && m_Accum->m_Index != -1)
     {
@@ -300,7 +305,7 @@ void Context::FlushFile()
     ScopeEnterPacket* enter = (ScopeEnterPacket*) (m_PacketBuffer + m_PacketBufferOffset); 
     m_PacketBufferOffset += sizeof(ScopeEnterPacket); 
 
-    enter->m_Header.m_Command = PROFILE_CMD_SCOPE_ENTER; 
+    enter->m_Header.m_Command = HELIUM_PROFILE_CMD_SCOPE_ENTER; 
     enter->m_Header.m_Size    = sizeof(ScopeEnterPacket); 
     enter->m_UniqueID         = 0; 
     enter->m_StackDepth       = 0; 
@@ -313,11 +318,11 @@ void Context::FlushFile()
     BlockEndPacket* blockEnd = (BlockEndPacket*) (m_PacketBuffer + m_PacketBufferOffset); 
     m_PacketBufferOffset += sizeof(BlockEndPacket); 
 
-    blockEnd->m_Header.m_Command = PROFILE_CMD_BLOCK_END; 
+    blockEnd->m_Header.m_Command = HELIUM_PROFILE_CMD_BLOCK_END; 
     blockEnd->m_Header.m_Size    = sizeof(BlockEndPacket); 
 
     // we write the whole buffer, in large blocks
-    m_TraceFile.Write( (const char*) m_PacketBuffer, PROFILE_PACKET_BLOCK_SIZE); 
+    m_TraceFile.Write( (const char*) m_PacketBuffer, HELIUM_PROFILE_PACKET_BLOCK_SIZE); 
 
     // reset the packet buffer
     m_PacketBufferOffset = 0; 
@@ -326,7 +331,7 @@ void Context::FlushFile()
     ScopeExitPacket* exit = (ScopeExitPacket*) (m_PacketBuffer + m_PacketBufferOffset); 
     m_PacketBufferOffset += sizeof(ScopeExitPacket); 
 
-    exit->m_Header.m_Command = PROFILE_CMD_SCOPE_EXIT; 
+    exit->m_Header.m_Command = HELIUM_PROFILE_CMD_SCOPE_EXIT; 
     exit->m_Header.m_Size    = sizeof(ScopeExitPacket); 
 
     exit->m_UniqueID   = 0; 

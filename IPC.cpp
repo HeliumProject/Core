@@ -49,7 +49,7 @@ MessageQueue::~MessageQueue()
 
 void MessageQueue::Add(Message* msg)
 {
-	IPC_SCOPE_TIMER("");
+	HELIUM_IPC_SCOPE_TIMER("");
 	bool shouldIncrement = true;
 
 	if ( msg )
@@ -114,7 +114,7 @@ void MessageQueue::Add(Message* msg)
 
 Message* MessageQueue::Remove()
 {
-	IPC_SCOPE_TIMER("");
+	HELIUM_IPC_SCOPE_TIMER("");
 
 	m_Append.Decrement();
 
@@ -143,7 +143,7 @@ Message* MessageQueue::Remove()
 
 void MessageQueue::Clear()
 {
-	IPC_SCOPE_TIMER("");
+	HELIUM_IPC_SCOPE_TIMER("");
 
 	Helium::MutexScopeLock mutex (m_Mutex);
 

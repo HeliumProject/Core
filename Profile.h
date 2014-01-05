@@ -6,23 +6,23 @@
 
 #include "Foundation/API.h"
 
-#define PROFILE_STRINGIFY(x) #x
-#define PROFILE_TOSTRING(x) PROFILE_STRINGIFY(x)
+#define HELIUM_PROFILE_STRINGIFY(x) #x
+#define HELIUM_PROFILE_TOSTRING(x) HELIUM_PROFILE_STRINGIFY(x)
 
-#define PROFILE_ACCUMULATOR_MAX         (2048)
-#define PROFILE_CONTEXTS_MAX            (128)
+#define HELIUM_PROFILE_ACCUMULATOR_MAX         (2048)
+#define HELIUM_PROFILE_CONTEXTS_MAX            (128)
 
-#define PROFILE_PROTOCOL_VERSION        (0x00)
-#define PROFILE_SIGNATURE               (0x12345678)
+#define HELIUM_PROFILE_PROTOCOL_VERSION        (0x00)
+#define HELIUM_PROFILE_SIGNATURE               (0x12345678)
 
-#define PROFILE_CMD_INIT                (0x00)
-#define PROFILE_CMD_SCOPE_ENTER         (0x01)
-#define PROFILE_CMD_SCOPE_EXIT          (0x02)
-#define PROFILE_CMD_BLOCK_END           (0x03)
+#define HELIUM_PROFILE_CMD_INIT                (0x00)
+#define HELIUM_PROFILE_CMD_SCOPE_ENTER         (0x01)
+#define HELIUM_PROFILE_CMD_SCOPE_EXIT          (0x02)
+#define HELIUM_PROFILE_CMD_BLOCK_END           (0x03)
 
-#define PROFILE_PACKET_STRING_BUFSIZE   (64)
-#define PROFILE_CYCLES_FOR_CONVERSION   (100000)
-#define PROFILE_PACKET_BLOCK_SIZE       (16 * 1024)
+#define HELIUM_PROFILE_PACKET_STRING_BUFSIZE   (64)
+#define HELIUM_PROFILE_CYCLES_FOR_CONVERSION   (100000)
+#define HELIUM_PROFILE_PACKET_BLOCK_SIZE       (16 * 1024)
 
 //
 // Profile code API, for the most part almost all of this code always gets compiled in
@@ -31,187 +31,173 @@
 
 namespace Helium
 {
-    namespace Profile
-    {
-        namespace Settings
-        {
-            HELIUM_FOUNDATION_API bool Enabled();
-            HELIUM_FOUNDATION_API bool MemoryProfilingEnabled();
-        }
+	namespace Profile
+	{
+		const static int MAX_DESCRIPTION = 256;
 
-        const static int MAX_DESCRIPTION = 256;
+		HELIUM_FOUNDATION_API void Initialize();
+		HELIUM_FOUNDATION_API void Cleanup();
+		HELIUM_FOUNDATION_API bool Enabled();
 
-        HELIUM_FOUNDATION_API void Initialize(); 
-        HELIUM_FOUNDATION_API void Cleanup(); 
+		//
+		// Accumulates information over multiple calls
+		//
 
-        //
-        // Accumulates information over multiple calls
-        //
+		class HELIUM_FOUNDATION_API Accumulator
+		{
+		public:
+			uint32_t m_Hits;
+			float    m_TotalMillis;
 
-        class HELIUM_FOUNDATION_API Accumulator
-        {
-        public:
-            uint32_t   m_Hits; 
-            float m_TotalMillis; 
+			int32_t  m_Index;
+			char     m_Name[MAX_DESCRIPTION];
 
-            int32_t   m_Index;
-            char  m_Name[MAX_DESCRIPTION];
+			Accumulator();
+			Accumulator(const char* name);
+			Accumulator (const char* function, const char* name);
+			~Accumulator();
 
-            Accumulator(); 
-            Accumulator(const char* name);
-            Accumulator (const char* function, const char* name);
-            ~Accumulator();
+			void Init(const char* name);
+			void Report();
 
-            void Init(const char* name);
-            void Report();
+			static void ReportAll();
 
-            static void ReportAll();
+		private: 
+		};
 
-        private: 
-        };
+		//
+		// Scope timer prints or logs information
+		//
 
-        //
-        // Scope timer prints or logs information
-        //
+		class HELIUM_FOUNDATION_API ScopeTimer
+		{
+		public: 
+			ScopeTimer(Accumulator* accum, const char* func, uint32_t line, const char* desc = NULL);
+			~ScopeTimer();
 
-        class HELIUM_FOUNDATION_API ScopeTimer
-        {
-        public: 
-            ScopeTimer(Accumulator* accum, const char* func, uint32_t line, const char* desc = NULL); 
-            ~ScopeTimer(); 
+			char         m_Description[MAX_DESCRIPTION];
+			uint64_t     m_StartTicks;
+			Accumulator* m_Accum;
+			uint32_t     m_UniqueID;
+			bool         m_Print;
 
-            char      m_Description[MAX_DESCRIPTION]; 
-            uint64_t     m_StartTicks; 
-            Accumulator* m_Accum; 
-            uint32_t     m_UniqueID; 
-            bool         m_Print; 
+		private: 
+			ScopeTimer(const ScopeTimer& rhs); // no implementation
+		};
 
-        private: 
-            ScopeTimer(const ScopeTimer& rhs);  // no implementation
+		struct Header
+		{
+			uint16_t m_Command; 
+			uint16_t m_Size; 
+		};
 
-        };
+		struct InitPacket 
+		{
+			Header    m_Header;
+			uint32_t  m_Version;
+			uint32_t  m_Signature;
+			float32_t m_Conversion; // PROFILE_CYCLES_FOR_CONVERSION cycles -> how many millis?
+		};
 
-        struct Header
-        {
-            uint16_t m_Command; 
-            uint16_t m_Size; 
-        }; 
+		struct ScopeEnterPacket
+		{
+			Header   m_Header;
+			uint32_t m_UniqueID;
+			uint32_t m_StackDepth;
+			uint32_t m_Line;
+			uint64_t m_StartTicks;
+			char     m_Description[HELIUM_PROFILE_PACKET_STRING_BUFSIZE];
+			char     m_Function[HELIUM_PROFILE_PACKET_STRING_BUFSIZE];
+		};
 
-        struct InitPacket 
-        {
-            Header m_Header; 
-            uint32_t    m_Version; 
-            uint32_t    m_Signature; 
-            float32_t   m_Conversion; // PROFILE_CYCLES_FOR_CONVERSION cycles -> how many millis?
-        }; 
+		struct ScopeExitPacket
+		{
+			Header   m_Header;
+			uint32_t m_UniqueID;
+			uint32_t m_StackDepth;
+			uint64_t m_Duration;
+		};
 
-        struct ScopeEnterPacket
-        {
-            Header      m_Header; 
-            uint32_t    m_UniqueID; 
-            uint32_t    m_StackDepth; 
-            uint32_t    m_Line; 
-            uint64_t    m_StartTicks; 
-            char        m_Description[PROFILE_PACKET_STRING_BUFSIZE]; 
-            char        m_Function[PROFILE_PACKET_STRING_BUFSIZE]; 
-        }; 
+		struct BlockEndPacket
+		{
+			Header m_Header;
+		};
 
-        struct ScopeExitPacket 
-        {
-            Header      m_Header;
-            uint32_t    m_UniqueID;   
-            uint32_t    m_StackDepth; 
-            uint64_t    m_Duration; 
-        }; 
+		union UberPacket
+		{
+			Header           m_Header;
+			InitPacket       m_Init;
+			ScopeEnterPacket m_ScopeEnter;
+			ScopeExitPacket  m_ScopeExitPacket;
+		};
 
-        struct BlockEndPacket
-        {
-            Header      m_Header; 
-        };
+		class HELIUM_FOUNDATION_API Context
+		{
+		public:
+			File     m_TraceFile;
+			uint32_t m_UniqueID;
+			uint32_t m_StackDepth;
+			uint32_t m_PacketBufferOffset;
+			uint8_t  m_PacketBuffer[HELIUM_PROFILE_PACKET_BLOCK_SIZE];
+			uint32_t m_AccumStack[HELIUM_PROFILE_ACCUMULATOR_MAX];
 
-        union UberPacket
-        {
-            Header           m_Header; 
-            InitPacket       m_Init; 
-            ScopeEnterPacket m_ScopeEnter; 
-            ScopeExitPacket  m_ScopeExitPacket; 
-        };
+			Context();
+			~Context();
 
-        class HELIUM_FOUNDATION_API Context
-        {
-        public:
-            File                m_TraceFile; 
-            uint32_t            m_UniqueID; 
-            uint32_t            m_StackDepth; 
-            uint32_t            m_PacketBufferOffset; 
-            uint8_t             m_PacketBuffer[PROFILE_PACKET_BLOCK_SIZE]; 
-            uint32_t            m_AccumStack[PROFILE_ACCUMULATOR_MAX]; 
+			void FlushFile();
 
-            Context(); 
-            ~Context(); 
+			template <class T>
+			T* AllocPacket(uint32_t cmd)
+			{
+				uint32_t spaceNeeded = sizeof(T) + sizeof(BlockEndPacket) + sizeof(ScopeEnterPacket);
 
-            void FlushFile(); 
+				if (m_PacketBufferOffset + spaceNeeded >= HELIUM_PROFILE_PACKET_BLOCK_SIZE)
+				{
+					FlushFile();
+				}
 
-            template <class T>
-            T* AllocPacket(uint32_t cmd)
-            {
-                uint32_t spaceNeeded = sizeof(T) + sizeof(BlockEndPacket) + sizeof(ScopeEnterPacket); 
+				T* packet = (T*) (m_PacketBuffer + m_PacketBufferOffset);
+				m_PacketBufferOffset += sizeof(T);
 
-                if (m_PacketBufferOffset + spaceNeeded >= PROFILE_PACKET_BLOCK_SIZE)
-                {
-                    FlushFile(); 
-                }
+				//Log::Print("CMD %d OFFSET %d\n", cmd, m_PacketBufferOffset);
 
-                T* packet = (T*) (m_PacketBuffer + m_PacketBufferOffset); 
-                m_PacketBufferOffset += sizeof(T); 
+				packet->m_Header.m_Command = cmd;
+				packet->m_Header.m_Size    = sizeof(T);
 
-                //Log::Print("CMD %d OFFSET %d\n", cmd, m_PacketBufferOffset); 
-
-                packet->m_Header.m_Command = cmd; 
-                packet->m_Header.m_Size    = sizeof(T); 
-
-                return packet; 
-            }
-        }; 
-    }
+				return packet;
+			}
+		}; 
+	}
 }
-
-// profile flag check
-#ifdef PROFILE_ENABLE
-# error PROFILE_ENABLE flag used by another module
-#endif
 
 // master profile enable
 #if HELIUM_PROFILE
-# define PROFILE_ENABLE
+# define HELIUM_PROFILE_ENABLE 1
+#else
+# define HELIUM_PROFILE_ENABLE 0
 #endif
 
 //
 // Accumulation API stashes time taken in each profile tag over the course of the entire profile interval
 //
 
-// profile flag check
-#ifdef PROFILE_ACCUMULATION
-# error PROFILE_ACCUMULATION flag used by another module
-#endif
-
 // accumulation api enable
-#ifdef PROFILE_ENABLE
-# define PROFILE_ACCUMULATION
+#if HELIUM_PROFILE_ENABLE
+# define HELIUM_PROFILE_ACCUMULATION 1
+#else
+# define HELIUM_PROFILE_ACCUMULATION 0
 #endif
-
-#define PROFILE_ACCUMULATION
 
 
 // accumulation macros
-#ifdef PROFILE_ACCUMULATION
-# define PROFILE_SCOPE_ACCUM(__Accum) \
-    Profile::ScopeTimer __ScopeAccum ( &__Accum, __FUNCTION__, __LINE__); 
-# define PROFILE_SCOPE_ACCUM_VERBOSE(__Accum, __Str) \
-    Profile::ScopeTimer __ScopeAccum ( &__Accum, __FUNCTION__, __LINE__, Profile::Settings::Enabled() ? __Str : NULL );
+#ifdef HELIUM_PROFILE_ACCUMULATION
+# define HELIUM_PROFILE_SCOPE_ACCUM(__Accum) \
+	Profile::ScopeTimer __ScopeAccum ( &__Accum, __FUNCTION__, __LINE__); 
+# define HELIUM_PROFILE_SCOPE_ACCUM_VERBOSE(__Accum, __Str) \
+	Profile::ScopeTimer __ScopeAccum ( &__Accum, __FUNCTION__, __LINE__, __Str );
 #else
-# define PROFILE_SCOPE_ACCUM(__Accum)
-# define PROFILE_SCOPE_ACCUM_VERBOSE(__Accum, __Str)
+# define HELIUM_PROFILE_SCOPE_ACCUM(__Accum)
+# define HELIUM_PROFILE_SCOPE_ACCUM_VERBOSE(__Accum, __Str)
 #endif
 
 
@@ -219,35 +205,34 @@ namespace Helium
 // Instrumentation API pervades more code blocks and provides fine-grain profile data to a log file
 //
 
-// profile flag check
-#ifdef PROFILE_INSTRUMENTATION
-# error PROFILE_INSTRUMENTATION flag used by another module
-#endif
-
 // instrumentation api enable
-#ifdef PROFILE_ENABLE
-# define PROFILE_INSTRUMENTATION
+#if HELIUM_PROFILE_ENABLE
+# define HELIUM_PROFILE_INSTRUMENTATION 1
+#else
+# define HELIUM_PROFILE_INSTRUMENTATION 0
 #endif
 
 // flag to instrument all code possible
-#ifdef PROFILE_INSTRUMENTATION
-# define PROFILE_INSTRUMENT_ALL
+#if HELIUM_PROFILE_INSTRUMENTATION
+# define HELIUM_PROFILE_INSTRUMENT_ALL 1
+#else
+# define HELIUM_PROFILE_INSTRUMENT_ALL 0
 #endif
 
 // instrumentation macros
-#ifdef PROFILE_INSTRUMENTATION
+#if HELIUM_PROFILE_INSTRUMENTATION
 
-# define PROFILE_FUNCTION_TIMER() \
-    static Profile::Accumulator __Accumulator ( __FUNCTION__ ); \
-    Profile::ScopeTimer __ScopeTimer ( &__Accumulator, __FUNCTION__, 0, __FILE__ );
+# define HELIUM_PROFILE_FUNCTION_TIMER() \
+	static Profile::Accumulator __Accumulator ( __FUNCTION__ ); \
+	Profile::ScopeTimer __ScopeTimer ( &__Accumulator, __FUNCTION__, 0, __FILE__ );
 
-# define PROFILE_SCOPE_TIMER(__Description) \
-    static Profile::Accumulator __Accumulator ( __FUNCTION__, ":" PROFILE_TOSTRING(__LINE__) ); \
-    Profile::ScopeTimer __ScopeTimer ( &__Accumulator, __FUNCTION__, __LINE__, __Description );
+# define HELIUM_PROFILE_SCOPE_TIMER(__Description) \
+	static Profile::Accumulator __Accumulator ( __FUNCTION__, ":" HELIUM_PROFILE_TOSTRING(__LINE__) ); \
+	Profile::ScopeTimer __ScopeTimer ( &__Accumulator, __FUNCTION__, __LINE__, __Description );
 
 #else
 
-# define PROFILE_FUNCTION_TIMER()
-# define PROFILE_SCOPE_TIMER(__Description)
+# define HELIUM_PROFILE_FUNCTION_TIMER()
+# define HELIUM_PROFILE_SCOPE_TIMER(__Description)
 
 #endif

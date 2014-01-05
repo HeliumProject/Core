@@ -8,12 +8,12 @@
 
 #include "Foundation/Profile.h"
 
-//#define IPC_PROFILE
+#define HELIUM_IPC_PROFILE 0
 
-#if defined(PROFILE_INSTRUMENT_ALL) || defined(IPC_PROFILE)
-# define IPC_SCOPE_TIMER(x) PROFILE_SCOPE_TIMER(x)
+#if HELIUM_PROFILE_INSTRUMENT_ALL || HELIUM_IPC_PROFILE
+# define HELIUM_IPC_SCOPE_TIMER(__Str) HELIUM_PROFILE_SCOPE_TIMER(__Str)
 #else
-# define IPC_SCOPE_TIMER(x)
+# define HELIUM_IPC_SCOPE_TIMER(__Str)
 #endif
 
 namespace Helium

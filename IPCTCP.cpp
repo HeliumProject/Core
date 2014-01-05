@@ -11,6 +11,7 @@
 #include <string.h>
 #include <algorithm>
 
+using namespace Helium;
 using namespace Helium::IPC;
 
 #define IPC_TCP_NO_DELAY 1
@@ -298,10 +299,10 @@ void TCPConnection::CleanupThread()
 
 bool TCPConnection::ReadMessage(Message** msg)
 {
-	IPC_SCOPE_TIMER("");
+	HELIUM_IPC_SCOPE_TIMER("");
 
 	{
-		IPC_SCOPE_TIMER("Read Message Header");
+		HELIUM_IPC_SCOPE_TIMER("Read Message Header");
 
 		if (!Read(&m_ReadHeader,sizeof(m_ReadHeader)))
 		{
@@ -339,7 +340,7 @@ bool TCPConnection::ReadMessage(Message** msg)
 	}
 
 	{
-		IPC_SCOPE_TIMER("Read Message Data");
+		HELIUM_IPC_SCOPE_TIMER("Read Message Data");
 
 		if (!Read(data,m_ReadHeader.m_Size))
 		{
@@ -359,7 +360,7 @@ bool TCPConnection::ReadMessage(Message** msg)
 
 bool TCPConnection::WriteMessage(Message* msg)
 {
-	IPC_SCOPE_TIMER("");
+	HELIUM_IPC_SCOPE_TIMER("");
 
 	m_WriteHeader.m_ID = msg->GetID();
 	m_WriteHeader.m_TRN = msg->GetTransaction();
@@ -374,7 +375,7 @@ bool TCPConnection::WriteMessage(Message* msg)
 #endif
 
 	{
-		IPC_SCOPE_TIMER("Write Message Header");
+		HELIUM_IPC_SCOPE_TIMER("Write Message Header");
 		if (!Write( &m_WriteHeader, sizeof( m_WriteHeader ) ))
 		{
 #ifdef IPC_TCP_DEBUG_SOCKETS
@@ -385,7 +386,7 @@ bool TCPConnection::WriteMessage(Message* msg)
 	}
 
 	{
-		IPC_SCOPE_TIMER("Write Message Data");
+		HELIUM_IPC_SCOPE_TIMER("Write Message Data");
 		if (!Write( msg->GetData(), msg->GetSize() ))
 		{
 #ifdef IPC_TCP_DEBUG_SOCKETS
