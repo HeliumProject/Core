@@ -10,7 +10,7 @@ using namespace Helium;
 
 void Line::Transform(const Matrix4& m)
 {
-    MATH_FUNCTION_TIMER();
+    HELIUM_MATH_FUNCTION_TIMER();
 
     m.TransformVertex(m_Origin);
     m.TransformVertex(m_Point);
@@ -19,7 +19,7 @@ void Line::Transform(const Matrix4& m)
 // http://astronomy.swin.edu.au/~pbourke/geometry/pointline/
 bool Line::IntersectsPoint(const Vector3& pos, const float32_t err, float32_t* mu, Vector3* offset) const
 {
-    MATH_FUNCTION_TIMER();
+    HELIUM_MATH_FUNCTION_TIMER();
 
     float32_t length = (m_Origin - m_Point).Length();
 
@@ -66,7 +66,7 @@ bool Line::IntersectsPoint(const Vector3& pos, const float32_t err, float32_t* m
 // http://astronomy.swin.edu.au/~pbourke/geometry/lineline3d/
 bool Line::IntersectsLine(const Vector3& p1, const Vector3& p2, Vector3* location) const
 {
-    MATH_FUNCTION_TIMER();
+    HELIUM_MATH_FUNCTION_TIMER();
 
     Vector3 p3 = m_Origin;
     Vector3 p4 = m_Point;
@@ -125,7 +125,7 @@ bool Line::IntersectsLine(const Vector3& p1, const Vector3& p2, Vector3* locatio
 // http://astronomy.swin.edu.au/~pbourke/geometry/lineline3d/
 bool Line::IntersectsSegment(const Vector3& p1, const Vector3& p2, const float32_t err, float32_t* mu, Vector3* offset) const
 {
-    MATH_FUNCTION_TIMER();
+    HELIUM_MATH_FUNCTION_TIMER();
 
     Vector3 p3 = m_Origin;
     Vector3 p4 = m_Point;
@@ -333,7 +333,7 @@ bool Line::IntersectRayTriangle( const Vector3& v0, const Vector3& v1, const Vec
 //  u and v are v0's and v1's barycentric coordinates
 bool Line::IntersectsTriangle(const Vector3& v0, const Vector3& v1, const Vector3& v2, float32_t* bary0, float32_t* bary1, float32_t* scale) const
 {
-    MATH_FUNCTION_TIMER();
+    HELIUM_MATH_FUNCTION_TIMER();
 
     float32_t u, v;
 
@@ -415,7 +415,7 @@ bool Line::IntersectsTriangle(const Vector3& v0, const Vector3& v1, const Vector
 // http://astronomy.swin.edu.au/~pbourke/geometry/sphereline/
 bool Line::IntersectsSphere(const Vector3& pos, const float32_t radius, V_Vector3* intersections) const
 {
-    MATH_FUNCTION_TIMER();
+    HELIUM_MATH_FUNCTION_TIMER();
 
     // polynomial coefficients
     float32_t a = SQR(m_Point.x - m_Origin.x) + SQR(m_Point.y - m_Origin.y) + SQR(m_Point.z - m_Origin.z);
@@ -464,7 +464,7 @@ bool Line::IntersectsSphere(const Vector3& pos, const float32_t radius, V_Vector
 // http://astronomy.swin.edu.au/~pbourke/geometry/planeline/
 bool Line::IntersectsPlane(const Plane& plane, Vector3* intersection) const
 {
-    MATH_FUNCTION_TIMER();
+    HELIUM_MATH_FUNCTION_TIMER();
 
     float32_t den = (plane.A() * (m_Origin.x - m_Point.x)) + (plane.B() * (m_Origin.y - m_Point.y)) + (plane.C() * (m_Origin.z - m_Point.z));
 
@@ -487,7 +487,7 @@ bool Line::IntersectsPlane(const Plane& plane, Vector3* intersection) const
 
 bool Line::IntersectsBox(const AlignedBox& box, Vector3* intersection) const
 {
-    MATH_FUNCTION_TIMER();
+    HELIUM_MATH_FUNCTION_TIMER();
 
     bool inside = true;
     int32_t i;

@@ -129,7 +129,7 @@ Frustum::Frustum(const AlignedBox& b)
 
 void Frustum::Transform(const Matrix4& m)
 {
-    MATH_FUNCTION_TIMER();
+    HELIUM_MATH_FUNCTION_TIMER();
 
     Matrix4 inv = m.Inverted();
     inv.Transpose();
@@ -144,7 +144,7 @@ void Frustum::Transform(const Matrix4& m)
 
 bool Frustum::IntersectsPoint(const Vector3& p, const float32_t distanceFromPlane) const
 {
-    MATH_FUNCTION_TIMER();
+    HELIUM_MATH_FUNCTION_TIMER();
 
     // we assume its above each plane
     bool above = true;
@@ -166,7 +166,7 @@ bool Frustum::IntersectsPoint(const Vector3& p, const float32_t distanceFromPlan
 
 bool Frustum::IntersectsSegment(const Vector3& point1, const Vector3& point2) const
 {
-    MATH_FUNCTION_TIMER();
+    HELIUM_MATH_FUNCTION_TIMER();
 
     ClipCode c1, c2;
     Vector3 p1 (point1), p2 (point2);
@@ -259,7 +259,7 @@ bool Frustum::IntersectsSegment(const Vector3& point1, const Vector3& point2) co
 
 bool Frustum::IntersectsTriangle(const Vector3& v0, const Vector3& v1, const Vector3& v2) const
 {
-    MATH_FUNCTION_TIMER();
+    HELIUM_MATH_FUNCTION_TIMER();
 
     // this is the source polygon and it will glow as we clip each plane in the frustum
     StaticPolygon<Vector3, 9> polygon (v0, v1, v2);
@@ -341,7 +341,7 @@ bool Frustum::IntersectsTriangle(const Vector3& v0, const Vector3& v1, const Vec
 
 bool Frustum::IntersectsBox(const AlignedBox& box, bool precise) const
 {
-    MATH_FUNCTION_TIMER();
+    HELIUM_MATH_FUNCTION_TIMER();
 
     if ( fabs((box.maximum - box.minimum).Length()) < HELIUM_LINEAR_INTERSECTION_ERROR )
     {
@@ -394,7 +394,7 @@ bool Frustum::IntersectsBox(const AlignedBox& box, bool precise) const
 
 bool Frustum::Contains(const AlignedBox& box) const
 {
-    MATH_FUNCTION_TIMER();
+    HELIUM_MATH_FUNCTION_TIMER();
 
     V_Vector3 verts;
     box.GetVertices(verts);
