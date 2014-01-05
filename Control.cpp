@@ -10,7 +10,7 @@ HELIUM_DEFINE_ABSTRACT( Helium::Inspect::Control );
 using namespace Helium;
 using namespace Helium::Inspect;
 
-#ifdef PROFILE_ACCUMULATION
+#ifdef HELIUM_PROFILE_ACCUMULATION
 Profile::Accumulator Inspect::g_RealizeAccumulator( "Inspect Realize Accumulator" );
 Profile::Accumulator Inspect::g_UnrealizeAccumulator( "Inspect Unrealize Accumulator" );
 #endif
@@ -165,7 +165,7 @@ bool Control::IsRealized()
 
 void Control::Realize(Canvas* canvas)
 {
-	PROFILE_SCOPE_ACCUM( g_RealizeAccumulator );
+	HELIUM_PROFILE_SCOPE_ACCUM( g_RealizeAccumulator );
 
 	if ( !m_IsRealized )
 	{
@@ -179,7 +179,7 @@ void Control::Realize(Canvas* canvas)
 
 void Control::Unrealize()
 {
-	PROFILE_SCOPE_ACCUM( g_UnrealizeAccumulator );
+	HELIUM_PROFILE_SCOPE_ACCUM( g_UnrealizeAccumulator );
 
 	if ( m_IsRealized )
 	{

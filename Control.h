@@ -294,7 +294,7 @@ namespace Helium
 		template<> bool Control::GetProperty( const std::string& key, std::string& value ) const;
 		template<> void Control::SetProperty( const std::string& key, const std::string& value );
 
-#ifdef PROFILE_ACCUMULATION
+#ifdef HELIUM_PROFILE_ACCUMULATION
 		HELIUM_INSPECT_API extern Profile::Accumulator g_RealizeAccumulator;
 		HELIUM_INSPECT_API extern Profile::Accumulator g_UnrealizeAccumulator;
 #endif
