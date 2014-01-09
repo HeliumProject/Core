@@ -10,13 +10,10 @@
 #if HELIUM_OS_WIN
 
 
-#if HELIUM_CPP11
-
-#include <type_traits>
-
-#else
-
-#include <type_traits>
+# if HELIUM_CPP11
+#  include <type_traits>
+# else // HELIUM_CPP11
+#  include <type_traits>
 
 namespace std
 {
@@ -24,7 +21,7 @@ namespace std
 	using namespace tr1;
 }
 
-#endif // HELIUM_CPP11
+# endif // HELIUM_CPP11
 
 
 //
@@ -33,23 +30,19 @@ namespace std
 
 #elif HELIUM_OS_LINUX // HELIUM_OS_WIN
 
-#if HELIUM_CPP11
-
-#include <type_traits>
-
-#if HELIUM_CC_GCC
-
-#if HELIUM_CC_GCC_VERSION >= 40800
+# if HELIUM_CPP11
+#  include <type_traits>
+#   if __GLIBCXX__ >= 20131008 // 4.8 or later
 
 namespace std
 {
 	template< class T > struct has_trivial_assign : has_trivial_copy_assign< T > {};
-	template< class T > struct has_trivial_constructor : has_trivial_copy_constructor< T > {};
+	template< class T > struct has_trivial_constructor : has_trivial_default_constructor< T > {};
 	template< class T > struct has_trivial_destructor : is_trivially_destructible< T > {};
 	template< class T > struct has_trivial_copy : has_trivial_copy_assign< T > {};
 }
 
-#else // HELIUM_GCC_VERSION
+#  else // earlier than 4.8
 
 namespace std
 {
@@ -58,22 +51,11 @@ namespace std
 	template< class T > struct has_trivial_copy : has_trivial_copy_assign< T > {};
 }
 
-#endif // HELIUM_GCC_VERSION
+#  endif // glib version check
 
-#elif HELIUM_CC_CLANG // HELIUM_CC_GCC
+# else // HELIUM_CPP11
 
-namespace std
-{
-	template< class T > struct has_trivial_assign : has_trivial_copy_assign< T > {};
-	template< class T > struct has_trivial_constructor : has_trivial_default_constructor< T > {};
-	template< class T > struct has_trivial_copy : has_trivial_copy_assign< T > {};
-}
-
-#endif // HELIUM_CC_CLANG
-
-#else // HELIUM_CPP11
-
-#include <tr1/type_traits>
+#  include <tr1/type_traits>
 
 namespace std
 {
@@ -96,7 +78,7 @@ namespace std
 	using tr1::has_trivial_copy;
 }
 
-#endif // HELIUM_CPP11
+# endif // HELIUM_CPP11
 
 
 //
@@ -105,9 +87,9 @@ namespace std
 
 #elif HELIUM_OS_MAC // HELIUM_OS_LINUX
 
-#if HELIUM_CC_GCC
+# if HELIUM_CC_GCC
 
-#include <tr1/type_traits>
+#  include <tr1/type_traits>
 
 namespace std
 {
@@ -130,9 +112,9 @@ namespace std
 	using tr1::has_trivial_copy;
 }
 
-#elif HELIUM_CC_CLANG // HELIUM_CC_GCC
+# elif HELIUM_CC_CLANG // HELIUM_CC_GCC
 
-#include <type_traits>
+#  include <type_traits>
 
 namespace std
 {
@@ -142,6 +124,6 @@ namespace std
 	template< class T > struct has_trivial_copy : is_trivially_copyable< T > {};
 }
 
-#endif // HELIUM_CC_CLANG
+# endif // HELIUM_CC_CLANG
 
 #endif // HELIUM_OS_MAC
