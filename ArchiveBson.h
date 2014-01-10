@@ -59,6 +59,59 @@ namespace Helium
 		};
 		HELIUM_COMPILE_ASSERT( sizeof( bson_oid_t ) == 12 );
 
+		namespace BsonGeoAxes
+		{
+			enum Enum
+			{
+				Longitude,
+				Latitude,
+			};
+		}
+
+		struct HELIUM_PERSIST_API BsonGeoPoint : Helium::Reflect::Struct
+		{
+			String type;
+			float32_t coordinates[2];
+
+			BsonGeoPoint()
+			{
+				type = "Point";
+				coordinates[ BsonGeoAxes::Longitude ] = 0.f;
+				coordinates[ BsonGeoAxes::Latitude ] = 0.f;
+			}
+
+			HELIUM_DECLARE_BASE_STRUCT( BsonGeoPoint );
+			static void PopulateMetaType( Helium::Reflect::MetaStruct& structure );
+		};
+
+		struct HELIUM_PERSIST_API BsonGeoLineString : Helium::Reflect::Struct
+		{
+			String type;
+			DynamicArray< DynamicArray< float32_t > > coordinates;
+
+			BsonGeoLineString()
+			{
+				type = "LineString";
+			}
+
+			HELIUM_DECLARE_BASE_STRUCT( BsonGeoLineString );
+			static void PopulateMetaType( Helium::Reflect::MetaStruct& structure );
+		};
+
+		struct HELIUM_PERSIST_API BsonGeoPolygon : Helium::Reflect::Struct
+		{
+			String type;
+			DynamicArray< DynamicArray< DynamicArray< float32_t > > > coordinates;
+
+			BsonGeoPolygon()
+			{
+				type = "Polygon";
+			}
+
+			HELIUM_DECLARE_BASE_STRUCT( BsonGeoPolygon );
+			static void PopulateMetaType( Helium::Reflect::MetaStruct& structure );
+		};
+
 		class HELIUM_PERSIST_API ArchiveWriterBson : public ArchiveWriter
 		{
 		public:
