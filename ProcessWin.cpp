@@ -9,6 +9,7 @@
 #include <sstream>
 #include <shlobj.h>
 #include <aclapi.h>
+#include <direct.h>
 
 using namespace Helium;
 
