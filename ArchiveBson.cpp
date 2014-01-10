@@ -14,6 +14,9 @@
 
 HELIUM_DEFINE_BASE_STRUCT( Helium::Persist::BsonDate );
 HELIUM_DEFINE_BASE_STRUCT( Helium::Persist::BsonObjectId );
+HELIUM_DEFINE_BASE_STRUCT( Helium::Persist::BsonGeoPoint );
+HELIUM_DEFINE_BASE_STRUCT( Helium::Persist::BsonGeoLineString );
+HELIUM_DEFINE_BASE_STRUCT( Helium::Persist::BsonGeoPolygon );
 
 using namespace Helium;
 using namespace Helium::Reflect;
@@ -70,6 +73,24 @@ void BsonObjectId::FromString( const String& str )
 void BsonObjectId::PopulateMetaType( Reflect::MetaStruct& type )
 {
 	type.AddField( &BsonObjectId::bytes, "bytes" );
+}
+
+void BsonGeoPoint::PopulateMetaType( Helium::Reflect::MetaStruct& type )
+{
+	type.AddField( &BsonGeoPoint::type, "type", Reflect::FieldFlags::Force );
+	type.AddField( &BsonGeoPoint::coordinates, "coordinates" );
+}
+
+void BsonGeoLineString::PopulateMetaType( Helium::Reflect::MetaStruct& type )
+{
+	type.AddField( &BsonGeoLineString::type, "type", Reflect::FieldFlags::Force );
+	type.AddField( &BsonGeoLineString::coordinates, "coordinates" );
+}
+
+void BsonGeoPolygon::PopulateMetaType( Helium::Reflect::MetaStruct& type )
+{
+	type.AddField( &BsonGeoPolygon::type, "type", Reflect::FieldFlags::Force );
+	type.AddField( &BsonGeoPolygon::coordinates, "coordinates" );
 }
 
 void ArchiveWriterBson::WriteToStream( const ObjectPtr& object, Stream& stream, ObjectIdentifier* identifier, uint32_t flags )
