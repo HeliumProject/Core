@@ -132,6 +132,20 @@ std::string Helium::GetProcessName()
 	return "";
 }
 
+std::string Helium::GetCurrentWorkingPath()
+{
+	char buf[ PATH_MAX ];
+
+	if (getcwd(buf, PATH_MAX))
+	{
+		return std::string(buf);
+	}
+	else
+	{
+		return std::string("");
+	}
+}
+
 std::string Helium::GetUserName()
 {
 	const char* user = getenv( "USER" );

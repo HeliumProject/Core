@@ -44,6 +44,9 @@ namespace Helium
 	/// Get the executable name for this process
 	HELIUM_PLATFORM_API std::string GetProcessName();
 
+	/// Get the current working path
+	HELIUM_PLATFORM_API std::string GetCurrentWorkingPath();
+
 	/// Get username of the current proess
 	HELIUM_PLATFORM_API std::string GetUserName();
 	

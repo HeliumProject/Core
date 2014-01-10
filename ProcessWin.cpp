@@ -297,6 +297,19 @@ std::string Helium::GetProcessName()
 	return convertedFile;
 }
 
+std::string Helium::GetCurrentWorkingPath()
+{
+	char buf[ MAX_PATH ];
+	if (_getcwd(buf, MAX_PATH))
+	{
+		return std::string(buf);
+	}
+	else
+	{
+		return std::string("");
+	}
+}
+
 std::string Helium::GetUserName()
 {
 	std::string username;
