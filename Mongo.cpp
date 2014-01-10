@@ -214,11 +214,6 @@ Database::~Database()
 	mongo_destroy( conn );
 }
 
-void Database::SetName( const char* name )
-{
-	this->name = name;
-}
-
 void Database::SetTimeout( int timeoutMilliseconds )
 {
 	mongo_set_op_timeout( conn, timeoutMilliseconds );
@@ -274,24 +269,34 @@ int64_t Database::GetServerTime( bool inMilliseconds )
 
 bool Database::Drop()
 {
-	bson b[1];
-	HELIUM_VERIFY( BSON_OK == bson_init( b ) );
-	HELIUM_VERIFY( BSON_OK == bson_append_int( b, "dropDatabase", 1 ) );
-	HELIUM_VERIFY( BSON_OK == bson_finish( b ) );
-
-	bool result = false;
-
-	bson out[1];
-	bson_init_zero( out );
-	if ( MONGO_OK == mongo_run_command( conn, name.GetData(), b, out ) )
+	if ( !HELIUM_VERIFY_MSG( IsCorrectThread(), "Database access from improper thread" ) )
 	{
-		result = true;
+		return false;
 	}
 
-	bson_destroy( b );
-	bson_destroy( out );
+	if ( MONGO_OK != mongo_cmd_drop_db( conn, name.GetData() ) )
+	{
+		Log::Error( "mongo_cmd_drop_db failed: %s\n", GetErrorString( conn->err ) );
+		return false;
+	}
 
-	return result;
+	return true;
+}
+
+bool Database::DropCollection( const char* name )
+{
+	if ( !HELIUM_VERIFY_MSG( IsCorrectThread(), "Database access from improper thread" ) )
+	{
+		return false;
+	}
+
+	if ( MONGO_OK != mongo_cmd_drop_collection( conn, this->name.GetData(), name, NULL ) )
+	{
+		Log::Error( "mongo_cmd_drop_collection failed: %s\n", GetErrorString( conn->err ) );
+		return false;
+	}
+
+	return true;
 }
 
 double Database::GetCollectionCount( const char* name )
@@ -547,14 +552,18 @@ bool Database::Insert( StrongPtr< Model >* objects, size_t count, const char* co
 	return result;
 }
 
-bool Database::DropCollection( const char* collection )
+bool Database::EnsureIndex( const char* collection, const bson* key, const char* name, int options )
 {
 	if ( !HELIUM_VERIFY_MSG( IsCorrectThread(), "Database access from improper thread" ) )
 	{
 		return false;
 	}
 
-	if ( MONGO_OK != mongo_cmd_drop_collection( conn, name.GetData(), collection, NULL ) )
+	Helium::String ns ( this->name );
+	ns += ".";
+	ns += collection;
+
+	if ( MONGO_OK != mongo_create_index( conn, ns.GetData(), key, name, options, NULL ) )
 	{
 		Log::Error( "mongo_cmd_drop_collection failed: %s\n", GetErrorString( conn->err ) );
 		return false;
