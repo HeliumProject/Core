@@ -214,11 +214,6 @@ Database::~Database()
 	mongo_destroy( conn );
 }
 
-void Database::SetTimeout( int timeoutMilliseconds )
-{
-	mongo_set_op_timeout( conn, timeoutMilliseconds );
-}
-
 bool Database::Connect( const char* addr, uint16_t port )
 {
 	this->threadId = Thread::GetCurrentId();

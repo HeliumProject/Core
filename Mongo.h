@@ -77,7 +77,6 @@ namespace Helium
 			// db ops/preferences
 			inline const char* GetName() const;
 			void SetName( const char* name );
-			void SetTimeout( int timeoutMilliseconds );
 			bool Connect( const char* addr, uint16_t port = HELIUM_MONGO_DEFAULT_PORT );
 			inline bool IsConnected( bool pingServer );
 			inline mongo* GetConnection();
