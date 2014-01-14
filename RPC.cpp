@@ -99,7 +99,6 @@ void Host::Reset()
 {
     m_Connection = NULL;
     m_ConnectionCount = 0;
-    m_Timeout = TIMEOUT_DEFAULT;
 
     memset(m_Interfaces, 0, sizeof(Interface*) * MAX_INTERFACES);
 }
@@ -134,11 +133,6 @@ void Host::SetConnection(IPC::Connection* con)
 {
     m_Connection = con;
     m_ConnectionCount = m_Connection->GetConnectCount();
-}
-
-void Host::SetTimeout(int32_t timeout)
-{
-    m_Timeout = timeout;
 }
 
 IPC::Message* Host::Create(Invoker* invoker, uint32_t size, int32_t transaction)

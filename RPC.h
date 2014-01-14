@@ -50,8 +50,6 @@ namespace Helium
         const uint32_t MAX_STACK = 64;
         const uint32_t MAX_INVOKERS = 32;
         const uint32_t MAX_INTERFACES = 32;
-        const int32_t TIMEOUT_DEFAULT = 1000;
-        const int32_t TIMEOUT_FOREVER = -1;
 
 
         //
@@ -192,9 +190,6 @@ namespace Helium
             // set the communication connection to use
             void SetConnection(IPC::Connection* con);
 
-            // set the timeout for blocking operations
-            void SetTimeout(int32_t timeout);
-
             //
             // Invoker dispatching
             //
@@ -251,7 +246,6 @@ namespace Helium
 
             IPC::Connection*    m_Connection;
             uint32_t                 m_ConnectionCount;
-            int32_t                 m_Timeout;
             Stack               m_Stack;
             Interface*          m_Interfaces[MAX_INTERFACES];
             uint32_t                 m_InterfaceCount;
