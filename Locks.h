@@ -32,6 +32,20 @@ namespace Helium
 		/// Reference to the synchronization object being locked.
 		T& m_rSyncObject;
 	};
+
+	/// Scoping locking mechanism.
+	///
+	/// Identical semantics to ScopeLock but used for invoking static lock/unlock functions
+	template< void ( *LockFunction )(), void ( *UnlockFunction )() >
+	class StaticScopeLock : NonCopyable
+	{
+	public:
+		/// @name Construction/Destruction
+		//@{
+		HELIUM_FORCEINLINE explicit StaticScopeLock();
+		HELIUM_FORCEINLINE ~StaticScopeLock();
+		//@}
+	};
 	
 	/// Spin lock.
 	///
@@ -94,6 +108,12 @@ namespace Helium
 
 		void LockWrite();
 		void UnlockWrite();
+		//@}
+
+		/// @name Condition accessors
+		//@{
+		inline Condition &GetReadReleaseCondition();
+		inline Condition &GetWriteReleaseCondition();
 		//@}
 
 	private:

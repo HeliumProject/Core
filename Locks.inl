@@ -21,6 +21,25 @@ Helium::ScopeLock< T, LockFunction, UnlockFunction >::~ScopeLock()
 }
 
 /// Constructor.
+///
+/// This calls the static locking function immediately.  The static unlocking function will be invoked when
+/// this object is destroyed.
+template< void ( *LockFunction )(), void ( *UnlockFunction )() >
+Helium::StaticScopeLock< LockFunction, UnlockFunction >::StaticScopeLock()
+{
+	LockFunction();
+}
+
+/// Destructor.
+///
+/// This automatically invokes the static unlocking function.
+template< void ( *LockFunction )(), void ( *UnlockFunction )() >
+Helium::StaticScopeLock< LockFunction, UnlockFunction >::~StaticScopeLock()
+{
+	UnlockFunction();
+}
+
+/// Constructor.
 Helium::SpinLock::SpinLock()
     : m_counter( 0 )
 {
@@ -79,6 +98,18 @@ void Helium::SpinLock::WaitForUnlock()
     {
         Thread::Yield();
     }
+}
+
+/// Get the read condition so that the caller may wait for the lock's read condition to change
+Helium::Condition &Helium::ReadWriteLock::GetReadReleaseCondition()
+{
+	return m_readReleaseCondition;
+}
+
+/// Get the write condition so that the caller may wait for the lock's write condition to change
+Helium::Condition &Helium::ReadWriteLock::GetWriteReleaseCondition()
+{
+	return m_writeReleaseCondition;
 }
 
 /// Get the platform-specific mutex handle.
