@@ -9,7 +9,8 @@
 #define HELIUM_PROFILE_STRINGIFY(x) #x
 #define HELIUM_PROFILE_TOSTRING(x) HELIUM_PROFILE_STRINGIFY(x)
 
-#define HELIUM_PROFILE_ACCUMULATOR_MAX         (2048)
+#define HELIUM_PROFILE_STRING_MAX              (256)
+#define HELIUM_PROFILE_SINK_MAX                (2048)
 #define HELIUM_PROFILE_CONTEXTS_MAX            (128)
 
 #define HELIUM_PROFILE_PROTOCOL_VERSION        (0x00)
@@ -33,56 +34,42 @@ namespace Helium
 {
 	namespace Profile
 	{
-		const static int MAX_DESCRIPTION = 256;
-
 		HELIUM_FOUNDATION_API void Initialize();
 		HELIUM_FOUNDATION_API void Cleanup();
-		HELIUM_FOUNDATION_API bool Enabled();
 
-		//
-		// Accumulates information over multiple calls
-		//
-
-		class HELIUM_FOUNDATION_API Accumulator
+		class HELIUM_FOUNDATION_API Sink
 		{
 		public:
-			uint32_t m_Hits;
-			float    m_TotalMillis;
+			Sink( const char* name );
+			Sink( const char* func, const char* file, uint32_t line );
+			~Sink();
 
-			int32_t  m_Index;
-			char     m_Name[MAX_DESCRIPTION];
-
-			Accumulator();
-			Accumulator(const char* name);
-			Accumulator (const char* function, const char* name);
-			~Accumulator();
-
-			void Init(const char* name);
+			void Init();
 			void Report();
-
 			static void ReportAll();
 
-		private: 
+			char        m_Name[HELIUM_PROFILE_STRING_MAX];
+			const char* m_Function;
+			const char* m_File;
+			uint32_t    m_Line;
+			uint32_t    m_Hits;
+			float       m_Millis;
+			int32_t     m_Index;
 		};
 
-		//
-		// Scope timer prints or logs information
-		//
-
-		class HELIUM_FOUNDATION_API ScopeTimer
+		class HELIUM_FOUNDATION_API Timer
 		{
 		public: 
-			ScopeTimer(Accumulator* accum, const char* func, uint32_t line, const char* desc = NULL);
-			~ScopeTimer();
+			Timer( Sink& sink, const char* fmt = NULL, ... );
+			~Timer();
 
-			char         m_Description[MAX_DESCRIPTION];
-			uint64_t     m_StartTicks;
-			Accumulator* m_Accum;
-			uint32_t     m_UniqueID;
-			bool         m_Print;
+			char     m_Name[HELIUM_PROFILE_STRING_MAX];
+			Sink&    m_Sink;
+			uint64_t m_StartTicks;
+			uint32_t m_UniqueID;
 
 		private: 
-			ScopeTimer(const ScopeTimer& rhs); // no implementation
+			Timer(const Timer& rhs); // no implementation
 		};
 
 		struct Header
@@ -139,7 +126,7 @@ namespace Helium
 			uint32_t m_StackDepth;
 			uint32_t m_PacketBufferOffset;
 			uint8_t  m_PacketBuffer[HELIUM_PROFILE_PACKET_BLOCK_SIZE];
-			uint32_t m_AccumStack[HELIUM_PROFILE_ACCUMULATOR_MAX];
+			uint32_t m_SinkStack[HELIUM_PROFILE_SINK_MAX];
 
 			Context();
 			~Context();
@@ -178,30 +165,6 @@ namespace Helium
 #endif
 
 //
-// Accumulation API stashes time taken in each profile tag over the course of the entire profile interval
-//
-
-// accumulation api enable
-#if HELIUM_PROFILE_ENABLE
-# define HELIUM_PROFILE_ACCUMULATION 1
-#else
-# define HELIUM_PROFILE_ACCUMULATION 0
-#endif
-
-
-// accumulation macros
-#ifdef HELIUM_PROFILE_ACCUMULATION
-# define HELIUM_PROFILE_SCOPE_ACCUM(__Accum) \
-	Profile::ScopeTimer __ScopeAccum ( &__Accum, __FUNCTION__, __LINE__); 
-# define HELIUM_PROFILE_SCOPE_ACCUM_VERBOSE(__Accum, __Str) \
-	Profile::ScopeTimer __ScopeAccum ( &__Accum, __FUNCTION__, __LINE__, __Str );
-#else
-# define HELIUM_PROFILE_SCOPE_ACCUM(__Accum)
-# define HELIUM_PROFILE_SCOPE_ACCUM_VERBOSE(__Accum, __Str)
-#endif
-
-
-//
 // Instrumentation API pervades more code blocks and provides fine-grain profile data to a log file
 //
 
@@ -223,16 +186,16 @@ namespace Helium
 #if HELIUM_PROFILE_INSTRUMENTATION
 
 # define HELIUM_PROFILE_FUNCTION_TIMER() \
-	static Profile::Accumulator __Accumulator ( __FUNCTION__ ); \
-	Profile::ScopeTimer __ScopeTimer ( &__Accumulator, __FUNCTION__, 0, __FILE__ );
+	static Helium::Profile::Sink functionSink ( HELIUM_FUNCTION_NAME, __FILE__, __LINE__ ); \
+	Helium::Profile::Timer functionTimer ( functionSink );
 
-# define HELIUM_PROFILE_SCOPE_TIMER(__Description) \
-	static Profile::Accumulator __Accumulator ( __FUNCTION__, ":" HELIUM_PROFILE_TOSTRING(__LINE__) ); \
-	Profile::ScopeTimer __ScopeTimer ( &__Accumulator, __FUNCTION__, __LINE__, __Description );
+# define HELIUM_PROFILE_SCOPE_TIMER( ... ) \
+	static Helium::Profile::Sink scopeSink ( HELIUM_FUNCTION_NAME, __FILE__, __LINE__ ); \
+	Helium::Profile::Timer scopeTimer ( scopeSink, __VA_ARGS__ );
 
 #else
 
 # define HELIUM_PROFILE_FUNCTION_TIMER()
-# define HELIUM_PROFILE_SCOPE_TIMER(__Description)
+# define HELIUM_PROFILE_SCOPE_TIMER( ... )
 
 #endif
