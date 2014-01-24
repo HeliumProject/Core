@@ -234,9 +234,24 @@ void Helium::ObjectPool< T, Allocator >::AllocateBlock()
 
     Block* pBlock = reinterpret_cast< Block* >( static_cast< uint8_t* >( pBuffer ) + alignedBufferSize );
     pBlock->pObjects = pObjects;
+	pBlock->pNext = NULL;
 
-    pBlock->pNext = m_pHeadBlock;
-    m_pHeadBlock = pBlock;
+	// We need to insert the new block on the end, otherwise object indexes
+	// will no longer correpond to the same object
+	Block *pLastBlock = m_pHeadBlock;
+	if (pLastBlock)
+	{
+		while (pLastBlock->pNext)
+		{
+			pLastBlock = pLastBlock->pNext;
+		}
+
+		pLastBlock->pNext = pBlock;
+	}
+	else
+	{
+		m_pHeadBlock = pBlock;
+	}
 
     // Reallocate the free object pool array.
     T* volatile * ppFreeObjects = m_ppFreeObjects;
