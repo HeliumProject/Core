@@ -97,7 +97,7 @@ bool ArchiveWriter::WriteToFile( const FilePath& path, const ObjectPtr& object, 
 bool ArchiveWriter::WriteToFile( const FilePath& path, const ObjectPtr* objects, size_t count, ObjectIdentifier* identifier, ArchiveType archiveType, std::string* error )
 {
 	HELIUM_ASSERT( !path.empty() );
-	HELIUM_PERSIST_SCOPE_TIMER( ( "%s", path.c_str() ) );
+	HELIUM_PERSIST_SCOPE_TIMER( "%s", path.c_str() );
 	Log::Debug( TXT( "Generating '%s'\n" ), path.c_str() );
 
 	path.MakePath();
@@ -283,7 +283,7 @@ bool ArchiveReader::ReadFromFile( const FilePath& path, ObjectPtr& object, Objec
 bool ArchiveReader::ReadFromFile( const FilePath& path, DynamicArray< ObjectPtr >& objects, ObjectResolver* resolver, ArchiveType archiveType, std::string* error )
 {
 	HELIUM_ASSERT( !path.empty() );
-	HELIUM_PERSIST_SCOPE_TIMER( ( "%s", path.c_str() ) );
+	HELIUM_PERSIST_SCOPE_TIMER( "%s", path.c_str() );
 	Log::Debug( TXT( "Parsing '%s'\n" ), path.c_str() );
 
 	SmartPtr< ArchiveReader > archive = GetReader( path, resolver, archiveType );

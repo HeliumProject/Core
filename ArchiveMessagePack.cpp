@@ -65,7 +65,7 @@ void ArchiveWriterMessagePack::Close()
 
 void ArchiveWriterMessagePack::Write( const Reflect::ObjectPtr* objects, size_t count )
 {
-	HELIUM_PERSIST_SCOPE_TIMER( ("Reflect - MessagePack Write") );
+	HELIUM_PERSIST_SCOPE_TIMER( "Reflect - MessagePack Write" );
 
 	// notify starting
 	ArchiveStatus info( *this, ArchiveStates::Starting );
@@ -407,7 +407,7 @@ void ArchiveReaderMessagePack::Close()
 
 void ArchiveReaderMessagePack::Read( DynamicArray< ObjectPtr >& objects )
 {
-	HELIUM_PERSIST_SCOPE_TIMER( ("Reflect - MessagePack Read") );
+	HELIUM_PERSIST_SCOPE_TIMER( "Reflect - MessagePack Read" );
 
 	Start();
 

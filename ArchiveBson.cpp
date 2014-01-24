@@ -128,7 +128,7 @@ void ArchiveWriterBson::Close()
 
 void ArchiveWriterBson::Write( const ObjectPtr* objects, size_t count )
 {
-	HELIUM_PERSIST_SCOPE_TIMER( ("Reflect - Bson Write") );
+	HELIUM_PERSIST_SCOPE_TIMER( "Reflect - Bson Write" );
 
 	// notify starting
 	ArchiveStatus info( *this, ArchiveStates::Starting );
@@ -495,7 +495,7 @@ void ArchiveReaderBson::Close()
 
 void ArchiveReaderBson::Read( DynamicArray< Reflect::ObjectPtr >& objects )
 {
-	HELIUM_PERSIST_SCOPE_TIMER( ("Reflect - Bson Read") );
+	HELIUM_PERSIST_SCOPE_TIMER( "Reflect - Bson Read" );
 
 	Start();
 

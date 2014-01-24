@@ -71,7 +71,7 @@ void ArchiveWriterJson::Close()
 
 void ArchiveWriterJson::Write( const ObjectPtr* objects, size_t count )
 {
-	HELIUM_PERSIST_SCOPE_TIMER( ("Reflect - Json Write") );
+	HELIUM_PERSIST_SCOPE_TIMER( "Reflect - Json Write" );
 
 	// notify starting
 	ArchiveStatus info( *this, ArchiveStates::Starting );
@@ -391,7 +391,7 @@ void ArchiveReaderJson::Close()
 
 void ArchiveReaderJson::Read( DynamicArray< ObjectPtr >& objects )
 {
-	HELIUM_PERSIST_SCOPE_TIMER( ("Reflect - Json Read") );
+	HELIUM_PERSIST_SCOPE_TIMER( "Reflect - Json Read" );
 
 	Start();
 
