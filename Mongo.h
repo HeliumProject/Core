@@ -75,10 +75,11 @@ namespace Helium
 			~Database();
 
 			// db ops/preferences
+			inline const char* GetName() const;
 			void SetName( const char* name );
-			void SetTimeout( int timeoutMilliseconds );
 			bool Connect( const char* addr, uint16_t port = HELIUM_MONGO_DEFAULT_PORT );
 			inline bool IsConnected( bool pingServer );
+			inline mongo* GetConnection();
 
 			// thread verification
 			inline void SetThread( Helium::ThreadId threadId = Thread::GetCurrentId() );
@@ -91,6 +92,7 @@ namespace Helium
 			bool Drop();
 
 			// collection routines
+			bool DropCollection( const char* name );
 			double GetCollectionCount( const char* name );
 			bool CreateCappedCollection( const char* name, int cappedSizeInBytes, int cappedMaxCount = 0 );
 
@@ -106,7 +108,8 @@ namespace Helium
 			// single fetch
 			bool Get( const Helium::StrongPtr< Model >& object, const char* collection = NULL );
 
-			bool DropCollection( const char* collection );
+			// index ops
+			bool EnsureIndex( const char* collection, const bson* key, const char* name = NULL, int options = 0x0 );
 
 			// find
 			//  query == NULL will return all objects by default
