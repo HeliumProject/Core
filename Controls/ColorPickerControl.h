@@ -1,9 +1,6 @@
 #pragma once
 
-#include "Math/Color3.h"
-#include "Math/Color4.h"
-#include "Math/HDRColor3.h"
-#include "Math/HDRColor4.h"
+#include "MathSimd/Color.h"
 #include "Reflect/MetaClass.h"
 
 #include "Inspect/API.h"
@@ -27,8 +24,7 @@ namespace Helium
         public:
             Attribute< bool >       a_Highlight;
             Attribute< bool >       a_Alpha;
-            Attribute< Color3 >     a_Color3;
-            Attribute< Color4 >     a_Color4;
+            Attribute< Color >      a_Color;
         };
 
         typedef Helium::StrongPtr< ColorPicker > ColorPickerPtr;
