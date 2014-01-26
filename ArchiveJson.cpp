@@ -28,21 +28,23 @@ void ArchiveWriterJson::WriteToStream( const ObjectPtr* objects, size_t count, S
 	archive.Close();
 }
 
+void ArchiveWriterJson::WriteToJson( const ObjectPtr& object, RapidJsonWriter& writer, const char* name, Reflect::ObjectIdentifier* identifier, uint32_t flags )
+{
+	ArchiveWriterJson archive ( NULL, identifier, flags );
+	archive.SerializeInstance( writer, object, object->GetMetaClass(), object );
+}
+
 ArchiveWriterJson::ArchiveWriterJson( const FilePath& path, ObjectIdentifier* identifier, uint32_t flags )
 	: ArchiveWriter( path, identifier, flags )
-	, m_Writer( m_Output )
 {
-	m_Writer.SetIndent('\t', 1);
 }
 
 ArchiveWriterJson::ArchiveWriterJson( Stream *stream, ObjectIdentifier* identifier, uint32_t flags )
 	: ArchiveWriter( identifier, flags )
-	, m_Writer( m_Output )
 {
 	m_Stream.Reset( stream );
 	m_Stream.Orphan( true );
 	m_Output.SetStream( stream );
-	m_Writer.SetIndent('\t', 1);
 }
 
 ArchiveType ArchiveWriterJson::GetType() const
@@ -80,8 +82,11 @@ void ArchiveWriterJson::Write( const ObjectPtr* objects, size_t count )
 	// the master object
 	m_Objects.AddArray( objects, count );
 
+	RapidJsonPrettyWriter writer ( m_Output );
+	writer.SetIndent('\t', 1);
+
 	// begin top level array of objects
-	m_Writer.StartArray();
+	writer.StartArray();
 
 	// objects can get changed during this iteration (in Identify), so use indices
 	for ( size_t index = 0; index < m_Objects.GetSize(); ++index )
@@ -89,10 +94,10 @@ void ArchiveWriterJson::Write( const ObjectPtr* objects, size_t count )
 		Object* object = m_Objects.GetElement( index );
 		const MetaClass* objectClass = object->GetMetaClass();
 
-		m_Writer.StartObject();
-		m_Writer.String( objectClass->m_Name );
-		SerializeInstance( object, objectClass, object );
-		m_Writer.EndObject();
+		writer.StartObject();
+		writer.String( objectClass->m_Name );
+		SerializeInstance( writer, object, objectClass, object );
+		writer.EndObject();
 
 		info.m_State = ArchiveStates::ObjectProcessed;
 		info.m_Progress = (int)(((float)(index) / (float)m_Objects.GetSize()) * 100.0f);
@@ -100,7 +105,7 @@ void ArchiveWriterJson::Write( const ObjectPtr* objects, size_t count )
 	}
 
 	// end top level array
-	m_Writer.EndArray();
+	writer.EndArray();
 
 	// notify completion of last object processed
 	info.m_State = ArchiveStates::ObjectProcessed;
@@ -115,7 +120,7 @@ void ArchiveWriterJson::Write( const ObjectPtr* objects, size_t count )
 	e_Status.Raise( info );
 }
 
-void ArchiveWriterJson::SerializeInstance( void* instance, const MetaStruct* structure, Object* object )
+void ArchiveWriterJson::SerializeInstance( RapidJsonWriter& writer, void* instance, const MetaStruct* structure, Object* object )
 {
 #if PERSIST_ARCHIVE_VERBOSE
 	Log::Print( TXT( "Serializing %s\n" ), structure->m_Name );
@@ -145,7 +150,7 @@ void ArchiveWriterJson::SerializeInstance( void* instance, const MetaStruct* str
 		}
 	}
 
-	m_Writer.StartObject();
+	writer.StartObject();
 	object->PreSerialize( NULL );
 
 	DynamicArray< const Field* >::ConstIterator itr = fields.Begin();
@@ -154,53 +159,53 @@ void ArchiveWriterJson::SerializeInstance( void* instance, const MetaStruct* str
 	{
 		const Field* field = *itr;
 		object->PreSerialize( field );
-		SerializeField( instance, field, object );
+		SerializeField( writer, instance, field, object );
 		object->PostSerialize( field );
 	}
 
 	object->PostSerialize( NULL );
-	m_Writer.EndObject();
+	writer.EndObject();
 }
 
-void ArchiveWriterJson::SerializeField( void* instance, const Field* field, Object* object )
+void ArchiveWriterJson::SerializeField( RapidJsonWriter& writer, void* instance, const Field* field, Object* object )
 {
 #if PERSIST_ARCHIVE_VERBOSE
 	Log::Print(TXT("Serializing field %s\n"), field->m_Name);
 #endif
 
 	// write the actual string
-	m_Writer.String( field->m_Name );
+	writer.String( field->m_Name );
 
 	if ( field->m_Count > 1 )
 	{
-		m_Writer.StartArray();
+		writer.StartArray();
 
 		for ( uint32_t i=0; i<field->m_Count; ++i )
 		{
-			SerializeTranslator( Pointer ( field, instance, object, i ), field->m_Translator, field, object );
+			SerializeTranslator( writer, Pointer ( field, instance, object, i ), field->m_Translator, field, object );
 		}
 
-		m_Writer.EndArray();
+		writer.EndArray();
 	}
 	else
 	{
-		SerializeTranslator( Pointer ( field, instance, object ), field->m_Translator, field, object );
+		SerializeTranslator( writer, Pointer ( field, instance, object ), field->m_Translator, field, object );
 	}
 }
 
-void ArchiveWriterJson::SerializeTranslator( Pointer pointer, Translator* translator, const Field* field, Object* object )
+void ArchiveWriterJson::SerializeTranslator( RapidJsonWriter& writer, Pointer pointer, Translator* translator, const Field* field, Object* object )
 {
 	switch ( translator->GetMetaId() )
 	{
 	case MetaIds::PointerTranslator:
 		{
 			const ObjectPtr& pointed ( pointer.As< ObjectPtr >() );
-			if ( !Identify( pointed, NULL ) )
+			if ( pointed && !Identify( pointed, NULL ) )
 			{
-				m_Writer.StartObject();
-				m_Writer.String( pointed->GetMetaClass()->m_Name );
-				SerializeInstance( pointed, pointed->GetMetaClass(), pointed );
-				m_Writer.EndObject();
+				writer.StartObject();
+				writer.String( pointed->GetMetaClass()->m_Name );
+				SerializeInstance( writer, pointed, pointed->GetMetaClass(), pointed );
+				writer.EndObject();
 				break;
 			}
 			else
@@ -218,53 +223,53 @@ void ArchiveWriterJson::SerializeTranslator( Pointer pointer, Translator* transl
 			switch ( scalar->m_Type )
 			{
 			case ScalarTypes::Boolean:
-				m_Writer.Bool( pointer.As<bool>() );
+				writer.Bool( pointer.As<bool>() );
 				break;
 
 			case ScalarTypes::Unsigned8:
-				m_Writer.Uint( pointer.As<uint8_t>() );
+				writer.Uint( pointer.As<uint8_t>() );
 				break;
 
 			case ScalarTypes::Unsigned16:
-				m_Writer.Uint( pointer.As<uint16_t>() );
+				writer.Uint( pointer.As<uint16_t>() );
 				break;
 
 			case ScalarTypes::Unsigned32:
-				m_Writer.Uint( pointer.As<uint32_t>() );
+				writer.Uint( pointer.As<uint32_t>() );
 				break;
 
 			case ScalarTypes::Unsigned64:
-				m_Writer.Uint64( pointer.As<uint64_t>() );
+				writer.Uint64( pointer.As<uint64_t>() );
 				break;
 
 			case ScalarTypes::Signed8:
-				m_Writer.Int( pointer.As<int8_t>() );
+				writer.Int( pointer.As<int8_t>() );
 				break;
 
 			case ScalarTypes::Signed16:
-				m_Writer.Int( pointer.As<int16_t>() );
+				writer.Int( pointer.As<int16_t>() );
 				break;
 
 			case ScalarTypes::Signed32:
-				m_Writer.Int( pointer.As<int32_t>() );
+				writer.Int( pointer.As<int32_t>() );
 				break;
 
 			case ScalarTypes::Signed64:
-				m_Writer.Int64( pointer.As<int64_t>() );
+				writer.Int64( pointer.As<int64_t>() );
 				break;
 
 			case ScalarTypes::Float32:
-				m_Writer.Double( pointer.As<float32_t>() );
+				writer.Double( pointer.As<float32_t>() );
 				break;
 
 			case ScalarTypes::Float64:
-				m_Writer.Double( pointer.As<float64_t>() );
+				writer.Double( pointer.As<float64_t>() );
 				break;
 
 			case ScalarTypes::String:
 				String str;
 				scalar->Print( pointer, str, this );
-				m_Writer.String( str.GetData() );
+				writer.String( str.GetData() );
 				break;
 			}
 			break;
@@ -273,7 +278,7 @@ void ArchiveWriterJson::SerializeTranslator( Pointer pointer, Translator* transl
 	case MetaIds::StructureTranslator:
 		{
 			StructureTranslator* structure = static_cast< StructureTranslator* >( translator );
-			SerializeInstance( pointer.m_Address, structure->GetMetaStruct(), object );
+			SerializeInstance( writer, pointer.m_Address, structure->GetMetaStruct(), object );
 			break;
 		}
 
@@ -285,14 +290,14 @@ void ArchiveWriterJson::SerializeTranslator( Pointer pointer, Translator* transl
 			DynamicArray< Pointer > items;
 			set->GetItems( pointer, items );
 
-			m_Writer.StartArray();
+			writer.StartArray();
 
 			for ( DynamicArray< Pointer >::Iterator itr = items.Begin(), end = items.End(); itr != end; ++itr )
 			{
-				SerializeTranslator( *itr, itemTranslator, field, object );
+				SerializeTranslator( writer, *itr, itemTranslator, field, object );
 			}
 
-			m_Writer.EndArray();
+			writer.EndArray();
 
 			break;
 		}
@@ -305,14 +310,14 @@ void ArchiveWriterJson::SerializeTranslator( Pointer pointer, Translator* transl
 			DynamicArray< Pointer > items;
 			sequence->GetItems( pointer, items );
 
-			m_Writer.StartArray();
+			writer.StartArray();
 
 			for ( DynamicArray< Pointer >::Iterator itr = items.Begin(), end = items.End(); itr != end; ++itr )
 			{
-				SerializeTranslator( *itr, itemTranslator, field, object );
+				SerializeTranslator( writer, *itr, itemTranslator, field, object );
 			}
 
-			m_Writer.EndArray();
+			writer.EndArray();
 
 			break;
 		}
@@ -326,17 +331,17 @@ void ArchiveWriterJson::SerializeTranslator( Pointer pointer, Translator* transl
 			DynamicArray< Pointer > keys, values;
 			association->GetItems( pointer, keys, values );
 
-			m_Writer.StartObject();
+			writer.StartObject();
 
 			for ( DynamicArray< Pointer >::Iterator keyItr = keys.Begin(), valueItr = values.Begin(), keyEnd = keys.End(), valueEnd = values.End();
 				keyItr != keyEnd && valueItr != valueEnd;
 				++keyItr, ++valueItr )
 			{
-				SerializeTranslator( *keyItr, keyTranslator, field, object );
-				SerializeTranslator( *valueItr, valueTranslator, field, object );
+				SerializeTranslator( writer, *keyItr, keyTranslator, field, object );
+				SerializeTranslator( writer, *valueItr, valueTranslator, field, object );
 			}
 
-			m_Writer.EndObject();
+			writer.EndObject();
 
 			break;
 		}
@@ -362,6 +367,12 @@ void ArchiveReaderJson::ReadFromStream( Stream& stream, DynamicArray< ObjectPtr 
 	ArchiveReaderJson archive( &stream, resolver, flags );
 	archive.Read( objects );
 	archive.Close();
+}
+
+void ArchiveReaderJson::ReadFromJson( rapidjson::Value& value, const ObjectPtr& object, ObjectResolver* resolver, uint32_t flags )
+{
+	ArchiveReaderJson archive( NULL, resolver, flags );
+	archive.DeserializeInstance( value, object.Ptr(), object->GetMetaClass(), object );
 }
 
 ArchiveReaderJson::ArchiveReaderJson( const FilePath& path, ObjectResolver* resolver, uint32_t flags )
