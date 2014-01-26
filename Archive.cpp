@@ -472,7 +472,7 @@ void ArchiveReader::Resolve()
 		if ( proxy )
 		{
 			Object* found = m_Objects.GetElement( itr->m_Index );
-			if ( HELIUM_VERIFY( found ) )
+			if ( found )
 			{
 				if ( !found->IsA( itr->m_PointerClass ) )
 				{

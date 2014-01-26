@@ -92,16 +92,25 @@ void ArchiveWriterJson::Write( const ObjectPtr* objects, size_t count )
 	for ( size_t index = 0; index < m_Objects.GetSize(); ++index )
 	{
 		Object* object = m_Objects.GetElement( index );
-		const MetaClass* objectClass = object->GetMetaClass();
 
-		writer.StartObject();
-		writer.String( objectClass->m_Name );
-		SerializeInstance( writer, object, objectClass, object );
-		writer.EndObject();
+		if (object)
+		{
+			const MetaClass* objectClass = object->GetMetaClass();
 
-		info.m_State = ArchiveStates::ObjectProcessed;
-		info.m_Progress = (int)(((float)(index) / (float)m_Objects.GetSize()) * 100.0f);
-		e_Status.Raise( info );
+			writer.StartObject();
+			writer.String( objectClass->m_Name );
+			SerializeInstance( writer, object, objectClass, object );
+			writer.EndObject();
+
+			info.m_State = ArchiveStates::ObjectProcessed;
+			info.m_Progress = (int)(((float)(index) / (float)m_Objects.GetSize()) * 100.0f);
+			e_Status.Raise( info );
+		}
+		else
+		{
+			m_Writer.StartObject();
+			m_Writer.EndObject();
+		}
 	}
 
 	// end top level array
@@ -520,12 +529,13 @@ bool ArchiveReaderJson::ReadNext( Reflect::ObjectPtr& object, size_t index )
 	if ( HELIUM_VERIFY( value.IsObject() ) )
 	{
 		rapidjson::Value::Member* member = value.MemberBegin();
-		if ( HELIUM_VERIFY( member != value.MemberEnd() ) )
+
+		if ( member != value.MemberEnd() )
 		{
+			String typeStr;
 			uint32_t objectClassCrc = 0;
 			if ( member->name.IsString() )
 			{
-				String typeStr;
 				typeStr = member->name.GetString();
 				objectClassCrc = Helium::Crc32( typeStr.GetData() );
 			}
@@ -534,6 +544,14 @@ bool ArchiveReaderJson::ReadNext( Reflect::ObjectPtr& object, size_t index )
 			if ( objectClassCrc != 0 )
 			{
 				objectClass = Registry::GetInstance()->GetMetaClass( objectClassCrc );
+				if ( !objectClass )
+				{
+					HELIUM_TRACE(
+						TraceLevels::Warning,
+						"ArchiveReaderJson::ReadNext - Could not find class '%s' (CRC-32 = %" PRIu32 ")\n",
+						*typeStr,
+						objectClassCrc);
+				}
 			}
 			
 			if ( !object && objectClass )
