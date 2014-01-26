@@ -108,8 +108,8 @@ void ArchiveWriterJson::Write( const ObjectPtr* objects, size_t count )
 		}
 		else
 		{
-			m_Writer.StartObject();
-			m_Writer.EndObject();
+			writer.StartObject();
+			writer.EndObject();
 		}
 	}
 
