@@ -140,7 +140,7 @@ namespace Helium
 
 		protected:
 			virtual void Write( const Reflect::ObjectPtr* objects, size_t count ) = 0;
-			virtual bool Identify( Reflect::Object* object, Name& identity ) HELIUM_OVERRIDE;
+			virtual bool Identify( const Reflect::ObjectPtr& object, Name* identity ) HELIUM_OVERRIDE;
 
 			DynamicArray< Reflect::ObjectPtr > m_Objects;
 			Reflect::ObjectIdentifier*         m_Identifier;

@@ -192,10 +192,26 @@ void ArchiveWriterJson::SerializeTranslator( Pointer pointer, Translator* transl
 {
 	switch ( translator->GetMetaId() )
 	{
+	case MetaIds::PointerTranslator:
+		{
+			const ObjectPtr& pointed ( pointer.As< ObjectPtr >() );
+			if ( !Identify( pointed, NULL ) )
+			{
+				m_Writer.StartObject();
+				m_Writer.String( pointed->GetMetaClass()->m_Name );
+				SerializeInstance( pointed, pointed->GetMetaClass(), pointed );
+				m_Writer.EndObject();
+				break;
+			}
+			else
+			{
+				// fall through!!
+			}
+		}
+
 	case MetaIds::ScalarTranslator:
 	case MetaIds::SimpleTranslator:
 	case MetaIds::EnumerationTranslator:
-	case MetaIds::PointerTranslator:
 	case MetaIds::TypeTranslator:
 		{
 			ScalarTranslator* scalar = static_cast< ScalarTranslator* >( translator );
@@ -716,7 +732,39 @@ void ArchiveReaderJson::DeserializeTranslator( rapidjson::Value& value, Pointer 
 	}
 	else if ( value.IsObject() )
 	{
-		if ( translator->GetMetaId() == MetaIds::StructureTranslator )
+		if ( translator->GetMetaId() == MetaIds::PointerTranslator )
+		{
+			ObjectPtr& object ( pointer.As<ObjectPtr>() );
+
+			rapidjson::Value::Member* member = value.MemberBegin();
+			if ( HELIUM_VERIFY( member != value.MemberEnd() ) )
+			{
+				uint32_t objectClassCrc = 0;
+				if ( member->name.IsString() )
+				{
+					String typeStr;
+					typeStr = member->name.GetString();
+					objectClassCrc = Helium::Crc32( typeStr.GetData() );
+				}
+
+				const MetaClass* objectClass = NULL;
+				if ( objectClassCrc != 0 )
+				{
+					objectClass = Registry::GetInstance()->GetMetaClass( objectClassCrc );
+				}
+			
+				if ( !object && objectClass )
+				{
+					object = objectClass->m_Creator();
+				}
+
+				if ( object.ReferencesObject() )
+				{
+					DeserializeInstance( member->value, object, object->GetMetaClass(), object );
+				}
+			}
+		}
+		else if ( translator->GetMetaId() == MetaIds::StructureTranslator )
 		{
 			StructureTranslator* structure = static_cast< StructureTranslator* >( translator );
 			DeserializeInstance( value, pointer.m_Address,  structure->GetMetaStruct(), object );

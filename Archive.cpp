@@ -199,34 +199,45 @@ ArchiveMode ArchiveWriter::GetMode() const
 	return ArchiveModes::Write;
 }
 
-bool ArchiveWriter::Identify( Object* object, Name& identity )
+bool ArchiveWriter::Identify( const ObjectPtr& object, Name* identity )
 {
-	if ( !m_Identifier || !m_Identifier->Identify( object, identity ))
+	if ( m_Identifier )
 	{
-		size_t index = Invalid< size_t >();
-		for ( DynamicArray< ObjectPtr >::ConstIterator itr = m_Objects.Begin(), end = m_Objects.End(); itr != end; ++itr )
-		{
-			if ( itr->Ptr() == object )
-			{
-				index = m_Objects.GetIndex( itr );
-				break;
-			}
-		}
-
-		if ( index == Invalid< size_t >() )
-		{
-			index = m_Objects.GetSize();
-
-			// this will cause it to be written after the current object-in-progress (see Write)
-			m_Objects.Push( object );
-		}
-
-		String str;
-		str.Format( "%d", index );
-		identity.Set( str );
+		return m_Identifier->Identify( object, identity );
 	}
 
-	return true;
+	bool strictOwnership = reinterpret_cast< RefCountProxy< Reflect::Object >* >( object.GetProxy() )->GetStrongRefCount() == 1;
+	if ( !strictOwnership )
+	{
+		if ( identity )
+		{
+			size_t index = Invalid< size_t >();
+			for ( DynamicArray< ObjectPtr >::ConstIterator itr = m_Objects.Begin(), end = m_Objects.End(); itr != end; ++itr )
+			{
+				if ( itr->Ptr() == object )
+				{
+					index = m_Objects.GetIndex( itr );
+					break;
+				}
+			}
+
+			if ( index == Invalid< size_t >() )
+			{
+				index = m_Objects.GetSize();
+
+				// this will cause it to be written after the current object-in-progress (see Write)
+				m_Objects.Push( object );
+			}
+
+			String str;
+			str.Format( "%d", index );
+			identity->Set( str );
+		}
+
+		return true;
+	}
+
+	return false;
 }
 
 SmartPtr< ArchiveReader > ArchiveReader::GetReader( const FilePath& path, ObjectResolver* resolver, ArchiveType archiveType )
