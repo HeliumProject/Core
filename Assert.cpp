@@ -95,29 +95,28 @@ bool Assert::Trigger(
 		}
 	}
 
-	HELIUM_TRACE( TraceLevels::Error, TXT( "%s\n" ), messageText );
-
-#if HELIUM_OS_WIN   
-#if !HELIUM_RELEASE && !HELIUM_PROFILE
+#if HELIUM_ENABLE_TRACE
+	Helium::Trace::Output( TraceLevels::Error, TXT( "%s\n" ), messageText );
+# if HELIUM_OS_WIN
+#  if !HELIUM_RELEASE && !HELIUM_PROFILE
     if (Helium::GetSymbolsInitialized())
     {
         std::vector<uintptr_t> trace;
         Helium::GetStackTrace( trace );
-
         std::string str = TXT("Stack Trace:\n");
         Helium::TranslateStackTrace( trace, str );
-
-        HELIUM_TRACE( TraceLevels::Error, str.c_str() );
+        Helium::Trace::Output( TraceLevels::Error, str.c_str() );
     }
     else
     {
         std::string str = TXT("Stack trace unavailable - symbols not loaded\n");
-        HELIUM_TRACE( TraceLevels::Error, str.c_str() );
+        Helium::Trace::Output( TraceLevels::Error, str.c_str() );
     }
-#else
+#  else
     std::string str = TXT("Stack trace unavailable - symbols not loaded\n");
     HELIUM_TRACE( TraceLevels::Error, str.c_str() );
-#endif
+#  endif
+# endif
 #endif
 
 	// Present the assert message and get how we should proceed.

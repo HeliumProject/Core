@@ -76,7 +76,7 @@ namespace Helium
 ///
 /// @param[in] LEVEL  Trace level.
 /// @param[in] ...    Message.  This can be a "printf"-style format string and arguments or a Helium::String.
-#define HELIUM_TRACE( LEVEL, ... ) Helium::Trace::Output( LEVEL, __VA_ARGS__ )
+#define HELIUM_TRACE( LEVEL, ... ) { Helium::Trace::Output( LEVEL, __VA_ARGS__ ); HELIUM_ASSERT( LEVEL != Helium::TraceLevels::Error ); }
 
 /// Write out a formatted message to the trace output using a variable argument list.
 ///
@@ -84,7 +84,7 @@ namespace Helium
 /// @param[in] FORMAT    Format string.
 /// @param[in] ARG_LIST  Variable argument list initialized to the format arguments (va_start() should have already been
 ///                      called.
-#define HELIUM_TRACE_VA( LEVEL, FORMAT, ARG_LIST ) Helium::Trace::OutputVa( LEVEL, FORMAT, ARG_LIST )
+#define HELIUM_TRACE_VA( LEVEL, FORMAT, ARG_LIST ) { Helium::Trace::OutputVa( LEVEL, FORMAT, ARG_LIST ); HELIUM_ASSERT( LEVEL != Helium::TraceLevels::Error ); }
 
 /// Set the current trace level.
 ///
