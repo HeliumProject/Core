@@ -15,79 +15,79 @@ using namespace Helium::RPC;
 //#define RPC_DEBUG_MSG
 
 Interface::Interface(const char* name)
-: m_Name (name)
-, m_Host (NULL)
-, m_InvokerCount (0)
+	: m_Name (name)
+	, m_Host (NULL)
+	, m_InvokerCount (0)
 {
 
 }
 
 void Interface::AddInvoker(InvokerPtr invoker)
 {
-    if (m_InvokerCount >= MAX_INVOKERS)
-    {
-        HELIUM_BREAK();
-        return;
-    }
+	if (m_InvokerCount >= MAX_INVOKERS)
+	{
+		HELIUM_BREAK();
+		return;
+	}
 
-    m_Invokers[m_InvokerCount++] = invoker;
+	m_Invokers[m_InvokerCount++] = invoker;
 }
 
 Invoker* Interface::GetInvoker(const char* name)
 {
-    for ( uint32_t i=0; i<m_InvokerCount; i++ )
-    {
-        if ( !strcmp( m_Invokers[i]->GetName(), name ) )
-        {
-            return m_Invokers[i];
-        }
-    }
+	for ( uint32_t i=0; i<m_InvokerCount; i++ )
+	{
+		if ( !strcmp( m_Invokers[i]->GetName(), name ) )
+		{
+			return m_Invokers[i];
+		}
+	}
 
-    return NULL;
+	return NULL;
 }
 
 Host::Stack::Stack()
 {
-    Reset();
+	Reset();
 }
 
 void Host::Stack::Reset()
 {
-    memset(m_Frames, 0, sizeof(Host::Frame) * MAX_STACK);
-    m_Size = 0;
+	memset(m_Frames, 0, sizeof(Host::Frame) * MAX_STACK);
+	m_Size = 0;
 }
 
 int32_t Host::Stack::Size()
 {
-    return m_Size;
+	return m_Size;
 }
 
 Host::Frame* Host::Stack::Push()
 {
-    HELIUM_ASSERT(m_Size < MAX_STACK);
+	HELIUM_ASSERT(m_Size < MAX_STACK);
 
-    m_Size++;
+	m_Size++;
 
-    return Top();
+	return Top();
 }
 
 Host::Frame* Host::Stack::Top()
 {
-    HELIUM_ASSERT(m_Size > 0);
+	HELIUM_ASSERT(m_Size > 0);
 
-    return &m_Frames[m_Size-1];
+	return &m_Frames[m_Size-1];
 }
 
 void Host::Stack::Pop()
 {
-    memset(Top(), 0, sizeof(Host::Frame));
+	memset(Top(), 0, sizeof(Host::Frame));
 
-    m_Size--;
+	m_Size--;
 }
 
 Host::Host()
 {
-    Reset();
+	Reset();
 }
 
 Host::~Host()
@@ -97,478 +97,478 @@ Host::~Host()
 
 void Host::Reset()
 {
-    m_Connection = NULL;
-    m_ConnectionCount = 0;
+	m_Connection = NULL;
+	m_ConnectionCount = 0;
 
-    memset(m_Interfaces, 0, sizeof(Interface*) * MAX_INTERFACES);
+	memset(m_Interfaces, 0, sizeof(Interface*) * MAX_INTERFACES);
 }
 
 void Host::AddInterface(Interface* iface)
 {
-    if (m_InterfaceCount >= MAX_INTERFACES)
-    {
-        HELIUM_BREAK();
-        return;
-    }
+	if (m_InterfaceCount >= MAX_INTERFACES)
+	{
+		HELIUM_BREAK();
+		return;
+	}
 
-    m_Interfaces[m_InterfaceCount++] = iface;
+	m_Interfaces[m_InterfaceCount++] = iface;
 
-    iface->SetHost( this );
+	iface->SetHost( this );
 }
 
 Interface* Host::GetInterface(const char* name)
 {
-    for ( uint32_t i=0; i<m_InterfaceCount; i++ )
-    {
-        if ( !strcmp( m_Interfaces[i]->GetName(), name ) )
-        {
-            return m_Interfaces[i];
-        }
-    }
+	for ( uint32_t i=0; i<m_InterfaceCount; i++ )
+	{
+		if ( !strcmp( m_Interfaces[i]->GetName(), name ) )
+		{
+			return m_Interfaces[i];
+		}
+	}
 
-    return NULL;
+	return NULL;
 }
 
 void Host::SetConnection(IPC::Connection* con)
 {
-    m_Connection = con;
-    m_ConnectionCount = m_Connection->GetConnectCount();
+	m_Connection = con;
+	m_ConnectionCount = m_Connection->GetConnectCount();
 }
 
 IPC::Message* Host::Create(Invoker* invoker, uint32_t size, int32_t transaction)
 {
-#pragma TODO("Pack the invoker and interface name into the message data")
-    invoker->GetName();
-    invoker->GetInterface()->GetName();
+	// TODO: Pack the invoker and interface name into the message data
+	invoker->GetName();
+	invoker->GetInterface()->GetName();
 
-    if (transaction != 0)
-    {
-        return m_Connection->CreateMessage(0, size, transaction);
-    }
-    else
-    {
-        return m_Connection->CreateMessage(0, size);
-    }
+	if (transaction != 0)
+	{
+		return m_Connection->CreateMessage(0, size, transaction);
+	}
+	else
+	{
+		return m_Connection->CreateMessage(0, size);
+	}
 }
 
 void Host::Emit(Invoker* invoker, Args* args, uint32_t size, SwizzleFunc swizzler)
 {
-    if (Connected())
-    {
-        if (m_ConnectionCount != m_Connection->GetConnectCount())
-        {
+	if (Connected())
+	{
+		if (m_ConnectionCount != m_Connection->GetConnectCount())
+		{
 #ifdef RPC_DEBUG
-            printf("RPC::Connection cycled, resetting stack\n");
+			printf("RPC::Connection cycled, resetting stack\n");
 #endif
-            m_ConnectionCount = m_Connection->GetConnectCount();
-            m_Stack.Reset();
-        }
+			m_ConnectionCount = m_Connection->GetConnectCount();
+			m_Stack.Reset();
+		}
 
-        uint32_t size = 0;
+		uint32_t size = 0;
 
-        if (args != NULL)
-        {
-            HELIUM_ASSERT(size > 0);
-            size += size;
-        }
+		if (args != NULL)
+		{
+			HELIUM_ASSERT(size > 0);
+			size += size;
+		}
 
-        if (args->m_Payload != NULL)
-        {
-            HELIUM_ASSERT(args->m_PayloadSize > 0);
-            size += args->m_PayloadSize;
-        }
+		if (args->m_Payload != NULL)
+		{
+			HELIUM_ASSERT(args->m_PayloadSize > 0);
+			size += args->m_PayloadSize;
+		}
 
-        IPC::Message* message = Create(invoker, size);
+		IPC::Message* message = Create(invoker, size);
 
-        uint8_t* ptr = message->GetData();
+		uint8_t* ptr = message->GetData();
 
-        if (args != NULL)
-        {
-            swizzler(args);
+		if (args != NULL)
+		{
+			swizzler(args);
 
-            memcpy(ptr, args, size);
-            ptr += size;
+			memcpy(ptr, args, size);
+			ptr += size;
 
-            swizzler(args);
-        }
+			swizzler(args);
+		}
 
-        if (args->m_Payload != NULL)
-        {
-            memcpy(ptr, args->m_Payload, args->m_PayloadSize);
-            ptr += args->m_PayloadSize;
-        }
+		if (args->m_Payload != NULL)
+		{
+			memcpy(ptr, args->m_Payload, args->m_PayloadSize);
+			ptr += args->m_PayloadSize;
+		}
 
-        HELIUM_ASSERT((uint32_t)(ptr - message->GetData()) == size);
+		HELIUM_ASSERT((uint32_t)(ptr - message->GetData()) == size);
 
 #ifdef RPC_DEBUG_MSG
-        uint32_t msg_id = message->GetID();
-        uint32_t msg_size = message->GetSize();
+		uint32_t msg_id = message->GetID();
+		uint32_t msg_size = message->GetSize();
 #endif
 
-        int32_t msg_transaction = message->GetTransaction();
-        if (m_Connection->Send(message)!=IPC::ConnectionStates::Active)
-        {
-            delete message;
-            return;
-        }
+		int32_t msg_transaction = message->GetTransaction();
+		if (m_Connection->Send(message)!=IPC::ConnectionStates::Active)
+		{
+			delete message;
+			return;
+		}
 
 #ifdef RPC_DEBUG_MSG
-        printf("RPC::Put message id 0x%08x, size %d, transaction %d\n", msg_id, msg_size, msg_transaction);
+		printf("RPC::Put message id 0x%08x, size %d, transaction %d\n", msg_id, msg_size, msg_transaction);
 #endif
 
-        message = NULL; // assume its GONE
+		message = NULL; // assume its GONE
 
-        if (args->m_Flags & RPC::Flags::NonBlocking)
-        {
+		if (args->m_Flags & RPC::Flags::NonBlocking)
+		{
 #ifdef RPC_DEBUG
-            printf("RPC::Emitting async transaction %d\n", msg_transaction);
+			printf("RPC::Emitting async transaction %d\n", msg_transaction);
 #endif
-        }
-        else
-        {
-            // create frame for call
-            Frame* frame = m_Stack.Push();
+		}
+		else
+		{
+			// create frame for call
+			Frame* frame = m_Stack.Push();
 
-            // set the transaction we are blocking on
-            frame->m_ReplyTransaction = msg_transaction;
+			// set the transaction we are blocking on
+			frame->m_ReplyTransaction = msg_transaction;
 
 #ifdef RPC_DEBUG
-            printf("RPC::Emitting transaction %d, stack size %d\n", msg_transaction, m_Stack.Size());
+			printf("RPC::Emitting transaction %d, stack size %d\n", msg_transaction, m_Stack.Size());
 #endif
 
-            // process until we retrieve it
-            frame->m_Replied = false;
+			// process until we retrieve it
+			frame->m_Replied = false;
 
-            // process messages until we receive our reply
-            while (Process(true) && !frame->m_Replied);
+			// process messages until we receive our reply
+			while (Process(true) && !frame->m_Replied);
 
-            // if we did not get our reply
-            if (!frame->m_Replied)
-            {
+			// if we did not get our reply
+			if (!frame->m_Replied)
+			{
 #ifdef RPC_DEBUG
-                printf("RPC::Emit failed for transaction %d, stack size %d\n", msg_transaction, m_Stack.Size());
+				printf("RPC::Emit failed for transaction %d, stack size %d\n", msg_transaction, m_Stack.Size());
 #endif
 
-                // if we didn't reset and the call timed out, pop
-                if (m_Stack.Size())
-                {
-                    m_Stack.Pop();
-                }
-            }
-            else
-            {
+				// if we didn't reset and the call timed out, pop
+				if (m_Stack.Size())
+				{
+					m_Stack.Pop();
+				}
+			}
+			else
+			{
 #ifdef RPC_DEBUG
-                printf("RPC::Emit success for transaction %d, stack size %d\n", msg_transaction, m_Stack.Size());
+				printf("RPC::Emit success for transaction %d, stack size %d\n", msg_transaction, m_Stack.Size());
 #endif
 
-                size = 0;
-                ptr = frame->m_ReplyData;
+				size = 0;
+				ptr = frame->m_ReplyData;
 
-                if (args != NULL)
-                {
-                    HELIUM_ASSERT(size > 0);
-                    size += size;
-                }
+				if (args != NULL)
+				{
+					HELIUM_ASSERT(size > 0);
+					size += size;
+				}
 
-                if (args->m_Payload != NULL)
-                {
-                    HELIUM_ASSERT(args->m_PayloadSize > 0);
-                    size += args->m_PayloadSize;
-                }
+				if (args->m_Payload != NULL)
+				{
+					HELIUM_ASSERT(args->m_PayloadSize > 0);
+					size += args->m_PayloadSize;
+				}
 
-                // do ref args processing here
-                if (args->m_Flags & RPC::Flags::ReplyWithArgs && args != NULL)
-                {
-                    swizzler(ptr);
+				// do ref args processing here
+				if (args->m_Flags & RPC::Flags::ReplyWithArgs && args != NULL)
+				{
+					swizzler(ptr);
 
-                    // copy our data BACK
-                    memcpy(args, ptr, size);
+					// copy our data BACK
+					memcpy(args, ptr, size);
 
-                    ptr += size;
-                }
+					ptr += size;
+				}
 
-                // do ref payload processing here
-                if (args->m_Flags & RPC::Flags::ReplyWithPayload && args->m_Payload != NULL)
-                {
-                    // copy our data BACK
-                    memcpy(args->m_Payload, ptr, args->m_PayloadSize);
-                    ptr += args->m_PayloadSize;
-                }
+				// do ref payload processing here
+				if (args->m_Flags & RPC::Flags::ReplyWithPayload && args->m_Payload != NULL)
+				{
+					// copy our data BACK
+					memcpy(args->m_Payload, ptr, args->m_PayloadSize);
+					ptr += args->m_PayloadSize;
+				}
 
-                // clean up our reply message's memory
-                delete[] frame->m_ReplyData;
+				// clean up our reply message's memory
+				delete[] frame->m_ReplyData;
 
-                // call complete, pop
-                m_Stack.Pop();
-            }
-        }
-    }
+				// call complete, pop
+				m_Stack.Pop();
+			}
+		}
+	}
 }
 
 bool Host::Invoke(IPC::Message* msg)
 {
-#pragma TODO("Unpack the invoker and interface name from the message data")
-    const char* invokerName = NULL;
-    const char* interfaceName = NULL;
+	// TODO: Unpack the invoker and interface name from the message data
+	const char* invokerName = NULL;
+	const char* interfaceName = NULL;
 
-    // find the interface
-    Interface* iface = GetInterface(interfaceName);
-    if (iface == NULL)
-    {
-        printf("RPC::Unable to find interface '%s'\n", interfaceName);
-        delete msg;
-        return true;
-    }
+	// find the interface
+	Interface* iface = GetInterface(interfaceName);
+	if (iface == NULL)
+	{
+		printf("RPC::Unable to find interface '%s'\n", interfaceName);
+		delete msg;
+		return true;
+	}
 
-    // find the invoker
-    Invoker* invoker = iface->GetInvoker(invokerName);
-    if (invoker == NULL)
-    {
-        printf("RPC::Unable to find invoker '%s' in interface '%s'\n", invokerName, interfaceName);
-        delete msg;
-        return true;
-    }
+	// find the invoker
+	Invoker* invoker = iface->GetInvoker(invokerName);
+	if (invoker == NULL)
+	{
+		printf("RPC::Unable to find invoker '%s' in interface '%s'\n", invokerName, interfaceName);
+		delete msg;
+		return true;
+	}
 
-    // get our frame from the top of the stack
-    Frame* frame = m_Stack.Top();
+	// get our frame from the top of the stack
+	Frame* frame = m_Stack.Top();
 
-    HELIUM_ASSERT(frame->m_Message == NULL);
-    frame->m_Message = msg;
+	HELIUM_ASSERT(frame->m_Message == NULL);
+	frame->m_Message = msg;
 
-    // call the function
-    frame->m_MessageTaken = false;
-    invoker->Invoke(msg->GetData(), msg->GetSize());
+	// call the function
+	frame->m_MessageTaken = false;
+	invoker->Invoke(msg->GetData(), msg->GetSize());
 
-    HELIUM_ASSERT(frame->m_Message != NULL);
-    frame->m_Message = NULL;
+	HELIUM_ASSERT(frame->m_Message != NULL);
+	frame->m_Message = NULL;
 
-    Args* args = (Args*)msg->GetData();
+	Args* args = (Args*)msg->GetData();
 
-    if (args->m_Flags & RPC::Flags::NonBlocking)
-    {
-        if (!frame->m_MessageTaken)
-        {
-            delete msg;
-        }
+	if (args->m_Flags & RPC::Flags::NonBlocking)
+	{
+		if (!frame->m_MessageTaken)
+		{
+			delete msg;
+		}
 
-        return true; // async call, we are done
-    }
+		return true; // async call, we are done
+	}
 
-    // our reply
-    IPC::Message* reply = NULL;
+	// our reply
+	IPC::Message* reply = NULL;
 
-    // if we have data, and a reference args or payload
-    if (msg->GetSize() > 0 && args->m_Flags & (RPC::Flags::ReplyWithArgs | RPC::Flags::ReplyWithPayload))
-    {
-        // total size of reply
-        uint32_t size = 0;
+	// if we have data, and a reference args or payload
+	if (msg->GetSize() > 0 && args->m_Flags & (RPC::Flags::ReplyWithArgs | RPC::Flags::ReplyWithPayload))
+	{
+		// total size of reply
+		uint32_t size = 0;
 
-        // size of args section
-        uint32_t argSize = invoker->GetArgsSize();
+		// size of args section
+		uint32_t argSize = invoker->GetArgsSize();
 
-        // size of payload section
-        uint32_t payload_size = msg->GetSize() - argSize;
+		// size of payload section
+		uint32_t payload_size = msg->GetSize() - argSize;
 
-        // if we have a ref args
-        if (args->m_Flags & RPC::Flags::ReplyWithArgs)
-        {
-            // alloc for args block
-            size += argSize;
-        }
+		// if we have a ref args
+		if (args->m_Flags & RPC::Flags::ReplyWithArgs)
+		{
+			// alloc for args block
+			size += argSize;
+		}
 
-        // if we have a ref payload
-        if (args->m_Flags & RPC::Flags::ReplyWithPayload)
-        {
-            // alloc for payload block
-            size += payload_size;
-        }
+		// if we have a ref payload
+		if (args->m_Flags & RPC::Flags::ReplyWithPayload)
+		{
+			// alloc for payload block
+			size += payload_size;
+		}
 
-        // create message
-        reply = Create(invoker, size, msg->GetTransaction());
+		// create message
+		reply = Create(invoker, size, msg->GetTransaction());
 
-        // where to write
-        uint8_t* ptr = reply->GetData();
+		// where to write
+		uint8_t* ptr = reply->GetData();
 
-        // if we have a ref args
-        if (args->m_Flags & RPC::Flags::ReplyWithArgs)
-        {
-            invoker->Swizzle( msg->GetData() );
+		// if we have a ref args
+		if (args->m_Flags & RPC::Flags::ReplyWithArgs)
+		{
+			invoker->Swizzle( msg->GetData() );
 
-            // write to ptr
-            memcpy(ptr, msg->GetData(), argSize);  
+			// write to ptr
+			memcpy(ptr, msg->GetData(), argSize);  
 
-            // incr ptr by amount written
-            ptr += argSize;
-        }
+			// incr ptr by amount written
+			ptr += argSize;
+		}
 
-        // if we have a ref payload
-        if (args->m_Flags & RPC::Flags::ReplyWithPayload)
-        {
-            // write to ptr
-            memcpy(ptr, msg->GetData() + argSize, payload_size);
+		// if we have a ref payload
+		if (args->m_Flags & RPC::Flags::ReplyWithPayload)
+		{
+			// write to ptr
+			memcpy(ptr, msg->GetData() + argSize, payload_size);
 
-            // incr ptr by amount written
-            ptr += payload_size;
-        }
+			// incr ptr by amount written
+			ptr += payload_size;
+		}
 
-        // assert we did not overrun message size
-        HELIUM_ASSERT((uint32_t)(ptr - reply->GetData()) == size);
-    }
-    else // no data, or no ref args or payload
-    {
-        // just create an empty reply, the other side is blocking
-        reply = Create(invoker, 0, msg->GetTransaction());
-    }
+		// assert we did not overrun message size
+		HELIUM_ASSERT((uint32_t)(ptr - reply->GetData()) == size);
+	}
+	else // no data, or no ref args or payload
+	{
+		// just create an empty reply, the other side is blocking
+		reply = Create(invoker, 0, msg->GetTransaction());
+	}
 
-    if (m_Connection->Send(reply)!= IPC::ConnectionStates::Active)
-    {
-        delete reply;
-    }
+	if (m_Connection->Send(reply)!= IPC::ConnectionStates::Active)
+	{
+		delete reply;
+	}
 
 #ifdef RPC_DEBUG_MSG
-    printf("RPC::Put message id 0x%08x, size %d, transaction %d\n", reply->GetID(), reply->GetSize(), reply->GetTransaction());
+	printf("RPC::Put message id 0x%08x, size %d, transaction %d\n", reply->GetID(), reply->GetSize(), reply->GetTransaction());
 #endif
 
-    if (!frame->m_MessageTaken)
-    {
-        delete msg;
-    }
+	if (!frame->m_MessageTaken)
+	{
+		delete msg;
+	}
 
-    return true;
+	return true;
 }
 
 uint8_t* Host::TakeData()
 {
-    Frame* frame = m_Stack.Top();
+	Frame* frame = m_Stack.Top();
 
-    frame->m_MessageTaken = true;
+	frame->m_MessageTaken = true;
 
-    return frame->m_Message->GetData();
+	return frame->m_Message->GetData();
 }
 
 bool Host::Connected()
 {
-    if (m_Connection == NULL)
-    {
-        return false; // no connection to use
-    }
+	if (m_Connection == NULL)
+	{
+		return false; // no connection to use
+	}
 
-    if (m_Connection->GetState()!=IPC::ConnectionStates::Active)
-    {
-        return false; // no connection to use
-    }
+	if (m_Connection->GetState()!=IPC::ConnectionStates::Active)
+	{
+		return false; // no connection to use
+	}
 
-    return true;
+	return true;
 }
 
 bool Host::Dispatch()
 {
-    return Process(false);
+	return Process(false);
 }
 
 bool Host::Process(bool wait)
 {
-    bool result = true;
+	bool result = true;
 
-    if (Connected())
-    {
-        if (m_ConnectionCount != m_Connection->GetConnectCount())
-        {
+	if (Connected())
+	{
+		if (m_ConnectionCount != m_Connection->GetConnectCount())
+		{
 #ifdef RPC_DEBUG
-            printf("RPC::Connection cycled, resetting stack\n");
+			printf("RPC::Connection cycled, resetting stack\n");
 #endif
-            m_ConnectionCount = m_Connection->GetConnectCount();
-            m_Stack.Reset();
-        }
+			m_ConnectionCount = m_Connection->GetConnectCount();
+			m_Stack.Reset();
+		}
 
-        if (m_Connection->GetState() != IPC::ConnectionStates::Active)
-        {
-            result = false;
-        }
+		if (m_Connection->GetState() != IPC::ConnectionStates::Active)
+		{
+			result = false;
+		}
 
-        while (result)
-        {
-            IPC::Message* msg = NULL;
-            IPC::ConnectionState state = m_Connection->Receive(&msg, wait);
+		while (result)
+		{
+			IPC::Message* msg = NULL;
+			IPC::ConnectionState state = m_Connection->Receive(&msg, wait);
 
-            if (state != IPC::ConnectionStates::Active || msg == NULL)
-            {
-                result = false;
-                break;
-            }
+			if (state != IPC::ConnectionStates::Active || msg == NULL)
+			{
+				result = false;
+				break;
+			}
 
 #ifdef RPC_DEBUG_MSG
-            printf("RPC::Got message id 0x%08x, size %d, transaction %d\n", msg->GetID(), msg->GetSize(), msg->GetTransaction());
+			printf("RPC::Got message id 0x%08x, size %d, transaction %d\n", msg->GetID(), msg->GetSize(), msg->GetTransaction());
 #endif
 
-            bool is_reply = m_Connection->CreatedMessage(msg->GetTransaction());
-            if (is_reply && m_Stack.Size() > 0)
-            {
-                Frame* top = m_Stack.Top();
+			bool is_reply = m_Connection->CreatedMessage(msg->GetTransaction());
+			if (is_reply && m_Stack.Size() > 0)
+			{
+				Frame* top = m_Stack.Top();
 
-                bool is_current = msg->GetTransaction() == top->m_ReplyTransaction;
-                if (is_current)
-                {
+				bool is_current = msg->GetTransaction() == top->m_ReplyTransaction;
+				if (is_current)
+				{
 #ifdef RPC_DEBUG
-                    printf("RPC::Got reply to transaction %d\n", msg->GetTransaction());
+					printf("RPC::Got reply to transaction %d\n", msg->GetTransaction());
 #endif
 
-                    // subsume the message into the frame
-                    top->m_Replied = true;
-                    top->m_ReplyID = msg->GetID();
-                    top->m_ReplyData = msg->TakeData();  // taking this will disconnect it from the message, making delete below *safe*
-                    top->m_ReplySize = msg->GetSize();
+					// subsume the message into the frame
+					top->m_Replied = true;
+					top->m_ReplyID = msg->GetID();
+					top->m_ReplyData = msg->TakeData();  // taking this will disconnect it from the message, making delete below *safe*
+					top->m_ReplySize = msg->GetSize();
 
-                    // free msg
-                    delete msg;
+					// free msg
+					delete msg;
 
-                    // we have our reply, break out of processing messages
-                    break;
-                }
-                else
-                {
-                    printf("RPC::Got reply to transaction %d, however its not a reply for the top of the stack (stack size: %d)\n", msg->GetTransaction(), m_Stack.Size());
-                }
-            }
-            else // else this is not a reply, meaning this is a new invocation
-            {
-                int32_t size HELIUM_ASSERT_ONLY = m_Stack.Size();
+					// we have our reply, break out of processing messages
+					break;
+				}
+				else
+				{
+					printf("RPC::Got reply to transaction %d, however its not a reply for the top of the stack (stack size: %d)\n", msg->GetTransaction(), m_Stack.Size());
+				}
+			}
+			else // else this is not a reply, meaning this is a new invocation
+			{
+				int32_t size HELIUM_ASSERT_ONLY = m_Stack.Size();
 
-                // allocate a frame for this local call
-                Frame* frame = m_Stack.Push();
+				// allocate a frame for this local call
+				Frame* frame = m_Stack.Push();
 
-                frame->m_ReplyTransaction = msg->GetTransaction();
+				frame->m_ReplyTransaction = msg->GetTransaction();
 
 #ifdef RPC_DEBUG
-                printf("RPC::Pushing invocation transaction %d, stack size %d\n", frame->m_ReplyTransaction, m_Stack.Size());
+				printf("RPC::Pushing invocation transaction %d, stack size %d\n", frame->m_ReplyTransaction, m_Stack.Size());
 #endif
 
-                // the one and only call to invoke, this expects our frame to be allocated
-                if (Invoke(msg))
-                {
+				// the one and only call to invoke, this expects our frame to be allocated
+				if (Invoke(msg))
+				{
 #ifdef RPC_DEBUG
-                    printf("RPC::Popping invocation transaction %d, stack size %d\n", frame->m_ReplyTransaction, m_Stack.Size());
+					printf("RPC::Popping invocation transaction %d, stack size %d\n", frame->m_ReplyTransaction, m_Stack.Size());
 #endif
 
-                    // success, pop the call
-                    m_Stack.Pop();
+					// success, pop the call
+					m_Stack.Pop();
 
-                    HELIUM_ASSERT(size == m_Stack.Size());
-                }
-                else
-                {
-                    printf("RPC::Invocation failed, resetting stack\n");
-                    m_Stack.Reset();
-                }
-            }
-        }
-    }
-    else
-    {
-        result = false;
-    }
+					HELIUM_ASSERT(size == m_Stack.Size());
+				}
+				else
+				{
+					printf("RPC::Invocation failed, resetting stack\n");
+					m_Stack.Reset();
+				}
+			}
+		}
+	}
+	else
+	{
+		result = false;
+	}
 
-    return result;
+	return result;
 }
 
 using namespace Helium::RPC::Test;
@@ -576,11 +576,11 @@ using namespace Helium::RPC::Test;
 Test::TestInterface g_TestInterface;
 
 TestInterface::TestInterface()
-: Interface ("Test")
+	: Interface ("Test")
 {
-    Helium::Signature< TestArgs&>::Delegate delegate ( this, &TestInterface::Test );
+	Helium::Signature< TestArgs&>::Delegate delegate ( this, &TestInterface::Test );
 
-    AddInvoker( new InvokerTemplate<TestArgs> ( this, delegate ) );
+	AddInvoker( new InvokerTemplate<TestArgs> ( this, delegate ) );
 }
 
 void TestInterface::Test( TestArgs& args )
@@ -590,5 +590,5 @@ void TestInterface::Test( TestArgs& args )
 
 void RPC::Test::AddInterface( RPC::Host& host )
 {
-    host.AddInterface( &g_TestInterface );
+	host.AddInterface( &g_TestInterface );
 }

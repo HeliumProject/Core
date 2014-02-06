@@ -186,9 +186,11 @@ bool FilePath::Readable() const
 
 bool FilePath::MakePath() const
 {
-#pragma TODO( "FIXME: This seems excessive, but Helium::MakePath expects native separators" )
 	std::string dir = Directory();
+
+	// TODO: This seems excessive, but Helium::MakePath expects native separators
 	FilePath::MakeNative( dir );
+
 	return Helium::MakePath( dir.c_str() );
 }
 
