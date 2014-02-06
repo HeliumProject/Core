@@ -32,7 +32,7 @@ volatile size_t VirtualMemory::sm_bytesAllocated = 0;
 /// we can properly construct one using placement new, as dlmalloc/nedmalloc are built to deal with more basic C types.
 struct MallocMutex
 {
-    size_t buffer[ ( sizeof( Helium::Mutex ) + sizeof( size_t ) - 1 ) / sizeof( size_t ) ];
+	size_t buffer[ ( sizeof( Helium::Mutex ) + sizeof( size_t ) - 1 ) / sizeof( size_t ) ];
 };
 
 /// Mutex initialize wrapper.
@@ -42,8 +42,8 @@ struct MallocMutex
 /// @return  Zero.
 static int MallocMutexInitialize( MallocMutex* pMutex )
 {
-    new( pMutex->buffer ) Helium::Mutex;
-    return 0;
+	new( pMutex->buffer ) Helium::Mutex;
+	return 0;
 }
 
 /// Mutex lock wrapper.
@@ -53,8 +53,8 @@ static int MallocMutexInitialize( MallocMutex* pMutex )
 /// @return  Zero.
 static int MallocMutexLock( MallocMutex* pMutex )
 {
-    reinterpret_cast< Helium::Mutex* >( pMutex->buffer )->Lock();
-    return 0;
+	reinterpret_cast< Helium::Mutex* >( pMutex->buffer )->Lock();
+	return 0;
 }
 
 /// Mutex unlock wrapper.
@@ -64,8 +64,8 @@ static int MallocMutexLock( MallocMutex* pMutex )
 /// @return  Zero.
 static int MallocMutexUnlock( MallocMutex* pMutex )
 {
-    reinterpret_cast< Helium::Mutex* >( pMutex->buffer )->Unlock();
-    return 0;
+	reinterpret_cast< Helium::Mutex* >( pMutex->buffer )->Unlock();
+	return 0;
 }
 
 /// Mutex try-lock wrapper.
@@ -75,7 +75,7 @@ static int MallocMutexUnlock( MallocMutex* pMutex )
 /// @return  True if the mutex was locked successfully by this thread, false if it was locked by another thread.
 static bool MallocMutexTryLock( MallocMutex* pMutex )
 {
-    return reinterpret_cast< Helium::Mutex* >( pMutex->buffer )->TryLock();
+	return reinterpret_cast< Helium::Mutex* >( pMutex->buffer )->TryLock();
 }
 
 /// Get a reference to the global dlmalloc mutex.
@@ -83,48 +83,48 @@ static bool MallocMutexTryLock( MallocMutex* pMutex )
 /// @return  Reference to the global dlmalloc mutex.
 static Helium::Mutex& GetMallocGlobalMutex()
 {
-    // Initialize as a local variable to try to ensure it is initialized the first time it is used.
-    static Helium::Mutex globalMutex;
-    return globalMutex;
+	// Initialize as a local variable to try to ensure it is initialized the first time it is used.
+	static Helium::Mutex globalMutex;
+	return globalMutex;
 }
 
 #if HELIUM_ENABLE_MEMORY_TRACKING_VERBOSE
 /// Dynamic memory heap verbose tracking data.
 struct Helium::DynamicMemoryHeapVerboseTrackingData
 {
-    /// Allocation backtraces for this heap.
-    std::map< void*, DynamicMemoryHeap::AllocationBacktrace > allocationBacktraceMap;
+	/// Allocation backtraces for this heap.
+	std::map< void*, DynamicMemoryHeap::AllocationBacktrace > allocationBacktraceMap;
 };
 
 static volatile ThreadId s_verboseTrackingCurrentThreadId = Thread::INVALID_ID;
 
 static Mutex& GetVerboseTrackingMutex()
 {
-    static Mutex verboseTrackingMutex;
+	static Mutex verboseTrackingMutex;
 
-    return verboseTrackingMutex;
+	return verboseTrackingMutex;
 }
 
 static bool ConditionalVerboseTrackingLock()
 {
-    ThreadId threadId = Thread::GetCurrentId();
-    if( s_verboseTrackingCurrentThreadId != threadId )
-    {
-        GetVerboseTrackingMutex().Lock();
-        s_verboseTrackingCurrentThreadId = threadId;
+	ThreadId threadId = Thread::GetCurrentId();
+	if( s_verboseTrackingCurrentThreadId != threadId )
+	{
+		GetVerboseTrackingMutex().Lock();
+		s_verboseTrackingCurrentThreadId = threadId;
 
-        return true;
-    }
+		return true;
+	}
 
-    return false;
+	return false;
 }
 
 static void VerboseTrackingUnlock()
 {
-    HELIUM_ASSERT( s_verboseTrackingCurrentThreadId == Thread::GetCurrentId() );
+	HELIUM_ASSERT( s_verboseTrackingCurrentThreadId == Thread::GetCurrentId() );
 
-    s_verboseTrackingCurrentThreadId = Thread::INVALID_ID;
-    GetVerboseTrackingMutex().Unlock();
+	s_verboseTrackingCurrentThreadId = Thread::INVALID_ID;
+	GetVerboseTrackingMutex().Unlock();
 }
 #endif  // HELIUM_ENABLE_MEMORY_TRACKING_VERBOSE
 
@@ -158,9 +158,9 @@ volatile bool DynamicMemoryHeap::sm_bDisableBacktraceTracking = false;
 /// @see UnlockReadGlobalHeapList(), GetPreviousHeap, GetNextHeap()
 DynamicMemoryHeap* DynamicMemoryHeap::LockReadGlobalHeapList()
 {
-    GetGlobalHeapListLock().LockRead();
+	GetGlobalHeapListLock().LockRead();
 
-    return sm_pGlobalHeapListHead;
+	return sm_pGlobalHeapListHead;
 }
 
 /// Release a previously acquired read-only lock on the global dynamic memory heap.
@@ -168,108 +168,107 @@ DynamicMemoryHeap* DynamicMemoryHeap::LockReadGlobalHeapList()
 /// @see LockReadGlobalHeapList(), GetPreviousHeap, GetNextHeap()
 void DynamicMemoryHeap::UnlockReadGlobalHeapList()
 {
-    GetGlobalHeapListLock().UnlockRead();
+	GetGlobalHeapListLock().UnlockRead();
 }
 
 #if HELIUM_ENABLE_MEMORY_TRACKING
 /// Write memory stats for all dynamic memory heap instances to the output log.
 void DynamicMemoryHeap::LogMemoryStats()
 {
-    HELIUM_TRACE( TraceLevels::Debug, TXT( "DynamicMemoryHeap stats:\n" ) );
-    HELIUM_TRACE( TraceLevels::Debug, TXT( "Heap name\tActive allocations\tBytes allocated\n" ) );
+	HELIUM_TRACE( TraceLevels::Debug, TXT( "DynamicMemoryHeap stats:\n" ) );
+	HELIUM_TRACE( TraceLevels::Debug, TXT( "Heap name\tActive allocations\tBytes allocated\n" ) );
 
-    ScopeReadLock readLock( GetGlobalHeapListLock() );
+	ScopeReadLock readLock( GetGlobalHeapListLock() );
 
-    for( DynamicMemoryHeap* pHeap = sm_pGlobalHeapListHead; pHeap != NULL; pHeap = pHeap->GetNextHeap() )
-    {
-        const char* pName = NULL;
+	for( DynamicMemoryHeap* pHeap = sm_pGlobalHeapListHead; pHeap != NULL; pHeap = pHeap->GetNextHeap() )
+	{
+		const char* pName = NULL;
 #if !HELIUM_RELEASE && !HELIUM_PROFILE
-        pName = pHeap->GetName();
+		pName = pHeap->GetName();
 #endif
-        if( !pName )
-        {
-            pName = TXT( "(unnamed)" );
-        }
+		if( !pName )
+		{
+			pName = TXT( "(unnamed)" );
+		}
 
-        size_t allocationCount = pHeap->GetAllocationCount();
-        size_t bytesActual = pHeap->GetBytesActual();
+		size_t allocationCount = pHeap->GetAllocationCount();
+		size_t bytesActual = pHeap->GetBytesActual();
 
-        HELIUM_TRACE(
-            TraceLevels::Debug,
-            TXT( "%s\t%" ) PRIuSZ TXT( "\t%" ) PRIuSZ TXT( "\n" ),
-            pName,
-            allocationCount,
-            bytesActual );
-    }
+		HELIUM_TRACE(
+			TraceLevels::Debug,
+			TXT( "%s\t%" ) PRIuSZ TXT( "\t%" ) PRIuSZ TXT( "\n" ),
+			pName,
+			allocationCount,
+			bytesActual );
+	}
 
-    HELIUM_TRACE( TraceLevels::Debug, TXT( "\n" ) );
+	HELIUM_TRACE( TraceLevels::Debug, TXT( "\n" ) );
 
 #if HELIUM_ENABLE_MEMORY_TRACKING_VERBOSE
-    bool bLockedTracking = ConditionalVerboseTrackingLock();
+	bool bLockedTracking = ConditionalVerboseTrackingLock();
 
-    bool bOldDisableBacktraceTracking = sm_bDisableBacktraceTracking;
-    sm_bDisableBacktraceTracking = true;
+	bool bOldDisableBacktraceTracking = sm_bDisableBacktraceTracking;
+	sm_bDisableBacktraceTracking = true;
 
-    HELIUM_TRACE( TraceLevels::Debug, TXT( "DynamicMemoryHeap unfreed allocations:\n" ) );
+	HELIUM_TRACE( TraceLevels::Debug, TXT( "DynamicMemoryHeap unfreed allocations:\n" ) );
 
-    size_t allocationIndex = 1;
+	size_t allocationIndex = 1;
 
-    for( DynamicMemoryHeap* pHeap = sm_pGlobalHeapListHead; pHeap != NULL; pHeap = pHeap->GetNextHeap() )
-    {
-        const char* pHeapName = pHeap->GetName();
+	for( DynamicMemoryHeap* pHeap = sm_pGlobalHeapListHead; pHeap != NULL; pHeap = pHeap->GetNextHeap() )
+	{
+		const char* pHeapName = pHeap->GetName();
 
-        DynamicMemoryHeapVerboseTrackingData* pTrackingData = pHeap->m_pVerboseTrackingData;
-        if( pTrackingData )
-        {
-            const std::map< void*, AllocationBacktrace >& rAllocationBacktraceMap =
-                pTrackingData->allocationBacktraceMap;
+		DynamicMemoryHeapVerboseTrackingData* pTrackingData = pHeap->m_pVerboseTrackingData;
+		if( pTrackingData )
+		{
+			const std::map< void*, AllocationBacktrace >& rAllocationBacktraceMap =
+				pTrackingData->allocationBacktraceMap;
 
-#pragma TODO( "HELIUM MERGE - Remove STL string usage here once String is merged over." )
-//            String symbol;
-            std::string symbol;
+			// TODO: Remove STL string usage here once String is merged over
+			std::string symbol;
 
-            std::map< void*, AllocationBacktrace >::const_iterator iterEnd = rAllocationBacktraceMap.end();
-            std::map< void*, AllocationBacktrace >::const_iterator iter;
-            for( iter = rAllocationBacktraceMap.begin(); iter != iterEnd; ++iter )
-            {
-                HELIUM_TRACE(
-                    TraceLevels::Debug,
-                    TXT( "%" ) PRIuSZ TXT( ": 0x%p (%s)\n" ),
-                    allocationIndex,
-                    iter->first,
-                    pHeapName );
-                ++allocationIndex;
+			std::map< void*, AllocationBacktrace >::const_iterator iterEnd = rAllocationBacktraceMap.end();
+			std::map< void*, AllocationBacktrace >::const_iterator iter;
+			for( iter = rAllocationBacktraceMap.begin(); iter != iterEnd; ++iter )
+			{
+				HELIUM_TRACE(
+					TraceLevels::Debug,
+					TXT( "%" ) PRIuSZ TXT( ": 0x%p (%s)\n" ),
+					allocationIndex,
+					iter->first,
+					pHeapName );
+				++allocationIndex;
 
-                void* const* ppTraceAddress = iter->second.pAddresses;
-                for( size_t addressIndex = 0;
-                     addressIndex < HELIUM_ARRAY_COUNT( iter->second.pAddresses );
-                     ++addressIndex )
-                {
-                    void* pAddress = *ppTraceAddress;
-                    ++ppTraceAddress;
-                    if( !pAddress )
-                    {
-                        break;
-                    }
+				void* const* ppTraceAddress = iter->second.pAddresses;
+				for( size_t addressIndex = 0;
+					addressIndex < HELIUM_ARRAY_COUNT( iter->second.pAddresses );
+					++addressIndex )
+				{
+					void* pAddress = *ppTraceAddress;
+					++ppTraceAddress;
+					if( !pAddress )
+					{
+						break;
+					}
 
-//                    Helium::GetAddressSymbol( symbol, pAddress );
-//                    HELIUM_TRACE( TraceLevels::Debug, TXT( "- 0x%p: %s\n" ), pAddress, *symbol );
-                    Helium::GetAddressSymbol( symbol, pAddress );
-                    const char* pSymbol = symbol.c_str();
-                    HELIUM_TRACE( TraceLevels::Debug, TXT( "- 0x%p: %s\n" ), pAddress, ( pSymbol ? pSymbol : TXT( "" ) ) );
-                }
-            }
-        }
-    }
+					//                    Helium::GetAddressSymbol( symbol, pAddress );
+					//                    HELIUM_TRACE( TraceLevels::Debug, TXT( "- 0x%p: %s\n" ), pAddress, *symbol );
+					Helium::GetAddressSymbol( symbol, pAddress );
+					const char* pSymbol = symbol.c_str();
+					HELIUM_TRACE( TraceLevels::Debug, TXT( "- 0x%p: %s\n" ), pAddress, ( pSymbol ? pSymbol : TXT( "" ) ) );
+				}
+			}
+		}
+	}
 
-    HELIUM_TRACE( TraceLevels::Debug, TXT( "\n" ) );
+	HELIUM_TRACE( TraceLevels::Debug, TXT( "\n" ) );
 
-    sm_bDisableBacktraceTracking = bOldDisableBacktraceTracking;
+	sm_bDisableBacktraceTracking = bOldDisableBacktraceTracking;
 
-    if( bLockedTracking )
-    {
-        VerboseTrackingUnlock();
-    }
+	if( bLockedTracking )
+	{
+		VerboseTrackingUnlock();
+	}
 #endif
 }
 #endif  // HELIUM_ENABLE_MEMORY_TRACKING
@@ -279,11 +278,11 @@ void DynamicMemoryHeap::LogMemoryStats()
 /// @return  Global heap list read-write lock.
 ReadWriteLock& DynamicMemoryHeap::GetGlobalHeapListLock()
 {
-    // Note that the construction of this is not inherently thread-safe, but we can be fairly certain that the main
-    // thread will trigger the creation of the lock before any other threads are spawned.
-    static ReadWriteLock globalHeapListLock;
+	// Note that the construction of this is not inherently thread-safe, but we can be fairly certain that the main
+	// thread will trigger the creation of the lock before any other threads are spawned.
+	static ReadWriteLock globalHeapListLock;
 
-    return globalHeapListLock;
+	return globalHeapListLock;
 }
 
 #endif // HELIUM_HEAP
@@ -291,8 +290,8 @@ ReadWriteLock& DynamicMemoryHeap::GetGlobalHeapListLock()
 /// Constructor.
 ThreadLocalStackAllocator::ThreadLocalStackAllocator()
 {
-    m_pHeap = &GetMemoryHeap();
-    HELIUM_ASSERT( m_pHeap );
+	m_pHeap = &GetMemoryHeap();
+	HELIUM_ASSERT( m_pHeap );
 }
 
 /// Allocate a block of memory.
@@ -302,10 +301,10 @@ ThreadLocalStackAllocator::ThreadLocalStackAllocator()
 /// @return  Base address of the allocation if successful, null if allocation failed.
 void* ThreadLocalStackAllocator::Allocate( size_t size )
 {
-    HELIUM_ASSERT( m_pHeap );
-    void* pMemory = m_pHeap->Allocate( size );
+	HELIUM_ASSERT( m_pHeap );
+	void* pMemory = m_pHeap->Allocate( size );
 
-    return pMemory;
+	return pMemory;
 }
 
 /// Allocate a block of aligned memory.
@@ -316,10 +315,10 @@ void* ThreadLocalStackAllocator::Allocate( size_t size )
 /// @return  Base address of the allocation if successful, null if allocation failed.
 void* ThreadLocalStackAllocator::AllocateAligned( size_t alignment, size_t size )
 {
-    HELIUM_ASSERT( m_pHeap );
-    void* pMemory = m_pHeap->AllocateAligned( alignment, size );
+	HELIUM_ASSERT( m_pHeap );
+	void* pMemory = m_pHeap->AllocateAligned( alignment, size );
 
-    return pMemory;
+	return pMemory;
 }
 
 /// Free a block of memory previously allocated using Allocate() or AllocateAligned().
@@ -327,8 +326,8 @@ void* ThreadLocalStackAllocator::AllocateAligned( size_t alignment, size_t size 
 /// @param[in] pMemory  Base address of the allocation to free.
 void ThreadLocalStackAllocator::Free( void* pMemory )
 {
-    HELIUM_ASSERT( m_pHeap );
-    m_pHeap->Free( pMemory );
+	HELIUM_ASSERT( m_pHeap );
+	m_pHeap->Free( pMemory );
 }
 
 /// Get the stack-based memory heap for the current thread.
@@ -338,18 +337,18 @@ void ThreadLocalStackAllocator::Free( void* pMemory )
 /// @see ReleaseMemoryHeap()
 StackMemoryHeap<>& ThreadLocalStackAllocator::GetMemoryHeap()
 {
-    ThreadLocalPointer& tls = GetMemoryHeapTls();
-    StackMemoryHeap<>* pHeap = static_cast< StackMemoryHeap<>* >( tls.GetPointer() );
-    if( !pHeap )
-    {
-        // Heap does not already exist for this thread, so create one.
-        pHeap = new StackMemoryHeap<>( BLOCK_SIZE );
-        HELIUM_ASSERT( pHeap );
+	ThreadLocalPointer& tls = GetMemoryHeapTls();
+	StackMemoryHeap<>* pHeap = static_cast< StackMemoryHeap<>* >( tls.GetPointer() );
+	if( !pHeap )
+	{
+		// Heap does not already exist for this thread, so create one.
+		pHeap = new StackMemoryHeap<>( BLOCK_SIZE );
+		HELIUM_ASSERT( pHeap );
 
-        tls.SetPointer( pHeap );
-    }
+		tls.SetPointer( pHeap );
+	}
 
-    return *pHeap;
+	return *pHeap;
 }
 
 /// Release the stack-based memory heap for the current thread.
@@ -360,13 +359,13 @@ StackMemoryHeap<>& ThreadLocalStackAllocator::GetMemoryHeap()
 /// @see GetMemoryHeap()
 void ThreadLocalStackAllocator::ReleaseMemoryHeap()
 {
-    ThreadLocalPointer& tls = GetMemoryHeapTls();
-    StackMemoryHeap<>* pHeap = static_cast< StackMemoryHeap<>* >( tls.GetPointer() );
-    if( pHeap )
-    {
-        delete pHeap;
-        tls.SetPointer( NULL );
-    }
+	ThreadLocalPointer& tls = GetMemoryHeapTls();
+	StackMemoryHeap<>* pHeap = static_cast< StackMemoryHeap<>* >( tls.GetPointer() );
+	if( pHeap )
+	{
+		delete pHeap;
+		tls.SetPointer( NULL );
+	}
 }
 
 /// Get the thread-local storage pointer for the current thread's stack heap.
@@ -374,15 +373,15 @@ void ThreadLocalStackAllocator::ReleaseMemoryHeap()
 /// @return  Thread-local storage pointer for the thread-local stack heap instance.
 ThreadLocalPointer& ThreadLocalStackAllocator::GetMemoryHeapTls()
 {
-    // Keeping this as a local static variable should help us enforce its construction on the first attempt to
-    // allocate memory, regardless of whichever code attempts to dynamically allocate memory first.
-    // XXX TMC: I'd imagine a race condition could still occur where multiple threads could use
-    // ThreadLocalStackAllocator for the first time at around the same time.  To be safe, the main thread should try
-    // to use ThreadLocalStackAllocator before any threads are created in order to prep this value (could do
-    // something in the Thread class itself...).
-    static ThreadLocalPointer memoryHeapTls;
+	// Keeping this as a local static variable should help us enforce its construction on the first attempt to
+	// allocate memory, regardless of whichever code attempts to dynamically allocate memory first.
+	// XXX TMC: I'd imagine a race condition could still occur where multiple threads could use
+	// ThreadLocalStackAllocator for the first time at around the same time.  To be safe, the main thread should try
+	// to use ThreadLocalStackAllocator before any threads are created in order to prep this value (could do
+	// something in the Thread class itself...).
+	static ThreadLocalPointer memoryHeapTls;
 
-    return memoryHeapTls;
+	return memoryHeapTls;
 }
 
 #if HELIUM_HEAP
@@ -393,14 +392,14 @@ ThreadLocalPointer& ThreadLocalStackAllocator::GetMemoryHeapTls()
 /// @return  Reference to the default dynamic memory heap.
 DynamicMemoryHeap& Helium::GetDefaultHeap()
 {
-    static DynamicMemoryHeap* pDefaultHeap = NULL;
-    if( !pDefaultHeap )
-    {
-        pDefaultHeap = static_cast< DynamicMemoryHeap* >( VirtualMemory::Allocate( sizeof( DynamicMemoryHeap ) ) );
-        new( pDefaultHeap ) DynamicMemoryHeap HELIUM_DYNAMIC_MEMORY_HEAP_INIT( TXT( "Default" ) );
-    }
+	static DynamicMemoryHeap* pDefaultHeap = NULL;
+	if( !pDefaultHeap )
+	{
+		pDefaultHeap = static_cast< DynamicMemoryHeap* >( VirtualMemory::Allocate( sizeof( DynamicMemoryHeap ) ) );
+		new( pDefaultHeap ) DynamicMemoryHeap HELIUM_DYNAMIC_MEMORY_HEAP_INIT( TXT( "Default" ) );
+	}
 
-    return *pDefaultHeap;
+	return *pDefaultHeap;
 }
 #endif
 
@@ -410,14 +409,14 @@ DynamicMemoryHeap& Helium::GetDefaultHeap()
 /// @return  Reference for the external allocation fallback heap.
 DynamicMemoryHeap& Helium::GetExternalHeap()
 {
-    static DynamicMemoryHeap* pExternalHeap = NULL;
-    if( !pExternalHeap )
-    {
-        pExternalHeap = static_cast< DynamicMemoryHeap* >( VirtualMemory::Allocate( sizeof( DynamicMemoryHeap ) ) );
-        new( pExternalHeap ) DynamicMemoryHeap HELIUM_DYNAMIC_MEMORY_HEAP_INIT( TXT( "External" ) );
-    }
+	static DynamicMemoryHeap* pExternalHeap = NULL;
+	if( !pExternalHeap )
+	{
+		pExternalHeap = static_cast< DynamicMemoryHeap* >( VirtualMemory::Allocate( sizeof( DynamicMemoryHeap ) ) );
+		new( pExternalHeap ) DynamicMemoryHeap HELIUM_DYNAMIC_MEMORY_HEAP_INIT( TXT( "External" ) );
+	}
 
-    return *pExternalHeap;
+	return *pExternalHeap;
 }
 #endif
 

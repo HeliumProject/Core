@@ -237,12 +237,3 @@ HELIUM_CC_POP_SILENCE_UNUSED_EXPRESSION_RESULT_WARNING
 # define HELIUM_COMPILE_ASSERT_DO_JOIN2(X, Y) X##Y
 # define HELIUM_COMPILE_ASSERT(exp) typedef char HELIUM_COMPILE_ASSERT_JOIN(__HELIUM_COMPILE_ASSERT__,__LINE__)[(exp)?1:-1]
 #endif
-
-//
-// #pragma TODO("Do something!")
-//
-
-#define TODO_STRING2(x) #x
-#define TODO_STRING(x) TODO_STRING2(x)
-#define TODO(msg) message (__FILE__ "(" TODO_STRING(__LINE__) ") : TODO: " msg)
-#define NYI(msg) TODO(__FUNCTION__ " is not yet implemented... " msg)
