@@ -214,14 +214,14 @@ void ArchiveWriterBson::SerializeInstance( bson* b, const char* name, void* inst
 	Log::Print( TXT( "Serializing %s\n" ), structure->m_Name );
 #endif
 
-#pragma TODO("Declare a max depth for inheritance to save heap allocs -geoff")
+	// TODO: Declare a max depth for inheritance to save heap allocs -geoff
 	DynamicArray< const MetaStruct* > bases;
 	for ( const MetaStruct* current = structure; current != NULL; current = current->m_Base )
 	{
 		bases.Push( current );
 	}
 
-#pragma TODO("Declare a max count for fields to save heap allocs -geoff")
+	// TODO: Declare a max count for fields to save heap allocs -geoff
 	DynamicArray< const Field* > fields;
 	while ( !bases.IsEmpty() )
 	{
