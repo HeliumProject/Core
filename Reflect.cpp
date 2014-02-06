@@ -484,7 +484,8 @@ void ReflectInterpreter::InterpretBitfieldField( const std::vector< Reflect::Poi
 		CheckBoxPtr checkbox = CreateControl< CheckBox >();
 		checkbox->a_IsReadOnly.Set( readOnly );
 		checkbox->a_HelpText.Set( enumItr->m_HelpText );
-#pragma TODO("Compute correct default value")
+		
+		// TODO: Compute correct default value
 		checkbox->a_Default.Set( defaultStr.GetData() );
 		checkbox->Bind( new MultiBitfieldStringFormatter ( &*enumItr, datas ) );
 		row->AddChild( checkbox );
