@@ -52,10 +52,9 @@ namespace Helium
 		protected:
 			virtual void Read( DynamicArray< Reflect::ObjectPtr >& objects ) HELIUM_OVERRIDE;
 
-		public: // TEMP, don't call these!
+		private:
 			void Start();
 			bool ReadNext( Reflect::ObjectPtr &object, size_t index );
-		private:
 			void DeserializeInstance( void* instance, const Reflect::MetaStruct* composite, Reflect::Object* object );
 			void DeserializeField( void* instance, const Reflect::Field* field, Reflect::Object* object );
 			void DeserializeTranslator( Reflect::Pointer pointer, Reflect::Translator* translator, const Reflect::Field* field, Reflect::Object* object );

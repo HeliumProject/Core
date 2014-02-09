@@ -84,10 +84,9 @@ namespace Helium
 		protected:
 			virtual void Read( DynamicArray< Reflect::ObjectPtr >& objects ) HELIUM_OVERRIDE;
 
-		public: // TEMP, don't call these!
+		private:
 			void Start();
 			bool ReadNext( Reflect::ObjectPtr &object, size_t index );
-		private:
 			void DeserializeInstance( rapidjson::Value& value, void* instance, const Reflect::MetaStruct* composite, Reflect::Object* object );
 			void DeserializeField( rapidjson::Value& value, void* instance, const Reflect::Field* field, Reflect::Object* object );
 			void DeserializeTranslator( rapidjson::Value& value, Reflect::Pointer pointer, Reflect::Translator* translator, const Reflect::Field* field, Reflect::Object* object );
