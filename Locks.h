@@ -121,6 +121,7 @@ namespace Helium
 		volatile int32_t m_readLockCount;
 		ThreadId m_writeThread;
 		int32_t m_readLockCountWithinWrite;
+		int32_t m_writeLockCountWithinWrite;
 
 		/// Read-lock release event.
 		Condition m_readReleaseCondition;
