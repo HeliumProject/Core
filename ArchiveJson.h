@@ -38,8 +38,7 @@ namespace Helium
 		private:
 			Stream* m_Stream;
 		};
-		typedef rapidjson::Writer< RapidJsonOutputStream > RapidJsonWriter;
-		typedef rapidjson::PrettyWriter< RapidJsonOutputStream > RapidJsonPrettyWriter;
+		typedef rapidjson::PrettyWriter< RapidJsonOutputStream > RapidJsonWriter;
 
 		class HELIUM_PERSIST_API ArchiveWriterJson : public ArchiveWriter
 		{

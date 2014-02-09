@@ -82,7 +82,7 @@ void ArchiveWriterJson::Write( const ObjectPtr* objects, size_t count )
 	// the master object
 	m_Objects.AddArray( objects, count );
 
-	RapidJsonPrettyWriter writer ( m_Output );
+	RapidJsonWriter writer ( m_Output );
 	writer.SetIndent('\t', 1);
 
 	// begin top level array of objects
