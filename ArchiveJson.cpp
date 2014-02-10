@@ -209,7 +209,14 @@ void ArchiveWriterJson::SerializeTranslator( RapidJsonWriter& writer, Pointer po
 	case MetaIds::PointerTranslator:
 		{
 			const ObjectPtr& pointed ( pointer.As< ObjectPtr >() );
-			if ( pointed && !Identify( pointed, NULL ) )
+
+			if ( !pointed )
+			{
+				writer.Uint(0);
+				break;
+			}
+
+			if ( !Identify( pointed, NULL ) )
 			{
 				writer.StartObject();
 				writer.String( pointed->GetMetaClass()->m_Name );
@@ -217,10 +224,8 @@ void ArchiveWriterJson::SerializeTranslator( RapidJsonWriter& writer, Pointer po
 				writer.EndObject();
 				break;
 			}
-			else
-			{
-				// fall through!!
-			}
+				
+			// fall through!!
 		}
 
 	case MetaIds::ScalarTranslator:
