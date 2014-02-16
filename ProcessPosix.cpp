@@ -15,6 +15,7 @@
 #include <unistd.h>
 #include <signal.h>
 #include <spawn.h>
+#include <dlfcn.h>
 
 #if HELIUM_OS_MAC
 # include <mach-o/dyld.h>
@@ -179,16 +180,20 @@ std::string Helium::GetHomeDirectory()
 	return "";
 }
 
-ModuleHandle Helium::LoadModule( const char* modulePath )
+Helium::ModuleHandle Helium::LoadModule( const char* modulePath )
 {
-	return InvalidModuleHandle;
+	return dlopen( modulePath, RTLD_NOW | RTLD_LOCAL );
 }
 
 void Helium::UnloadModule( ModuleHandle handle )
 {
+	if ( handle != InvalidModuleHandle )
+	{
+		HELIUM_VERIFY( dlclose( handle ) );
+	}
 }
 
 void* Helium::GetModuleFunction( ModuleHandle handle, const char* functionName )
 {
-	return NULL;
+	return dlsym( handle, functionName );
 }
