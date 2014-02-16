@@ -340,3 +340,22 @@ std::string Helium::GetHomeDirectory()
 
 	return profileDirectory;
 }
+
+ModuleHandle Helium::LoadModule( const char* modulePath )
+{
+	HELIUM_TCHAR_TO_WIDE( modulePath, convertedModulePath );
+	return ::LoadLibraryW( convertedModulePath );
+}
+
+void Helium::UnloadModule( ModuleHandle handle )
+{
+	if ( handle != InvalidModuleHandle )
+	{
+		HELIUM_VERIFY( ::FreeLibrary( handle ) );
+	}
+}
+
+void* Helium::GetModuleFunction( ModuleHandle handle, const char* functionName )
+{
+	return ::GetProcAddress( handle, functionName );
+}

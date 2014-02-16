@@ -178,3 +178,17 @@ std::string Helium::GetHomeDirectory()
 	HELIUM_ASSERT( false );
 	return "";
 }
+
+ModuleHandle Helium::LoadModule( const char* modulePath )
+{
+	return InvalidModuleHandle;
+}
+
+void Helium::UnloadModule( ModuleHandle handle )
+{
+}
+
+void* Helium::GetModuleFunction( ModuleHandle handle, const char* functionName )
+{
+	return NULL;
+}

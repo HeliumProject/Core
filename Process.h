@@ -55,4 +55,21 @@ namespace Helium
 	
 	/// Location for user preferences on disk
 	HELIUM_PLATFORM_API std::string GetHomeDirectory();
+
+#if HELIUM_OS_WIN
+	typedef HMODULE ModuleHandle;
+	const static HMODULE InvalidModuleHandle = NULL;
+#else
+	typedef void* ModuleHandle;
+	const static void* InvalidModuleHandle = NULL;
+#endif
+
+	/// Load a module into the caller's address space
+	ModuleHandle LoadModule( const char* modulePath );
+
+	/// Unload a module from the caller's address space
+	void UnloadModule( ModuleHandle handle );
+
+	/// Find a function in a loaded module
+	void* GetModuleFunction( ModuleHandle handle, const char* functionName );
 }
