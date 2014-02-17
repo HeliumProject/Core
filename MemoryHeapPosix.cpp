@@ -27,7 +27,7 @@ void* VirtualMemory::Allocate( size_t size )
 {
 	int flags = MAP_PRIVATE | MAP_ANONYMOUS;
 
-#if !HELIUM_DEBUG
+#if HELIUM_OS_LINUX && !HELIUM_DEBUG
 	flags |= MAP_UNINITIALIZED;
 #endif
 
