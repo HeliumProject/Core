@@ -25,27 +25,27 @@ using namespace Helium;
 /// @see Free()
 void* VirtualMemory::Allocate( size_t size )
 {
-    int flags = MAP_PRIVATE | MAP_ANONYMOUS;
+	int flags = MAP_PRIVATE | MAP_ANONYMOUS;
 
 #if !HELIUM_DEBUG
-    flags |= MAP_UNINITIALIZED;
+	flags |= MAP_UNINITIALIZED;
 #endif
 
-    void* pMemory = mmap( NULL, size, PROT_READ | PROT_WRITE, flags, 0, 0 );
-    HELIUM_ASSERT( pMemory != reinterpret_cast< void* >( ~static_cast< uintptr_t >( 0 ) ) ) );
+	void* pMemory = mmap( NULL, size, PROT_READ | PROT_WRITE, flags, 0, 0 );
+	HELIUM_ASSERT( pMemory != reinterpret_cast< void* >( ~static_cast< uintptr_t >( 0 ) ) );
 
 #if HELIUM_ENABLE_MEMORY_TRACKING
-# pragma TODO("This is a rough shot at computing the appropriate bytes in the number of pages allocated, it needs testing -geoff")
-    size_t pageSize = GetPageSize();
-    size_t trackingSize = ( (size + pageSize) / pageSize ) * pageSize;
+	// This is a rough shot at computing the appropriate bytes in the number of pages allocated, it needs testing -geoff
+	size_t pageSize = GetPageSize();
+	size_t trackingSize = ( (size + pageSize) / pageSize ) * pageSize;
 # if !((__GNUC__ >= 4) && (__GNUC_MINOR__ >= 7))
-    size_t prev = __sync_fetch_and_add( static_cast< volatile size_t* >( &sm_bytesAllocated ), trackingSize );
+	size_t prev = __sync_fetch_and_add( static_cast< volatile size_t* >( &sm_bytesAllocated ), trackingSize );
 # else
-    size_t prev = __atomic_fetch_add( static_cast< volatile size_t* >( &sm_bytesAllocated ), trackingSize, __ATOMIC_SEQ_CST );
+	size_t prev = __atomic_fetch_add( static_cast< volatile size_t* >( &sm_bytesAllocated ), trackingSize, __ATOMIC_SEQ_CST );
 # endif
 #endif
 
-    return pMemory;
+	return pMemory;
 }
 
 /// Free memory previously allocated using Allocate().
@@ -62,27 +62,27 @@ void* VirtualMemory::Allocate( size_t size )
 /// @see Allocate()
 bool VirtualMemory::Free( void* pMemory, size_t size )
 {
-    HELIUM_ASSERT( pMemory );
-    HELIUM_ASSERT( size != 0 );
+	HELIUM_ASSERT( pMemory );
+	HELIUM_ASSERT( size != 0 );
 
-    uint8_t* pCurrentBase = static_cast< uint8_t* >( pMemory );
-    HELIUM_ASSERT( pCurrentBase + size == 0 || pCurrentBase + size > pCurrentBase );  // Check address space bounds.
+	uint8_t* pCurrentBase = static_cast< uint8_t* >( pMemory );
+	HELIUM_ASSERT( pCurrentBase + size == 0 || pCurrentBase + size > pCurrentBase );  // Check address space bounds.
 
-    int result = munmap( pMemory, size );
-    HELIUM_ASSERT( result == 0 );
+	int result = munmap( pMemory, size );
+	HELIUM_ASSERT( result == 0 );
 
 #if HELIUM_ENABLE_MEMORY_TRACKING
-# pragma TODO("This is a rough shot at computing the appropriate bytes in the number of pages allocated, it needs testing -geoff")
-    size_t pageSize = GetPageSize();
-    size_t trackingSize = ( (size + pageSize) / pageSize ) * pageSize;
+	// This is a rough shot at computing the appropriate bytes in the number of pages allocated, it needs testing -geoff
+	size_t pageSize = GetPageSize();
+	size_t trackingSize = ( (size + pageSize) / pageSize ) * pageSize;
 # if !((__GNUC__ >= 4) && (__GNUC_MINOR__ >= 7))
-    size_t prev = __sync_fetch_and_sub( static_cast< volatile size_t* >( &sm_bytesAllocated ), trackingSize );
+	size_t prev = __sync_fetch_and_sub( static_cast< volatile size_t* >( &sm_bytesAllocated ), trackingSize );
 # else
-    size_t prev = __atomic_fetch_sub( static_cast< volatile size_t* >( &sm_bytesAllocated ), trackingSize, __ATOMIC_SEQ_CST );
+	size_t prev = __atomic_fetch_sub( static_cast< volatile size_t* >( &sm_bytesAllocated ), trackingSize, __ATOMIC_SEQ_CST );
 # endif
 #endif
 
-    return result == 0;
+	return result == 0;
 }
 
 /// Get the page size of memory allocated through this function.
@@ -90,7 +90,7 @@ bool VirtualMemory::Free( void* pMemory, size_t size )
 /// @return  Current platform page size.
 size_t VirtualMemory::GetPageSize()
 {
-    return sysconf(_SC_PAGE_SIZE);
+	return sysconf(_SC_PAGE_SIZE);
 }
 
 #endif // HELIUM_HEAP
