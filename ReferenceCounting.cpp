@@ -1,6 +1,7 @@
 #include "FoundationPch.h"
 #include "Foundation/ReferenceCounting.h"
 
+#include "Foundation/ConcurrentHashSet.h"
 #include "Foundation/ObjectPool.h"
 
 #if !HELIUM_RELEASE
@@ -114,21 +115,18 @@ void ObjectRefCountSupport::Release( RefCountProxy< Object >* pProxy )
 void ObjectRefCountSupport::Shutdown()
 {
 #if HELIUM_ENABLE_MEMORY_TRACKING
-	ConcurrentHashSet< RefCountProxy< Reflect::Object >* >::ConstAccessor refCountProxyAccessor;
-	if( Reflect::ObjectRefCountSupport::GetFirstActiveProxy( refCountProxyAccessor ) )
+	ConcurrentHashSet< RefCountProxy< Object >* >::ConstAccessor refCountProxyAccessor;
+	if( ObjectRefCountSupport::GetFirstActiveProxy( refCountProxyAccessor ) )
 	{
 		HELIUM_TRACE(
 			TraceLevels::Error,
 			TXT( "%" ) PRIuSZ TXT( " reference counted object(s) still active during shutdown!\n" ),
-			Reflect::ObjectRefCountSupport::GetActiveProxyCount() );
+			ObjectRefCountSupport::GetActiveProxyCount() );
   
-#if 0
-		refCountProxyAccessor.Release();
-#else
-		Reflect::ObjectRefCountSupport::GetFirstActiveProxy( refCountProxyAccessor );
+		ObjectRefCountSupport::GetFirstActiveProxy( refCountProxyAccessor );
 		while( refCountProxyAccessor.IsValid() )
 		{
-			RefCountProxy< Reflect::Object >* pProxy = *refCountProxyAccessor;
+			RefCountProxy< Object >* pProxy = *refCountProxyAccessor;
 			HELIUM_ASSERT( pProxy );
 
 			HELIUM_TRACE(
@@ -141,7 +139,6 @@ void ObjectRefCountSupport::Shutdown()
 			++refCountProxyAccessor;
 		}
 		refCountProxyAccessor.Release();
-#endif
 	}
 #endif  // HELIUM_ENABLE_MEMORY_TRACKING
 
