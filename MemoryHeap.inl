@@ -747,7 +747,7 @@ template< typename Allocator > void Helium::FreeAlignmentHelper( Allocator& rAll
 	rAllocator.Free( pMemory );
 }
 
-#if HELIUM_HEAP
+#if HELIUM_NEW_DELETE
 
 #if !HELIUM_DEBUG
 #define HELIUM_NEW_DELETE_SPEC HELIUM_FORCEINLINE

@@ -393,6 +393,12 @@ void Helium::MEMORY_HEAP_CLASS_NAME::Free( void* pMemory )
 #endif
 }
 
+/// @copydoc Free()
+void Helium::MEMORY_HEAP_CLASS_NAME::FreeAligned( void* pMemory )
+{
+	MEMORY_HEAP_CLASS_NAME::Free( pMemory );
+}
+
 /// Get the size of an allocated memory block.
 ///
 /// @param[in] pMemory  Base address of the allocation.

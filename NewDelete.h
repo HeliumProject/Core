@@ -8,7 +8,11 @@
 #error HELIUM_HEAP not defined!
 #endif
 
-#if HELIUM_HEAP
+#ifndef HELIUM_NEW_DELETE
+#error HELIUM_NEW_DELETE not defined!
+#endif
+
+#if HELIUM_NEW_DELETE
 
 /// Global "new" operator.
 ///
@@ -106,4 +110,4 @@ HELIUM_NEW_DELETE_SPEC void operator delete[]( void* pMemory, const std::nothrow
     Helium::DefaultAllocator().Free( pMemory );
 }
 
-#endif // HELIUM_HEAP
+#endif // HELIUM_NEW_DELETE

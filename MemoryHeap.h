@@ -14,8 +14,13 @@
 //@{
 
 #ifndef HELIUM_HEAP
-/// Take control of heap allocations, as invasively as possible.
+/// Enable internal heap functionality
 #define HELIUM_HEAP 0
+#endif
+
+#ifndef HELIUM_NEW_DELETE
+/// Take control of heap allocations, as invasively as possible.
+#define HELIUM_NEW_DELETE 0
 #endif
 
 #if HELIUM_HEAP
@@ -59,6 +64,12 @@
 #error HELIUM_MODULE not defined, please define this macro to be the bare (non-stringified) name of the current compiling module
 #endif
 
+#if HELIUM_SHARED
+# define HELIUM_MODULE_HEAP_FUNCTION_SPEC HELIUM_API_EXPORT
+#else
+# define HELIUM_MODULE_HEAP_FUNCTION_SPEC
+#endif
+
 /// Define the default memory heap for the current module.
 ///
 /// This must be called in the source file of a given module in order to set up the default heap to use for that module.
@@ -68,7 +79,7 @@
 #define HELIUM_DEFINE_DEFAULT_MODULE_HEAP( MODULE_NAME ) \
 	namespace Helium \
 	{ \
-		DynamicMemoryHeap& HELIUM_MODULE_HEAP_FUNCTION() \
+		HELIUM_MODULE_HEAP_FUNCTION_SPEC DynamicMemoryHeap& HELIUM_MODULE_HEAP_FUNCTION() \
 		{ \
 			static DynamicMemoryHeap* pModuleHeap = NULL; \
 			if( !pModuleHeap ) \
@@ -152,12 +163,14 @@
 
 #ifndef HELIUM_ENABLE_MEMORY_TRACKING
 /// Non-zero if general memory tracking should be enabled.
-#define HELIUM_ENABLE_MEMORY_TRACKING ( !HELIUM_RELEASE )
+# define HELIUM_ENABLE_MEMORY_TRACKING ( !HELIUM_RELEASE )
 #endif
 
 #ifndef HELIUM_ENABLE_MEMORY_TRACKING_VERBOSE
+# if HELIUM_ENABLE_MEMORY_TRACKING && HELIUM_DEBUG
 /// Non-zero if detailed allocation tracking should be enabled.
-#define HELIUM_ENABLE_MEMORY_TRACKING_VERBOSE ( 0/*HELIUM_ENABLE_MEMORY_TRACKING && HELIUM_DEBUG*/ )
+#  define HELIUM_ENABLE_MEMORY_TRACKING_VERBOSE ( 0 )
+# endif
 #endif
 
 #endif // HELIUM_HEAP
@@ -230,6 +243,7 @@ namespace Helium
 		virtual void* Reallocate( void* pMemory, size_t size ) = 0;
 		virtual void* AllocateAligned( size_t alignment, size_t size ) = 0;
 		virtual void Free( void* pMemory ) = 0;
+		virtual void FreeAligned( void* pMemory ) = 0;
 		virtual size_t GetMemorySize( void* pMemory ) = 0;
 		//@}
 	};
@@ -272,6 +286,7 @@ namespace Helium
 		virtual void* Reallocate( void* pMemory, size_t size );
 		virtual void* AllocateAligned( size_t alignment, size_t size );
 		virtual void Free( void* pMemory );
+		virtual void FreeAligned( void* pMemory );
 		virtual size_t GetMemorySize( void* pMemory );
 		//@}
 
@@ -541,7 +556,7 @@ namespace Helium
 
 #if HELIUM_USE_MODULE_HEAPS
 	/// Get the default heap to use for dynamic allocations from this module (not DLL-exported).
-	extern DynamicMemoryHeap& HELIUM_MODULE_HEAP_FUNCTION();
+	HELIUM_MODULE_HEAP_FUNCTION_SPEC extern DynamicMemoryHeap& HELIUM_MODULE_HEAP_FUNCTION();
 #else
 	/// Get the default heap to use for dynamic allocations.
 	HELIUM_PLATFORM_API DynamicMemoryHeap& GetDefaultHeap();
@@ -576,7 +591,7 @@ namespace Helium
 
 /// @defgroup memoryheapnew Helium::MemoryHeap "new" Overrides
 //@{
-#if HELIUM_HEAP
+#if HELIUM_NEW_DELETE
 inline void* operator new( size_t size, Helium::MemoryHeap& rHeap );
 #endif // HELIUM_HEAP
 //@}
