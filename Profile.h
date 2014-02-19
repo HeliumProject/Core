@@ -191,7 +191,7 @@ namespace Helium
 
 # define HELIUM_PROFILE_SCOPE_TIMER( ... ) \
 	static Helium::Profile::Sink scopeSink ( HELIUM_FUNCTION_NAME, __FILE__, __LINE__ ); \
-	Helium::Profile::Timer scopeTimer ( scopeSink, __VA_ARGS__ );
+	Helium::Profile::Timer scopeTimer ( scopeSink, ##__VA_ARGS__ );
 
 #else
 
