@@ -3,7 +3,8 @@
 #include <new>
 #if HELIUM_OS_MAC
 # include <malloc/malloc.h>
-#elif HELIUM_OS_WIN
+#else
+# define HAVE_USR_INCLUDE_MALLOC_H 1
 # include <malloc.h>
 #endif
 
