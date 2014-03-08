@@ -4,7 +4,6 @@
 #if HELIUM_OS_MAC
 # include <malloc/malloc.h>
 #else
-# define HAVE_USR_INCLUDE_MALLOC_H 1
 # include <malloc.h>
 #endif
 

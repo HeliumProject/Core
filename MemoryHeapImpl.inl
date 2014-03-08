@@ -109,6 +109,9 @@ static void PrintfWrapper( const char* pFormat, ... )
 #include "Dependencies/nedmalloc/nedmalloc.c"
 #undef EXTSPEC
 #else
+# if !HELIUM_OS_WIN
+#  define HAVE_USR_INCLUDE_MALLOC_H 1
+# endif
 #include "Platform/MemoryHeap.dlmalloc.c"
 #endif
 
