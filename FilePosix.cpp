@@ -5,6 +5,7 @@
 #include "Platform/Encoding.h"
 #include "Platform/Types.h"
 
+#include <errno.h>
 #include <vector>
 #include <sys/types.h>
 #include <sys/stat.h>
