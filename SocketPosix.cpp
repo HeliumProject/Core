@@ -173,11 +173,11 @@ bool Socket::Read(void* buffer, uint32_t bytes, uint32_t& read, sockaddr_in* pee
 	int32_t local_read;
 	if ( udp )
 	{
-		::recvfrom( m_Handle, (char*)buffer, bytes, flags, (sockaddr*)(peer ? peer : &addr), &addrLen );
+		local_read = ::recvfrom( m_Handle, (char*)buffer, bytes, flags, (sockaddr*)(peer ? peer : &addr), &addrLen );
 	}
 	else
 	{
-		::recv( m_Handle, (char*)buffer, bytes, flags );
+		local_read = ::recv( m_Handle, (char*)buffer, bytes, flags );
 	}
 
 	if (local_read < 0)
@@ -212,11 +212,11 @@ bool Socket::Write(void* buffer, uint32_t bytes, uint32_t& wrote, const char* ip
 	int32_t local_wrote;
 	if ( udp )
 	{
-		::sendto( m_Handle, (char*)buffer, bytes, 0, (sockaddr*)&addr, addrLen );
+		local_wrote = ::sendto( m_Handle, (char*)buffer, bytes, 0, (sockaddr*)&addr, addrLen );
 	}
 	else
 	{
-		::send( m_Handle, (char*)buffer, bytes, 0 );
+		local_wrote = ::send( m_Handle, (char*)buffer, bytes, 0 );
 	}
 
 	if (local_wrote < 0)
