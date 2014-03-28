@@ -92,7 +92,10 @@ bool File::Read( void* buffer, size_t numberOfBytesToRead, size_t* numberOfBytes
 		return false;
 	}
 
-	*numberOfBytesRead = numberOfBytesToRead;
+	if (numberOfBytesRead)
+	{
+		*numberOfBytesRead = numberOfBytesToRead;
+	}
 	return true;
 }
 
@@ -105,7 +108,10 @@ bool File::Write( const void* buffer, size_t numberOfBytesToWrite, size_t* numbe
 		return false;
 	}
 
-	*numberOfBytesWritten = numberOfBytesToWrite;
+	if (numberOfBytesWritten)
+	{
+		*numberOfBytesWritten = numberOfBytesToWrite;
+	}
 	return true;
 }
 
