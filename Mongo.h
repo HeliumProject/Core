@@ -117,6 +117,11 @@ namespace Helium
 			//  collection == NULL uses collection named for the type specified in the cursor object
 			Cursor Find( const char* collection, const bson* query = NULL, int limit = 0, int skip = 0, int options = 0 );
 
+			// remove
+			//  collection == NULL uses collection named for the type specified in the cursor object
+			//  query == NULL will remove all objects by default
+			bool Remove( const char* collection, const bson* query = NULL );
+
 		private:
 			Helium::String       name;
 			bool                 isConnected;

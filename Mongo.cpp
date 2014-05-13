@@ -590,3 +590,24 @@ Cursor Database::Find( const char* collection, const bson* query, int limit, int
 		return Cursor();
 	}
 }
+
+
+bool Database::Remove( const char* collection, const bson* query )
+{
+	if ( !HELIUM_VERIFY_MSG( IsCorrectThread(), "Database access from improper thread" ) )
+	{
+		return false;
+	}
+
+	Helium::String ns ( name );
+	ns += ".";
+	ns += collection;
+
+	if ( MONGO_OK != mongo_remove( conn, ns.GetData(), query, NULL ) )
+	{
+		Log::Error( "mongo_cmd_remove failed: %s\n", GetErrorString( conn->err ) );
+		return false;
+	}
+
+	return true;
+}
