@@ -187,7 +187,7 @@ Helium::ModuleHandle Helium::LoadModule( const char* modulePath )
 
 void Helium::UnloadModule( ModuleHandle handle )
 {
-	if ( handle != InvalidModuleHandle )
+	if ( handle != HELIUM_INVALID_MODULE )
 	{
 		HELIUM_VERIFY( dlclose( handle ) );
 	}

@@ -201,7 +201,7 @@ ProcessHandle Helium::Spawn( const std::string& command, bool autoKill )
 	flags |= DETACHED_PROCESS;
 #endif
 
-	ProcessHandle handle = InvalidProcessHandle;
+	ProcessHandle handle = HELIUM_INVALID_PROCESS;
 
 	HELIUM_TCHAR_TO_WIDE( command.c_str(), convertedCommand );
 
@@ -254,7 +254,7 @@ void Helium::SpawnKill( ProcessHandle handle )
 
 int Helium::GetProcessId( ProcessHandle handle )
 {
-	if ( handle == InvalidProcessHandle )
+	if ( handle == HELIUM_INVALID_PROCESS )
 	{
 		return ::GetCurrentProcessId();
 	}
@@ -349,7 +349,7 @@ ModuleHandle Helium::LoadModule( const char* modulePath )
 
 void Helium::UnloadModule( ModuleHandle handle )
 {
-	if ( handle != InvalidModuleHandle )
+	if ( handle != HELIUM_INVALID_MODULE )
 	{
 		HELIUM_VERIFY( ::FreeLibrary( handle ) );
 	}

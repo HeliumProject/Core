@@ -3,14 +3,30 @@
 #include "Platform/API.h"
 #include "Platform/Types.h"
 
+#if HELIUM_OS_WIN
+# define HELIUM_INVALID_PROCESS ( NULL )
+# define HELIUM_INVALID_MODULE ( NULL )
+# define HELIUM_MODULE_EXTENSION "dll"
+#else // HELIUM_OS_WIN
+# define HELIUM_INVALID_PROCESS ( 0 )
+# define HELIUM_INVALID_MODULE ( NULL )
+# if HELIUM_OS_MAC
+#  define HELIUM_MODULE_EXTENSION "dylib"
+# elif HELIUM_OS_LINUX
+#  define HELIUM_MODULE_EXTENSION "so"
+# else
+#  error Unknown module extension!
+# endif
+#endif // HELIUM_OS_WIN
+
 namespace Helium
 {
 #if HELIUM_OS_WIN
-	typedef HANDLE ProcessHandle;
-	const static HANDLE InvalidProcessHandle = NULL;
+	typedef HANDLE  ProcessHandle;
+	typedef HMODULE ModuleHandle;
 #else
-	typedef pid_t ProcessHandle;
-	const static pid_t InvalidProcessHandle = 0;
+	typedef pid_t   ProcessHandle;
+	typedef void*   ModuleHandle;
 #endif
 
 	/// Creates a new process with no window or output, use it for running scripts and file association apps
@@ -33,7 +49,7 @@ namespace Helium
 	HELIUM_PLATFORM_API void SpawnKill( ProcessHandle handle );
 
 	/// Get the process id
-	HELIUM_PLATFORM_API int GetProcessId( ProcessHandle handle = InvalidProcessHandle );
+	HELIUM_PLATFORM_API int GetProcessId( ProcessHandle handle = HELIUM_INVALID_PROCESS );
 
 	/// Get a unique string for this process
 	HELIUM_PLATFORM_API std::string GetProcessString();
@@ -56,20 +72,12 @@ namespace Helium
 	/// Location for user preferences on disk
 	HELIUM_PLATFORM_API std::string GetHomeDirectory();
 
-#if HELIUM_OS_WIN
-	typedef HMODULE ModuleHandle;
-	const static HMODULE InvalidModuleHandle = NULL;
-#else
-	typedef void* ModuleHandle;
-	const static void* InvalidModuleHandle = NULL;
-#endif
-
 	/// Load a module into the caller's address space
-	ModuleHandle LoadModule( const char* modulePath );
+	HELIUM_PLATFORM_API ModuleHandle LoadModule( const char* modulePath );
 
 	/// Unload a module from the caller's address space
-	void UnloadModule( ModuleHandle handle );
+	HELIUM_PLATFORM_API void UnloadModule( ModuleHandle handle );
 
 	/// Find a function in a loaded module
-	void* GetModuleFunction( ModuleHandle handle, const char* functionName );
+	HELIUM_PLATFORM_API void* GetModuleFunction( ModuleHandle handle, const char* functionName );
 }
