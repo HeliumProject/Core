@@ -11,6 +11,10 @@
 #include <aclapi.h>
 #include <direct.h>
 
+#if _MSC_VER >= 1800
+#include <VersionHelpers.h>
+#endif
+
 using namespace Helium;
 
 static bool GetEnvVar( wchar_t* var, std::string& value )
@@ -184,6 +188,14 @@ ProcessHandle Helium::Spawn( const std::string& command, bool autoKill )
 
 	DWORD flags = 0x0;
 
+#if _MSC_VER >= 1800
+	if ( IsWindowsVistaOrGreater() )
+	{
+		// windows vista and beyond somtimes have system software that attach child processes to jobs,
+		//  and pre-windows 8 you can only attach a process to a single job
+		flags |= CREATE_BREAKAWAY_FROM_JOB;
+	}
+#else
 	OSVERSIONINFO osvi;
 	memset(&osvi, 0, sizeof( OSVERSIONINFO ) );
 	osvi.dwOSVersionInfoSize = sizeof( OSVERSIONINFO );
@@ -194,6 +206,7 @@ ProcessHandle Helium::Spawn( const std::string& command, bool autoKill )
 		//  and pre-windows 8 you can only attach a process to a single job
 		flags |= CREATE_BREAKAWAY_FROM_JOB;
 	}
+#endif
 
 #if !HELIUM_RELEASE
 	flags |= CREATE_NEW_CONSOLE;
