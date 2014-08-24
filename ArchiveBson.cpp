@@ -609,7 +609,7 @@ bool ArchiveReaderBson::ReadNext( Reflect::ObjectPtr& object, size_t index )
 			objectClass = Registry::GetInstance()->GetMetaClass( objectClassCrc );
 		}
 
-		if ( !object && objectClass )
+		if ( !object && HELIUM_VERIFY( objectClass ) )
 		{
 			object = AllocateObject( objectClass, index );
 		}

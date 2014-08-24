@@ -559,7 +559,7 @@ bool ArchiveReaderJson::ReadNext( Reflect::ObjectPtr& object, size_t index )
 				}
 			}
 			
-			if ( !object && objectClass )
+			if ( !object && HELIUM_VERIFY( objectClass ) )
 			{
 				object = AllocateObject( objectClass, index );
 			}
@@ -787,7 +787,7 @@ void ArchiveReaderJson::DeserializeTranslator( rapidjson::Value& value, Pointer 
 					objectClass = Registry::GetInstance()->GetMetaClass( objectClassCrc );
 				}
 			
-				if ( !object && objectClass )
+				if ( !object && HELIUM_VERIFY( objectClass ) )
 				{
 					object = objectClass->m_Creator();
 				}
