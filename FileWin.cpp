@@ -296,15 +296,21 @@ bool Directory::Close()
 
 const char Helium::PathSeparator = TXT('\\');
 
-void Helium::GetFullPath( const char* path, std::string& fullPath )
+bool Helium::GetFullPath( const char* path, std::string& fullPath )
 {
 	HELIUM_TCHAR_TO_WIDE( path, convertedPath );
 	DWORD fullPathNameCount = ::GetFullPathName( convertedPath, 0, NULL, NULL );
 	wchar_t* fullPathName = (wchar_t*)alloca( sizeof(wchar_t) * fullPathNameCount );
 	uint32_t result = ::GetFullPathName( convertedPath, fullPathNameCount, fullPathName, NULL );
 
+	if ( result == 0 )
+	{
+		return false;
+	}
+	
 	HELIUM_WIDE_TO_TCHAR( fullPathName, convertedFullPathName );
 	fullPath = convertedFullPathName;
+	return true;
 }
 
 bool Helium::IsAbsolute( const char* path )

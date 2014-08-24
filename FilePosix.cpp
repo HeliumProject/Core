@@ -268,18 +268,57 @@ bool Directory::Close()
 
 const char Helium::PathSeparator = TXT('/');
 
-void Helium::GetFullPath( const char* path, std::string& fullPath )
+bool Helium::GetFullPath( const char* path, std::string& fullPath )
 {
-	char* p = realpath( path, NULL );
-	if ( p )
+	HELIUM_ASSERT( sizeof( path ) > 0 );
+	
+	// unbelievably, posix doesn't seem to have a built-in path normalization function
+	// that doesn't require the file to exist
+	
+	std::vector< std::string > directories;
+	SplitDirectories( path, directories );
+
+	if ( directories.empty() )
 	{
-		fullPath = p;
-		free( p );
+		return false;
 	}
-	else
+
+	std::vector< std::string > normalizedDirs;
+	
+	for( std::vector< std::string >::const_iterator itr = directories.begin(), end = directories.end(); itr != end; ++itr )
 	{
-	  fullPath = "";
+		if ( *itr == "." )
+		{
+			continue;
+		}
+		else if ( *itr == ".." )
+		{
+			normalizedDirs.pop_back();
+		}
+		else
+		{
+			normalizedDirs.push_back( *itr );
+		}
 	}
+
+	fullPath.reserve( PATH_MAX );
+	fullPath.clear();
+	
+	// if it's not absolute, start with CWD
+	if ( path[ 0 ] != Helium::PathSeparator )
+	{
+		char cwd[ PATH_MAX ];
+		getcwd( cwd, PATH_MAX );
+		fullPath = cwd;
+	}
+	
+	for( std::vector< std::string >::const_iterator itr = normalizedDirs.begin(), end = normalizedDirs.end(); itr != end; ++itr )
+	{
+		fullPath += Helium::PathSeparator;
+		fullPath += *itr;
+	}
+
+	return true;
 }
 
 bool Helium::IsAbsolute( const char* path )
@@ -298,40 +337,41 @@ bool Helium::IsAbsolute( const char* path )
 bool Helium::MakePath( const char* path )
 {
 	std::string fullPath;
-	GetFullPath( path, fullPath );
+	if ( !GetFullPath( path, fullPath ) )
+	{
+		return false;
+	}
 
 	std::vector< std::string > directories;
 	SplitDirectories( fullPath, directories );
 
-	if ( directories.size() == 1 )
+	if ( directories.empty() )
 	{
-		if ( !mkdir( path, 0777 ) )
-		{
-			return errno == EEXIST;
-		}
+		return false;
 	}
-	else
+	
+	struct stat status;
+	std::string currentDirectory;
+	currentDirectory.reserve( PATH_MAX );
+	currentDirectory = Helium::PathSeparator + directories[ 0 ];
+	std::vector< std::string >::const_iterator itr = directories.begin() + 1, end = directories.end();
+	do
 	{
-		struct stat status;
-		std::string currentDirectory;
-		currentDirectory.reserve( PATH_MAX );
-		currentDirectory = directories[ 0 ];
-		for( std::vector< std::string >::const_iterator itr = directories.begin() + 1, end = directories.end(); itr != end; ++itr )
+		if ( stat( currentDirectory.c_str(), &status ) != 0 )
 		{
-			if ( !IsAbsolute( currentDirectory.c_str() ) && stat( currentDirectory.c_str(), &status ) != 0 )
+			if ( !mkdir( currentDirectory.c_str(), 0777 ) )
 			{
-				if ( !mkdir( currentDirectory.c_str(), 0777 ) )
+				if ( errno != EEXIST )
 				{
-					if ( errno != EEXIST )
-					{
-						return false;
-					}
+					return false;
 				}
 			}
-
-			currentDirectory += std::string( "/" ) + *itr;
 		}
-	}
+
+		currentDirectory += Helium::PathSeparator;
+		currentDirectory += *itr;
+		++itr;
+	} while( itr <= end );
 
 	return true;
 }

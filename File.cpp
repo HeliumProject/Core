@@ -21,7 +21,7 @@ void Helium::SplitDirectories( const std::string& path, std::vector< std::string
 	}
 
 	std::string substr = path.substr( start );
-	if ( substr != pathSep )
+	if ( substr != pathSep && substr.length() > 0 )
 	{
 		output.push_back( substr ); 
 	}

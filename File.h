@@ -147,7 +147,7 @@ namespace Helium
 	//
 
 	HELIUM_PLATFORM_API extern const char PathSeparator;
-	HELIUM_PLATFORM_API void GetFullPath( const char* path, std::string& fullPath );
+	HELIUM_PLATFORM_API bool GetFullPath( const char* path, std::string& fullPath );
 	HELIUM_PLATFORM_API bool IsAbsolute( const char* path );
 	HELIUM_PLATFORM_API void SplitDirectories( const std::string& path, std::vector< std::string >& output );
 	HELIUM_PLATFORM_API bool MakePath( const char* path );
