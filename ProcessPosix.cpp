@@ -16,6 +16,7 @@
 #include <signal.h>
 #include <spawn.h>
 #include <dlfcn.h>
+#include <pwd.h>
 
 #if HELIUM_OS_MAC
 # include <mach-o/dyld.h>
@@ -171,13 +172,19 @@ std::string Helium::GetMachineName()
 
 std::string Helium::GetHomeDirectory()
 {
-	const char* user = getenv( "HOME" );
-	if ( user )
+	const char* home = getenv( "HOME" );
+
+	if ( !home )
 	{
-		return user;
+		struct passwd *pwd = getpwuid(getuid());
+		if ( pwd )
+		{
+			home = pwd->pw_dir;
+		}
 	}
-	HELIUM_ASSERT( false );
-	return "";
+
+	HELIUM_ASSERT( home );
+	return home;
 }
 
 Helium::ModuleHandle Helium::LoadModule( const char* modulePath )
