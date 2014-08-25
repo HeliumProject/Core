@@ -350,7 +350,8 @@ bool Helium::MakePath( const char* path )
 		std::string currentDirectory;
 		currentDirectory.reserve( MAX_PATH );
 		currentDirectory = directories[ 0 ];
-		for( std::vector< std::string >::const_iterator itr = directories.begin() + 1, end = directories.end(); itr != end; ++itr )
+		std::vector< std::string >::const_iterator itr = directories.begin() + 1, end = directories.end();
+		while( true )
 		{
 			HELIUM_TCHAR_TO_WIDE( currentDirectory.c_str(), convertedCurrentDirectory );
 
@@ -365,7 +366,15 @@ bool Helium::MakePath( const char* path )
 				}
 			}
 
-			currentDirectory += std::string( TXT("\\") ) + *itr;
+			if( itr != end )
+			{
+				currentDirectory += std::string( TXT("\\") ) + *itr;
+				++itr;
+			}
+			else
+			{
+				break;
+			}
 		}
 	}
 

@@ -355,7 +355,7 @@ bool Helium::MakePath( const char* path )
 	currentDirectory.reserve( PATH_MAX );
 	currentDirectory = Helium::PathSeparator + directories[ 0 ];
 	std::vector< std::string >::const_iterator itr = directories.begin() + 1, end = directories.end();
-	do
+	while( true )
 	{
 		if ( stat( currentDirectory.c_str(), &status ) != 0 )
 		{
@@ -368,10 +368,17 @@ bool Helium::MakePath( const char* path )
 			}
 		}
 
-		currentDirectory += Helium::PathSeparator;
-		currentDirectory += *itr;
-		++itr;
-	} while( itr <= end );
+		if( itr != end )
+		{
+			currentDirectory += Helium::PathSeparator;
+			currentDirectory += *itr;
+			++itr;
+		}
+		else
+		{
+			break;
+		}
+	}
 
 	return true;
 }
