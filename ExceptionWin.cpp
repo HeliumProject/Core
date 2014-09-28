@@ -66,11 +66,11 @@ static BOOL CALLBACK EnumerateLoadedModulesProc(PCTSTR name, DWORD64 base, ULONG
 			if ( moduleInfo.LoadedPdbName[0] != '\0' )
 			{
 				HELIUM_CONVERT_TO_CHAR( moduleInfo.LoadedPdbName, convertedPdbName ); 
-				Print( TXT("Success loading symbols for module: %s, base: 0x%08I64X, size: %u: %s\n"), convertedName, base, size, convertedPdbName );
+				Print( TXT("Success loading symbols for module: %s, base: 0x%"HELIUM_PRINT_POINTER", size: %u: %s\n"), convertedName, base, size, convertedPdbName );
 			}
 			else
 			{
-				Print( TXT("Success loading symbols for module: %s, base: 0x%08I64X, size: %u\n"), convertedName, base, size );
+				Print( TXT("Success loading symbols for module: %s, base: 0x%"HELIUM_PRINT_POINTER", size: %u\n"), convertedName, base, size );
 			}
 		}
 		else
@@ -208,7 +208,7 @@ std::string Helium::GetSymbolInfo(uintptr_t adr, bool enumLoadedModules)
 		{
 			HELIUM_WIDE_TO_TCHAR(symbolInfo->Name, convertedSymbolName);
 			// success, copy the symbol info
-			StringPrint(symbol, TXT("%s + 0x%X"), convertedSymbolName, disp);
+			StringPrint(symbol, TXT("%s + 0x%"HELIUM_PRINT_POINTER), convertedSymbolName, disp);
 
 			//
 			// Now find source line information
@@ -376,7 +376,7 @@ bool Helium::GetStackTrace(LPCONTEXT context, std::vector<uintptr_t>& stack, uns
 		}
 
 #ifdef DEBUG_SYMBOLS
-		Print( TXT( "0x%08I64X - %s\n" ), frame.AddrReturn.Offset, GetSymbolInfo(frame.AddrReturn.Offset, false).c_str() );
+		Print( TXT( "0x%"HELIUM_PRINT_POINTER" - %s\n" ), frame.AddrReturn.Offset, GetSymbolInfo(frame.AddrReturn.Offset, false).c_str() );
 #endif
 
 		if (omitFrames == 0)
@@ -398,7 +398,7 @@ void Helium::TranslateStackTrace(const std::vector<uintptr_t>& trace, std::strin
 	std::vector<uintptr_t>::const_iterator end = trace.end();
 	for ( ; itr != end; ++itr )
 	{
-		PrintToString(buffer, TXT("0x%08I64X - %s\n"), *itr, GetSymbolInfo(*itr, false).c_str() );
+		PrintToString(buffer, TXT("0x%"HELIUM_PRINT_POINTER" - %s\n"), *itr, GetSymbolInfo(*itr, false).c_str() );
 	}
 }
 
@@ -558,8 +558,8 @@ void Helium::GetExceptionDetails( LPEXCEPTION_POINTERS info, ExceptionArgs& args
 		{
 			PrintToString( args.m_Threads.back(), 
 				TXT("\nControl Registers:\n")
-				TXT("EIP = 0x%08X  ESP = 0x%08X\n")
-				TXT("EBP = 0x%08X  EFL = 0x%08X\n"),
+				TXT("EIP = 0x%"HELIUM_PRINT_POINTER"  ESP = 0x%"HELIUM_PRINT_POINTER"\n")
+				TXT("EBP = 0x%"HELIUM_PRINT_POINTER"  EFL = 0x%"HELIUM_PRINT_POINTER"\n"),
 				info->ContextRecord->IPREG,
 				info->ContextRecord->SPREG,
 				info->ContextRecord->BPREG,
@@ -567,9 +567,9 @@ void Helium::GetExceptionDetails( LPEXCEPTION_POINTERS info, ExceptionArgs& args
 
 			PrintToString( args.m_Threads.back(), 
 				TXT("\nInteger Registers:\n")
-				TXT("EAX = 0x%08X  EBX = 0x%08X\n")
-				TXT("ECX = 0x%08X  EDX = 0x%08X\n")
-				TXT("ESI = 0x%08X  EDI = 0x%08X\n"),
+				TXT("EAX = 0x%"HELIUM_PRINT_POINTER"  EBX = 0x%"HELIUM_PRINT_POINTER"\n")
+				TXT("ECX = 0x%"HELIUM_PRINT_POINTER"  EDX = 0x%"HELIUM_PRINT_POINTER"\n")
+				TXT("ESI = 0x%"HELIUM_PRINT_POINTER"  EDI = 0x%"HELIUM_PRINT_POINTER"\n"),
 				info->ContextRecord->AXREG,
 				info->ContextRecord->BXREG,
 				info->ContextRecord->CXREG,
@@ -660,15 +660,15 @@ void Helium::GetExceptionDetails( LPEXCEPTION_POINTERS info, ExceptionArgs& args
 
 		if (args.m_SEHCode == EXCEPTION_ACCESS_VIOLATION)
 		{
-			PrintToString( args.m_Message, TXT("Attempt to %s address 0x%08X"), (info->ExceptionRecord->ExceptionInformation[0]==1)?TXT("write to"):TXT("read from"), info->ExceptionRecord->ExceptionInformation[1]);
+			PrintToString( args.m_Message, TXT("Attempt to %s address 0x%"HELIUM_PRINT_POINTER""), (info->ExceptionRecord->ExceptionInformation[0]==1)?TXT("write to"):TXT("read from"), info->ExceptionRecord->ExceptionInformation[1]);
 		}
 
 		if (info->ContextRecord->ContextFlags & CONTEXT_CONTROL)
 		{
 			PrintToString( args.m_SEHControlRegisters, 
 				TXT("Control Registers:\n")
-				TXT("EIP = 0x%08X  ESP = 0x%08X\n")
-				TXT("EBP = 0x%08X  EFL = 0x%08X\n"),
+				TXT("EIP = 0x%"HELIUM_PRINT_POINTER"  ESP = 0x%"HELIUM_PRINT_POINTER"\n")
+				TXT("EBP = 0x%"HELIUM_PRINT_POINTER"  EFL = 0x%"HELIUM_PRINT_POINTER"\n"),
 				info->ContextRecord->IPREG,
 				info->ContextRecord->SPREG,
 				info->ContextRecord->BPREG,
@@ -679,9 +679,9 @@ void Helium::GetExceptionDetails( LPEXCEPTION_POINTERS info, ExceptionArgs& args
 		{
 			PrintToString( args.m_SEHIntegerRegisters, 
 				TXT("Integer Registers:\n")
-				TXT("EAX = 0x%08X  EBX = 0x%08X\n")
-				TXT("ECX = 0x%08X  EDX = 0x%08X\n")
-				TXT("ESI = 0x%08X  EDI = 0x%08X\n"),
+				TXT("EAX = 0x%"HELIUM_PRINT_POINTER"  EBX = 0x%"HELIUM_PRINT_POINTER"\n")
+				TXT("ECX = 0x%"HELIUM_PRINT_POINTER"  EDX = 0x%"HELIUM_PRINT_POINTER"\n")
+				TXT("ESI = 0x%"HELIUM_PRINT_POINTER"  EDI = 0x%"HELIUM_PRINT_POINTER"\n"),
 				info->ContextRecord->AXREG,
 				info->ContextRecord->BXREG,
 				info->ContextRecord->CXREG,
@@ -724,7 +724,7 @@ std::string Helium::GetExceptionInfo(LPEXCEPTION_POINTERS info)
 	case ExceptionTypes::Structured:
 		{
 			PrintToString( buffer, TXT("Type:    SEH Exception\n") );
-			PrintToString( buffer, TXT("Code:    0x%08X\n"), args.m_SEHCode );
+			PrintToString( buffer, TXT("Code:    0x%"HELIUM_PRINT_POINTER"\n"), args.m_SEHCode );
 			PrintToString( buffer, TXT("Class:   %s\n"), args.m_SEHClass.c_str() );
 
 			if ( !args.m_Message.empty() )
