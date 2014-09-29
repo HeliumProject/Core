@@ -233,7 +233,7 @@ void DynamicMemoryHeap::LogMemoryStats()
 			{
 				HELIUM_TRACE(
 					TraceLevels::Debug,
-					TXT( "%" ) PRIuSZ TXT( ": 0x%"HELIUM_PRINT_POINTER" (%s)\n" ),
+					TXT( "%" ) PRIuSZ TXT( ": 0x%" HELIUM_PRINT_POINTER " (%s)\n" ),
 					allocationIndex,
 					iter->first,
 					pHeapName );
@@ -253,7 +253,7 @@ void DynamicMemoryHeap::LogMemoryStats()
 
 					Helium::GetAddressSymbol( symbol, pAddress );
 					const char* pSymbol = symbol.c_str();
-					HELIUM_TRACE( TraceLevels::Debug, TXT( "- 0x%"HELIUM_PRINT_POINTER": %s\n" ), pAddress, ( pSymbol ? pSymbol : TXT( "" ) ) );
+					HELIUM_TRACE( TraceLevels::Debug, TXT( "- 0x%" HELIUM_PRINT_POINTER ": %s\n" ), pAddress, ( pSymbol ? pSymbol : TXT( "" ) ) );
 				}
 			}
 		}
