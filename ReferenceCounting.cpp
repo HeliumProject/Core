@@ -131,7 +131,7 @@ void ObjectRefCountSupport::Shutdown()
 
 			HELIUM_TRACE(
 				TraceLevels::Error,
-				TXT( "   - 0x%p: (%" ) PRIu16 TXT( " strong ref(s), %" ) PRIu16 TXT( " weak ref(s))\n" ),
+				TXT( "   - 0x%"HELIUM_PRINT_POINTER": (%" ) PRIu16 TXT( " strong ref(s), %" ) PRIu16 TXT( " weak ref(s))\n" ),
 				pProxy,
 				pProxy->GetStrongRefCount(),
 				pProxy->GetWeakRefCount() );

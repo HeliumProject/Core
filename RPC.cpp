@@ -213,7 +213,7 @@ void Host::Emit(Invoker* invoker, Args* args, uint32_t size, SwizzleFunc swizzle
 		}
 
 #ifdef RPC_DEBUG_MSG
-		printf("RPC::Put message id 0x%08x, size %d, transaction %d\n", msg_id, msg_size, msg_transaction);
+		printf("RPC::Put message id 0x%"HELIUM_PRINT_POINTER", size %d, transaction %d\n", msg_id, msg_size, msg_transaction);
 #endif
 
 		message = NULL; // assume its GONE
@@ -426,7 +426,7 @@ bool Host::Invoke(IPC::Message* msg)
 	}
 
 #ifdef RPC_DEBUG_MSG
-	printf("RPC::Put message id 0x%08x, size %d, transaction %d\n", reply->GetID(), reply->GetSize(), reply->GetTransaction());
+	printf("RPC::Put message id 0x%"HELIUM_PRINT_POINTER", size %d, transaction %d\n", reply->GetID(), reply->GetSize(), reply->GetTransaction());
 #endif
 
 	if (!frame->m_MessageTaken)
@@ -498,7 +498,7 @@ bool Host::Process(bool wait)
 			}
 
 #ifdef RPC_DEBUG_MSG
-			printf("RPC::Got message id 0x%08x, size %d, transaction %d\n", msg->GetID(), msg->GetSize(), msg->GetTransaction());
+			printf("RPC::Got message id 0x%"HELIUM_PRINT_POINTER", size %d, transaction %d\n", msg->GetID(), msg->GetSize(), msg->GetTransaction());
 #endif
 
 			bool is_reply = m_Connection->CreatedMessage(msg->GetTransaction());

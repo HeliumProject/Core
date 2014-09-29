@@ -14,8 +14,8 @@
 #include "Foundation/Endian.h"
 
 typedef uint64_t tuid;
-#define TUID_HEX_FORMAT TXT( "0x%016I64X" )
-#define TUID_INT_FORMAT TXT( "%I64u" )
+#define TUID_HEX_FORMAT TXT( "0x%016"PRIX64 )
+#define TUID_INT_FORMAT TXT( "%"PRIu64 )
 
 namespace Helium
 {
