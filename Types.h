@@ -41,7 +41,7 @@
 /// "char" string format macro for size_t.
 # define PRIuSZ TXT( "zu" )
 
-#elif
+#else
 
 #error Unknown compiler for defining format macros!
 
@@ -62,7 +62,7 @@ typedef double float64_t;
 #define HELIUM_PRINT_POINTER "08" PRIXPTR
 #elif HELIUM_CPU_X86_64
 #define HELIUM_PRINT_POINTER "016" PRIXPTR
-#elif
+#else
 #error Unknown register width!
 #endif
 
