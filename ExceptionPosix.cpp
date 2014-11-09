@@ -18,10 +18,8 @@
 #endif
 
 #if HELIUM_OS_LINUX
-static void* test_trace(void* ignored)
-{
-  return (void*)ptrace(PTRACE_TRACEME, 0, NULL, NULL);
-}
+#include <fstream>
+#include <string.h>
 #endif
 
 bool Helium::IsDebuggerPresent()
@@ -58,24 +56,21 @@ bool Helium::IsDebuggerPresent()
 
 #elif HELIUM_OS_LINUX
 
-  pthread_attr_t attr;
-  void* result;
-  pthread_t thread;
-
-  pthread_attr_init(&attr);
-  pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
-  if (pthread_create(&thread, &attr, test_trace, NULL) != 0)
-  {
-    pthread_attr_destroy(&attr);
-    return false;
+  const int maxline = 1024;
+  char buffer[maxline];
+  const char * tracerheader = "TracerPid:";
+  const int len = strlen(tracerheader);
+  std::ifstream status("/proc/self/status");
+  while (status.getline(&buffer[0], maxline)) {
+    if (!strncmp(buffer,tracerheader,strlen(tracerheader)))
+    {
+      std::string rest(buffer+len);
+      std::stringstream stream(rest);
+      int tracerpid;
+      stream >> tracerpid;
+      return !!tracerpid;
+    }
   }
-  pthread_attr_destroy(&attr);
-  if (pthread_join(thread, &result) != 0)
-  {
-    return false;
-  }
-
-  return result != NULL;
 
 #endif
 
