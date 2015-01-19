@@ -38,3 +38,6 @@
 ///
 /// @param[in] ALIGNMENT  Byte alignment (must be a power of two).
 #define HELIUM_ALIGN_POST( ALIGNMENT ) __attribute__( ( aligned( ALIGNMENT ) ) )
+
+/// Mark variable as actually used (omit unused variable warning)
+#define HELIUM_UNUSED(expr) (void)(expr)

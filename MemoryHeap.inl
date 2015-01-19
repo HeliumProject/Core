@@ -226,8 +226,10 @@ HELIUM_FORCEINLINE size_t Helium::DefaultAllocator::GetMemorySizeAligned( void* 
 # if HELIUM_OS_WIN
 	return _aligned_msize( pMemory, alignment, 0 );
 # elif HELIUM_OS_LINUX
+	HELIUM_UNUSED( alignment );
 	return malloc_usable_size( pMemory );
 # elif HELIUM_OS_MAC
+	HELIUM_UNUSED( alignment );
 	return malloc_size( pMemory );
 # endif
 #endif

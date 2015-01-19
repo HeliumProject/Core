@@ -40,6 +40,9 @@
 /// @param[in] ALIGNMENT  Byte alignment (must be a power of two).
 #define HELIUM_ALIGN_POST( ALIGNMENT )
 
+/// Mark variable as actually used (omit unused variable warning)
+#define HELIUM_UNUSED(expr) (void)(expr)
+
 // Template classes shouldn't be DLL exported, but the compiler warns us by default.
 #pragma warning( disable : 4251 ) // 'identifier' : class 'type' needs to have dll-interface to be used by clients of class 'type2'
 // Visual C++ does not support exception specifications at this time, but we still want to retain them for compilers
