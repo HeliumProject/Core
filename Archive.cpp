@@ -464,24 +464,7 @@ void ArchiveReader::Resolve()
 	info.m_Progress = 100;
 	e_Status.Raise( info );
 
-#if HELIUM_TOOLS
-	// finish linking objects (unless we have a custom handler)
-	for ( DynamicArray< Fixup >::ConstIterator itr = m_Fixups.Begin(), end = m_Fixups.End(); itr != end; ++itr )
-	{
-		RefCountProxyBase< void >* proxy = m_Proxies[ itr->m_Index ];
-		if ( proxy )
-		{
-			Object* found = m_Objects.GetElement( itr->m_Index );
-			if ( found )
-			{
-				if ( !found->IsA( itr->m_PointerClass ) )
-				{
-					Log::Warning( TXT( "Object of type '%s' is not valid for pointer type '%s'" ), found->GetMetaClass()->m_Name, itr->m_PointerClass->m_Name );
-				}
-			}
-		}
-	}
-#endif
+	// do any necessary object finalization here
 
 	info.m_State = ArchiveStates::Complete;
 	e_Status.Raise( info );
