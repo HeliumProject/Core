@@ -15,29 +15,14 @@ namespace Helium
 
 	class HELIUM_FOUNDATION_API FilePath
 	{
-	private:
-		std::string m_Path;
-
-		void Init( const char* path );
-
 	public:
-		static void Normalize( std::string& path );
-		static void MakeNative( std::string& path );
-		static void GuaranteeSeparator( std::string& path );
-
-		static bool Exists( const std::string& path );
-		static bool IsAbsolute( const char* path );
-		static bool IsUnder( const std::string& location, const std::string& path );
-
-	public:
-		explicit FilePath( const std::string& path = TXT( "" ) );
+		FilePath();
+		FilePath( const std::string& path );
 		FilePath( const FilePath& path );
-
-		const char* operator*() const;
 
 		FilePath& operator=( const FilePath& rhs );
 		bool operator==( const FilePath& rhs ) const;
-
+		bool operator!=( const FilePath& rhs ) const;
 		bool operator<( const FilePath& rhs ) const;
 
 		FilePath operator+( const char* rhs ) const;
@@ -53,17 +38,21 @@ namespace Helium
 		void Set( const String& path );
 		void Clear();
 
-		void TrimToExisting();
+		size_t Length() const;
+		bool Empty() const;
+		const char* Data() const;
 
-		void Split( std::string& directory, std::string& filename ) const;
-		void Split( std::string& directory, std::string& filename, std::string& extension ) const;
+		void Split( FilePath& directory, FilePath& filename ) const;
+		void Split( FilePath& directory, FilePath& filename, std::string& extension ) const;
 
+		// relatives
+		FilePath Directory() const;
+		FilePath Parent() const;
+
+		// components
+		void Directories( std::vector< std::string >& directories ) const;
+		FilePath Filename() const;
 		std::string Basename() const;
-		std::string Filename() const;
-		std::string Directory() const;
-		std::string Parent() const;
-		std::vector< std::string > DirectoryAsVector() const;
-
 		std::string Extension() const;
 		std::string FullExtension() const;
 		void RemoveExtension();
@@ -72,47 +61,48 @@ namespace Helium
 		void ReplaceFullExtension( const std::string& newExtension );
 		bool HasExtension( const char* extension ) const;
 
-		std::string Native() const;
-		std::string Absolute() const;
-		std::string Normalized() const;
-		std::string Signature();
+		// munging
+		FilePath Native() const;
+		FilePath Absolute() const;
+		FilePath Normalized() const;
 
+		// utility
 		bool Exists() const;
 		bool IsAbsolute() const;
-		bool IsUnder( const std::string& location ) const;
+		bool IsUnder( const FilePath& location ) const;
 		bool IsFile() const;
 		bool IsDirectory() const;
 		bool Writable() const;
 		bool Readable() const;
 
+		// file
+		void TrimToExisting();
 		bool MakePath() const;
 		bool Create() const;
 		bool Copy( const Helium::FilePath& target, bool overwrite = true ) const;
 		bool Move( const Helium::FilePath& target ) const;
 		bool Delete() const;
 
+		// meta
+		std::string MD5() const;
 		std::string FileMD5() const;
 		bool VerifyFileMD5( const std::string& hash ) const;
 
-	public:
-
+		// relpath
 		Helium::FilePath GetAbsolutePath( const Helium::FilePath& basisPath ) const;
 		Helium::FilePath GetRelativePath( const Helium::FilePath& basisPath ) const;
 
-	public:
+		static void Normalize( FilePath& path );
+		static void MakeNative( FilePath& path );
+		static void GuaranteeSeparator( FilePath& path );
 
-		size_t length() const;
-		bool empty() const;
-		const char* c_str() const;
-		operator const char*() const
-		{
-			return c_str();
-		}
-		operator const std::string&() const
-		{
-			return m_Path;
-		}
+		static bool Exists( const FilePath& path );
+		static bool IsAbsolute( const FilePath& path );
+		static bool IsUnder( const FilePath& location, const FilePath& path );
 
-		static const FilePath NULL_FILE_PATH;
+	private:
+		void Init( const char* path );
+
+		std::string m_Path;
 	};
 }

@@ -117,7 +117,7 @@ bool DirectoryIterator::Find()
         bool ok = true;
         bool needStatPath = true;
 
-        std::string absolutePath;
+        FilePath absolutePath;
 
         // skip relative path directories if fileName is "." or ".."
         if ( ( CompareString( entry.m_Name.c_str(), TXT( "." ) ) == 0 ) || ( CompareString( entry.m_Name.c_str(), TXT( ".." ) ) == 0 ) )
@@ -128,7 +128,7 @@ bool DirectoryIterator::Find()
         {
             absolutePath = m_Path.Get() + entry.m_Name;
 
-            HELIUM_VERIFY( entry.m_Stat.Read( absolutePath.c_str() ) );
+            HELIUM_VERIFY( entry.m_Stat.Read( absolutePath.Data() ) );
             needStatPath = false;
 
             // directory...
@@ -161,7 +161,7 @@ bool DirectoryIterator::Find()
             if ( needStatPath )
             {
                 absolutePath = m_Path.Get() + entry.m_Name;
-				HELIUM_VERIFY( entry.m_Stat.Read( absolutePath.c_str() ) );
+				HELIUM_VERIFY( entry.m_Stat.Read( absolutePath.Data() ) );
             }
 
             if ( m_Flags & DirectoryFlags::RelativePath )
@@ -175,7 +175,7 @@ bool DirectoryIterator::Find()
                     FilePath::GuaranteeSeparator( absolutePath );
                 }
 
-                m_Item.m_Path.Set( absolutePath );
+                m_Item.m_Path = absolutePath;
             }
 
             m_Item.m_CreateTime = entry.m_Stat.m_CreatedTime;
