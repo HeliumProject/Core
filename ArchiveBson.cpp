@@ -137,7 +137,7 @@ void ArchiveWriterBson::Open()
 #endif
 
 	FileStream* stream = new FileStream();
-	stream->Open( m_Path, FileStream::MODE_WRITE );
+	stream->Open( m_Path.Data(), FileStream::MODE_WRITE );
 	m_Stream.Reset( stream );
 }
 
@@ -504,7 +504,7 @@ void ArchiveReaderBson::Open()
 #endif
 
 	FileStream* stream = new FileStream();
-	stream->Open( m_Path, FileStream::MODE_READ );
+	stream->Open( m_Path.Data(), FileStream::MODE_READ );
 	m_Stream.Reset( stream );
 }
 
@@ -570,7 +570,7 @@ void ArchiveReaderBson::Start()
 	// fail on an empty input stream
 	if ( m_Size == 0 )
 	{
-		throw Persist::StreamException( TXT( "Input stream is empty (%s)" ), m_Path.c_str() );
+		throw Persist::StreamException( TXT( "Input stream is empty (%s)" ), m_Path.Data() );
 	}
 
 	// read entire contents

@@ -44,7 +44,7 @@ Archive::Archive( const FilePath& path, uint32_t flags )
 	, m_Abort( false )
 	, m_Flags( flags )
 {
-	HELIUM_ASSERT( !m_Path.empty() );
+	HELIUM_ASSERT( !m_Path.Empty() );
 }
 
 Archive::~Archive()
@@ -96,9 +96,9 @@ bool ArchiveWriter::WriteToFile( const FilePath& path, const ObjectPtr& object, 
 
 bool ArchiveWriter::WriteToFile( const FilePath& path, const ObjectPtr* objects, size_t count, ObjectIdentifier* identifier, ArchiveType archiveType, std::string* error )
 {
-	HELIUM_ASSERT( !path.empty() );
-	HELIUM_PERSIST_SCOPE_TIMER( "%s", path.c_str() );
-	Log::Debug( TXT( "Generating '%s'\n" ), path.c_str() );
+	HELIUM_ASSERT( !path.Empty() );
+	HELIUM_PERSIST_SCOPE_TIMER( "%s", path.Data() );
+	Log::Debug( TXT( "Generating '%s'\n" ), path.Data() );
 
 	path.MakePath();
 
@@ -129,7 +129,7 @@ bool ArchiveWriter::WriteToFile( const FilePath& path, const ObjectPtr* objects,
 		catch ( Helium::Exception& ex )
 		{
 			std::stringstream str;
-			str << "While writing '" << path.c_str() << "': " << ex.Get();
+			str << "While writing '" << path.Data() << "': " << ex.Get();
 
 			if ( error )
 			{
@@ -167,7 +167,7 @@ bool ArchiveWriter::WriteToFile( const FilePath& path, const ObjectPtr* objects,
 	catch ( Helium::Exception& ex )
 	{
 		std::stringstream str;
-		str << "While moving '" << safetyPath.c_str() << "' to '" << path.c_str() << "': " << ex.Get();
+		str << "While moving '" << safetyPath.Data() << "' to '" << path.Data() << "': " << ex.Get();
 
 		if ( error )
 		{
@@ -293,9 +293,9 @@ bool ArchiveReader::ReadFromFile( const FilePath& path, ObjectPtr& object, Objec
 
 bool ArchiveReader::ReadFromFile( const FilePath& path, DynamicArray< ObjectPtr >& objects, ObjectResolver* resolver, ArchiveType archiveType, std::string* error )
 {
-	HELIUM_ASSERT( !path.empty() );
-	HELIUM_PERSIST_SCOPE_TIMER( "%s", path.c_str() );
-	Log::Debug( TXT( "Parsing '%s'\n" ), path.c_str() );
+	HELIUM_ASSERT( !path.Empty() );
+	HELIUM_PERSIST_SCOPE_TIMER( "%s", path.Data() );
+	Log::Debug( TXT( "Parsing '%s'\n" ), path.Data() );
 
 	SmartPtr< ArchiveReader > archive = GetReader( path, resolver, archiveType );
 
@@ -319,7 +319,7 @@ bool ArchiveReader::ReadFromFile( const FilePath& path, DynamicArray< ObjectPtr 
 		catch ( Helium::Exception& ex )
 		{
 			std::stringstream str;
-			str << "While reading '" << path.c_str() << "': " << ex.Get();
+			str << "While reading '" << path.Data() << "': " << ex.Get();
 
 			if ( error )
 			{
