@@ -309,7 +309,8 @@ bool Helium::GetFullPath( const char* path, std::string& fullPath )
 	if ( path[ 0 ] != Helium::PathSeparator )
 	{
 		char cwd[ PATH_MAX ];
-		getcwd( cwd, PATH_MAX );
+		char* result = getcwd( cwd, PATH_MAX );
+		HELIUM_ASSERT( result ); // will fire when cwd isn't large enough
 		fullPath = cwd;
 	}
 	
