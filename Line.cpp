@@ -82,7 +82,7 @@ bool Line::IntersectsLine(const Vector3& p1, const Vector3& p2, Vector3* locatio
     p43.y = p4.y - p3.y;
     p43.z = p4.z - p3.z;
 
-    if (abs(p43.x) < EPSILON && abs(p43.y) < EPSILON && abs(p43.z) < EPSILON)
+    if (fabs(p43.x) < EPSILON && fabs(p43.y) < EPSILON && fabs(p43.z) < EPSILON)
     {
         return false;
     }
@@ -91,7 +91,7 @@ bool Line::IntersectsLine(const Vector3& p1, const Vector3& p2, Vector3* locatio
     p21.y = p2.y - p1.y;
     p21.z = p2.z - p1.z;
 
-    if (abs(p21.x) < EPSILON && abs(p21.y) < EPSILON && abs(p21.z) < EPSILON)
+    if (fabs(p21.x) < EPSILON && fabs(p21.y) < EPSILON && fabs(p21.z) < EPSILON)
     {
         return false;
     }
@@ -104,7 +104,7 @@ bool Line::IntersectsLine(const Vector3& p1, const Vector3& p2, Vector3* locatio
 
     denom = d2121 * d4343 - d4321 * d4321;
 
-    if (abs(denom) < EPSILON)
+    if (fabs(denom) < EPSILON)
     {
         return false;
     }
@@ -141,7 +141,7 @@ bool Line::IntersectsSegment(const Vector3& p1, const Vector3& p2, const float32
     p43.y = p4.y - p3.y;
     p43.z = p4.z - p3.z;
 
-    if (abs(p43.x) < EPSILON && abs(p43.y) < EPSILON && abs(p43.z) < EPSILON)
+    if (fabs(p43.x) < EPSILON && fabs(p43.y) < EPSILON && fabs(p43.z) < EPSILON)
     {
         return false;
     }
@@ -150,7 +150,7 @@ bool Line::IntersectsSegment(const Vector3& p1, const Vector3& p2, const float32
     p21.y = p2.y - p1.y;
     p21.z = p2.z - p1.z;
 
-    if (abs(p21.x) < EPSILON && abs(p21.y) < EPSILON && abs(p21.z) < EPSILON)
+    if (fabs(p21.x) < EPSILON && fabs(p21.y) < EPSILON && fabs(p21.z) < EPSILON)
     {
         return false;
     }
@@ -163,7 +163,7 @@ bool Line::IntersectsSegment(const Vector3& p1, const Vector3& p2, const float32
 
     denom = d2121 * d4343 - d4321 * d4321;
 
-    if (abs(denom) < EPSILON)
+    if (fabs(denom) < EPSILON)
     {
         return false;
     }
@@ -468,7 +468,7 @@ bool Line::IntersectsPlane(const Plane& plane, Vector3* intersection) const
 
     float32_t den = (plane.A() * (m_Origin.x - m_Point.x)) + (plane.B() * (m_Origin.y - m_Point.y)) + (plane.C() * (m_Origin.z - m_Point.z));
 
-    if (abs(den) < HELIUM_VALUE_NEAR_ZERO)
+    if (fabs(den) < HELIUM_VALUE_NEAR_ZERO)
     {
         return false;
     }

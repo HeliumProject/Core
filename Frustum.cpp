@@ -358,7 +358,7 @@ bool Frustum::IntersectsBox(const AlignedBox& box, bool precise) const
 			const Plane& p = (*this)[i];
 
 			m = (c.x * p.A()) + (c.y * p.B()) + (c.z * p.C()) + p.D();
-			n = (d.x * abs(p.A())) + (d.y * abs(p.B())) + (d.z * abs(p.C()));
+			n = (d.x * fabs(p.A())) + (d.y * fabs(p.B())) + (d.z * fabs(p.C()));
 
 			if (m + n < 0)
 			{
