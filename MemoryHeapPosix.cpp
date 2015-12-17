@@ -25,6 +25,11 @@ using namespace Helium;
 /// @see Free()
 void* VirtualMemory::Allocate( size_t size )
 {
+	// different systems refer to the same flag by different macros
+#if !defined(MAP_ANONYMOUS) && defined(MAP_ANON)
+# define MAP_ANONYMOUS MAP_ANON
+#endif
+
 	int flags = MAP_PRIVATE | MAP_ANONYMOUS;
 
 #if HELIUM_OS_LINUX && !HELIUM_DEBUG
