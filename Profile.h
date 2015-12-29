@@ -34,14 +34,14 @@ namespace Helium
 {
 	namespace Profile
 	{
-		HELIUM_FOUNDATION_API void Initialize();
-		HELIUM_FOUNDATION_API void Cleanup();
+		HELIUM_FOUNDATION_API void Startup();
+		HELIUM_FOUNDATION_API void Shutdown();
 
 		class HELIUM_FOUNDATION_API Sink
 		{
 		public:
-			Sink( const char* name );
-			Sink( const char* func, const char* file, uint32_t line );
+			Sink(const char* name);
+			Sink(const char* func, const char* file, uint32_t line);
 			~Sink();
 
 			void Init();
@@ -59,8 +59,8 @@ namespace Helium
 
 		class HELIUM_FOUNDATION_API Timer
 		{
-		public: 
-			Timer( Sink& sink, const char* fmt = NULL, ... );
+		public:
+			Timer(Sink& sink, const char* fmt = NULL, ...);
 			~Timer();
 
 			char     m_Name[HELIUM_PROFILE_STRING_MAX];
@@ -68,17 +68,17 @@ namespace Helium
 			uint64_t m_StartTicks;
 			uint32_t m_UniqueID;
 
-		private: 
+		private:
 			Timer(const Timer& rhs); // no implementation
 		};
 
 		struct Header
 		{
-			uint16_t m_Command; 
-			uint16_t m_Size; 
+			uint16_t m_Command;
+			uint16_t m_Size;
 		};
 
-		struct InitPacket 
+		struct InitPacket
 		{
 			Header    m_Header;
 			uint32_t  m_Version;
@@ -138,22 +138,22 @@ namespace Helium
 			{
 				uint32_t spaceNeeded = sizeof(T) + sizeof(BlockEndPacket) + sizeof(ScopeEnterPacket);
 
-				if (m_PacketBufferOffset + spaceNeeded >= HELIUM_PROFILE_PACKET_BLOCK_SIZE)
+				if ( m_PacketBufferOffset + spaceNeeded >= HELIUM_PROFILE_PACKET_BLOCK_SIZE )
 				{
 					FlushFile();
 				}
 
-				T* packet = (T*) (m_PacketBuffer + m_PacketBufferOffset);
+				T* packet = (T*)( m_PacketBuffer + m_PacketBufferOffset );
 				m_PacketBufferOffset += sizeof(T);
 
 				//Log::Print("CMD %d OFFSET %d\n", cmd, m_PacketBufferOffset);
 
 				packet->m_Header.m_Command = cmd;
-				packet->m_Header.m_Size    = sizeof(T);
+				packet->m_Header.m_Size = sizeof(T);
 
 				return packet;
 			}
-		}; 
+		};
 	}
 }
 
