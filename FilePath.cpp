@@ -40,7 +40,7 @@ FilePath& FilePath::operator=( const FilePath& rhs )
 bool FilePath::operator==( const FilePath& rhs ) const
 {
 #if HELIUM_OS_LINUX
-	return CaseSensitiveCompareString( Data(), rhs.Data() ) == 0;
+	return CompareString( Data(), rhs.Data() ) == 0;
 #else
 	return CaseInsensitiveCompareString( Data(), rhs.Data() ) == 0;
 #endif
@@ -49,7 +49,7 @@ bool FilePath::operator==( const FilePath& rhs ) const
 bool FilePath::operator!=( const FilePath& rhs ) const
 {
 #if HELIUM_OS_LINUX
-	return CaseSensitiveCompareString( Data(), rhs.Data() ) != 0;
+	return CompareString( Data(), rhs.Data() ) != 0;
 #else
 	return CaseInsensitiveCompareString( Data(), rhs.Data() ) != 0;
 #endif
@@ -58,7 +58,7 @@ bool FilePath::operator!=( const FilePath& rhs ) const
 bool FilePath::operator<( const FilePath& rhs ) const
 {
 #if HELIUM_OS_LINUX
-	return CaseSensitiveCompareString( Data(), rhs.Data() ) < 0;
+	return CompareString( Data(), rhs.Data() ) < 0;
 #else
 	return CaseInsensitiveCompareString( Data(), rhs.Data() ) < 0;
 #endif
@@ -320,7 +320,7 @@ bool FilePath::HasExtension( const char* extension ) const
 	}
 
 #if HELIUM_OS_LINUX
-	return CaseSensitiveCompareString( Data() + ( m_Path.length() - len ), extension ) == 0;
+	return CompareString( Data() + ( m_Path.length() - len ), extension ) == 0;
 #else
 	return CaseInsensitiveCompareString( Data() + ( m_Path.length() - len ), extension ) == 0;
 #endif
@@ -569,7 +569,7 @@ bool FilePath::IsAbsolute( const FilePath& path )
 bool FilePath::IsUnder( const FilePath& location, const FilePath& path )
 {
 #if HELIUM_OS_LINUX
-	return CaseSensitiveCompareString( location.Data(), path.Data(), location.m_Path.length() ) == 0;
+	return CompareString( location.Data(), path.Data(), location.m_Path.length() ) == 0;
 #else
 	return CaseInsensitiveCompareString( location.Data(), path.Data(), location.m_Path.length() ) == 0;
 #endif
