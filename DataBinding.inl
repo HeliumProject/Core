@@ -84,7 +84,7 @@ template< class T >
 bool Helium::Inspect::DataBindingTemplate<T>::SetAll(const std::vector<T>& s, const DataChangedSignature::Delegate& emitter)
 {
 	bool result = false;
-	HELIUM_ASSERT( s.size() == 1 ); // this means you did not HELIUM_OVERRIDE this function for data objects that support multi
+	HELIUM_ASSERT( s.size() == 1 ); // this means you did not override this function for data objects that support multi
 	if ( s.size() > 0 )
 	{
 		result = Set( s.back(), emitter );

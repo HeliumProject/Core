@@ -35,7 +35,7 @@ namespace Helium
             List();
 
         protected:
-            virtual bool Process(const std::string& key, const std::string& value) HELIUM_OVERRIDE;
+            virtual bool Process(const std::string& key, const std::string& value) override;
             void SetToDefault(const ContextMenuEventArgs& event);
 
         public:

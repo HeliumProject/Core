@@ -120,7 +120,7 @@ bool Control::IsDefault() const
 		return a_Default.Get() == val;
 	}
 
-	HELIUM_BREAK(); // you need to HELIUM_OVERRIDE this, your control is using custom data
+	HELIUM_BREAK(); // you need to override this, your control is using custom data
 	return false;
 }
 

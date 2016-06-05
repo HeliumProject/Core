@@ -184,8 +184,8 @@ namespace Helium
 			typedef Helium::SmartPtr< DataBindingTemplate > Ptr;
 
 		public:
-			virtual void Refresh() HELIUM_OVERRIDE;
-			virtual UndoCommandPtr GetUndoCommand() const HELIUM_OVERRIDE;
+			virtual void Refresh() override;
+			virtual UndoCommandPtr GetUndoCommand() const override;
 
 			virtual bool Set(const T& s, const DataChangedSignature::Delegate& emitter = DataChangedSignature::Delegate ()) = 0;
 			virtual bool SetAll(const std::vector<T>& s, const DataChangedSignature::Delegate& emitter = DataChangedSignature::Delegate ());
@@ -212,8 +212,8 @@ namespace Helium
 		public:
 			DataBindingCommand( const typename DataBindingTemplate<T>::Ptr& data );
 
-			virtual void Undo() HELIUM_OVERRIDE;
-			virtual void Redo() HELIUM_OVERRIDE;
+			virtual void Undo() override;
+			virtual void Redo() override;
 			virtual bool IsSignificant() const;
 
 		private:
@@ -253,8 +253,8 @@ namespace Helium
 			StringFormatter(T* data, bool perishable = false);
 			virtual ~StringFormatter();
 
-			virtual bool Set(const std::string& s, const DataChangedSignature::Delegate& emitter = NULL) HELIUM_OVERRIDE;
-			virtual void Get(std::string& s) const HELIUM_OVERRIDE;
+			virtual bool Set(const std::string& s, const DataChangedSignature::Delegate& emitter = NULL) override;
+			virtual void Get(std::string& s) const override;
 		};
 
 		//
@@ -278,11 +278,11 @@ namespace Helium
 			MultiStringFormatter( const std::vector<T*>& data, bool perishable = false);
 			virtual ~MultiStringFormatter();
 
-			virtual bool Set(const std::string& s, const DataChangedSignature::Delegate& emitter = NULL) HELIUM_OVERRIDE;
-			virtual bool SetAll(const std::vector< std::string >& values, const DataChangedSignature::Delegate& emitter = NULL) HELIUM_OVERRIDE;
+			virtual bool Set(const std::string& s, const DataChangedSignature::Delegate& emitter = NULL) override;
+			virtual bool SetAll(const std::vector< std::string >& values, const DataChangedSignature::Delegate& emitter = NULL) override;
 
-			virtual void Get(std::string& s) const HELIUM_OVERRIDE;
-			virtual void GetAll(std::vector< std::string >& s) const HELIUM_OVERRIDE;
+			virtual void Get(std::string& s) const override;
+			virtual void GetAll(std::vector< std::string >& s) const override;
 		};
 
 		//
@@ -302,8 +302,8 @@ namespace Helium
 			PropertyStringFormatter(const Helium::SmartPtr< Helium::Property<T> >& property);
 			virtual ~PropertyStringFormatter();
 
-			virtual bool Set(const std::string& s, const DataChangedSignature::Delegate& emitter = NULL) HELIUM_OVERRIDE;
-			virtual void Get(std::string& s) const HELIUM_OVERRIDE;
+			virtual bool Set(const std::string& s, const DataChangedSignature::Delegate& emitter = NULL) override;
+			virtual void Get(std::string& s) const override;
 		};
 
 		//
@@ -323,11 +323,11 @@ namespace Helium
 			MultiPropertyStringFormatter(const std::vector< Helium::SmartPtr< Helium::Property<T> > >& properties);
 			virtual ~MultiPropertyStringFormatter();
 
-			virtual bool Set(const std::string& s, const DataChangedSignature::Delegate& emitter = NULL) HELIUM_OVERRIDE;
-			virtual bool SetAll(const std::vector< std::string >& s, const DataChangedSignature::Delegate& emitter = NULL) HELIUM_OVERRIDE;
+			virtual bool Set(const std::string& s, const DataChangedSignature::Delegate& emitter = NULL) override;
+			virtual bool SetAll(const std::vector< std::string >& s, const DataChangedSignature::Delegate& emitter = NULL) override;
 
-			virtual void Get(std::string& s) const HELIUM_OVERRIDE;
-			virtual void GetAll(std::vector< std::string >& s) const HELIUM_OVERRIDE;
+			virtual void Get(std::string& s) const override;
+			virtual void GetAll(std::vector< std::string >& s) const override;
 		};
 
 
@@ -356,8 +356,8 @@ namespace Helium
 			TypedPropertyFormatter(const Helium::SmartPtr< Helium::Property< T > >& property);
 			virtual ~TypedPropertyFormatter();
 
-			virtual bool Set(const T& value, const DataChangedSignature::Delegate& emitter = NULL) HELIUM_OVERRIDE;
-			virtual void Get(T& value) const HELIUM_OVERRIDE;
+			virtual bool Set(const T& value, const DataChangedSignature::Delegate& emitter = NULL) override;
+			virtual void Get(T& value) const override;
 		};
 	}
 }

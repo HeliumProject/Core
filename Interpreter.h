@@ -25,7 +25,7 @@ namespace Helium
 			static std::multimap< uint32_t, std::stack< ContainerPtr >* > s_Stacks;
 		};
 
-		class HELIUM_INSPECT_API Interpreter HELIUM_ABSTRACT : public RefCountBase< Interpreter >
+		class HELIUM_INSPECT_API Interpreter : public RefCountBase< Interpreter >
 		{
 		public:
 			Interpreter(Container* container);

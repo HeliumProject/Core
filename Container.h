@@ -49,19 +49,19 @@ namespace Helium
 			inline void SetUIHints( const UIHints hints );
 
 			// recusively binds contained controls to data
-			virtual void Bind(const DataBindingPtr& data) HELIUM_OVERRIDE;
+			virtual void Bind(const DataBindingPtr& data) override;
 
 			// process properties coming from script
-			virtual bool Process(const std::string& key, const std::string& value) HELIUM_OVERRIDE;
+			virtual bool Process(const std::string& key, const std::string& value) override;
 
 			// populate
-			virtual void Populate() HELIUM_OVERRIDE;
+			virtual void Populate() override;
 
 			// refreshes the UI state from data
-			virtual void Read() HELIUM_OVERRIDE;
+			virtual void Read() override;
 
 			// updates the data based on the state of the UI
-			virtual bool Write() HELIUM_OVERRIDE;
+			virtual bool Write() override;
 
 			Attribute< std::string > a_Name;
 			Attribute< std::string > a_Icon;

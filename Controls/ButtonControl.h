@@ -37,7 +37,7 @@ namespace Helium
                 return m_ButtonClickedEvent;
             }
 
-            virtual bool Write() HELIUM_OVERRIDE
+            virtual bool Write() override
             {
                 m_ButtonClickedEvent.Raise( ButtonClickedArgs( this ) );
                 return true;

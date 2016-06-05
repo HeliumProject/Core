@@ -30,8 +30,8 @@ namespace Helium
             Value();
 
         protected:
-            virtual bool Process(const std::string& key, const std::string& value) HELIUM_OVERRIDE;
-            virtual void SetDefaultAppearance(bool def) HELIUM_OVERRIDE;
+            virtual bool Process(const std::string& key, const std::string& value) override;
+            virtual void SetDefaultAppearance(bool def) override;
             void SetToDefault(const ContextMenuEventArgs& event);
 
         public:

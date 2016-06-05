@@ -69,8 +69,8 @@ namespace Helium
 
             Choice();
 
-            virtual bool Process(const std::string& key, const std::string& value) HELIUM_OVERRIDE;
-            virtual void SetDefaultAppearance(bool def) HELIUM_OVERRIDE;
+            virtual bool Process(const std::string& key, const std::string& value) override;
+            virtual void SetDefaultAppearance(bool def) override;
             void SetToDefault(const ContextMenuEventArgs& event);
 
             const std::string& GetPrefix()
@@ -81,7 +81,7 @@ namespace Helium
             bool Contains(const std::string& data);
             void Clear();
 
-            virtual void Populate() HELIUM_OVERRIDE;
+            virtual void Populate() override;
 
             Attribute< bool >                       a_Highlight;
             Attribute< bool >                       a_IsSorted;

@@ -401,7 +401,7 @@ public:
 		return MultiStringFormatter<Data>::Set( bitSet, emitter );
 	}
 
-	virtual void Get(std::string& s) const HELIUM_OVERRIDE
+	virtual void Get(std::string& s) const override
 	{
 		MultiStringFormatter<Data>::Get( s );
 

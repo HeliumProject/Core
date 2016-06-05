@@ -57,7 +57,7 @@ namespace Helium
                 a_Filter.Set( filter );
             }
 
-            virtual bool Write() HELIUM_OVERRIDE
+            virtual bool Write() override
             {
                 std::string path;
                 ReadStringData( path );
@@ -76,7 +76,7 @@ namespace Helium
             Attribute< std::string >         a_Filter;
 
         protected:
-            virtual bool  Process( const std::string& key, const std::string& value ) HELIUM_OVERRIDE;
+            virtual bool  Process( const std::string& key, const std::string& value ) override;
         };
 
         typedef Helium::StrongPtr< FileDialogButton > FileDialogButtonPtr;

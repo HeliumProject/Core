@@ -18,7 +18,7 @@ namespace Helium
             ColorPicker();
 
         protected:
-            virtual void SetDefaultAppearance( bool def ) HELIUM_OVERRIDE;
+            virtual void SetDefaultAppearance( bool def ) override;
             void SetToDefault( const ContextMenuEventArgs& event );
 
         public:
