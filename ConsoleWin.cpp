@@ -3,9 +3,11 @@
 
 #include "Platform/Assert.h"
 
-#undef _UNICODE
-#include "Platform/ConsoleWin.vsscanf.impl"
-#define _UNICODE 1
+#if _MSC_VER < 1900
+# undef _UNICODE
+# include "Platform/ConsoleWin.vsscanf.impl"
+# define _UNICODE 1
+#endif
 
 #include <stdlib.h>
 #include <io.h>
@@ -21,7 +23,7 @@ struct ColorEntry
 
 ColorEntry g_ColorTable[] =
 {
-	{ ConsoleColors::None, 0xffffffff },
+	{ ConsoleColors::None, (int)0xffffffff },
 	{ ConsoleColors::Red, FOREGROUND_RED },
 	{ ConsoleColors::Green, FOREGROUND_GREEN },
 	{ ConsoleColors::Blue, FOREGROUND_BLUE },
@@ -52,7 +54,7 @@ int Helium::Scan(const char* fmt, ...)
 
 	va_list args;
 	va_start(args, fmt);
-	int result = vsscanf( buf, (const unsigned char*)fmt, args );
+	int result = vsscanf( buf, fmt, args );
 	va_end(args);
 	return result;
 }
@@ -67,7 +69,7 @@ int Helium::ScanArgs(const char* fmt, va_list args)
 {
 	char buf[1024];
 	fgets( buf, sizeof( buf ), stdin );
-	return vsscanf( buf, (const unsigned char*)fmt, args );
+	return vsscanf( buf, fmt, args );
 }
 
 int Helium::ScanArgs(const wchar_t* fmt, va_list args)
@@ -83,7 +85,7 @@ int Helium::FileScan(FILE* f, const char* fmt, ...)
 
 	va_list args;
 	va_start(args, fmt);
-	int result = vsscanf( buf, (const unsigned char*)fmt, args );
+	int result = vsscanf( buf, fmt, args );
 	va_end(args);
 	return result;
 }
@@ -98,7 +100,7 @@ int Helium::FileScanArgs(FILE* f, const char* fmt, va_list args)
 {
 	char buf[1024];
 	fgets( buf, sizeof( buf ), f );
-	return vsscanf( buf, (const unsigned char*)fmt, args );
+	return vsscanf( buf, fmt, args );
 }
 
 int Helium::FileScanArgs(FILE* f, const wchar_t* fmt, va_list args)
@@ -111,7 +113,7 @@ int Helium::StringScan(const char* str, const char* fmt, ...)
 {
 	va_list args;
 	va_start(args, fmt);
-	int result = vsscanf(str, (const unsigned char*)fmt, args);
+	int result = vsscanf(str, fmt, args);
 	va_end(args);
 	return result;
 }
@@ -124,7 +126,7 @@ int Helium::StringScan(const wchar_t* str, const wchar_t* fmt, ...)
 
 int Helium::StringScanArgs(const char* str, const char* fmt, va_list args)
 {
-	return vsscanf(str, (const unsigned char*)fmt, args);
+	return vsscanf(str, fmt, args);
 }
 
 int Helium::StringScanArgs(const wchar_t* str, const wchar_t* fmt, va_list args)

@@ -554,7 +554,7 @@ void Helium::DeleteHelper( Allocator& rAllocator, T* pObject )
 template< typename T, typename Allocator >
 T* Helium::NewArrayHelper( Allocator& rAllocator, size_t count )
 {
-	return NewArrayHelper< T >( rAllocator, count, std::has_trivial_destructor< T >() );
+	return NewArrayHelper< T >( rAllocator, count, std::is_trivially_destructible< T >() );
 }
 
 /// Construct a new array of a type with a trivial destructor.
@@ -634,7 +634,7 @@ T* Helium::NewArrayHelper( Allocator& rAllocator, size_t count, const std::false
 template< typename T, typename Allocator >
 void Helium::DeleteArrayHelper( Allocator& rAllocator, T* pArray )
 {
-	DeleteArrayHelper< T >( rAllocator, pArray, std::has_trivial_destructor< T >() );
+	DeleteArrayHelper< T >( rAllocator, pArray, std::is_trivially_destructible< T >() );
 }
 
 /// Delete an allocated array of a type with a trivial destructor.

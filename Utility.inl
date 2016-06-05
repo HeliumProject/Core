@@ -350,7 +350,7 @@ void Helium::InPlaceDestruct( void* pMemory )
 template< typename T >
 void Helium::ArrayCopy( T* pDest, const T* pSource, size_t count )
 {
-	_ArrayCopy( pDest, pSource, count, std::has_trivial_assign< T >() );
+	_ArrayCopy( pDest, pSource, count, std::is_trivially_copy_assignable< T >() );
 }
 
 /// Copy an array of data from one region of memory to another, with support for overlapping regions of memory.
@@ -368,7 +368,7 @@ void Helium::ArrayCopy( T* pDest, const T* pSource, size_t count )
 template< typename T >
 void Helium::ArrayMove( T* pDest, const T* pSource, size_t count )
 {
-	_ArrayMove( pDest, pSource, count, std::has_trivial_assign< T >() );
+	_ArrayMove( pDest, pSource, count, std::is_trivially_copy_assignable< T >() );
 }
 
 /// Set each element in an array to a given value.
@@ -411,7 +411,7 @@ void Helium::ArraySet( T* pDest, const T& rValue, size_t count )
 template< typename T >
 T* Helium::ArrayInPlaceConstruct( void* pMemory, size_t count )
 {
-	return _ArrayInPlaceConstruct< T >( pMemory, count, std::has_trivial_constructor< T >() );
+	return _ArrayInPlaceConstruct< T >( pMemory, count, std::is_trivially_constructible< T >() );
 }
 
 /// Call the destructor on each element in the given array without deallocating the array.
@@ -427,7 +427,7 @@ T* Helium::ArrayInPlaceConstruct( void* pMemory, size_t count )
 template< typename T >
 void Helium::ArrayInPlaceDestruct( T* pMemory, size_t count )
 {
-	_ArrayInPlaceDestruct( pMemory, count, std::has_trivial_destructor< T >() );
+	_ArrayInPlaceDestruct( pMemory, count, std::is_trivially_destructible< T >() );
 }
 
 /// Construct copies of objects from the source array in the uninitialized destination buffer.
@@ -441,7 +441,7 @@ void Helium::ArrayInPlaceDestruct( T* pMemory, size_t count )
 template< typename T >
 void Helium::ArrayUninitializedCopy( T* pDest, const T* pSource, size_t count )
 {
-	_ArrayUninitializedCopy( pDest, pSource, count, std::has_trivial_copy< T >() );
+	_ArrayUninitializedCopy( pDest, pSource, count, std::is_trivially_copy_assignable< T >() );
 }
 
 /// Construct copies of the given object in the uninitialized destination buffer.
@@ -455,7 +455,7 @@ void Helium::ArrayUninitializedCopy( T* pDest, const T* pSource, size_t count )
 template< typename T >
 void Helium::ArrayUninitializedFill( T* pDest, const T& rValue, size_t count )
 {
-	_ArrayUninitializedFill( pDest, rValue, count, std::integral_constant< bool, std::has_trivial_copy< T >::value && sizeof( T ) == 1 >() );
+	_ArrayUninitializedFill( pDest, rValue, count, std::integral_constant< bool, std::is_trivially_copy_assignable< T >::value && sizeof( T ) == 1 >() );
 }
 
 /// Align a value (size or memory address) up to a given byte alignment.

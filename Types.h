@@ -8,22 +8,14 @@
 #define __STDC_LIMIT_MACROS
 #endif
 
-#if _MSC_VER == 1500
-# include "vs2008/stdint.h"
-#else
-# include <stdint.h>
-#endif
+#include <stdint.h>
 
 // std printf macros
 #ifndef __STDC_FORMAT_MACROS
 #define __STDC_FORMAT_MACROS
 #endif
 
-#if _MSC_VER
-# include "vs20xx/inttypes.h"
-#else
-# include <inttypes.h>
-#endif
+#include <inttypes.h>
 
 #include "Platform/System.h"
 

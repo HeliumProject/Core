@@ -1,23 +1,12 @@
 #pragma once
 
-#if _MSC_VER < 1500
-#error Visual Studio 2008 SP1 required.
+#if _MSC_VER < 1900
+#pragma message ("Only Visual Studio 2015 is tested and supported, so YMMV with other versions.")
 #endif
 
 #include <intrin.h>
 
 #define HELIUM_CC_CL 1
-
-#if _MSC_VER < 1700
-# define HELIUM_CPP11 0
-#else
-# define HELIUM_CPP11 1
-#endif
-
-/// Declare a class method as overriding a virtual method of a parent class.
-#define HELIUM_OVERRIDE override
-/// Declare a class as an abstract base class.
-#define HELIUM_ABSTRACT abstract
 
 /// DLL export API declaration.
 #define HELIUM_API_EXPORT __declspec( dllexport )
@@ -48,12 +37,5 @@
 // Visual C++ does not support exception specifications at this time, but we still want to retain them for compilers
 // that do support them.  This is harmless to ignore.
 #pragma warning( disable : 4290 ) // C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
-// Visual C++ specific keywords such as "override" and "abstract" are used, but are abstracted via "HELIUM_OVERRIDE" and
-// "HELIUM_ABSTRACT" macros.
-#pragma warning( disable : 4481 ) // nonstandard extension used: override specifier 'keyword'
 // This spuriously comes up on occasion with certain template class methods.
 #pragma warning( disable : 4505 ) // 'function' : unreferenced local function has been removed
-
-#if _MSC_VER == 1500
-#pragma warning( disable : 4985 ) // ceil() flawed in vs2008 headers
-#endif
