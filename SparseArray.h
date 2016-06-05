@@ -127,8 +127,8 @@ namespace Helium
         /// Constant iterator type.
         typedef ConstSparseArrayIterator< T > ConstIterator;
 
-        typedef std::has_trivial_copy< T > TrivialCopyElements;
-        typedef std::has_trivial_destructor< T > TrivialDestroyElements;
+        typedef std::is_trivially_copy_assignable< T > TrivialCopyElements;
+        typedef std::is_trivially_destructible< T > TrivialDestroyElements;
 
         /// @name Construction/Destruction
         //@{
