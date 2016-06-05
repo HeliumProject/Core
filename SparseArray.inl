@@ -1322,7 +1322,7 @@ T* Helium::SparseArray< T, Allocator >::ResizeBuffer(
     size_t oldCapacity,
     size_t newCapacity )
 {
-    return ResizeBuffer( pMemory, elementRange, pUsedElements, oldCapacity, newCapacity, std::integral_constant< bool, std::has_trivial_copy< T >::value && std::has_trivial_destructor< T >::value >() );
+    return ResizeBuffer( pMemory, elementRange, pUsedElements, oldCapacity, newCapacity, std::integral_constant< bool, std::is_trivially_copy_assignable< T >::value && std::is_trivially_destructible< T >::value >() );
 }
 
 /// ResizeBuffer() implementation for types with both a trivial copy constructor and trivial destructor.
@@ -1384,7 +1384,7 @@ T* Helium::SparseArray< T, Allocator >::ResizeBuffer( T* pMemory, size_t element
 template< typename T, typename Allocator >
 void Helium::SparseArray< T, Allocator >::InPlaceDestroy( T* pMemory, size_t range, const uint32_t* pUsedElements )
 {
-    InPlaceDestroy( pMemory, range, pUsedElements, std::has_trivial_destructor< T >() );
+    InPlaceDestroy( pMemory, range, pUsedElements, std::is_trivially_destructible< T >() );
 }
 
 /// InPlaceDestroy() implementation for types with a trivial destructor.
@@ -1462,7 +1462,7 @@ void Helium::SparseArray< T, Allocator >::UninitializedCopy(
     size_t range,
     const uint32_t* pUsedElements )
 {
-    UninitializedCopy( pDest, pSource, range, pUsedElements, std::has_trivial_copy< T >() );
+    UninitializedCopy( pDest, pSource, range, pUsedElements, std::is_trivially_copy_assignable< T >() );
 }
 
 /// UninitializedCopy() implementation for types with a trivial copy constructor.

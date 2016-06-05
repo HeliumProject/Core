@@ -40,11 +40,11 @@ namespace Helium
     };
 
     //
-    // Property HELIUM_ABSTRACT base class exposes the ability to read/write data of a type
+    // Property abstract base class exposes the ability to read/write data of a type
     //
 
     template <class V>
-    class Property HELIUM_ABSTRACT : public Helium::RefCountBase< Property<V> >
+    class Property : public Helium::RefCountBase< Property<V> >
     {
     public:
         virtual V Get() const = 0;
