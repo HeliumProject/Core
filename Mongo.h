@@ -16,9 +16,7 @@
 
 #include <mongo-c/src/mongo.h>
 
-#if HELIUM_CPP11
-# include <functional>
-#endif
+#include <functional>
 
 #define HELIUM_MONGO_DEFAULT_PORT ( 27017 )
 
