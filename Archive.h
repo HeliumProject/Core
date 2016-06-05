@@ -136,11 +136,11 @@ namespace Helium
 			ArchiveWriter( Reflect::ObjectIdentifier* identifier, uint32_t flags );
 			ArchiveWriter( const FilePath& path, Reflect::ObjectIdentifier* identifier, uint32_t flags );
 
-			virtual ArchiveMode GetMode() const HELIUM_OVERRIDE;
+			virtual ArchiveMode GetMode() const override;
 
 		protected:
 			virtual void Write( const Reflect::ObjectPtr* objects, size_t count ) = 0;
-			virtual bool Identify( const Reflect::ObjectPtr& object, Name* identity ) HELIUM_OVERRIDE;
+			virtual bool Identify( const Reflect::ObjectPtr& object, Name* identity ) override;
 
 			DynamicArray< Reflect::ObjectPtr > m_Objects;
 			Reflect::ObjectIdentifier*         m_Identifier;
@@ -161,12 +161,12 @@ namespace Helium
 			ArchiveReader( Reflect::ObjectResolver* resolver, uint32_t flags );
 			ArchiveReader( const FilePath& path, Reflect::ObjectResolver* resolver, uint32_t flags );
 
-			virtual ArchiveMode GetMode() const HELIUM_OVERRIDE;
+			virtual ArchiveMode GetMode() const override;
 
 		protected:
 			virtual void       Read( DynamicArray< Reflect::ObjectPtr >& objects ) = 0;
 			Reflect::ObjectPtr AllocateObject( const Reflect::MetaClass* type, size_t index );
-			bool               Resolve( const Name& identity, Reflect::ObjectPtr& pointer, const Reflect::MetaClass* pointerClass ) HELIUM_OVERRIDE;
+			bool               Resolve( const Name& identity, Reflect::ObjectPtr& pointer, const Reflect::MetaClass* pointerClass ) override;
 			void               Resolve();
 
 			struct Fixup

@@ -122,9 +122,9 @@ namespace Helium
 			ArchiveWriterBson( const FilePath& path, Reflect::ObjectIdentifier* identifier = NULL, uint32_t flags = 0x0 );
 			ArchiveWriterBson( Stream *stream, Reflect::ObjectIdentifier* identifier = NULL, uint32_t flags = 0x0 );
 			
-			virtual ArchiveType GetType() const HELIUM_OVERRIDE;
-			virtual void Open() HELIUM_OVERRIDE;
-			virtual void Close() HELIUM_OVERRIDE; 
+			virtual ArchiveType GetType() const override;
+			virtual void Open() override;
+			virtual void Close() override; 
 
 		protected:
 			virtual void Write( const Reflect::ObjectPtr* objects, size_t count );
@@ -147,12 +147,12 @@ namespace Helium
 			ArchiveReaderBson( const FilePath& path, Reflect::ObjectResolver* resolver = NULL, uint32_t flags = 0x0 );
 			ArchiveReaderBson( Stream *stream, Reflect::ObjectResolver* resolver = NULL, uint32_t flags = 0x0 );
 			
-			virtual ArchiveType GetType() const HELIUM_OVERRIDE;
-			virtual void Open() HELIUM_OVERRIDE;
-			virtual void Close() HELIUM_OVERRIDE; 
+			virtual ArchiveType GetType() const override;
+			virtual void Open() override;
+			virtual void Close() override; 
 
 		protected:
-			virtual void Read( DynamicArray< Reflect::ObjectPtr >& objects ) HELIUM_OVERRIDE;
+			virtual void Read( DynamicArray< Reflect::ObjectPtr >& objects ) override;
 
 		private:
 			void Start();
