@@ -44,7 +44,7 @@ namespace Helium
             }
 
         protected:
-            virtual bool Process( const std::string& key, const std::string& value );
+            virtual bool Process( const std::string& key, const std::string& value ) override;
 
         public:
             // Label on the button

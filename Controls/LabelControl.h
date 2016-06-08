@@ -16,7 +16,7 @@ namespace Helium
 
             Label();
 
-            virtual bool Process(const std::string& key, const std::string& value);
+            virtual bool Process(const std::string& key, const std::string& value) override;
 
             void BindText( const std::string& text )
             {

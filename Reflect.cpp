@@ -354,7 +354,7 @@ public:
 
 	}
 
-	virtual bool Set(const std::string& s, const DataChangedSignature::Delegate& emitter = NULL)
+	virtual bool Set(const std::string& s, const DataChangedSignature::Delegate& emitter = NULL) override
 	{
 		// get the full string set
 		std::string bitSet;

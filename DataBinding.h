@@ -214,7 +214,7 @@ namespace Helium
 
 			virtual void Undo() override;
 			virtual void Redo() override;
-			virtual bool IsSignificant() const;
+			virtual bool IsSignificant() const override;
 
 		private:
 			void Swap();
