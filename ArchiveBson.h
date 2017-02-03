@@ -127,7 +127,7 @@ namespace Helium
 			virtual void Close() override; 
 
 		protected:
-			virtual void Write( const Reflect::ObjectPtr* objects, size_t count );
+			virtual void Write( const Reflect::ObjectPtr* objects, size_t count ) override;
 
 		private:
 			void SerializeInstance( bson* b, const char* name, void* instance, const Reflect::MetaStruct* structure, Reflect::Object* object );

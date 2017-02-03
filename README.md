@@ -1,4 +1,4 @@
-<a href="http://heliumproject.org/">![Helium Game Engine](https://raw.github.com/HeliumProject/Helium/master/Documentation/Helium.png)</a>
+<a href="http://heliumproject.org/">![Helium Game Engine](https://raw.githubusercontent.com/HeliumProject/Helium/master/Editor/Icons/Helium/Helium.png)</a>
 
 Persist is an implementation of object persistence built atop the [Reflect](https://github.com/HeliumProject/Reflect) C++ reflection library.  It currently implements the following formats:
 * [BSON](http://bsonspec.org/) using [mongo-c](https://github.com/mongodb/mongo-c-driver)
