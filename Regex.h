@@ -4,22 +4,7 @@
 
 #include <string> 
 #include <sstream>
-
-#if HELIUM_CC_GCC
-# include <boost/regex.hpp>
-namespace std
-{
-    using boost::regex;
-    using boost::regex_search;
-    using boost::regex_replace;
-    using boost::smatch;
-    using boost::sregex_iterator;
-    using boost::sregex_token_iterator;
-    using boost::match_results;
-}
-#else
-# include <regex>
-#endif
+#include <regex>
 
 //--------------------------------------------------------------
 // helper functions for using std::tr1::regex
