@@ -298,21 +298,9 @@ std::exception* Helium::GetStandardException(uintptr_t addr)
 
 bool Helium::GetStackTrace(std::vector<uintptr_t>& trace, unsigned omitFrames)
 {
-	//  Some techniques borrowed from Visual Leak Detector 1.9
-	//   (http://www.codeproject.com/tools/visualleakdetector.asp)
-
 	CONTEXT context;
-
-	volatile char *p = 0;
-	__try
-	{
-		*p = 0;
-	}
-	__except(CopyMemory(&context, (GetExceptionInformation())->ContextRecord, sizeof(context)), EXCEPTION_EXECUTE_HANDLER)
-	{
-
-	}
-
+	ZeroMemory( &context, sizeof( context ) );
+	RtlCaptureContext( &context );
 	return GetStackTrace(&context, trace, omitFrames+1);
 }
 

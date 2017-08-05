@@ -102,7 +102,7 @@ bool Assert::Trigger(
     if (Helium::GetSymbolsInitialized())
     {
         std::vector<uintptr_t> trace;
-        Helium::GetStackTrace( trace );
+        Helium::GetStackTrace( trace, 1 );
         std::string str = TXT("Stack Trace:\n");
         Helium::TranslateStackTrace( trace, str );
         Helium::Trace::Output( TraceLevels::Error, str.c_str() );
