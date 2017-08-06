@@ -1340,7 +1340,13 @@ bool Helium::StringBase< CharType, Allocator >::operator==( const CharType* pStr
 	// Check for empty string matches.
 	if( !pString || pString[ 0 ] == static_cast< CharType >( 0 ) )
 	{
+		// Handling passed in pString being null/empty
 		return ( bufferSize <= 1 );
+	}
+	else if ( bufferSize == 0 )
+	{
+		// Handle our buffer being null/empty
+		return false;
 	}
 
 	// Perform a character-by-character comparison.
