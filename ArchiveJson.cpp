@@ -517,7 +517,7 @@ void ArchiveReaderJson::Start()
 			++i;
 		}
 
-		const char* error = m_Document.GetParseError();
+		const char* error = rapidjson::GetParseError_En( m_Document.GetParseError() );
 		throw Persist::Exception( "Error parsing JSON (%d,%d): %s", lineCount, charCount, error );
 	}
 }
@@ -533,7 +533,7 @@ bool ArchiveReaderJson::ReadNext( Reflect::ObjectPtr& object, size_t index )
 	
 	if ( HELIUM_VERIFY( value.IsObject() ) )
 	{
-		rapidjson::Value::Member* member = value.MemberBegin();
+		rapidjson::Value::MemberIterator member = value.MemberBegin();
 
 		if ( member != value.MemberEnd() )
 		{
@@ -770,7 +770,7 @@ void ArchiveReaderJson::DeserializeTranslator( rapidjson::Value& value, Pointer 
 		{
 			ObjectPtr& object ( pointer.As<ObjectPtr>() );
 
-			rapidjson::Value::Member* member = value.MemberBegin();
+			rapidjson::Value::MemberIterator member = value.MemberBegin();
 			if ( HELIUM_VERIFY( member != value.MemberEnd() ) )
 			{
 				uint32_t objectClassCrc = 0;

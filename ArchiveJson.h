@@ -22,6 +22,7 @@
 
 #include "rapidjson/include/rapidjson/prettywriter.h"
 #include "rapidjson/include/rapidjson/document.h"
+#include "rapidjson/include/rapidjson/error/en.h"
 
 namespace Helium
 {
@@ -30,9 +31,10 @@ namespace Helium
 		class RapidJsonOutputStream
 		{
 		public:
+			typedef char Ch;
 			inline RapidJsonOutputStream();
 			inline void SetStream( Stream* stream );
-			inline void Put( char c );
+			inline void Put( Ch c );
 			inline void Flush();
 
 		private:
