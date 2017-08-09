@@ -20,9 +20,18 @@
 
 #define RAPIDJSON_STATIC_ASSERT HELIUM_COMPILE_ASSERT
 
+#if HELIUM_CC_GCC
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpragmas"
+#endif
+
 #include "rapidjson/include/rapidjson/prettywriter.h"
 #include "rapidjson/include/rapidjson/document.h"
 #include "rapidjson/include/rapidjson/error/en.h"
+
+#if HELIUM_CC_GCC
+#pragma GCC diagnostic pop
+#endif
 
 namespace Helium
 {
