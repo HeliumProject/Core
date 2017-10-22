@@ -41,7 +41,6 @@
 // internet explorer 7
 #define _WIN32_IE		0x0700
 
-#include <tchar.h>
 #include <windows.h>
 #include <winsock2.h>
 #include <intrin.h>

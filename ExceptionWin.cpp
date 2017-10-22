@@ -114,7 +114,7 @@ bool Helium::InitializeSymbols(const std::string& path)
 			wchar_t file[MAX_PATH];
 			wchar_t ext[MAX_PATH];
 			GetModuleFileName(0,module,MAX_PATH);
-			_tsplitpath(module,drive,path,file,ext);
+			_wsplitpath(module,drive,path,file,ext);
 
 			dir = drive;
 			dir += path;
@@ -191,8 +191,8 @@ std::string Helium::GetSymbolInfo(uintptr_t adr, bool enumLoadedModules)
 	if (SymGetModuleInfo64(GetCurrentProcess(), adr, &moduleInfo))
 	{
 		// success, copy the module info
-		_tsplitpath(moduleInfo.ImageName, NULL, NULL, module, extension);
-		_tcscat(module, extension);
+		_wsplitpath(moduleInfo.ImageName, NULL, NULL, module, extension);
+		wcscat(module, extension);
 
 		//
 		// Now find symbol information
@@ -224,10 +224,10 @@ std::string Helium::GetSymbolInfo(uintptr_t adr, bool enumLoadedModules)
 			if ( SymGetLineFromAddr64(GetCurrentProcess(), adr, &d, &l) !=0 )
 			{
 				// success, copy the source file name
-				_tcscpy(filename, l.FileName);
+				wcscpy(filename, l.FileName);
 				wchar_t ext[MAX_PATH];
 				wchar_t file[MAX_PATH];
-				_tsplitpath(filename, NULL, NULL, file, ext);
+				_wsplitpath(filename, NULL, NULL, file, ext);
 
 				HELIUM_WIDE_TO_TCHAR(module, convertedModule);
 				HELIUM_WIDE_TO_TCHAR(file, convertedFile);
