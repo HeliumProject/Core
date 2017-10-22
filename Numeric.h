@@ -117,6 +117,7 @@ namespace Helium
         return false;
     }
 
+#if HELIUM_CC_CLANG
     template<> HELIUM_FOUNDATION_API const int8_t Helium::NumericLimits<int8_t>::Minimum;
     template<> HELIUM_FOUNDATION_API const int8_t Helium::NumericLimits<int8_t>::Maximum;
     template<> HELIUM_FOUNDATION_API const uint8_t Helium::NumericLimits<uint8_t>::Minimum;
@@ -137,6 +138,7 @@ namespace Helium
     template<> HELIUM_FOUNDATION_API const float32_t Helium::NumericLimits<float32_t>::Maximum;
     template<> HELIUM_FOUNDATION_API const float64_t Helium::NumericLimits<float64_t>::Minimum;
     template<> HELIUM_FOUNDATION_API const float64_t Helium::NumericLimits<float64_t>::Maximum;
+#endif
 
     template <> HELIUM_FOUNDATION_API bool RangeCast( const int8_t source, int8_t& dest, bool clamp );
     template <> HELIUM_FOUNDATION_API bool RangeCast( const int8_t source, int16_t& dest, bool clamp );
