@@ -101,11 +101,14 @@ int Helium::GetProcessId( ProcessHandle handle )
 
 std::string Helium::GetProcessString()
 {
+	std::ostringstream result;
+#if HELIUM_OS_MAC
 	uint64_t tid;
 	pthread_threadid_np(NULL, &tid);
-
-	std::ostringstream result;
 	result << GetProcessName() << "_" << getpid() << "_" << tid;
+#else
+	result << GetProcessName() << "_" << getpid() << "_" << syscall(SYS_gettid);
+#endif
 	return result.str();
 }
 
