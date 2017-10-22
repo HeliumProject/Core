@@ -117,6 +117,27 @@ namespace Helium
         return false;
     }
 
+    template<> HELIUM_FOUNDATION_API const int8_t Helium::NumericLimits<int8_t>::Minimum;
+    template<> HELIUM_FOUNDATION_API const int8_t Helium::NumericLimits<int8_t>::Maximum;
+    template<> HELIUM_FOUNDATION_API const uint8_t Helium::NumericLimits<uint8_t>::Minimum;
+    template<> HELIUM_FOUNDATION_API const uint8_t Helium::NumericLimits<uint8_t>::Maximum;
+    template<> HELIUM_FOUNDATION_API const int16_t Helium::NumericLimits<int16_t>::Minimum;
+    template<> HELIUM_FOUNDATION_API const int16_t Helium::NumericLimits<int16_t>::Maximum;
+    template<> HELIUM_FOUNDATION_API const uint16_t Helium::NumericLimits<uint16_t>::Minimum;
+    template<> HELIUM_FOUNDATION_API const uint16_t Helium::NumericLimits<uint16_t>::Maximum;
+    template<> HELIUM_FOUNDATION_API const int32_t Helium::NumericLimits<int32_t>::Minimum;
+    template<> HELIUM_FOUNDATION_API const int32_t Helium::NumericLimits<int32_t>::Maximum;
+    template<> HELIUM_FOUNDATION_API const uint32_t Helium::NumericLimits<uint32_t>::Minimum;
+    template<> HELIUM_FOUNDATION_API const uint32_t Helium::NumericLimits<uint32_t>::Maximum;
+    template<> HELIUM_FOUNDATION_API const int64_t Helium::NumericLimits<int64_t>::Minimum;
+    template<> HELIUM_FOUNDATION_API const int64_t Helium::NumericLimits<int64_t>::Maximum;
+    template<> HELIUM_FOUNDATION_API const uint64_t Helium::NumericLimits<uint64_t>::Minimum;
+    template<> HELIUM_FOUNDATION_API const uint64_t Helium::NumericLimits<uint64_t>::Maximum;
+    template<> HELIUM_FOUNDATION_API const float32_t Helium::NumericLimits<float32_t>::Minimum;
+    template<> HELIUM_FOUNDATION_API const float32_t Helium::NumericLimits<float32_t>::Maximum;
+    template<> HELIUM_FOUNDATION_API const float64_t Helium::NumericLimits<float64_t>::Minimum;
+    template<> HELIUM_FOUNDATION_API const float64_t Helium::NumericLimits<float64_t>::Maximum;
+
     template <> HELIUM_FOUNDATION_API bool RangeCast( const int8_t source, int8_t& dest, bool clamp );
     template <> HELIUM_FOUNDATION_API bool RangeCast( const int8_t source, int16_t& dest, bool clamp );
     template <> HELIUM_FOUNDATION_API bool RangeCast( const int8_t source, int32_t& dest, bool clamp );
