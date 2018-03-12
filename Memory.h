@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Platform/Types.h"
+#include "Platform/System.h"
 
 //
 // n is BYTES
@@ -15,7 +16,7 @@
 #define HELIUM_ALIGN_2(n)      ((((uintptr_t)(n)) + 1  ) & ~1  )
 #define HELIUM_ALIGN_ARB(n, a) ((((uintptr_t)(n)) + ((a)-1)) & ~((a)-1))  // 'a' needs to be a power of 2
 
-#ifdef _MSC_VER
+#ifdef HELIUM_CC_CL
 # define HELIUM_PRE_STRUCT_ALIGN( bits ) __declspec( align( bits ) )
 # define HELIUM_POST_STRUCT_ALIGN( bits )
 #else

@@ -3,12 +3,6 @@
 
 #include "Platform/Assert.h"
 
-#if _MSC_VER < 1900
-# undef _UNICODE
-# include "Platform/ConsoleWin.vsscanf.impl"
-# define _UNICODE 1
-#endif
-
 #include <stdlib.h>
 #include <io.h>
 #include <fcntl.h>

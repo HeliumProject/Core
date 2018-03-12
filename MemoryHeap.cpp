@@ -12,14 +12,14 @@ using namespace Helium;
 
 #if HELIUM_HEAP
 
-#ifdef _MSC_VER
+#ifdef HELIUM_CC_CL
 #pragma warning( push )
 #pragma warning( disable : 4530 )  // C++ exception handler used, but unwind semantics are not enabled. Specify /EHsc
 #endif
 
 #include <map>
 
-#ifdef _MSC_VER
+#ifdef HELIUM_CC_CL
 #pragma warning( pop )
 #endif
 

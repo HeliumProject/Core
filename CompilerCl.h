@@ -1,7 +1,7 @@
 #pragma once
 
 #if _MSC_VER < 1900
-#pragma message ("Only Visual Studio 2015 is tested and supported, so YMMV with other versions.")
+#pragma message "Visual Studio 2015 is the minimum supported version."
 #endif
 
 #include <intrin.h>

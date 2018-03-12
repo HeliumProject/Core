@@ -5,18 +5,6 @@
 #include "Platform/Assert.h"
 #include "Platform/System.h"
 
-#if HELIUM_CC_CL
-# pragma warning( push )
-# pragma warning( disable : 4530 )  // C++ exception handler used, but unwind semantics are not enabled. Specify /EHsc
-# if _MSC_VER < 1600 // VC2008
-#  pragma warning( disable : 4985 )  // 'symbol name': attributes not present on previous declaration : see http://connect.microsoft.com/VisualStudio/feedback/details/381422/warning-of-attributes-not-present-on-previous-declaration-on-ceil-using-both-math-h-and-intrin-h
-# endif
-#endif
-
-#if HELIUM_CC_CL
-#pragma warning( pop )
-#endif
-
 #include <type_traits>
 #include <cstdarg>
 #include <string.h>

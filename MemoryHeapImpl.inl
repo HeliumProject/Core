@@ -72,53 +72,50 @@ static void PrintfWrapper( const char* pFormat, ... )
 #define USAGE_ERROR_ACTION( m, p ) HELIUM_BREAK_MSG( TXT( "Incorrect realloc()/free() usage detected!" ) )
 
 #if HELIUM_RELEASE || HELIUM_PROFILE
-#define INSECURE 1
+# define INSECURE 1
 #else
-#define INSECURE 0
+# define INSECURE 0
 #endif
 
 #if HELIUM_DEBUG
-#define DEBUG 1
+# define DEBUG 1
 #endif
 
 #ifdef HELIUM_ENABLE_MEMORY_TRACKING_VERBOSE
-#define FULLSANITYCHECKS
+# define FULLSANITYCHECKS
 #endif
 
-#ifdef _MSC_VER
-#pragma warning( push )
-#pragma warning( disable : 4100 ) // 'identifier' : unreferenced formal parameter
-#pragma warning( disable : 4127 ) // conditional expression is constant
-#pragma warning( disable : 4189 ) // 'identifier' : local variable is initialized but not referenced
-#pragma warning( disable : 4267 ) // 'var' : conversion from 'size_t' to 'type', possible loss of data
-// XXX TMC: C4505 must be disabled on a per-source basis (disabling it on just the scope of the function definitions
-// does not work).
-//#pragma warning( disable : 4505 ) // 'function' : unreferenced local function has been removed
-#pragma warning( disable : 4706 ) // assignment within conditional expression
+#ifdef HELIUM_CC_CL
+# pragma warning( push )
+# pragma warning( disable : 4100 ) // 'identifier' : unreferenced formal parameter
+# pragma warning( disable : 4127 ) // conditional expression is constant
+# pragma warning( disable : 4189 ) // 'identifier' : local variable is initialized but not referenced
+# pragma warning( disable : 4267 ) // 'var' : conversion from 'size_t' to 'type', possible loss of data
+# pragma warning( disable : 4706 ) // assignment within conditional expression
 #endif
 
 // Re-route printf() calls to the engine's logging system.
 #if HELIUM_ENABLE_TRACE
-#define printf( FORMAT, ... ) PrintfWrapper( FORMAT, __VA_ARGS__ )
+# define printf( FORMAT, ... ) PrintfWrapper( FORMAT, __VA_ARGS__ )
 #else
-#define printf( FORMAT, ... )
+# define printf( FORMAT, ... )
 #endif
 
 #if USE_NEDMALLOC
-#define EXTSPEC static
-#include "Dependencies/nedmalloc/nedmalloc.c"
-#undef EXTSPEC
+# define EXTSPEC static
+# include "Dependencies/nedmalloc/nedmalloc.c"
+# undef EXTSPEC
 #else
 # if HELIUM_OS_LINUX
 #  define HAVE_USR_INCLUDE_MALLOC_H 1
 # endif
-#include "Platform/MemoryHeap.dlmalloc.c"
+# include "Platform/MemoryHeap.dlmalloc.c"
 #endif
 
 #undef printf
 
-#ifdef _MSC_VER
-#pragma warning( pop )
+#ifdef HELIUM_CC_CL
+# pragma warning( pop )
 #endif
 
 /// Constructor.
