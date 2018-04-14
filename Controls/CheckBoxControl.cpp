@@ -13,7 +13,7 @@ CheckBox::CheckBox()
     a_IsFixedWidth.Set( true );
 
     m_ContextMenu = new ContextMenu( this );
-    m_ContextMenu->AddItem( TXT( "Set To Default" ), ContextMenuSignature::Delegate( this, &CheckBox::SetToDefault ) );
+    m_ContextMenu->AddItem( "Set To Default", ContextMenuSignature::Delegate( this, &CheckBox::SetToDefault ) );
 }
 
 void CheckBox::SetDefaultAppearance( bool def ) 

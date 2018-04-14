@@ -7,10 +7,10 @@ namespace Helium
 {
     namespace Inspect
     {
-        const static char CHOICE_ATTR_ENUM[]      = TXT( "enum" );
-        const static char CHOICE_ATTR_SORTED[]    = TXT( "sorted" );
-        const static char CHOICE_ATTR_DROPDOWN[]  = TXT( "dropdown" );
-        const static char CHOICE_ATTR_PREFIX[]    = TXT( "prefix" );
+        const static char CHOICE_ATTR_ENUM[]      = "enum";
+        const static char CHOICE_ATTR_SORTED[]    = "sorted";
+        const static char CHOICE_ATTR_DROPDOWN[]  = "dropdown";
+        const static char CHOICE_ATTR_PREFIX[]    = "prefix";
 
         class Choice;
 
@@ -41,7 +41,7 @@ namespace Helium
 
         struct ChoiceItem
         {
-            ChoiceItem(const std::string& key = TXT(""), const std::string& data = TXT(""))
+            ChoiceItem(const std::string& key = "", const std::string& data = "")
                 : m_Key( key )
                 , m_Data( data )
             {

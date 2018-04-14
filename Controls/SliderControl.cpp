@@ -13,7 +13,7 @@ Slider::Slider()
 , a_AutoAdjustMinMax( true )
 {
     m_ContextMenu = new ContextMenu (this);
-    m_ContextMenu->AddItem( TXT( "Set To Default" ), ContextMenuSignature::Delegate(this, &Slider::SetToDefault));
+    m_ContextMenu->AddItem( "Set To Default", ContextMenuSignature::Delegate(this, &Slider::SetToDefault));
 }
 
 bool Slider::Process( const std::string& key, const std::string& value )

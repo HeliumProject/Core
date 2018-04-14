@@ -44,8 +44,8 @@ namespace Helium
 		// Constants
 		//
 
-		const char UNDEF_VALUE_STRING[] = TXT( "Undef" );
-		const char MULTI_VALUE_STRING[] = TXT( "Multi" );
+		const char UNDEF_VALUE_STRING[] = "Undef";
+		const char MULTI_VALUE_STRING[] = "Multi";
 
 		//
 		// Extract and Insert are template functions that go between a sting buffer and typed data

@@ -49,7 +49,7 @@ namespace Helium
 			void Push(Container* container);
 
 			Container* GetContainer();
-			Container* PushContainer( const std::string& name = TXT("") );
+			Container* PushContainer( const std::string& name = "" );
 			Container* Pop( bool setParent = true );
 			Container* Top();
 

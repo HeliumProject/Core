@@ -9,8 +9,8 @@ namespace Helium
 {
     namespace Inspect
     {
-        const static char BUTTON_ATTR_TEXT[] = TXT( "text" );
-        const static char BUTTON_ATTR_ICON[] = TXT( "icon" );
+        const static char BUTTON_ATTR_TEXT[] = "text";
+        const static char BUTTON_ATTR_ICON[] = "icon";
 
         class Button;
 

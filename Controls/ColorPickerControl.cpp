@@ -13,7 +13,7 @@ ColorPicker::ColorPicker()
 : a_Highlight( false )
 {
     m_ContextMenu = new ContextMenu( this );
-    m_ContextMenu->AddItem( TXT( "Set To Default" ), ContextMenuSignature::Delegate( this, &ColorPicker::SetToDefault ) );
+    m_ContextMenu->AddItem( "Set To Default", ContextMenuSignature::Delegate( this, &ColorPicker::SetToDefault ) );
 }
 
 void ColorPicker::SetDefaultAppearance( bool def ) 

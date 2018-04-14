@@ -12,7 +12,7 @@ Value::Value()
 , a_Highlight( false )
 {
     m_ContextMenu = new ContextMenu (this);
-    m_ContextMenu->AddItem( TXT( "Set To Default" ), ContextMenuSignature::Delegate(this, &Value::SetToDefault));
+    m_ContextMenu->AddItem( "Set To Default", ContextMenuSignature::Delegate(this, &Value::SetToDefault));
 }
 
 bool Value::Process(const std::string& key, const std::string& value)

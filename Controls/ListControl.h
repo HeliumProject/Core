@@ -7,7 +7,7 @@ namespace Helium
 {
     namespace Inspect
     {
-        const static char LIST_ATTR_SORTED[]    = TXT( "sorted" );
+        const static char LIST_ATTR_SORTED[]    = "sorted";
 
         namespace MoveDirections
         {

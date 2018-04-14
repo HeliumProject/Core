@@ -24,5 +24,5 @@ void ContextMenu::AddItem(const std::string& item, ContextMenuSignature::Delegat
 
 void ContextMenu::AddSeperator()
 {
-	m_Items.push_back( TXT( "-" ) );
+	m_Items.push_back( "-" );
 }

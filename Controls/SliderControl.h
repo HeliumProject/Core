@@ -7,8 +7,8 @@ namespace Helium
 {
     namespace Inspect
     {
-        const static char SLIDER_ATTR_MIN[] = TXT( "min" );
-        const static char SLIDER_ATTR_MAX[] = TXT( "max" );
+        const static char SLIDER_ATTR_MIN[] = "min";
+        const static char SLIDER_ATTR_MAX[] = "max";
 
         class HELIUM_INSPECT_API Slider : public Control
         {

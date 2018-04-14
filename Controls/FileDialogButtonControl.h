@@ -7,8 +7,8 @@ namespace Helium
 {
     namespace Inspect
     {
-        const static char BUTTON_FILEDIALOG_ATTR_FILTER[] = TXT( "filter" );
-        const static char BUTTON_FILEDIALOG_ATTR_TITLE[] = TXT( "caption" );
+        const static char BUTTON_FILEDIALOG_ATTR_FILTER[] = "filter";
+        const static char BUTTON_FILEDIALOG_ATTR_TITLE[] = "caption";
 
         namespace FileDialogTypes
         {
@@ -50,7 +50,7 @@ namespace Helium
         public:
             HELIUM_DECLARE_CLASS( FileDialogButton, Inspect::Button );
 
-            FileDialogButton( const FileDialogType& type = FileDialogTypes::OpenFile, const std::string& caption = TXT( "Open" ), const std::string& filter = TXT( "All files (*.*)|*.*" ) )
+            FileDialogButton( const FileDialogType& type = FileDialogTypes::OpenFile, const std::string& caption = "Open", const std::string& filter = "All files (*.*)|*.*" )
             {
                 a_Type.Set( type );
                 a_Caption.Set( caption );

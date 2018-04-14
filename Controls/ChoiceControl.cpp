@@ -14,7 +14,7 @@ Choice::Choice()
 , a_EnableAdds( false )
 {
     m_ContextMenu = new ContextMenu (this);
-    m_ContextMenu->AddItem( TXT( "Set To Default" ), ContextMenuSignature::Delegate(this, &Choice::SetToDefault));
+    m_ContextMenu->AddItem( "Set To Default", ContextMenuSignature::Delegate(this, &Choice::SetToDefault));
 }
 
 bool Choice::Process(const std::string& key, const std::string& value)

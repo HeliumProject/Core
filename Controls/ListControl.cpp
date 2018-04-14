@@ -15,7 +15,7 @@ List::List()
     a_IsFixedHeight.Set( true );
 
     m_ContextMenu = new ContextMenu (this);
-    m_ContextMenu->AddItem( TXT( "Set To Default" ), ContextMenuSignature::Delegate(this, &List::SetToDefault));
+    m_ContextMenu->AddItem( "Set To Default", ContextMenuSignature::Delegate(this, &List::SetToDefault));
 }
 
 bool List::Process(const std::string& key, const std::string& value)

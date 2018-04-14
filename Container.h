@@ -7,8 +7,8 @@ namespace Helium
 {
 	namespace Inspect
 	{
-		const static char CONTAINER_ATTR_NAME[] = TXT( "name" );
-		const static char CONTAINER_ATTR_ICON[] = TXT( "icon" );
+		const static char CONTAINER_ATTR_NAME[] = "name";
+		const static char CONTAINER_ATTR_ICON[] = "icon";
 
 		namespace UIHint
 		{

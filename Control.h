@@ -16,9 +16,9 @@ namespace Helium
 		class Container;
 		class Canvas;
 
-		const static char ATTR_VALUE_TRUE[]    = TXT( "true" );
-		const static char ATTR_VALUE_FALSE[]   = TXT( "false" );
-		const static char ATTR_HELPTEXT[]      = TXT( "helptext" );
+		const static char ATTR_VALUE_TRUE[]    = "true";
+		const static char ATTR_VALUE_FALSE[]   = "false";
+		const static char ATTR_HELPTEXT[]      = "helptext";
 
 		//
 		// Event Args and Signatures

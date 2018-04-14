@@ -50,7 +50,7 @@ void ReflectInterpreter::Interpret( const std::vector< void* >& instances, const
 	ContainerPtr container = CreateControl<Container>();
 
 	std::string labelText;
-	commonType->GetProperty( TXT( "UIName" ), labelText );
+	commonType->GetProperty( "UIName", labelText );
 	if ( labelText.empty() )
 	{
 		labelText = commonType->m_Name;
@@ -59,7 +59,7 @@ void ReflectInterpreter::Interpret( const std::vector< void* >& instances, const
 	container->a_Name.Set( labelText );
 
 	std::map< std::string, ContainerPtr > containersMap;
-	containersMap.insert( std::make_pair( TXT( "" ), container) );
+	containersMap.insert( std::make_pair( "", container) );
 
 	std::stack< const MetaStruct* > bases;
 	for ( const MetaStruct* current = commonType; current != NULL; current = current->m_Base )
@@ -86,7 +86,7 @@ void ReflectInterpreter::Interpret( const std::vector< void* >& instances, const
 			}
 
 			std::string fieldUIGroup;
-			if ( field->GetProperty( TXT( "UIGroup" ), fieldUIGroup ) && !fieldUIGroup.empty() )
+			if ( field->GetProperty( "UIGroup", fieldUIGroup ) && !fieldUIGroup.empty() )
 			{
 				std::map< std::string, ContainerPtr >::iterator itr = containersMap.find( fieldUIGroup );
 				if ( itr == containersMap.end() )
@@ -97,7 +97,7 @@ void ReflectInterpreter::Interpret( const std::vector< void* >& instances, const
 
 					ContainerPtr parent;
 					std::string groupName;
-					size_t idx = fieldUIGroup.find_last_of( TXT( "/" ) );
+					size_t idx = fieldUIGroup.find_last_of( "/" );
 					if ( idx != std::string::npos )
 					{
 						std::string parentName = fieldUIGroup.substr( 0, idx );
@@ -110,13 +110,13 @@ void ReflectInterpreter::Interpret( const std::vector< void* >& instances, const
 							std::string currentParent = parentName;
 							for (;;)
 							{
-								idx = currentParent.find_last_of( TXT( "/" ) );
+								idx = currentParent.find_last_of( "/" );
 								if ( idx == std::string::npos )
 								{
 									// no more parents so we add it to the root
 									containersMap.insert( std::make_pair(currentParent, parent) );
 									parent->a_Name.Set( currentParent );
-									containersMap[ TXT( "" ) ]->AddChild( parent );
+									containersMap[ "" ]->AddChild( parent );
 									break;
 								}
 								else
@@ -144,7 +144,7 @@ void ReflectInterpreter::Interpret( const std::vector< void* >& instances, const
 					}
 					else
 					{
-						parent = containersMap[TXT( "" )];
+						parent = containersMap[""];
 						groupName = fieldUIGroup;
 					}
 					newContainer->a_Name.Set( groupName );
@@ -155,7 +155,7 @@ void ReflectInterpreter::Interpret( const std::vector< void* >& instances, const
 			}
 			else
 			{
-				container = containersMap[TXT( "" )];
+				container = containersMap[""];
 			}
 
 			if ( field->m_Count > 1 )
@@ -185,7 +185,7 @@ void ReflectInterpreter::Interpret( const std::vector< void* >& instances, const
 	}
 
 	// Make sure we have the base container
-	container = containersMap[TXT( "" )];
+	container = containersMap[""];
 
 	if ( !container->GetChildren().empty() )
 	{
@@ -247,7 +247,7 @@ void ReflectInterpreter::InterpretValueField( const std::vector< Reflect::Pointe
 			item.m_Data = itr->m_Name;
 		}
 
-		choice->a_HelpText.Set( field->GetProperty( TXT( "HelpText" ) ) );
+		choice->a_HelpText.Set( field->GetProperty( "HelpText" ) );
 		choice->a_Items.Set( items );
 		choice->a_IsDropDown.Set( true );
 		choice->a_IsReadOnly.Set( readOnly );
@@ -261,14 +261,14 @@ void ReflectInterpreter::InterpretValueField( const std::vector< Reflect::Pointe
 		{
 			CheckBoxPtr checkBox = CreateControl<CheckBox>();
 			checkBox->a_IsReadOnly.Set( readOnly );
-			checkBox->a_HelpText.Set( field->GetProperty( TXT( "HelpText" ) ) );
+			checkBox->a_HelpText.Set( field->GetProperty( "HelpText" ) );
 			container->AddChild( checkBox );
 		}
 		else
 		{
 			ValuePtr value = CreateControl<Value>();
 			value->a_IsReadOnly.Set( readOnly );
-			value->a_HelpText.Set( field->GetProperty( TXT( "HelpText" ) ) );
+			value->a_HelpText.Set( field->GetProperty( "HelpText" ) );
 			container->AddChild( value );
 		}
 	}
@@ -297,7 +297,7 @@ void ReflectInterpreter::InterpretValueField( const std::vector< Reflect::Pointe
 		label = CreateControl<Label>();
 
 		std::string temp;
-		field->GetProperty( TXT( "UIName" ), temp );
+		field->GetProperty( "UIName", temp );
 		if ( temp.empty() )
 		{
 			bool converted = Helium::ConvertString( field->m_Name, temp );
@@ -305,7 +305,7 @@ void ReflectInterpreter::InterpretValueField( const std::vector< Reflect::Pointe
 		}
 
 		label->BindText( temp );
-		label->a_HelpText.Set( field->GetProperty( TXT( "HelpText" ) ) );
+		label->a_HelpText.Set( field->GetProperty( "HelpText" ) );
 
 		container->InsertChild(0, label);
 	}
@@ -360,7 +360,7 @@ public:
 		std::string bitSet;
 		MultiStringFormatter<Data>::Get( bitSet );
 
-		if ( s == TXT("1") )
+		if ( s == "1" )
 		{
 			if ( !bitSet.find_first_of( m_EnumerationElement->m_Name ) )
 			{
@@ -370,11 +370,11 @@ public:
 				}
 				else
 				{
-					bitSet += TXT("|") + m_EnumerationElement->m_Name;
+					bitSet += "|" + m_EnumerationElement->m_Name;
 				}
 			}
 		}
-		else if ( s == TXT("0") )
+		else if ( s == "0" )
 		{
 			if ( bitSet == m_EnumerationElement->m_Name )
 			{
@@ -407,11 +407,11 @@ public:
 
 		if ( s.find_first_of( m_EnumerationElement->m_Name ) != std::string::npos )
 		{
-			s = TXT("1");
+			s = "1";
 		}
 		else
 		{
-			s = TXT("0");
+			s = "0";
 		}
 	}
 
@@ -439,7 +439,7 @@ void ReflectInterpreter::InterpretBitfieldField( const std::vector< Reflect::Poi
 	ContainerPtr container = CreateControl<Container>();
 
 	std::string temp;
-	field->GetProperty( TXT( "UIName" ), temp );
+	field->GetProperty( "UIName", temp );
 	if ( temp.empty() )
 	{
 		bool converted = Helium::ConvertString( field->m_Name, temp );
@@ -501,7 +501,7 @@ void ReflectInterpreter::InterpretColorField( const std::vector< Reflect::Pointe
 	LabelPtr label = CreateControl< Label >();
 
 	std::string temp;
-	field->GetProperty( TXT( "UIName" ), temp );
+	field->GetProperty( "UIName", temp );
 	if ( temp.empty() )
 	{
 		bool converted = Helium::ConvertString( field->m_Name, temp );
@@ -509,7 +509,7 @@ void ReflectInterpreter::InterpretColorField( const std::vector< Reflect::Pointe
 	}
 
 	label->BindText( temp );
-	label->a_HelpText.Set( field->GetProperty( TXT( "HelpText" ) ) );
+	label->a_HelpText.Set( field->GetProperty( "HelpText" ) );
 
 	container->AddChild( label );
 
@@ -549,7 +549,7 @@ void ReflectInterpreter::InterpretColorField( const std::vector< Reflect::Pointe
 			ColorPickerPtr colorPicker = CreateControl<ColorPicker>();
 			container->AddChild( colorPicker );
 
-			colorPicker->a_HelpText.Set( field->GetProperty( TXT( "HelpText" ) ) );
+			colorPicker->a_HelpText.Set( field->GetProperty( "HelpText" ) );
 
 			bool readOnly = ( field->m_Flags & FieldFlags::ReadOnly ) == FieldFlags::ReadOnly;
 			colorPicker->a_IsReadOnly.Set( readOnly );
@@ -571,12 +571,12 @@ void ReflectInterpreter::InterpretColorField( const std::vector< Reflect::Pointe
 				slider->a_Min.Set( 0.0 );
 				slider->a_Max.Set( 255.0f );
 				slider->a_IsReadOnly.Set( readOnly );
-				slider->a_HelpText.Set( TXT( "Sets the alpha value for the color." ) );
+				slider->a_HelpText.Set( "Sets the alpha value for the color." );
 
 				ValuePtr value = CreateControl<Value>();
 				container->AddChild( value );
 				value->a_IsReadOnly.Set( readOnly );
-				value->a_HelpText.Set( TXT( "Sets the alpha value for the color." ) );
+				value->a_HelpText.Set( "Sets the alpha value for the color." );
 
 				std::vector<Data*> alphaSer;
 				std::vector<Reflect::Object*>::const_iterator itr = objects.begin();
@@ -608,12 +608,12 @@ void ReflectInterpreter::InterpretColorField( const std::vector< Reflect::Pointe
 				slider->a_Min.Set( 0.0 );
 				slider->a_Max.Set( 8.0 );
 				slider->a_IsReadOnly.Set( readOnly );
-				slider->a_HelpText.Set( TXT( "Adjusts the HDR value of the color." ) );
+				slider->a_HelpText.Set( "Adjusts the HDR value of the color." );
 
 				ValuePtr value = CreateControl<Value>();
 				container->AddChild( value );
 				value->a_IsReadOnly.Set( readOnly );
-				value->a_HelpText.Set( TXT( "Adjusts the HDR value of the color." ) );
+				value->a_HelpText.Set( "Adjusts the HDR value of the color." );
 
 				std::vector<Data*> intensitySer;
 				std::vector<Reflect::Object*>::const_iterator itr = objects.begin();
@@ -680,7 +680,7 @@ void ReflectInterpreter::InterpretFilePathField( const std::vector< Reflect::Poi
 	// Parse
 	//
 	std::string fieldUI;
-	field->GetProperty( TXT( "UIScript" ), fieldUI );
+	field->GetProperty( "UIScript", fieldUI );
 	bool result = Script::Parse(fieldUI, this, parent->GetCanvas(), container, field->m_Flags);
 
 	if (!result)
@@ -691,7 +691,7 @@ void ReflectInterpreter::InterpretFilePathField( const std::vector< Reflect::Poi
 			ValuePtr value = CreateControl< Value >();
 			value->a_Justification.Set( Justifications::Right );
 			value->a_IsReadOnly.Set( readOnly );
-			value->a_HelpText.Set( field->GetProperty( TXT( "HelpText" ) ) );
+			value->a_HelpText.Set( field->GetProperty( "HelpText" ) );
 			valueContainer->AddChild( value );
 			groups.push_back( valueContainer );
 
@@ -701,9 +701,9 @@ void ReflectInterpreter::InterpretFilePathField( const std::vector< Reflect::Poi
 
 				// File dialog button
 				fileDialogButton = CreateControl< FileDialogButton >();
-				fileDialogButton->a_HelpText.Set( TXT( "Open a file dialog to choose a new file." ) );
+				fileDialogButton->a_HelpText.Set( "Open a file dialog to choose a new file." );
 
-				field->GetProperty( TXT( "FileFilter" ), m_FileFilter );
+				field->GetProperty( "FileFilter", m_FileFilter );
 
 				if ( !m_FileFilter.empty() )
 				{
@@ -711,7 +711,7 @@ void ReflectInterpreter::InterpretFilePathField( const std::vector< Reflect::Poi
 				}
 				container->AddChild( fileDialogButton );
 
-				value->SetProperty( TXT( "FileFilter" ), m_FileFilter );
+				value->SetProperty( "FileFilter", m_FileFilter );
 			}
 
 			if ( objects.size() == 1 )
@@ -719,8 +719,8 @@ void ReflectInterpreter::InterpretFilePathField( const std::vector< Reflect::Poi
 				// File edit button
 				ButtonPtr editButton = CreateControl< Button >();
 				editButton->ButtonClickedEvent().Add( ButtonClickedSignature::Delegate ( this, &PathInterpreter::Edit ) );
-				editButton->a_Label.Set( TXT( "Edit" ) );
-				editButton->a_HelpText.Set( TXT( "Attempt to edit the file using its associated default application." ) );
+				editButton->a_Label.Set( "Edit" );
+				editButton->a_HelpText.Set( "Attempt to edit the file using its associated default application." );
 				container->AddChild( editButton );
 			}
 		}
@@ -729,7 +729,7 @@ void ReflectInterpreter::InterpretFilePathField( const std::vector< Reflect::Poi
 	{
 		ValuePtr value = CreateControl< Value >();
 		value->a_IsReadOnly.Set( readOnly );
-		value->a_HelpText.Set( field->GetProperty( TXT( "HelpText" ) ) );
+		value->a_HelpText.Set( field->GetProperty( "HelpText" ) );
 		container->AddChild( value );
 	}
 
@@ -758,7 +758,7 @@ void ReflectInterpreter::InterpretFilePathField( const std::vector< Reflect::Poi
 		label = CreateControl< Label >();
 
 		std::string temp;
-		field->GetProperty( TXT( "UIName" ), temp );
+		field->GetProperty( "UIName", temp );
 		if ( temp.empty() )
 		{
 			bool converted = Helium::ConvertString( field->m_Name, temp );
@@ -766,7 +766,7 @@ void ReflectInterpreter::InterpretFilePathField( const std::vector< Reflect::Poi
 		}
 
 		label->BindText( temp );
-		label->a_HelpText.Set( field->GetProperty( TXT( "HelpText" ) ) );
+		label->a_HelpText.Set( field->GetProperty( "HelpText" ) );
 
 		container->InsertChild(0, label);
 	}
@@ -861,7 +861,7 @@ void ReflectInterpreter::FilePathDataChanging( const DataChangingArgs& args )
 
 		path.TrimToExisting();
 
-		FileDialogArgs fileDialogArgs( Helium::FileDialogTypes::OpenFile, TXT( "FilePath Does Not Exist" ), m_FileFilter, path );
+		FileDialogArgs fileDialogArgs( Helium::FileDialogTypes::OpenFile, "FilePath Does Not Exist", m_FileFilter, path );
 		d_FindMissingFile.Invoke( fileDialogArgs );
 		Reflect::Data::SetValue< std::string >( args.m_NewValue, fileDialogArgs.m_Result.Get() );
 	}
@@ -891,11 +891,11 @@ void ReflectInterpreter::InterpretSequenceField( const std::vector< Reflect::Poi
 	ContainerPtr labelContainer = CreateControl<Container>();
 	parent->AddChild( labelContainer );
 	LabelPtr label = CreateControl< Label >();
-	label->a_HelpText.Set( field->GetProperty( TXT( "HelpText" ) ) );
+	label->a_HelpText.Set( field->GetProperty( "HelpText" ) );
 	labelContainer->AddChild( label );
 
 	std::string temp;
-	field->GetProperty( TXT( "UIName" ), temp );
+	field->GetProperty( "UIName", temp );
 	if ( temp.empty() )
 	{
 		bool converted = Helium::ConvertString( field->m_Name, temp );
@@ -908,7 +908,7 @@ void ReflectInterpreter::InterpretSequenceField( const std::vector< Reflect::Poi
 	ContainerPtr listContainer = CreateControl<Container>();
 	parent->AddChild( listContainer );
 	ListPtr list = CreateControl<List>();
-	list->a_HelpText.Set( field->GetProperty( TXT( "HelpText" ) ) );
+	list->a_HelpText.Set( field->GetProperty( "HelpText" ) );
 	listContainer->AddChild( list );
 
 	// create the buttons
@@ -978,8 +978,8 @@ ButtonPtr ReflectInterpreter::SequenceAddAddButton( List* list )
 	ButtonPtr addButton =CreateControl< Button >();
 	addButton->ButtonClickedEvent().Add( ButtonClickedSignature::Delegate ( this, &ReflectInterpreter::SequenceOnAdd ) );
 	addButton->SetClientData( new ClientData( list ) );
-	addButton->a_Label.Set( TXT( "Add" ) );
-	addButton->a_HelpText.Set( TXT( "Add an item to the list." ) );
+	addButton->a_Label.Set( "Add" );
+	addButton->a_HelpText.Set( "Add an item to the list." );
 
 	return addButton;
 }
@@ -987,10 +987,10 @@ ButtonPtr ReflectInterpreter::SequenceAddAddButton( List* list )
 ButtonPtr ReflectInterpreter::SequenceAddRemoveButton( List* list )
 {
 	ButtonPtr removeButton = CreateControl< Button >();
-	removeButton->a_Label.Set( TXT( "Remove" ) );
+	removeButton->a_Label.Set( "Remove" );
 	removeButton->ButtonClickedEvent().Add( ButtonClickedSignature::Delegate ( this, &ReflectInterpreter::SequenceOnRemove ) );
 	removeButton->SetClientData( new ClientData( list ) );
-	removeButton->a_HelpText.Set( TXT( "Remove the selected item(s) from the list." ) );
+	removeButton->a_HelpText.Set( "Remove the selected item(s) from the list." );
 
 	return removeButton;
 }
@@ -998,10 +998,10 @@ ButtonPtr ReflectInterpreter::SequenceAddRemoveButton( List* list )
 ButtonPtr ReflectInterpreter::SequenceAddMoveUpButton( List* list )
 {
 	ButtonPtr upButton = CreateControl< Button >();
-	upButton->a_Icon.Set( TXT( "actions/go-up" ) );
+	upButton->a_Icon.Set( "actions/go-up" );
 	upButton->ButtonClickedEvent().Add( ButtonClickedSignature::Delegate ( this, &ReflectInterpreter::SequenceOnMoveUp ) );
 	upButton->SetClientData( new ClientData( list ) );
-	upButton->a_HelpText.Set( TXT( "Move the selected item(s) up the list." ) );
+	upButton->a_HelpText.Set( "Move the selected item(s) up the list." );
 
 	return upButton;
 }
@@ -1009,10 +1009,10 @@ ButtonPtr ReflectInterpreter::SequenceAddMoveUpButton( List* list )
 ButtonPtr ReflectInterpreter::SequenceAddMoveDownButton( List* list )
 {
 	ButtonPtr downButton = CreateControl< Button >();
-	downButton->a_Icon.Set( TXT( "actions/go-down" ) );
+	downButton->a_Icon.Set( "actions/go-down" );
 	downButton->ButtonClickedEvent().Add( ButtonClickedSignature::Delegate ( this, &ReflectInterpreter::SequenceOnMoveDown ) );
 	downButton->SetClientData( new ClientData( list ) );
-	downButton->a_HelpText.Set( TXT( "Move the selected item(s) down the list." ) );
+	downButton->a_HelpText.Set( "Move the selected item(s) down the list." );
 
 	return downButton;
 }
@@ -1134,7 +1134,7 @@ void ReflectInterpreter::InterpretSetField( const std::vector< Reflect::Pointer 
 	parent->AddChild( container );
 
 	std::string temp;
-	field->GetProperty( TXT( "UIName" ), temp );
+	field->GetProperty( "UIName", temp );
 	if ( temp.empty() )
 	{
 		bool converted = Helium::ConvertString( field->m_Name, temp );
@@ -1152,7 +1152,7 @@ void ReflectInterpreter::InterpretSetField( const std::vector< Reflect::Pointer 
 
 	// create the list
 	ListPtr list = CreateControl< List >();
-	list->a_HelpText.Set( field->GetProperty( TXT( "HelpText" ) ) );
+	list->a_HelpText.Set( field->GetProperty( "HelpText" ) );
 	container->AddChild( list );
 
 	// bind the ui to the serialiers
@@ -1166,15 +1166,15 @@ void ReflectInterpreter::InterpretSetField( const std::vector< Reflect::Pointer 
 
 		ButtonPtr buttonAdd = CreateControl< Button >();
 		buttonContainer->AddChild( buttonAdd );
-		buttonAdd->a_Label.Set( TXT( "Add" ) );
-		buttonAdd->a_HelpText.Set( TXT( "Add an item to the list." ) );
+		buttonAdd->a_Label.Set( "Add" );
+		buttonAdd->a_HelpText.Set( "Add an item to the list." );
 		buttonAdd->ButtonClickedEvent().Add( ButtonClickedSignature::Delegate ( this, &ReflectInterpreter::SetOnAdd ) );
 		buttonAdd->SetClientData( new ClientData( list ) );
 
 		ButtonPtr buttonRemove = CreateControl< Button >();
 		buttonContainer->AddChild( buttonRemove );
-		buttonRemove->a_Label.Set( TXT( "Remove" ) );
-		buttonRemove->a_HelpText.Set( TXT( "Remove the selected item(s) from the list." ) );
+		buttonRemove->a_Label.Set( "Remove" );
+		buttonRemove->a_HelpText.Set( "Remove the selected item(s) from the list." );
 		buttonRemove->ButtonClickedEvent().Add( ButtonClickedSignature::Delegate ( this, &ReflectInterpreter::SetOnRemove ) );
 		buttonRemove->SetClientData( new ClientData( list ) );
 	}

@@ -7,7 +7,7 @@ namespace Helium
 {
     namespace Inspect
     {
-        const static char LABEL_ATTR_TEXT[] = TXT( "text" );
+        const static char LABEL_ATTR_TEXT[] = "text";
 
         class HELIUM_INSPECT_API Label : public Control
         {

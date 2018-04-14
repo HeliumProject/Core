@@ -28,7 +28,7 @@ void Helium::Inspect::Container::BuildPath(std::string& path) const
 		m_Parent->BuildPath(path);
 	}
 
-	path += TXT( "|" ) + a_Name.Get();
+	path += "|" + a_Name.Get();
 }
 
 Helium::Inspect::UIHints Helium::Inspect::Container::GetUIHints() const
