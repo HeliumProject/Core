@@ -22,7 +22,7 @@ bool Helium::InitializeSockets()
 		int result = WSAStartup(MAKEWORD(2,2), &g_WSAData);
 		if (result != NO_ERROR)
 		{
-			Helium::Print(TXT("Error initializing socket layer (%d)\n"), WSAGetLastError());
+			Helium::Print( "Error initializing socket layer (%d)\n", WSAGetLastError() );
 			return false;
 		}
 	}
@@ -37,7 +37,7 @@ void Helium::CleanupSockets()
 		int result = WSACleanup();
 		if (result != NO_ERROR)
 		{
-			Helium::Print(TXT("Error cleaning up socket layer (%d)\n"), WSAGetLastError());
+			Helium::Print( "Error cleaning up socket layer (%d)\n", WSAGetLastError() );
 		}
 	}
 }
@@ -109,7 +109,7 @@ bool Socket::Create( SocketProtocol protocol )
 		int result = ::WSAIoctl( m_Handle, SIO_KEEPALIVE_VALS, &keepalive, sizeof( keepalive ), NULL, 0, &returned, NULL, NULL );
 		if ( result == SOCKET_ERROR )
 		{
-			Helium::Print( TXT("Error setting keep alive on socket (%d)\n"), WSAGetLastError() );
+			Helium::Print( "Error setting keep alive on socket (%d)\n", WSAGetLastError() );
 		}
 	}
 
@@ -138,7 +138,7 @@ bool Socket::Bind( uint16_t port )
 	service.sin_port = htons(port);
 	if ( ::bind( m_Handle, (sockaddr*)&service, sizeof(sockaddr_in) ) == SOCKET_ERROR )
 	{
-		Helium::Print( TXT("Failed to bind socket (%d)\n"), WSAGetLastError() );
+		Helium::Print( "Failed to bind socket (%d)\n", WSAGetLastError() );
 		::shutdown( m_Handle, SD_BOTH );
 		HELIUM_VERIFY( 0 == ::closesocket( m_Handle ) );
 		m_Handle = INVALID_SOCKET;
@@ -158,7 +158,7 @@ bool Socket::Listen()
 		}
 		else
 		{
-			Helium::Print( TXT("Failed to listen socket (%d)\n"), WSAGetLastError() );
+			Helium::Print( "Failed to listen socket (%d)\n", WSAGetLastError() );
 			::shutdown( m_Handle, SD_BOTH );
 			HELIUM_VERIFY( 0 == ::closesocket( m_Handle ) );
 			m_Handle = INVALID_SOCKET;

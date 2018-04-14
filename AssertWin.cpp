@@ -31,8 +31,8 @@ bool Assert::TriggerImplementation( const char* pMessageText )
 	char messageBoxText[ 1024 ];
 	StringPrint(
 		messageBoxText,
-		( TXT( "%s\n\nChoose \"Abort\" to terminate the program, \"Retry\" to debug the program (if a debugger " )
-		  TXT( "is attached), or \"Ignore\" to attempt to skip over the error." ) ),
+		( "%s\n\nChoose \"Abort\" to terminate the program, \"Retry\" to debug the program (if a debugger "
+		  "is attached), or \"Ignore\" to attempt to skip over the error." ),
 		pMessageText );
 
 	HELIUM_TCHAR_TO_WIDE( messageBoxText, wideMessageBoxText );

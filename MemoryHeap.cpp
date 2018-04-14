@@ -175,8 +175,8 @@ void DynamicMemoryHeap::UnlockReadGlobalHeapList()
 /// Write memory stats for all dynamic memory heap instances to the output log.
 void DynamicMemoryHeap::LogMemoryStats()
 {
-	HELIUM_TRACE( TraceLevels::Debug, TXT( "DynamicMemoryHeap stats:\n" ) );
-	HELIUM_TRACE( TraceLevels::Debug, TXT( "Heap name\tActive allocations\tBytes allocated\n" ) );
+	HELIUM_TRACE( TraceLevels::Debug, "DynamicMemoryHeap stats:\n" );
+	HELIUM_TRACE( TraceLevels::Debug, "Heap name\tActive allocations\tBytes allocated\n" );
 
 	ScopeReadLock readLock( GetGlobalHeapListLock() );
 
@@ -188,7 +188,7 @@ void DynamicMemoryHeap::LogMemoryStats()
 #endif
 		if( !pName )
 		{
-			pName = TXT( "(unnamed)" );
+			pName = "(unnamed)";
 		}
 
 		size_t allocationCount = pHeap->GetAllocationCount();
@@ -196,13 +196,13 @@ void DynamicMemoryHeap::LogMemoryStats()
 
 		HELIUM_TRACE(
 			TraceLevels::Debug,
-			TXT( "%s\t%" ) PRIuSZ TXT( "\t%" ) PRIuSZ TXT( "\n" ),
+			"%s\t%" PRIuSZ "\t%" PRIuSZ "\n",
 			pName,
 			allocationCount,
 			bytesActual );
 	}
 
-	HELIUM_TRACE( TraceLevels::Debug, TXT( "\n" ) );
+	HELIUM_TRACE( TraceLevels::Debug, "\n" );
 
 #if HELIUM_ENABLE_MEMORY_TRACKING_VERBOSE
 	bool bLockedTracking = ConditionalVerboseTrackingLock();
@@ -210,7 +210,7 @@ void DynamicMemoryHeap::LogMemoryStats()
 	bool bOldDisableBacktraceTracking = sm_bDisableBacktraceTracking;
 	sm_bDisableBacktraceTracking = true;
 
-	HELIUM_TRACE( TraceLevels::Debug, TXT( "DynamicMemoryHeap unfreed allocations:\n" ) );
+	HELIUM_TRACE( TraceLevels::Debug, "DynamicMemoryHeap unfreed allocations:\n" );
 
 	size_t allocationIndex = 1;
 
@@ -233,7 +233,7 @@ void DynamicMemoryHeap::LogMemoryStats()
 			{
 				HELIUM_TRACE(
 					TraceLevels::Debug,
-					TXT( "%" ) PRIuSZ TXT( ": 0x%" HELIUM_PRINT_POINTER " (%s)\n" ),
+					"%" PRIuSZ ": 0x%" HELIUM_PRINT_POINTER " (%s)\n",
 					allocationIndex,
 					iter->first,
 					pHeapName );
@@ -253,13 +253,13 @@ void DynamicMemoryHeap::LogMemoryStats()
 
 					Helium::GetAddressSymbol( symbol, pAddress );
 					const char* pSymbol = symbol.c_str();
-					HELIUM_TRACE( TraceLevels::Debug, TXT( "- 0x%" HELIUM_PRINT_POINTER ": %s\n" ), pAddress, ( pSymbol ? pSymbol : TXT( "" ) ) );
+					HELIUM_TRACE( TraceLevels::Debug, "- 0x%" HELIUM_PRINT_POINTER ": %s\n", pAddress, ( pSymbol ? pSymbol : "" ) );
 				}
 			}
 		}
 	}
 
-	HELIUM_TRACE( TraceLevels::Debug, TXT( "\n" ) );
+	HELIUM_TRACE( TraceLevels::Debug, "\n" );
 
 	sm_bDisableBacktraceTracking = bOldDisableBacktraceTracking;
 
@@ -394,7 +394,7 @@ DynamicMemoryHeap& Helium::GetDefaultHeap()
 	if( !pDefaultHeap )
 	{
 		pDefaultHeap = static_cast< DynamicMemoryHeap* >( VirtualMemory::Allocate( sizeof( DynamicMemoryHeap ) ) );
-		new( pDefaultHeap ) DynamicMemoryHeap HELIUM_DYNAMIC_MEMORY_HEAP_INIT( TXT( "Default" ) );
+		new( pDefaultHeap ) DynamicMemoryHeap HELIUM_DYNAMIC_MEMORY_HEAP_INIT( "Default" );
 	}
 
 	return *pDefaultHeap;
@@ -411,7 +411,7 @@ DynamicMemoryHeap& Helium::GetExternalHeap()
 	if( !pExternalHeap )
 	{
 		pExternalHeap = static_cast< DynamicMemoryHeap* >( VirtualMemory::Allocate( sizeof( DynamicMemoryHeap ) ) );
-		new( pExternalHeap ) DynamicMemoryHeap HELIUM_DYNAMIC_MEMORY_HEAP_INIT( TXT( "External" ) );
+		new( pExternalHeap ) DynamicMemoryHeap HELIUM_DYNAMIC_MEMORY_HEAP_INIT( "External" );
 	}
 
 	return *pExternalHeap;

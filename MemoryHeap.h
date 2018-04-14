@@ -86,7 +86,7 @@
 			{ \
 				pModuleHeap = static_cast< DynamicMemoryHeap* >( \
 					VirtualMemory::Allocate( sizeof( DynamicMemoryHeap ) ) ); \
-				new( pModuleHeap ) DynamicMemoryHeap HELIUM_DYNAMIC_MEMORY_HEAP_INIT( TXT( #MODULE_NAME ) ); \
+				new( pModuleHeap ) DynamicMemoryHeap HELIUM_DYNAMIC_MEMORY_HEAP_INIT( #MODULE_NAME ); \
 			} \
 			\
 			return *pModuleHeap; \

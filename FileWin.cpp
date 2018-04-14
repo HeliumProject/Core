@@ -105,7 +105,7 @@ bool File::Close()
 
 bool File::Read( void* buffer, size_t numberOfBytesToRead, size_t* numberOfBytesRead )
 {
-	HELIUM_ASSERT_MSG( numberOfBytesToRead <= MAXDWORD, TXT( "File read operations are limited to DWORD sizes" ) );
+	HELIUM_ASSERT_MSG( numberOfBytesToRead <= MAXDWORD, "File read operations are limited to DWORD sizes" );
 	if( numberOfBytesToRead > MAXDWORD )
 	{
 		return false;
@@ -124,7 +124,7 @@ bool File::Read( void* buffer, size_t numberOfBytesToRead, size_t* numberOfBytes
 
 bool File::Write( const void* buffer, size_t numberOfBytesToWrite, size_t* numberOfBytesWritten )
 {
-	HELIUM_ASSERT_MSG( numberOfBytesToWrite <= MAXDWORD, TXT( "File write operations are limited to DWORD sizes" ) );
+	HELIUM_ASSERT_MSG( numberOfBytesToWrite <= MAXDWORD, "File write operations are limited to DWORD sizes" );
 	if( numberOfBytesToWrite > MAXDWORD )
 	{
 		return false;
@@ -253,7 +253,7 @@ bool Directory::FindFirst( DirectoryEntry& entry )
 {
 	Close();
 
-	std::string path ( m_Path + TXT( "/*" ) );
+	std::string path ( m_Path + "/*" );
 	HELIUM_TCHAR_TO_WIDE( path.c_str(), convertedPath );
 
 	WIN32_FIND_DATA foundFile;
@@ -294,7 +294,7 @@ bool Directory::Close()
 // File system ops
 //
 
-const char Helium::PathSeparator = TXT('\\');
+const char Helium::PathSeparator = '\\';
 
 bool Helium::GetFullPath( const char* path, std::string& fullPath )
 {
@@ -355,7 +355,7 @@ bool Helium::MakePath( const char* path )
 		{
 			HELIUM_TCHAR_TO_WIDE( currentDirectory.c_str(), convertedCurrentDirectory );
 
-			if ( ( (*currentDirectory.rbegin()) != TXT(':') ) && ( _wstat64( convertedCurrentDirectory, &statInfo ) != 0 ) )
+			if ( ( (*currentDirectory.rbegin()) != ':' ) && ( _wstat64( convertedCurrentDirectory, &statInfo ) != 0 ) )
 			{
 				if ( !CreateDirectory( convertedCurrentDirectory, NULL ) )
 				{
@@ -368,7 +368,7 @@ bool Helium::MakePath( const char* path )
 
 			if( itr != end )
 			{
-				currentDirectory += std::string( TXT("\\") ) + *itr;
+				currentDirectory += std::string( "\\" ) + *itr;
 				++itr;
 			}
 			else

@@ -59,11 +59,11 @@ namespace Helium
 
 		static const char* Strings[] =
 		{
-			TXT("C++"),
+			"C++",
 #if HELIUM_OS_WIN
-			TXT("Structured"),
+			"Structured",
 #else
-			TXT("Signal"),
+			"Signal",
 #endif
 		};
 	}
@@ -104,7 +104,7 @@ namespace Helium
 	HELIUM_PLATFORM_API bool IsDebuggerPresent();
 
 #if !HELIUM_RELEASE && !HELIUM_PROFILE
-	HELIUM_PLATFORM_API bool InitializeSymbols( const std::string& path = TXT("") );
+	HELIUM_PLATFORM_API bool InitializeSymbols( const std::string& path = "" );
 	HELIUM_PLATFORM_API bool GetSymbolsInitialized();
 	HELIUM_PLATFORM_API size_t GetStackTrace( void** ppStackTraceArray, size_t stackTraceArraySize, size_t skipCount = 1 );
 	HELIUM_PLATFORM_API void GetAddressSymbol( std::string& rSymbol, void* pAddress );

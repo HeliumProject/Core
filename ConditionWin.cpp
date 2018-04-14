@@ -18,7 +18,7 @@ Condition::Condition( bool bManualReset, bool bInitialState )
     HELIUM_ASSERT( m_Handle );
     if ( !m_Handle )
     {
-        Helium::Print(TXT("Failed to create event (%s)\n"), Helium::GetErrorString().c_str());
+        Helium::Print( "Failed to create event (%s)\n", Helium::GetErrorString().c_str() );
         HELIUM_BREAK();
     }
 }
@@ -30,7 +30,7 @@ Condition::~Condition()
     HELIUM_ASSERT( result );
     if ( result != TRUE )
     {
-        Helium::Print(TXT("Failed to close event (%s)\n"), Helium::GetErrorString().c_str());
+        Helium::Print( "Failed to close event (%s)\n", Helium::GetErrorString().c_str() );
         HELIUM_BREAK();
     }
 }
@@ -52,7 +52,7 @@ void Condition::Signal()
     HELIUM_ASSERT( result );
     if ( result != TRUE )
     {
-        Helium::Print(TXT("Failed to signal event (%s)\n"), Helium::GetErrorString().c_str());
+        Helium::Print( "Failed to signal event (%s)\n", Helium::GetErrorString().c_str() );
         HELIUM_BREAK();
     }
 }
@@ -66,7 +66,7 @@ void Condition::Reset()
     HELIUM_ASSERT( result );
     if ( result != TRUE )
     {
-        Helium::Print(TXT("Failed to reset event (%s)\n"), Helium::GetErrorString().c_str());
+        Helium::Print( "Failed to reset event (%s)\n", Helium::GetErrorString().c_str() );
         HELIUM_BREAK();
     }
 }
@@ -106,7 +106,7 @@ bool Condition::Wait( uint32_t timeout )
     {
         if ( result != WAIT_TIMEOUT )
         {
-            Helium::Print(TXT("Failed to wait for event (%s)\n"), Helium::GetErrorString().c_str());
+            Helium::Print( "Failed to wait for event (%s)\n", Helium::GetErrorString().c_str() );
             HELIUM_BREAK();
         }
 

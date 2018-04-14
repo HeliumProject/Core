@@ -267,7 +267,7 @@ bool Directory::Close()
 // File system ops
 //
 
-const char Helium::PathSeparator = TXT('/');
+const char Helium::PathSeparator = '/';
 
 bool Helium::GetFullPath( const char* path, std::string& fullPath )
 {

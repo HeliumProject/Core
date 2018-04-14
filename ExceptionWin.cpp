@@ -69,16 +69,16 @@ static BOOL CALLBACK EnumerateLoadedModulesProc(PCTSTR name, DWORD64 base, ULONG
 			if ( moduleInfo.LoadedPdbName[0] != '\0' )
 			{
 				HELIUM_CONVERT_TO_CHAR( moduleInfo.LoadedPdbName, convertedPdbName ); 
-				Print( TXT("Success loading symbols for module: %s, base: 0x%" HELIUM_PRINT_POINTER ", size: %u: %s\n"), convertedName, base, size, convertedPdbName );
+				Print( "Success loading symbols for module: %s, base: 0x%" HELIUM_PRINT_POINTER ", size: %u: %s\n", convertedName, base, size, convertedPdbName );
 			}
 			else
 			{
-				Print( TXT("Success loading symbols for module: %s, base: 0x%" HELIUM_PRINT_POINTER ", size: %u\n"), convertedName, base, size );
+				Print( "Success loading symbols for module: %s, base: 0x%" HELIUM_PRINT_POINTER ", size: %u\n", convertedName, base, size );
 			}
 		}
 		else
 		{
-			Print( TXT("Failure loading symbols for module: %s: %s\n"), convertedName, Helium::GetErrorString().c_str() );
+			Print( "Failure loading symbols for module: %s: %s\n", convertedName, Helium::GetErrorString().c_str() );
 		}
 	}
 
@@ -133,7 +133,7 @@ bool Helium::InitializeSymbols(const std::string& path)
 		// initialize symbols (dbghelp.dll)
 		if ( SymInitialize(GetCurrentProcess(), dir.c_str(), FALSE) == 0 )
 		{
-			Print( TXT("Failure initializing symbol API: %s\n"), Helium::GetErrorString().c_str() );
+			Print( "Failure initializing symbol API: %s\n", Helium::GetErrorString().c_str() );
 			return false;
 		}
 
@@ -211,7 +211,7 @@ std::string Helium::GetSymbolInfo(uintptr_t adr, bool enumLoadedModules)
 		{
 			HELIUM_WIDE_TO_TCHAR(symbolInfo->Name, convertedSymbolName);
 			// success, copy the symbol info
-			StringPrint(symbol, TXT("%s + 0x%"HELIUM_PRINT_POINTER), convertedSymbolName, disp);
+			StringPrint(symbol, "%s + 0x%" HELIUM_PRINT_POINTER, convertedSymbolName, disp);
 
 			//
 			// Now find source line information
@@ -232,21 +232,21 @@ std::string Helium::GetSymbolInfo(uintptr_t adr, bool enumLoadedModules)
 				HELIUM_WIDE_TO_TCHAR(module, convertedModule);
 				HELIUM_WIDE_TO_TCHAR(file, convertedFile);
 				HELIUM_WIDE_TO_TCHAR(ext, convertedExt);
-				StringPrint(result, TXT("%s, %s : %s%s(%d)"), convertedModule, symbol, convertedFile, convertedExt, l.LineNumber);
+				StringPrint(result, "%s, %s : %s%s(%d)", convertedModule, symbol, convertedFile, convertedExt, l.LineNumber);
 				return result;
 			}
 
-			StringPrint(result, TXT("%s, %s"), module, symbol);
+			StringPrint(result, "%s, %s", module, symbol);
 			return result;
 		}
 
-		StringPrint(result, TXT("%s"), module);
+		StringPrint(result, "%s", module);
 		return result;
 	}
 	else
 	{
 		DWORD err = GetLastError();
-		return TXT("Unknown");
+		return "Unknown";
 	}
 }
 
@@ -367,7 +367,7 @@ bool Helium::GetStackTrace(LPCONTEXT context, std::vector<uintptr_t>& stack, uns
 		}
 
 #ifdef DEBUG_SYMBOLS
-		Print( TXT( "0x%" HELIUM_PRINT_POINTER " - %s\n" ), frame.AddrReturn.Offset, GetSymbolInfo(frame.AddrReturn.Offset, false).c_str() );
+		Print( "0x%" HELIUM_PRINT_POINTER " - %s\n", frame.AddrReturn.Offset, GetSymbolInfo(frame.AddrReturn.Offset, false).c_str() );
 #endif
 
 		if (omitFrames == 0)
@@ -389,7 +389,7 @@ void Helium::TranslateStackTrace(const std::vector<uintptr_t>& trace, std::strin
 	std::vector<uintptr_t>::const_iterator end = trace.end();
 	for ( ; itr != end; ++itr )
 	{
-		PrintToString(buffer, TXT("0x%" HELIUM_PRINT_POINTER " - %s\n"), *itr, GetSymbolInfo(*itr, false).c_str() );
+		PrintToString(buffer, "0x%" HELIUM_PRINT_POINTER " - %s\n", *itr, GetSymbolInfo(*itr, false).c_str() );
 	}
 }
 
@@ -400,97 +400,97 @@ const char* Helium::GetExceptionClass(uint32_t exceptionCode)
 	switch (exceptionCode)
 	{
 	case EXCEPTION_ACCESS_VIOLATION:
-		ex_name = TXT("EXCEPTION_ACCESS_VIOLATION");
+		ex_name = "EXCEPTION_ACCESS_VIOLATION";
 		break;
 
 	case EXCEPTION_BREAKPOINT:
-		ex_name = TXT("EXCEPTION_BREAKPOINT");
+		ex_name = "EXCEPTION_BREAKPOINT";
 		break;
 
 	case EXCEPTION_SINGLE_STEP:
-		ex_name = TXT("EXCEPTION_SINGLE_STEP");
+		ex_name = "EXCEPTION_SINGLE_STEP";
 		break;
 
 	case EXCEPTION_ARRAY_BOUNDS_EXCEEDED:
-		ex_name = TXT("EXCEPTION_ARRAY_BOUNDS_EXCEEDED");
+		ex_name = "EXCEPTION_ARRAY_BOUNDS_EXCEEDED";
 		break;
 
 	case EXCEPTION_FLT_DENORMAL_OPERAND:
-		ex_name = TXT("EXCEPTION_FLT_DENORMAL_OPERAND");
+		ex_name = "EXCEPTION_FLT_DENORMAL_OPERAND";
 		break;
 
 	case EXCEPTION_FLT_DIVIDE_BY_ZERO:
-		ex_name = TXT("EXCEPTION_FLT_DIVIDE_BY_ZERO");
+		ex_name = "EXCEPTION_FLT_DIVIDE_BY_ZERO";
 		break;
 
 	case EXCEPTION_FLT_INEXACT_RESULT:
-		ex_name = TXT("EXCEPTION_FLT_INEXACT_RESULT");
+		ex_name = "EXCEPTION_FLT_INEXACT_RESULT";
 		break;
 
 	case EXCEPTION_FLT_INVALID_OPERATION:
-		ex_name = TXT("EXCEPTION_FLT_INVALID_OPERATION");
+		ex_name = "EXCEPTION_FLT_INVALID_OPERATION";
 		break;
 
 	case EXCEPTION_FLT_OVERFLOW:
-		ex_name = TXT("EXCEPTION_FLT_OVERFLOW");
+		ex_name = "EXCEPTION_FLT_OVERFLOW";
 		break;
 
 	case EXCEPTION_FLT_STACK_CHECK:
-		ex_name = TXT("EXCEPTION_FLT_STACK_CHECK");
+		ex_name = "EXCEPTION_FLT_STACK_CHECK";
 		break;
 
 	case EXCEPTION_FLT_UNDERFLOW:
-		ex_name = TXT("EXCEPTION_FLT_UNDERFLOW");
+		ex_name = "EXCEPTION_FLT_UNDERFLOW";
 		break;
 
 	case EXCEPTION_INT_DIVIDE_BY_ZERO:
-		ex_name = TXT("EXCEPTION_INT_DIVIDE_BY_ZERO");
+		ex_name = "EXCEPTION_INT_DIVIDE_BY_ZERO";
 		break;
 
 	case EXCEPTION_INT_OVERFLOW:
-		ex_name = TXT("EXCEPTION_INT_OVERFLOW");
+		ex_name = "EXCEPTION_INT_OVERFLOW";
 		break;
 
 	case EXCEPTION_PRIV_INSTRUCTION:
-		ex_name = TXT("EXCEPTION_PRIV_INSTRUCTION");
+		ex_name = "EXCEPTION_PRIV_INSTRUCTION";
 		break;
 
 	case EXCEPTION_IN_PAGE_ERROR:
-		ex_name = TXT("EXCEPTION_IN_PAGE_ERROR");
+		ex_name = "EXCEPTION_IN_PAGE_ERROR";
 		break;
 
 	case EXCEPTION_ILLEGAL_INSTRUCTION:
-		ex_name = TXT("EXCEPTION_ILLEGAL_INSTRUCTION");
+		ex_name = "EXCEPTION_ILLEGAL_INSTRUCTION";
 		break;
 
 	case EXCEPTION_NONCONTINUABLE_EXCEPTION:
-		ex_name = TXT("EXCEPTION_NONCONTINUABLE_EXCEPTION");
+		ex_name = "EXCEPTION_NONCONTINUABLE_EXCEPTION";
 		break;
 
 	case EXCEPTION_STACK_OVERFLOW:
-		ex_name = TXT("EXCEPTION_STACK_OVERFLOW");
+		ex_name = "EXCEPTION_STACK_OVERFLOW";
 		break;
 
 	case EXCEPTION_INVALID_DISPOSITION:
-		ex_name = TXT("EXCEPTION_INVALID_DISPOSITION");
+		ex_name = "EXCEPTION_INVALID_DISPOSITION";
 		break;
 
 	case EXCEPTION_GUARD_PAGE:
-		ex_name = TXT("EXCEPTION_GUARD_PAGE");
+		ex_name = "EXCEPTION_GUARD_PAGE";
 		break;
 
 	case EXCEPTION_INVALID_HANDLE:
-		ex_name = TXT("EXCEPTION_INVALID_HANDLE");
+		ex_name = "EXCEPTION_INVALID_HANDLE";
 		break;
 
 	case 0xC00002B5:
-		ex_name = TXT("Multiple floating point traps");
+		ex_name = "Multiple floating point traps";
 		break;
 	}
 
 	if (ex_name == NULL)
 	{
-		ex_name = TXT("Unknown Exception");
+		ex_name = "Unknown Exception";
 	}
 
 	return ex_name;
@@ -538,8 +538,8 @@ void Helium::GetExceptionDetails( LPEXCEPTION_POINTERS info, ExceptionArgs& args
 		DWORD id = itr->first;
 		HANDLE handle = itr->second;
 
-		args.m_Threads.push_back( TXT("") );
-		PrintToString( args.m_Threads.back(), TXT("Thread %d:\n"), id );
+		args.m_Threads.push_back( "" );
+		PrintToString( args.m_Threads.back(), "Thread %d:\n", id );
 		std::string::size_type size = args.m_Threads.back().size();
 
 		CONTEXT context;
@@ -548,19 +548,19 @@ void Helium::GetExceptionDetails( LPEXCEPTION_POINTERS info, ExceptionArgs& args
 		if ( ::GetThreadContext( handle, &context ) )
 		{
 			PrintToString( args.m_Threads.back(), 
-				TXT("\nControl Registers:\n")
-				TXT("EIP = 0x%" HELIUM_PRINT_POINTER "  ESP = 0x%" HELIUM_PRINT_POINTER "\n")
-				TXT("EBP = 0x%" HELIUM_PRINT_POINTER "  EFL = 0x%" HELIUM_PRINT_POINTER "\n"),
+				"\nControl Registers:\n"
+				"EIP = 0x%" HELIUM_PRINT_POINTER "  ESP = 0x%" HELIUM_PRINT_POINTER "\n"
+				"EBP = 0x%" HELIUM_PRINT_POINTER "  EFL = 0x%" HELIUM_PRINT_POINTER "\n",
 				info->ContextRecord->IPREG,
 				info->ContextRecord->SPREG,
 				info->ContextRecord->BPREG,
 				info->ContextRecord->EFlags );
 
 			PrintToString( args.m_Threads.back(), 
-				TXT("\nInteger Registers:\n")
-				TXT("EAX = 0x%" HELIUM_PRINT_POINTER "  EBX = 0x%" HELIUM_PRINT_POINTER "\n")
-				TXT("ECX = 0x%" HELIUM_PRINT_POINTER "  EDX = 0x%" HELIUM_PRINT_POINTER "\n")
-				TXT("ESI = 0x%" HELIUM_PRINT_POINTER "  EDI = 0x%" HELIUM_PRINT_POINTER "\n"),
+				"\nInteger Registers:\n"
+				"EAX = 0x%" HELIUM_PRINT_POINTER "  EBX = 0x%" HELIUM_PRINT_POINTER "\n"
+				"ECX = 0x%" HELIUM_PRINT_POINTER "  EDX = 0x%" HELIUM_PRINT_POINTER "\n"
+				"ESI = 0x%" HELIUM_PRINT_POINTER "  EDI = 0x%" HELIUM_PRINT_POINTER "\n",
 				info->ContextRecord->AXREG,
 				info->ContextRecord->BXREG,
 				info->ContextRecord->CXREG,
@@ -568,7 +568,7 @@ void Helium::GetExceptionDetails( LPEXCEPTION_POINTERS info, ExceptionArgs& args
 				info->ContextRecord->SIREG,
 				info->ContextRecord->DIREG );
 
-			PrintToString( args.m_Threads.back(), TXT("\nCallstack:\n") );
+			PrintToString( args.m_Threads.back(), "\nCallstack:\n" );
 
 			std::vector<uintptr_t> trace;
 			if ( GetStackTrace( &context, trace ) )
@@ -579,7 +579,7 @@ void Helium::GetExceptionDetails( LPEXCEPTION_POINTERS info, ExceptionArgs& args
 
 		if ( args.m_Threads.back().size() == size )
 		{
-			args.m_Threads.back() += TXT("No thread info\n");
+			args.m_Threads.back() += "No thread info\n";
 		}
 
 		::ResumeThread( handle );
@@ -640,7 +640,7 @@ void Helium::GetExceptionDetails( LPEXCEPTION_POINTERS info, ExceptionArgs& args
 
 		if ( args.m_CPPClass.empty() && args.m_Message.empty() )
 		{
-			args.m_Message = TXT("Thrown object is not a known type of C++ exception");
+			args.m_Message = "Thrown object is not a known type of C++ exception";
 		}
 
 		info->ContextRecord->IPREG = (DWORD)info->ExceptionRecord->ExceptionInformation[2];
@@ -651,15 +651,15 @@ void Helium::GetExceptionDetails( LPEXCEPTION_POINTERS info, ExceptionArgs& args
 
 		if (args.m_SEHCode == EXCEPTION_ACCESS_VIOLATION)
 		{
-			PrintToString( args.m_Message, TXT("Attempt to %s address 0x%" HELIUM_PRINT_POINTER ""), (info->ExceptionRecord->ExceptionInformation[0]==1)?TXT("write to"):TXT("read from"), info->ExceptionRecord->ExceptionInformation[1]);
+			PrintToString( args.m_Message, "Attempt to %s address 0x%" HELIUM_PRINT_POINTER "", (info->ExceptionRecord->ExceptionInformation[0]==1) ? "write to" : "read from", info->ExceptionRecord->ExceptionInformation[1] );
 		}
 
 		if (info->ContextRecord->ContextFlags & CONTEXT_CONTROL)
 		{
 			PrintToString( args.m_SEHControlRegisters, 
-				TXT("Control Registers:\n")
-				TXT("EIP = 0x%" HELIUM_PRINT_POINTER "  ESP = 0x%" HELIUM_PRINT_POINTER "\n")
-				TXT("EBP = 0x%" HELIUM_PRINT_POINTER "  EFL = 0x%" HELIUM_PRINT_POINTER "\n"),
+				"Control Registers:\n"
+				"EIP = 0x%" HELIUM_PRINT_POINTER "  ESP = 0x%" HELIUM_PRINT_POINTER "\n"
+				"EBP = 0x%" HELIUM_PRINT_POINTER "  EFL = 0x%" HELIUM_PRINT_POINTER "\n",
 				info->ContextRecord->IPREG,
 				info->ContextRecord->SPREG,
 				info->ContextRecord->BPREG,
@@ -669,10 +669,10 @@ void Helium::GetExceptionDetails( LPEXCEPTION_POINTERS info, ExceptionArgs& args
 		if ( info->ContextRecord->ContextFlags & CONTEXT_INTEGER )
 		{
 			PrintToString( args.m_SEHIntegerRegisters, 
-				TXT("Integer Registers:\n")
-				TXT("EAX = 0x%" HELIUM_PRINT_POINTER "  EBX = 0x%" HELIUM_PRINT_POINTER "\n")
-				TXT("ECX = 0x%" HELIUM_PRINT_POINTER "  EDX = 0x%" HELIUM_PRINT_POINTER "\n")
-				TXT("ESI = 0x%" HELIUM_PRINT_POINTER "  EDI = 0x%" HELIUM_PRINT_POINTER "\n"),
+				"Integer Registers:\n"
+				"EAX = 0x%" HELIUM_PRINT_POINTER "  EBX = 0x%" HELIUM_PRINT_POINTER "\n"
+				"ECX = 0x%" HELIUM_PRINT_POINTER "  EDX = 0x%" HELIUM_PRINT_POINTER "\n"
+				"ESI = 0x%" HELIUM_PRINT_POINTER "  EDI = 0x%" HELIUM_PRINT_POINTER "\n",
 				info->ContextRecord->AXREG,
 				info->ContextRecord->BXREG,
 				info->ContextRecord->CXREG,
@@ -695,18 +695,18 @@ std::string Helium::GetExceptionInfo(LPEXCEPTION_POINTERS info)
 	GetExceptionDetails( info, args );
 
 	std::string buffer;
-	buffer += TXT("An exception has occurred\n");
+	buffer += "An exception has occurred\n";
 
 	switch ( args.m_Type )
 	{
 	case ExceptionTypes::CPP:
 		{
-			PrintToString( buffer, TXT("Type:    C++ Exception\n") );
-			PrintToString( buffer, TXT("Class:   %s\n"), args.m_CPPClass.c_str() );
+			PrintToString( buffer, "Type:    C++ Exception\n" );
+			PrintToString( buffer, "Class:   %s\n", args.m_CPPClass.c_str() );
 
 			if ( !args.m_Message.empty() )
 			{
-				PrintToString( buffer, TXT("Message:\n%s\n"), args.m_Message.c_str() );
+				PrintToString( buffer, "Message:\n%s\n", args.m_Message.c_str() );
 			}
 
 			break;
@@ -714,45 +714,45 @@ std::string Helium::GetExceptionInfo(LPEXCEPTION_POINTERS info)
 
 	case ExceptionTypes::Structured:
 		{
-			PrintToString( buffer, TXT("Type:    SEH Exception\n") );
-			PrintToString( buffer, TXT("Code:    0x%" HELIUM_PRINT_POINTER "\n"), args.m_SEHCode );
-			PrintToString( buffer, TXT("Class:   %s\n"), args.m_SEHClass.c_str() );
+			PrintToString( buffer, "Type:    SEH Exception\n" );
+			PrintToString( buffer, "Code:    0x%" HELIUM_PRINT_POINTER "\n", args.m_SEHCode );
+			PrintToString( buffer, "Class:   %s\n", args.m_SEHClass.c_str() );
 
 			if ( !args.m_Message.empty() )
 			{
-				PrintToString( buffer, TXT("Message:\n%s\n"), args.m_Message.c_str() );
+				PrintToString( buffer, "Message:\n%s\n", args.m_Message.c_str() );
 			}
 
 			if ( !args.m_SEHControlRegisters.empty() )
 			{
-				PrintToString( buffer, TXT("\n%s"), args.m_SEHControlRegisters.c_str() );
+				PrintToString( buffer, "\n%s", args.m_SEHControlRegisters.c_str() );
 			}
 
 			if ( !args.m_SEHIntegerRegisters.empty() )
 			{
-				PrintToString( buffer, TXT("\n%s"), args.m_SEHIntegerRegisters.c_str() );
+				PrintToString( buffer, "\n%s", args.m_SEHIntegerRegisters.c_str() );
 			}
 
 			break;
 		}
 	}
 
-	buffer += TXT("\nCallstack:\n");
+	buffer += "\nCallstack:\n";
 
 	if ( !args.m_Callstack.empty() )
 	{
-		PrintToString( buffer, TXT("%s"), args.m_Callstack.c_str() );
+		PrintToString( buffer, "%s", args.m_Callstack.c_str() );
 	}
 	else
 	{
-		buffer += TXT("No call stack info\n");
+		buffer += "No call stack info\n";
 	}
 
 	std::vector< std::string >::const_iterator itr = args.m_Threads.begin();
 	std::vector< std::string >::const_iterator end = args.m_Threads.end();
 	for ( ; itr != end; ++itr )
 	{
-		PrintToString( buffer, TXT("\n%s"), itr->c_str() );
+		PrintToString( buffer, "\n%s", itr->c_str() );
 	}
 
 	return buffer;
@@ -772,7 +772,7 @@ static void ConditionalSymInitialize()
 	static volatile bool bSymInitialized = false;
 	if( !bSymInitialized )
 	{
-		HELIUM_TRACE( TraceLevels::Info, TXT( "Initializing symbol handler for the current process...\n" ) );
+		HELIUM_TRACE( TraceLevels::Info, "Initializing symbol handler for the current process...\n" );
 
 		HANDLE hProcess = GetCurrentProcess();
 		HELIUM_ASSERT( hProcess );
@@ -780,13 +780,13 @@ static void ConditionalSymInitialize()
 		BOOL bInitialized = SymInitialize( hProcess, NULL, TRUE );
 		if( bInitialized )
 		{
-			HELIUM_TRACE( TraceLevels::Info, TXT( "Symbol handler initialization successful!\n" ) );
+			HELIUM_TRACE( TraceLevels::Info, "Symbol handler initialization successful!\n" );
 		}
 		else
 		{
 			HELIUM_TRACE(
 				TraceLevels::Info,
-				TXT( "Symbol handler initialization failed (error code %u).\n" ),
+				"Symbol handler initialization failed (error code %u).\n",
 				::GetLastError() );
 		}
 
@@ -913,10 +913,10 @@ void Helium::GetAddressSymbol( std::string& rSymbol, void* pAddress )
 		moduleInfo.SizeOfStruct = sizeof( moduleInfo );
 		if( SymGetModuleInfo64( hProcess, moduleBase, &moduleInfo ) )
 		{
-			rSymbol += TXT( "(" );
+			rSymbol += "(";
 			HELIUM_WIDE_TO_TCHAR( moduleInfo.ModuleName, convertedModuleName );
 			rSymbol += convertedModuleName;
-			rSymbol += TXT( ") " );
+			rSymbol += ") ";
 
 			bAddedModuleName = true;
 		}
@@ -924,7 +924,7 @@ void Helium::GetAddressSymbol( std::string& rSymbol, void* pAddress )
 
 	if( !bAddedModuleName )
 	{
-		rSymbol += TXT( "(???) " );
+		rSymbol += "(???) ";
 	}
 
 	uint64_t symbolInfoBuffer[
@@ -937,14 +937,14 @@ void Helium::GetAddressSymbol( std::string& rSymbol, void* pAddress )
 	rSymbolInfo.MaxNameLen = MAX_SYM_NAME;
 	if( SymFromAddr( hProcess, reinterpret_cast< uintptr_t >( pAddress ), NULL, &rSymbolInfo ) )
 	{
-		rSymbolInfo.Name[ MAX_SYM_NAME - 1 ] = TXT( '\0' );
+		rSymbolInfo.Name[ MAX_SYM_NAME - 1 ] = '\0';
 		HELIUM_WIDE_TO_TCHAR( rSymbolInfo.Name, convertedName );
 		rSymbol += convertedName;
-		rSymbol += TXT( " " );
+		rSymbol += " ";
 	}
 	else
 	{
-		rSymbol += TXT( "??? " );
+		rSymbol += "??? ";
 	}
 
 	DWORD displacement = 0;
@@ -954,19 +954,19 @@ void Helium::GetAddressSymbol( std::string& rSymbol, void* pAddress )
 	if( SymGetLineFromAddr64( hProcess, reinterpret_cast< uintptr_t >( pAddress ), &displacement, &lineInfo ) )
 	{
 		char lineNumberBuffer[ 32 ];
-		StringPrint( lineNumberBuffer, HELIUM_ARRAY_COUNT( lineNumberBuffer ), TXT( "%u" ), lineInfo.LineNumber );
-		lineNumberBuffer[ HELIUM_ARRAY_COUNT( lineNumberBuffer ) - 1 ] = TXT( '\0' );
+		StringPrint( lineNumberBuffer, HELIUM_ARRAY_COUNT( lineNumberBuffer ), "%u", lineInfo.LineNumber );
+		lineNumberBuffer[ HELIUM_ARRAY_COUNT( lineNumberBuffer ) - 1 ] = '\0';
 
-		rSymbol += TXT( "(" );
+		rSymbol += "(";
 		HELIUM_WIDE_TO_TCHAR( lineInfo.FileName, convertedFileName );
 		rSymbol += convertedFileName;
-		rSymbol += TXT( ", line " );
+		rSymbol += ", line ";
 		rSymbol += lineNumberBuffer;
-		rSymbol += TXT( ")" );
+		rSymbol += ")";
 	}
 	else
 	{
-		rSymbol += TXT( "(???, line ?)" );
+		rSymbol += "(???, line ?)";
 	}
 }
 

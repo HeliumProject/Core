@@ -260,7 +260,7 @@ int PrintString(ConsoleColor color, FILE* stream, const std::basic_string< T >& 
 		SetConsoleTextAttribute(GetStdHandle(STD_ERROR_HANDLE), LookupColor( color ) | FOREGROUND_INTENSITY | background);
 	}
 
-	int result = FilePrint(stream, TXT("%s"), str.c_str());
+	int result = FilePrint(stream, "%s", str.c_str());
 
 	fflush(stream);
 

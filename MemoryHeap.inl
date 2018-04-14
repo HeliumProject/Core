@@ -296,7 +296,7 @@ void* Helium::StackMemoryHeap< Allocator >::Allocate( size_t size )
 template< typename Allocator >
 void* Helium::StackMemoryHeap< Allocator >::Reallocate( void* /*pMemory*/, size_t /*size*/ )
 {
-	HELIUM_BREAK_MSG( TXT( "Reallocate() not supported by StackMemoryHeap" ) );
+	HELIUM_BREAK_MSG( "Reallocate() not supported by StackMemoryHeap" );
 
 	return NULL;
 }
@@ -405,9 +405,7 @@ void Helium::StackMemoryHeap< Allocator >::Free( void* pMemory )
 		pBlock = pBlock->m_pPreviousBlock;
 	}
 
-	HELIUM_BREAK_MSG(
-		TXT( "Allocation does not exist in the current stack (may have already been popped via another " )
-		TXT( "allocation)" ) );
+	HELIUM_BREAK_MSG( "Allocation does not exist in the current stack (may have already been popped via another allocation)" );
 }
 
 // @copydoc Free()
@@ -421,7 +419,7 @@ void Helium::StackMemoryHeap< Allocator >::FreeAligned( void* pMemory )
 template< typename Allocator >
 size_t Helium::StackMemoryHeap< Allocator >::GetMemorySize( void* /*pMemory*/ )
 {
-	HELIUM_BREAK_MSG( TXT( "GetMemorySize() is not supported by StackMemoryHeap" ) );
+	HELIUM_BREAK_MSG( "GetMemorySize() is not supported by StackMemoryHeap" );
 
 	return static_cast< size_t >( -1 ); 
 }

@@ -111,7 +111,7 @@ namespace Helium
 	class HELIUM_PLATFORM_API DirectoryEntry
 	{
 	public:
-		DirectoryEntry( const std::string& name = TXT( "" ) );
+		DirectoryEntry( const std::string& name = "" );
 
 		std::string	m_Name;
 		Status	m_Stat;
@@ -120,7 +120,7 @@ namespace Helium
 	class HELIUM_PLATFORM_API Directory : NonCopyable
 	{
 	public:
-		Directory( const std::string& path = TXT( "" ) );
+		Directory( const std::string& path = "" );
 		~Directory();
 
 		bool IsOpen();

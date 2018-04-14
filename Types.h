@@ -29,9 +29,9 @@
 #elif HELIUM_CC_GCC || HELIUM_CC_CLANG
 
 /// "char" string format macro for ptrdiff_t.
-# define PRIdPD TXT( "td" )
+# define PRIdPD "td"
 /// "char" string format macro for size_t.
-# define PRIuSZ TXT( "zu" )
+# define PRIuSZ "zu"
 
 #else
 
@@ -51,9 +51,9 @@ typedef double float64_t;
 //@}
 
 #if HELIUM_CPU_X86_32
-#define HELIUM_PRINT_POINTER "08" PRIXPTR
+# define HELIUM_PRINT_POINTER "08" PRIXPTR
 #elif HELIUM_CPU_X86_64
-#define HELIUM_PRINT_POINTER "016" PRIXPTR
+# define HELIUM_PRINT_POINTER "016" PRIXPTR
 #else
 #error Unknown register width!
 #endif
@@ -74,6 +74,3 @@ typedef double float64_t;
 #  define _UNICODE
 # endif
 #endif
-
-/// Prefix for declaring string and character literals of the default character type.
-#define TXT( X ) X

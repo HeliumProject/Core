@@ -262,7 +262,7 @@ int PrintString(ConsoleColor color, FILE* stream, const std::basic_string< T >& 
 		FilePrint( stream, LookupColor( color ) );
 	}
 
-	int result = FilePrint(stream, TXT("%s"), tstring.c_str());
+	int result = FilePrint(stream, "%s", tstring.c_str());
 
 	if (color != ConsoleColors::None)
 	{

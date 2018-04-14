@@ -48,7 +48,7 @@ bool Assert::Trigger(
 
 			StringPrint(
 				messageText,
-				TXT( "%s\n\nAssertion failed in %s (%s, line %d): (%s)" ),
+				"%s\n\nAssertion failed in %s (%s, line %d): (%s)",
 				message,
 				pFunction,
 				pFile,
@@ -59,7 +59,7 @@ bool Assert::Trigger(
 		{
 			StringPrint(
 				messageText,
-				TXT( "Assertion failed in %s (%s, line %d): %s" ),
+				"Assertion failed in %s (%s, line %d): %s",
 				pFunction,
 				pFile,
 				line,
@@ -78,7 +78,7 @@ bool Assert::Trigger(
 
 			StringPrint(
 				messageText,
-				TXT( "%s\n\nAssertion failed in %s (%s, line %d)" ),
+				"%s\n\nAssertion failed in %s (%s, line %d)",
 				message,
 				pFunction,
 				pFile,
@@ -88,7 +88,7 @@ bool Assert::Trigger(
 		{
 			StringPrint(
 				messageText,
-				TXT( "Assertion failed in %s (%s, line %d)" ),
+				"Assertion failed in %s (%s, line %d)",
 				pFunction,
 				pFile,
 				line );
@@ -96,24 +96,24 @@ bool Assert::Trigger(
 	}
 
 #if HELIUM_ENABLE_TRACE
-	Helium::Trace::Output( TraceLevels::Error, TXT( "%s\n" ), messageText );
+	Helium::Trace::Output( TraceLevels::Error, "%s\n", messageText );
 # if HELIUM_OS_WIN
 #  if !HELIUM_RELEASE && !HELIUM_PROFILE
     if (Helium::GetSymbolsInitialized())
     {
         std::vector<uintptr_t> trace;
         Helium::GetStackTrace( trace, 1 );
-        std::string str = TXT("Stack Trace:\n");
+        std::string str = "Stack Trace:\n";
         Helium::TranslateStackTrace( trace, str );
         Helium::Trace::Output( TraceLevels::Error, str.c_str() );
     }
     else
     {
-        std::string str = TXT("Stack trace unavailable - symbols not loaded\n");
+        std::string str = "Stack trace unavailable - symbols not loaded\n";
         Helium::Trace::Output( TraceLevels::Error, str.c_str() );
     }
 #  else
-    std::string str = TXT("Stack trace unavailable - symbols not loaded\n");
+    std::string str = "Stack trace unavailable - symbols not loaded\n";
     HELIUM_TRACE( TraceLevels::Error, str.c_str() );
 #  endif
 # endif

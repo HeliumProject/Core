@@ -77,7 +77,7 @@ void Trace::OutputVa( TraceLevel level, const char* pFormat, va_list argList )
 	if( static_cast< unsigned int >( result ) < HELIUM_ARRAY_COUNT( buffer ) )
 	{
 		OutputImplementation( buffer );
-		sm_bNewLine = ( buffer[ result - 1 ] == TXT( '\n' ) );
+		sm_bNewLine = ( buffer[ result - 1 ] == '\n' );
 
 		return;
 	}
@@ -113,7 +113,7 @@ void Trace::OutputVa( TraceLevel level, const char* pFormat, va_list argList )
 
 		HELIUM_ASSERT( result == static_cast< int >( bufferSize - 1 ) );
 		OutputImplementation( pBuffer );
-		sm_bNewLine = ( pBuffer[ result - 1 ] == TXT( '\n' ) );
+		sm_bNewLine = ( pBuffer[ result - 1 ] == '\n' );
 
 #if HELIUM_HEAP
 		allocator.Free( pBuffer );
@@ -146,26 +146,26 @@ const char* Trace::GetLevelString( TraceLevel level )
 	{
 		case TraceLevels::Debug:
 		{
-			return TXT( "[D] " );
+			return "[D] ";
 		}
 
 		case TraceLevels::Info:
 		{
-			return TXT( "[I] " );
+			return "[I] ";
 		}
 
 		case TraceLevels::Warning:
 		{
-			return TXT( "[W] " );
+			return "[W] ";
 		}
 
 		case TraceLevels::Error:
 		{
-			return TXT( "[E] " );
+			return "[E] ";
 		}
 	}
 
-	return TXT( "[?] " );
+	return "[?] ";
 }
 
 #endif  // HELIUM_ENABLE_TRACE
