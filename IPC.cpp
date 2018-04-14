@@ -200,10 +200,10 @@ namespace ProtocolMessageIDs
 
 static const char* ConnectionStateNames[] = 
 {
-	TXT( "Waiting" ),
-	TXT( "Active" ),
-	TXT( "Closed" ),
-	TXT( "Failed" ),
+	"Waiting",
+	"Active",
+	"Closed",
+	"Failed",
 };
 
 HELIUM_COMPILE_ASSERT( ConnectionStates::Count == (sizeof(ConnectionStateNames) / sizeof(const char*)) );
@@ -273,17 +273,17 @@ void Connection::SetState(ConnectionState state)
 #else
 		if (m_State != ConnectionStates::Active && state == ConnectionStates::Active)
 		{
-			Helium::Print( TXT( "%s: Connected\n" ), m_Name );
+			Helium::Print( "%s: Connected\n", m_Name );
 		}
 
 		if (m_State == ConnectionStates::Active && state != ConnectionStates::Active)
 		{
-			Helium::Print( TXT( "%s: Disconnected\n" ), m_Name );
+			Helium::Print( "%s: Disconnected\n", m_Name );
 		}
 
 		if (m_State == ConnectionStates::Active && state == ConnectionStates::Waiting)
 		{
-			Helium::Print( TXT( "%s: Waiting for connection\n" ), m_Name );
+			Helium::Print( "%s: Waiting for connection\n", m_Name );
 		}
 #endif
 
@@ -318,7 +318,7 @@ Message* Connection::CreateMessage(uint32_t id, uint32_t size, int32_t trans, Me
 
 	if (!msg)
 	{
-		Helium::Print( TXT( "%s: Failed to create message ( ID: %d, TRN: %d, Size: %d )\n" ), id, trans, size );
+		Helium::Print( "%s: Failed to create message ( ID: %d, TRN: %d, Size: %d )\n", id, trans, size );
 	}
 
 	return msg;
@@ -519,11 +519,11 @@ void Connection::ConnectThread()
 	SetState(ConnectionStates::Active);
 
 	// report our remote platform type
-	Helium::Print( TXT( "%s: Remote platform is '%s', %s endian\n" ), m_Name, Helium::Platform::GetTypeString(m_RemoteType), Helium::Platform::GetEndiannessString(m_RemoteEndianness) );
+	Helium::Print( "%s: Remote platform is '%s', %s endian\n", m_Name, Helium::Platform::GetTypeString(m_RemoteType), Helium::Platform::GetEndiannessString(m_RemoteEndianness) );
 
 	// start read thread
 	Helium::CallbackThread::Entry readEntry = &Helium::CallbackThread::EntryHelper<Connection, &Connection::ReadThread>;
-	if (!m_ReadThread.Create( readEntry, this, TXT("IPC Read Thread")))
+	if (!m_ReadThread.Create( readEntry, this, "IPC Read Thread"))
 	{
 		HELIUM_BREAK();
 		return;
@@ -531,7 +531,7 @@ void Connection::ConnectThread()
 
 	// start write thread
 	Helium::CallbackThread::Entry writeEntry = &Helium::CallbackThread::EntryHelper<Connection, &Connection::WriteThread>;
-	if (!m_WriteThread.Create( writeEntry, this, TXT("IPC Write Thread")))
+	if (!m_WriteThread.Create( writeEntry, this, "IPC Write Thread"))
 	{
 		HELIUM_BREAK();
 		return;
@@ -591,7 +591,7 @@ bool Connection::ReadPeerInfo()
 	uint8_t byte = 0;
 	if (!Read(&byte, sizeof(byte)))
 	{
-		Helium::Print( TXT( "%s: Failed to read remote platform info!\n" ), m_Name );
+		Helium::Print( "%s: Failed to read remote platform info!\n", m_Name );
 		return false;
 	}
 
@@ -608,7 +608,7 @@ bool Connection::WritePeerInfo()
 
 	if (!Write(&byte, sizeof(byte)))
 	{
-		Helium::Print( TXT( "%s: Failed to write platform info!\n" ), m_Name );
+		Helium::Print( "%s: Failed to write platform info!\n", m_Name );
 		return false;
 	}
 

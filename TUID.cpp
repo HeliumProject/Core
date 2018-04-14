@@ -152,7 +152,7 @@ void TUID::Generate( tuid& uid )
         }
         else
         {
-            throw Helium::Exception( TXT( "Could not get network adapter info to seed TUID generation." ) );
+            throw Helium::Exception( "Could not get network adapter info to seed TUID generation." );
         }
 
 #elif HELIUM_OS_MAC
@@ -184,7 +184,7 @@ void TUID::Generate( tuid& uid )
 
         if ( !gotAddress )
         {
-            throw Helium::Exception( TXT( "Could not get network adapter info to seed TUID generation." ) );
+            throw Helium::Exception( "Could not get network adapter info to seed TUID generation." );
         }
 
 #elif HELIUM_OS_LINUX
@@ -207,7 +207,7 @@ void TUID::Generate( tuid& uid )
 
         if ( !gotAddress )
         {
-            throw Helium::Exception( TXT( "Could not get network adapter info to seed TUID generation." ) );
+            throw Helium::Exception( "Could not get network adapter info to seed TUID generation." );
         }
 
 #endif

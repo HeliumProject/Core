@@ -500,7 +500,7 @@ std::string Helium::MD5(const void* data, uint32_t count)
     for (int di = 0; di < 16; ++di)
     {
 		char* where = hex_output + di * 2;
-        StringPrint(where, where - hex_output, TXT( "%02X" ), digest[di]);
+        StringPrint(where, where - hex_output, "%02X", digest[di]);
     }
 
     return hex_output;
@@ -516,7 +516,7 @@ std::string Helium::FileMD5(const std::string& filePath, uint32_t packetSize)
     File f;
     if ( !f.Open( filePath.c_str(), FileModes::Read ) )
     {
-        throw Helium::Exception( TXT( "Unable to open %s for read" ), filePath.c_str());
+        throw Helium::Exception( "Unable to open %s for read", filePath.c_str());
     }
 
 	f.Seek( 0, SeekOrigins::End );
@@ -542,7 +542,7 @@ std::string Helium::FileMD5(const std::string& filePath, uint32_t packetSize)
     for (int di = 0; di < 16; ++di)
     {
 		char* where = hex_output + di * 2;
-        StringPrint(where, where - hex_output, TXT( "%02X" ), digest[di]);
+        StringPrint(where, where - hex_output, "%02X", digest[di]);
     }
 
     return hex_output;

@@ -59,9 +59,9 @@ bool TCPConnection::Initialize(bool server, const char* name, const char* server
 
 	Helium::CallbackThread::Entry serverEntry = Helium::CallbackThread::EntryHelper<TCPConnection, &TCPConnection::ServerThread>;
 	Helium::CallbackThread::Entry clientEntry = Helium::CallbackThread::EntryHelper<TCPConnection, &TCPConnection::ClientThread>;
-	if (!m_ConnectThread.Create(server ? serverEntry : clientEntry, this, TXT("IPC Connection Thread")))
+	if (!m_ConnectThread.Create(server ? serverEntry : clientEntry, this, "IPC Connection Thread"))
 	{
-		Helium::Print( TXT( "%s: Failed to create connect thread\n" ), m_Name);
+		Helium::Print( "%s: Failed to create connect thread\n", m_Name);
 		SetState(ConnectionStates::Failed);
 		return false;
 	}
@@ -79,7 +79,7 @@ void TCPConnection::ServerThread()
 {
 	Helium::InitializeSockets();
 
-	Helium::Print( TXT( "%s: Starting TCP server (ports %d, %d)\n" ), m_Name, m_ReadPort, m_WritePort);
+	Helium::Print( "%s: Starting TCP server (ports %d, %d)\n", m_Name, m_ReadPort, m_WritePort);
 
 	Helium::Socket server_read_socket;
 	if (!server_read_socket.Create( SocketProtocols::Tcp ))
@@ -114,7 +114,7 @@ void TCPConnection::ServerThread()
 	// while the server is still running, cycle through connections
 	while (!m_Terminating)
 	{
-		Helium::Print( TXT( "%s: Ready for client\n" ), m_Name);
+		Helium::Print( "%s: Ready for client\n", m_Name);
 
 		// wait for a connection
 		while (!m_Terminating)
@@ -166,7 +166,7 @@ void TCPConnection::ServerThread()
 			HELIUM_VERIFY( 0 == setsockopt(m_ReadSocket, SOL_SOCKET, SO_SNDBUF, (const char*)&buf_size, size_size) );
 			HELIUM_VERIFY( 0 == setsockopt(m_WriteSocket, SOL_SOCKET, SO_RCVBUF, (const char*)&buf_size, size_size) );
 			HELIUM_VERIFY( 0 == setsockopt(m_WriteSocket, SOL_SOCKET, SO_SNDBUF, (const char*)&buf_size, size_size) );
-			Helium::Print( TXT( "%s: Accepted connection (%dk/%dk)\n" ), m_Name, IPC_TCP_BUFFER_SIZE >> 10, IPC_TCP_BUFFER_SIZE >> 10);
+			Helium::Print( "%s: Accepted connection (%dk/%dk)\n", m_Name, IPC_TCP_BUFFER_SIZE >> 10, IPC_TCP_BUFFER_SIZE >> 10);
 
 #ifdef IPC_TCP_NO_DELAY
 			int flag = 1;
@@ -188,7 +188,7 @@ void TCPConnection::ServerThread()
 	server_read_socket.Close();
 	server_write_socket.Close();
 
-	Helium::Print( TXT( "%s: Stopping TCP server (ports %d, %d)\n" ), m_Name, m_ReadPort, m_WritePort);
+	Helium::Print( "%s: Stopping TCP server (ports %d, %d)\n", m_Name, m_ReadPort, m_WritePort);
 
 	CleanupThread();
 
@@ -199,25 +199,25 @@ void TCPConnection::ClientThread()
 {
 	Helium::InitializeSockets();
 
-	Helium::Print( TXT( "%s: Starting TCP client (%s: %d, %d)\n" ), m_Name, m_IP, m_ReadPort, m_WritePort);
+	Helium::Print( "%s: Starting TCP client (%s: %d, %d)\n", m_Name, m_IP, m_ReadPort, m_WritePort);
 
 	std::string ip;
 	bool converted = Helium::ConvertString( m_IP, ip );
 	HELIUM_ASSERT( converted );
 
-	Helium::Print( TXT( "%s: Resolving '%s'\n" ), m_Name, ip.c_str());
+	Helium::Print( "%s: Resolving '%s'\n", m_Name, ip.c_str());
 	hostent* hostInfo = gethostbyname(ip.c_str());
 	if ( hostInfo )
 	{
 		sockaddr_in sockAddr;
 		memcpy(&sockAddr.sin_addr, hostInfo->h_addr, hostInfo->h_length);
 		ip = inet_ntoa(sockAddr.sin_addr);
-		Helium::Print( TXT( "%s: IP is '%s'\n" ), m_Name, ip.c_str());
+		Helium::Print( "%s: IP is '%s'\n", m_Name, ip.c_str());
 	}
 
 	while (!m_Terminating)
 	{
-		Helium::Print( TXT( "%s: Ready for server\n" ), m_Name);
+		Helium::Print( "%s: Ready for server\n", m_Name);
 
 		bool socketsCreated = false;
 
@@ -260,7 +260,7 @@ void TCPConnection::ClientThread()
 			HELIUM_VERIFY( 0 == setsockopt(m_ReadSocket, SOL_SOCKET, SO_SNDBUF, (const char*)&buf_size, size_size) );
 			HELIUM_VERIFY( 0 == setsockopt(m_WriteSocket, SOL_SOCKET, SO_RCVBUF, (const char*)&buf_size, size_size) );
 			HELIUM_VERIFY( 0 == setsockopt(m_WriteSocket, SOL_SOCKET, SO_SNDBUF, (const char*)&buf_size, size_size) );
-			Helium::Print( TXT( "%s: Connection established (%dk/%dk)\n" ), m_Name, IPC_TCP_BUFFER_SIZE / 1024, IPC_TCP_BUFFER_SIZE / 1024);
+			Helium::Print( "%s: Connection established (%dk/%dk)\n", m_Name, IPC_TCP_BUFFER_SIZE / 1024, IPC_TCP_BUFFER_SIZE / 1024);
 
 #ifdef IPC_TCP_NO_DELAY
 			int flag = 1;
@@ -285,7 +285,7 @@ void TCPConnection::ClientThread()
 		}
 	}
 
-	Helium::Print( TXT( "%s: Stopping TCP client (%s: %d, %d)\n" ), m_Name, m_IP, m_ReadPort, m_WritePort);
+	Helium::Print( "%s: Stopping TCP client (%s: %d, %d)\n", m_Name, m_IP, m_ReadPort, m_WritePort);
 
 	CleanupThread();
 
@@ -325,7 +325,7 @@ bool TCPConnection::ReadMessage(Message** msg)
 	// out of memory condition
 	if ( message == NULL )
 	{
-		Helium::Print( TXT( "%s: Failed to allocate memory for message\n" ), m_Name);
+		Helium::Print( "%s: Failed to allocate memory for message\n", m_Name);
 		return false;
 	}
 
@@ -334,7 +334,7 @@ bool TCPConnection::ReadMessage(Message** msg)
 	// out of memory condition #2
 	if ( m_ReadHeader.m_Size > 0 && data == NULL )
 	{
-		Helium::Print( TXT( "%s: Failed to allocate memory for message data\n" ), m_Name);
+		Helium::Print( "%s: Failed to allocate memory for message data\n", m_Name);
 		delete message;
 		return false;
 	}

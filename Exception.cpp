@@ -74,7 +74,7 @@ void Helium::ProcessException(const Helium::Exception& exception, bool print, bo
 
     if (print)
     {
-        Helium::Print(Helium::ConsoleColors::Red, stderr, TXT( "An exception has occurred\nType:    C++ Exception\n Class:   %s\n Message: %s\n" ), args.m_CPPClass.c_str(), args.m_Message.c_str() );
+        Helium::Print(Helium::ConsoleColors::Red, stderr, "An exception has occurred\nType:    C++ Exception\n Class:   %s\n Message: %s\n", args.m_CPPClass.c_str(), args.m_Message.c_str() );
     }
 
     g_ExceptionOccurred.Invoke( args );
@@ -123,7 +123,7 @@ void Helium::ProcessException(const std::exception& exception, bool print, bool 
 
     if (print)
     {
-        Helium::Print(Helium::ConsoleColors::Red, stderr, TXT( "An exception has occurred\nType:    C++ Exception\n Class:   %s\n Message: %s\n" ), args.m_CPPClass.c_str(), args.m_Message.c_str() );
+        Helium::Print(Helium::ConsoleColors::Red, stderr, "An exception has occurred\nType:    C++ Exception\n Class:   %s\n Message: %s\n", args.m_CPPClass.c_str(), args.m_Message.c_str() );
     }
 
     g_ExceptionOccurred.Invoke( args );
@@ -166,7 +166,7 @@ uint32_t Helium::ProcessException(LPEXCEPTION_POINTERS info, bool print, bool fa
 
         if ( print )
         {
-            Helium::Print( Helium::ConsoleColors::Red, stderr, TXT( "%s" ), GetExceptionInfo( info ).c_str() );
+            Helium::Print( Helium::ConsoleColors::Red, stderr, "%s", GetExceptionInfo( info ).c_str() );
         }
 
         g_ExceptionOccurred.Invoke( args );

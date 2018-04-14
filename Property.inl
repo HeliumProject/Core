@@ -88,7 +88,7 @@ V Helium::StaticProperty< V >::Get() const
 
     default:
         {
-            throw PropertyException( TXT( "StaticProperty has no compatible get function" ) );
+            throw PropertyException( "StaticProperty has no compatible get function" );
         }
     }
 }
@@ -112,7 +112,7 @@ bool Helium::StaticProperty< V >::Set(const V& value)
 
     default:
         {
-            throw PropertyException( TXT( "StaticProperty has no compatible get function" ) );
+            throw PropertyException( "StaticProperty has no compatible get function" );
         }
     }
 }
@@ -188,7 +188,7 @@ V Helium::MemberProperty< T, V >::Get() const
 {
     if (m_Target == NULL)
     {
-        throw PropertyException( TXT( "MemberProperty has no target" ) );
+        throw PropertyException( "MemberProperty has no target" );
     }
 
     switch(m_GetterType)
@@ -212,7 +212,7 @@ V Helium::MemberProperty< T, V >::Get() const
 
     default:
         {
-            throw PropertyException( TXT( "MemberProperty has no compatible get function" ) );
+            throw PropertyException( "MemberProperty has no compatible get function" );
         }
     }
 }
@@ -222,7 +222,7 @@ bool Helium::MemberProperty< T, V >::Set(const V& value)
 {
     if (m_Target == NULL)
     {
-        throw PropertyException( TXT( "MemberProperty has no target" ) );
+        throw PropertyException( "MemberProperty has no target" );
     }
 
     switch (m_SetterType)
@@ -241,7 +241,7 @@ bool Helium::MemberProperty< T, V >::Set(const V& value)
 
     default:
         {
-            throw PropertyException( TXT( "MemberProperty has no compatible set function" ) );
+            throw PropertyException( "MemberProperty has no compatible set function" );
         }
     }
 }

@@ -18,7 +18,7 @@ DirectoryIterator::DirectoryIterator( const FilePath& path, uint32_t flags )
 : m_Done( true )
 {
     HELIUM_ASSERT( path.IsDirectory() );
-    HELIUM_ASSERT( *path.Get().rbegin() == TXT( '/' ) )
+    HELIUM_ASSERT( *path.Get().rbegin() == '/' )
 
     Open( path, flags );
 }
@@ -47,7 +47,7 @@ const DirectoryIteratorItem& DirectoryIterator::GetItem()
 {
     if ( m_Done )
     {
-        throw Helium::Exception( TXT( "The file iterator is invalid!" ) );
+        throw Helium::Exception( "The file iterator is invalid!" );
     }
 
     return m_Item;
@@ -64,7 +64,7 @@ bool DirectoryIterator::Open( const FilePath& path, uint32_t flags )
     Close();
 
     HELIUM_ASSERT( path.IsDirectory() );
-    HELIUM_ASSERT( *path.Get().rbegin() == TXT( '/' ) )
+    HELIUM_ASSERT( *path.Get().rbegin() == '/' )
 
     m_Path = path;
     m_Directory.SetPath( m_Path.Get() );
@@ -120,7 +120,7 @@ bool DirectoryIterator::Find()
         FilePath absolutePath;
 
         // skip relative path directories if fileName is "." or ".."
-        if ( ( CompareString( entry.m_Name.c_str(), TXT( "." ) ) == 0 ) || ( CompareString( entry.m_Name.c_str(), TXT( ".." ) ) == 0 ) )
+        if ( ( CompareString( entry.m_Name.c_str(), "." ) == 0 ) || ( CompareString( entry.m_Name.c_str(), ".." ) == 0 ) )
         {
             ok = false;
         }

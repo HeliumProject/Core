@@ -119,7 +119,7 @@ void Log::Statement::ApplyIndent( const char* string, std::string& output )
 {
 	if ( m_Indent > 0 )
 	{
-		char m_IndentString[64] = TXT( "" );
+		char m_IndentString[64] = "";
 		if(m_Indent >= sizeof(m_IndentString))
 		{
 			m_Indent = sizeof(m_IndentString)-1;
@@ -196,11 +196,11 @@ void Redirect(const std::string& fileName, const char* str, bool stampNewLine = 
 			time += currentTime.dstflag ? 1 : 0;
 			uint32_t hour = time % 24;
 
-			length = StringPrint( temp, count, TXT("[%02d:%02d:%02d.%03d TID:%d] %s"), hour, min, sec, milli, Thread::GetCurrentId(), str );
+			length = StringPrint( temp, count, "[%02d:%02d:%02d.%03d TID:%d] %s", hour, min, sec, milli, Thread::GetCurrentId(), str );
 		}
 		else
 		{
-			length = StringPrint( temp, count, TXT("%s"), str );
+			length = StringPrint( temp, count, "%s", str );
 		}
 
 		f->Write( temp, length );
@@ -229,7 +229,7 @@ bool AddFile( M_OutputFile& files, const std::string& fileName, Stream stream, T
 	}
 	else
 	{
-		if (fileName != TXT( "" ))
+		if (fileName != "")
 		{
 			File* f = new File;
 			if ( f->Open( fileName.c_str(), FileModes::Write ) )
@@ -535,7 +535,7 @@ void Log::Debug(const char *fmt,...)
 	Helium::MutexScopeLock mutex (g_Mutex);
 
 	static char format[MAX_PRINT_SIZE];
-	StringPrint(format, TXT( "DEBUG: " ));
+	StringPrint(format, "DEBUG: ");
 	AppendString(format, fmt);
 
 	va_list args;
@@ -554,7 +554,7 @@ void Log::Debug(Level level, const char *fmt,...)
 	Helium::MutexScopeLock mutex (g_Mutex);
 
 	static char format[MAX_PRINT_SIZE];
-	StringPrint(format, TXT( "DEBUG: " ));
+	StringPrint(format, "DEBUG: ");
 	AppendString(format, fmt);
 
 	va_list args;
@@ -573,7 +573,7 @@ void Log::Profile(const char *fmt,...)
 	Helium::MutexScopeLock mutex (g_Mutex);
 
 	static char format[MAX_PRINT_SIZE];
-	StringPrint(format, TXT( "PROFILE: " ));
+	StringPrint(format, "PROFILE: ");
 	AppendString(format, fmt);
 
 	va_list args;
@@ -592,7 +592,7 @@ void Log::Profile(Level level, const char *fmt,...)
 	Helium::MutexScopeLock mutex (g_Mutex);
 
 	static char format[MAX_PRINT_SIZE];
-	StringPrint(format, TXT( "PROFILE: " ));
+	StringPrint(format, "PROFILE: ");
 	AppendString(format, fmt);
 
 	va_list args;
@@ -611,7 +611,7 @@ void Log::Warning(const char *fmt,...)
 	Helium::MutexScopeLock mutex (g_Mutex);
 
 	static char format[MAX_PRINT_SIZE];
-	StringPrint(format, TXT( "WARNING: " ));
+	StringPrint(format, "WARNING: ");
 	AppendString(format, fmt);
 
 	va_list args;
@@ -630,7 +630,7 @@ void Log::Warning(Level level, const char *fmt,...)
 	Helium::MutexScopeLock mutex (g_Mutex);
 
 	static char format[MAX_PRINT_SIZE];
-	StringPrint(format, TXT( "WARNING: " ));
+	StringPrint(format, "WARNING: ");
 	AppendString(format, fmt);
 
 	va_list args;
@@ -649,7 +649,7 @@ void Log::Error(const char *fmt,...)
 	Helium::MutexScopeLock mutex (g_Mutex);
 
 	static char format[MAX_PRINT_SIZE];
-	StringPrint(format, TXT( "ERROR: " ));
+	StringPrint(format, "ERROR: ");
 	AppendString(format, fmt);
 
 	va_list args;
@@ -668,7 +668,7 @@ void Log::Error(Level level, const char *fmt,...)
 	Helium::MutexScopeLock mutex (g_Mutex);
 
 	static char format[MAX_PRINT_SIZE];
-	StringPrint(format, TXT( "ERROR: " ));
+	StringPrint(format, "ERROR: ");
 	AppendString(format, fmt);
 
 	va_list args;
@@ -816,7 +816,7 @@ void Log::Bullet::CreateBullet(const char *fmt, va_list args)
 	static char output[MAX_PRINT_SIZE];
 	if (g_Indent == 1)
 	{
-		PrintString( TXT( "\n" ), m_Stream, m_Level, Log::GetStreamColor( m_Stream ), -1, output, sizeof( output ) );
+		PrintString( "\n", m_Stream, m_Level, Log::GetStreamColor( m_Stream ), -1, output, sizeof( output ) );
 	}
 	PrintString( string, m_Stream, m_Level, Log::GetStreamColor( m_Stream ), -1, output, sizeof( output ) );
 

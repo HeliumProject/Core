@@ -69,8 +69,8 @@ bool FileStream::IsOpen() const
 /// @copydoc Stream::Read()
 size_t FileStream::Read( void* pBuffer, size_t size, size_t count )
 {
-	HELIUM_ASSERT_MSG( m_File.IsOpen(), TXT( "File not open" ) );
-	HELIUM_ASSERT_MSG( m_modeFlags & MODE_READ, TXT( "File not open for reading" ) );
+	HELIUM_ASSERT_MSG( m_File.IsOpen(), "File not open" );
+	HELIUM_ASSERT_MSG( m_modeFlags & MODE_READ, "File not open for reading" );
 	if( !m_File.IsOpen() || !( m_modeFlags & MODE_READ ) )
 	{
 		return 0;
@@ -86,8 +86,8 @@ size_t FileStream::Read( void* pBuffer, size_t size, size_t count )
 /// @copydoc Stream::Write()
 size_t FileStream::Write( const void* pBuffer, size_t size, size_t count )
 {
-	HELIUM_ASSERT_MSG( m_File.IsOpen(), TXT( "File not open" ) );
-	HELIUM_ASSERT_MSG( m_modeFlags & MODE_WRITE, TXT( "File not open for writing" ) );
+	HELIUM_ASSERT_MSG( m_File.IsOpen(), "File not open" );
+	HELIUM_ASSERT_MSG( m_modeFlags & MODE_WRITE, "File not open for writing" );
 	if( !m_File.IsOpen() || !( m_modeFlags & MODE_WRITE ) )
 	{
 		return 0;
@@ -103,7 +103,7 @@ size_t FileStream::Write( const void* pBuffer, size_t size, size_t count )
 /// @copydoc Stream::Flush()
 void FileStream::Flush()
 {
-	HELIUM_ASSERT_MSG( m_File.IsOpen(), TXT( "File not open" ) );
+	HELIUM_ASSERT_MSG( m_File.IsOpen(), "File not open" );
 
 	// Only files open for writing need to be flushed.
 	if( m_File.IsOpen() && ( m_modeFlags & MODE_WRITE ) )
@@ -117,7 +117,7 @@ int64_t FileStream::Seek( int64_t offset, SeekOrigin origin )
 {
 	if( !m_File.IsOpen() )
 	{
-		HELIUM_BREAK_MSG( TXT( "File not open" ) );
+		HELIUM_BREAK_MSG( "File not open" );
 		return -1;
 	}
 
@@ -129,7 +129,7 @@ int64_t FileStream::Tell() const
 {
 	if( !m_File.IsOpen() )
 	{
-		HELIUM_BREAK_MSG( TXT( "File not open" ) );
+		HELIUM_BREAK_MSG( "File not open" );
 		return -1;
 	}
 
@@ -141,7 +141,7 @@ int64_t FileStream::GetSize() const
 {
 	if( !m_File.IsOpen() )
 	{
-		HELIUM_BREAK_MSG( TXT( "File not open" ) );
+		HELIUM_BREAK_MSG( "File not open" );
 		return -1;
 	}
 
@@ -156,7 +156,7 @@ bool FileStream::Open( const char* pPath, uint32_t modeFlags, bool bTruncate )
 	// Verify that at least one mode flag is given.
 	if( !( modeFlags & ( MODE_READ | MODE_WRITE ) ) )
 	{
-		HELIUM_BREAK_MSG( TXT( "At least one FileStream::EMode flag must be set" ) );
+		HELIUM_BREAK_MSG( "At least one FileStream::EMode flag must be set" );
 		return false;
 	}
 

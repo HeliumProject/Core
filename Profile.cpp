@@ -93,7 +93,7 @@ Sink::~Sink()
 
 void Sink::Report()
 {
-	Log::Profile(TXT("[%12.3f] [%8d] %s\n"), m_Millis, m_Hits, m_Name);
+	Log::Profile("[%12.3f] [%8d] %s\n", m_Millis, m_Hits, m_Name);
 }
 
 int CompareLocationPtr(const void* ptr1, const void* ptr2)
@@ -139,7 +139,7 @@ void Sink::ReportAll()
 
 	if ( totalTime > 0.f )
 	{
-		Log::Profile(TXT("\nProfile Report:\n"));
+		Log::Profile("\nProfile Report:\n");
 
 		qsort(g_Sinks, g_SinkCount, sizeof(Sink*), &CompareLocationPtr);
 
@@ -228,7 +228,7 @@ Profile::Timer::~Timer()
 
 	if ( m_Name[0] != '\0' )
 	{
-		Log::Profile(TXT("[%12.3f] %s\n"), millis, m_Name);
+		Log::Profile("[%12.3f] %s\n", millis, m_Name);
 	}
 
 #if HELIUM_PROFILE_INSTRUMENTATION
