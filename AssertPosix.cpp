@@ -7,26 +7,20 @@ using namespace Helium;
 /// Terminate the application on a fatal error.
 ///
 /// @param[in] exitCode  Error code associated with the exit.
-void Helium::FatalExit( int /*exitCode*/ )
+void Helium::FatalExit(int /*exitCode*/)
 {
-    abort();
+	abort();
 }
 
 #if HELIUM_ASSERT_ENABLED
 
-#if HELIUM_UNICODE
-#define PRINTF wprintf
-#else
-#define PRINTF printf
-#endif
-
 /// Handle an assertion.
 ///
 /// @param[in] pMessageText  Assert message text.
-bool Assert::TriggerImplementation( const char* pMessageText )
+bool Assert::TriggerImplementation(const char* pMessageText)
 {
-    PRINTF( "%s\n", pMessageText );
-    return true;
+	printf("%s\n", pMessageText);
+	return true;
 }
 
 #endif  // HELIUM_ASSERT_ENABLED
