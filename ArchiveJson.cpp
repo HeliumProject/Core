@@ -55,7 +55,7 @@ ArchiveType ArchiveWriterJson::GetType() const
 void ArchiveWriterJson::Open()
 {
 #if PERSIST_ARCHIVE_VERBOSE
-	Log::Print(TXT("Opening file '%s'\n"), m_Path.c_str());
+	Log::Print("Opening file '%s'\n", m_Path.c_str());
 #endif
 
 	FileStream* stream = new FileStream();
@@ -132,7 +132,7 @@ void ArchiveWriterJson::Write( const ObjectPtr* objects, size_t count )
 void ArchiveWriterJson::SerializeInstance( RapidJsonWriter& writer, void* instance, const MetaStruct* structure, Object* object )
 {
 #if PERSIST_ARCHIVE_VERBOSE
-	Log::Print( TXT( "Serializing %s\n" ), structure->m_Name );
+	Log::Print("Serializing %s\n", structure->m_Name );
 #endif
 
 	// TODO: Declare a max depth for inheritance to save heap allocs -geoff
@@ -179,7 +179,7 @@ void ArchiveWriterJson::SerializeInstance( RapidJsonWriter& writer, void* instan
 void ArchiveWriterJson::SerializeField( RapidJsonWriter& writer, void* instance, const Field* field, Object* object )
 {
 #if PERSIST_ARCHIVE_VERBOSE
-	Log::Print(TXT("Serializing field %s\n"), field->m_Name);
+	Log::Print("Serializing field %s\n", field->m_Name);
 #endif
 
 	// write the actual string
@@ -416,7 +416,7 @@ ArchiveType ArchiveReaderJson::GetType() const
 void ArchiveReaderJson::Open()
 {
 #if PERSIST_ARCHIVE_VERBOSE
-	Log::Print(TXT("Opening file '%s'\n"), m_Path.c_str());
+	Log::Print("Opening file '%s'\n", m_Path.c_str());
 #endif
 
 	FileStream* stream = new FileStream();
@@ -477,7 +477,7 @@ void ArchiveReaderJson::Start()
 	// fail on an empty input stream
 	if ( m_Size == 0 )
 	{
-		throw Persist::StreamException( TXT( "Input stream is empty (%s)" ), m_Path.Data() );
+		throw Persist::StreamException( "Input stream is empty (%s)", m_Path.Data() );
 	}
 
 	// read entire contents
@@ -578,7 +578,7 @@ bool ArchiveReaderJson::ReadNext( Reflect::ObjectPtr& object, size_t index )
 void ArchiveReaderJson::DeserializeInstance( rapidjson::Value& value, void* instance, const MetaStruct* structure, Object* object )
 {
 #if PERSIST_ARCHIVE_VERBOSE
-	Log::Print(TXT("Deserializing %s\n"), structure->m_Name);
+	Log::Print("Deserializing %s\n", structure->m_Name);
 #endif
 
 	object->PreDeserialize( NULL );
@@ -632,7 +632,7 @@ void ArchiveReaderJson::DeserializeInstance( rapidjson::Value& value, void* inst
 void ArchiveReaderJson::DeserializeField( rapidjson::Value& value, void* instance, const Field* field, Object* object )
 {
 #if PERSIST_ARCHIVE_VERBOSE
-	Log::Print(TXT("Deserializing field %s\n"), field->m_Name);
+	Log::Print("Deserializing field %s\n", field->m_Name);
 #endif
 	
 	if ( field->m_Count > 1 )

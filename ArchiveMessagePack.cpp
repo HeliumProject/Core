@@ -48,7 +48,7 @@ ArchiveType ArchiveWriterMessagePack::GetType() const
 void ArchiveWriterMessagePack::Open()
 {
 #if PERSIST_ARCHIVE_VERBOSE
-	Log::Print(TXT("Opening file '%s'\n"), m_Path.c_str());
+	Log::Print("Opening file '%s'\n", m_Path.c_str());
 #endif
 
 	FileStream* stream = new FileStream();
@@ -123,7 +123,7 @@ void ArchiveWriterMessagePack::Write( const Reflect::ObjectPtr* objects, size_t 
 void ArchiveWriterMessagePack::SerializeInstance( void* instance, const MetaStruct* structure, Object* object )
 {
 #if PERSIST_ARCHIVE_VERBOSE
-	Log::Print( TXT( "Serializing %s\n" ), structure->m_Name );
+	Log::Print("Serializing %s\n", structure->m_Name );
 #endif
 
 	// TODO: Declare a max depth for inheritance to save heap allocs -geoff
@@ -170,7 +170,7 @@ void ArchiveWriterMessagePack::SerializeInstance( void* instance, const MetaStru
 void ArchiveWriterMessagePack::SerializeField( void* instance, const Field* field, Object* object )
 {
 #if PERSIST_ARCHIVE_VERBOSE
-	Log::Print(TXT("Serializing field %s\n"), field->m_Name);
+	Log::Print("Serializing field %s\n", field->m_Name);
 #endif
 
 	if ( m_Flags & ArchiveFlags::StringCrc )
@@ -390,7 +390,7 @@ ArchiveType ArchiveReaderMessagePack::GetType() const
 void ArchiveReaderMessagePack::Open()
 {
 #if PERSIST_ARCHIVE_VERBOSE
-	Log::Print(TXT("Opening file '%s'\n"), m_Path.c_str());
+	Log::Print("Opening file '%s'\n", m_Path.c_str());
 #endif
 
 	FileStream* stream = new FileStream();
@@ -458,7 +458,7 @@ void ArchiveReaderMessagePack::Start()
 	// fail on an empty input stream
 	if ( m_Size == 0 )
 	{
-		throw Persist::StreamException( TXT( "Input stream is empty (%s)" ), m_Path.Data() );
+		throw Persist::StreamException( "Input stream is empty (%s)", m_Path.Data() );
 	}
 
 	// parse the first byte of the stream
@@ -519,7 +519,7 @@ bool ArchiveReaderMessagePack::ReadNext( ObjectPtr& object, size_t index )
 void ArchiveReaderMessagePack::DeserializeInstance( void* instance, const MetaStruct* structure, Object* object )
 {
 #if PERSIST_ARCHIVE_VERBOSE
-	Log::Print(TXT("Deserializing %s\n"), structure->m_Name);
+	Log::Print("Deserializing %s\n", structure->m_Name);
 #endif
 
 	object->PreDeserialize( NULL );
@@ -571,7 +571,7 @@ void ArchiveReaderMessagePack::DeserializeInstance( void* instance, const MetaSt
 void ArchiveReaderMessagePack::DeserializeField( void* instance, const Field* field, Object* object )
 {
 #if PERSIST_ARCHIVE_VERBOSE
-	Log::Print(TXT("Deserializing field %s\n"), field->m_Name);
+	Log::Print("Deserializing field %s\n", field->m_Name);
 #endif
 	
 	if ( field->m_Count > 1 )

@@ -86,7 +86,7 @@ SmartPtr< ArchiveWriter > ArchiveWriter::GetWriter( const FilePath& path, Object
 		break;
 	}
 
-	throw Persist::StreamException( TXT( "Unknown archive type" ) );
+	throw Persist::StreamException( "Unknown archive type" );
 }
 
 bool ArchiveWriter::WriteToFile( const FilePath& path, const ObjectPtr& object, ObjectIdentifier* identifier, ArchiveType archiveType, std::string* error )
@@ -98,7 +98,7 @@ bool ArchiveWriter::WriteToFile( const FilePath& path, const ObjectPtr* objects,
 {
 	HELIUM_ASSERT( !path.Empty() );
 	HELIUM_PERSIST_SCOPE_TIMER( "%s", path.Data() );
-	Log::Debug( TXT( "Generating '%s'\n" ), path.Data() );
+	Log::Debug( "Generating '%s'\n", path.Data() );
 
 	path.MakePath();
 
@@ -275,7 +275,7 @@ SmartPtr< ArchiveReader > ArchiveReader::GetReader( const FilePath& path, Object
 		break;
 	}
 
-	throw Persist::StreamException( TXT( "Unknown archive type" ) );
+	throw Persist::StreamException( "Unknown archive type" );
 }
 
 bool ArchiveReader::ReadFromFile( const FilePath& path, ObjectPtr& object, ObjectResolver* resolver, ArchiveType archiveType, std::string* error )
@@ -295,7 +295,7 @@ bool ArchiveReader::ReadFromFile( const FilePath& path, DynamicArray< ObjectPtr 
 {
 	HELIUM_ASSERT( !path.Empty() );
 	HELIUM_PERSIST_SCOPE_TIMER( "%s", path.Data() );
-	Log::Debug( TXT( "Parsing '%s'\n" ), path.Data() );
+	Log::Debug( "Parsing '%s'\n", path.Data() );
 
 	SmartPtr< ArchiveReader > archive = GetReader( path, resolver, archiveType );
 
@@ -419,7 +419,7 @@ bool ArchiveReader::Resolve( const Name& identity, ObjectPtr& pointer, const Met
 		{
 			if ( !found->IsA( pointerClass ) )
 			{
-				Log::Warning( TXT( "Object of type '%s' is not valid for pointer type '%s'" ), pointer->GetMetaClass()->m_Name, pointerClass->m_Name );
+				Log::Warning( "Object of type '%s' is not valid for pointer type '%s'", pointer->GetMetaClass()->m_Name, pointerClass->m_Name );
 			}
 			else
 			{

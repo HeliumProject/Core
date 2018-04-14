@@ -133,7 +133,7 @@ ArchiveType ArchiveWriterBson::GetType() const
 void ArchiveWriterBson::Open()
 {
 #if PERSIST_ARCHIVE_VERBOSE
-	Log::Print(TXT("Opening file '%s'\n"), m_Path.c_str());
+	Log::Print("Opening file '%s'\n", m_Path.c_str());
 #endif
 
 	FileStream* stream = new FileStream();
@@ -211,7 +211,7 @@ void ArchiveWriterBson::Write( const ObjectPtr* objects, size_t count )
 void ArchiveWriterBson::SerializeInstance( bson* b, const char* name, void* instance, const MetaStruct* structure, Object* object )
 {
 #if PERSIST_ARCHIVE_VERBOSE
-	Log::Print( TXT( "Serializing %s\n" ), structure->m_Name );
+	Log::Print("Serializing %s\n", structure->m_Name );
 #endif
 
 	// TODO: Declare a max depth for inheritance to save heap allocs -geoff
@@ -269,7 +269,7 @@ void ArchiveWriterBson::SerializeInstance( bson* b, const char* name, void* inst
 void ArchiveWriterBson::SerializeField( bson* b, void* instance, const Field* field, Object* object )
 {
 #if PERSIST_ARCHIVE_VERBOSE
-	Log::Print(TXT("Serializing field %s\n"), field->m_Name);
+	Log::Print("Serializing field %s\n", field->m_Name);
 #endif
 
 	if ( field->m_Count > 1 )
@@ -500,7 +500,7 @@ ArchiveType ArchiveReaderBson::GetType() const
 void ArchiveReaderBson::Open()
 {
 #if PERSIST_ARCHIVE_VERBOSE
-	Log::Print(TXT("Opening file '%s'\n"), m_Path.c_str());
+	Log::Print("Opening file '%s'\n", m_Path.c_str());
 #endif
 
 	FileStream* stream = new FileStream();
@@ -570,7 +570,7 @@ void ArchiveReaderBson::Start()
 	// fail on an empty input stream
 	if ( m_Size == 0 )
 	{
-		throw Persist::StreamException( TXT( "Input stream is empty (%s)" ), m_Path.Data() );
+		throw Persist::StreamException( "Input stream is empty (%s)", m_Path.Data() );
 	}
 
 	// read entire contents
@@ -629,7 +629,7 @@ bool ArchiveReaderBson::ReadNext( Reflect::ObjectPtr& object, size_t index )
 void ArchiveReaderBson::DeserializeInstance( bson_iterator* i, void* instance, const MetaStruct* structure, Object* object )
 {
 #if PERSIST_ARCHIVE_VERBOSE
-	Log::Print(TXT("Deserializing %s\n"), structure->m_Name);
+	Log::Print("Deserializing %s\n", structure->m_Name);
 #endif
 	object->PreDeserialize( NULL );
 
@@ -679,7 +679,7 @@ void ArchiveReaderBson::DeserializeInstance( bson_iterator* i, void* instance, c
 void ArchiveReaderBson::DeserializeField( bson_iterator* i, void* instance, const Field* field, Object* object )
 {
 #if PERSIST_ARCHIVE_VERBOSE
-	Log::Print(TXT("Deserializing field %s\n"), field->m_Name);
+	Log::Print("Deserializing field %s\n", field->m_Name);
 #endif
 	
 	if ( field->m_Count > 1 )
