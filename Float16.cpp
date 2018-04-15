@@ -1,4 +1,4 @@
-#include "MathPch.h"
+#include "Precompile.h"
 #include "Math/Float16.h"
 #include "Foundation/Math.h"
 

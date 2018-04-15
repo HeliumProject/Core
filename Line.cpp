@@ -1,4 +1,4 @@
-#include "MathPch.h"
+#include "Precompile.h"
 #include "Math/Line.h"
 #include "Math/AlignedBox.h"
 #include "Math/Matrix4.h"

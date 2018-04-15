@@ -1,4 +1,4 @@
-#include "MathPch.h"
+#include "Precompile.h"
 #include "Math/Frustum.h"
 #include "Math/Polygon.h"
 #include "Math/Line.h"

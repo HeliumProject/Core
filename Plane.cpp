@@ -1,4 +1,4 @@
-#include "MathPch.h"
+#include "Precompile.h"
 #include "Math/Plane.h"
 
 using namespace Helium;

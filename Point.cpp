@@ -1,4 +1,4 @@
-#include "MathPch.h"
+#include "Precompile.h"
 #include "Math/Point.h"
 
 #include "Reflect/TranslatorDeduction.h"

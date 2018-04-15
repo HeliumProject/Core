@@ -1,4 +1,4 @@
-#include "MathPch.h"
+#include "Precompile.h"
 #include "Math/Vector3.h"
 #include "Math/Scale.h"
 #include "Reflect/TranslatorDeduction.h"
