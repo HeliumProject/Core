@@ -1,5 +1,5 @@
-#include "FoundationPch.h"
-#include "FoundationPch.h"
+#include "Precompile.h"
+#include "Precompile.h"
 #include "Foundation/Name.h"
 
 using namespace Helium;

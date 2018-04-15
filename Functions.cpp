@@ -1,5 +1,5 @@
-#include "FoundationPch.h"
-#include "FoundationPch.h"
+#include "Precompile.h"
+#include "Precompile.h"
 
 #include "Foundation/Functions.h"
 #include "Foundation/String.h"
