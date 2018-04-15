@@ -1,4 +1,4 @@
-#include "PlatformPch.h"
+#include "Precompile.h"
 #include "Exception.h"
 
 using namespace Helium;

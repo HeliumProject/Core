@@ -1,6 +1,7 @@
-#include "PlatformPch.h"
+#include "Precompile.h"
+#include "Assert.h"
+
 #include "Platform/System.h"
-#include "Platform/Assert.h"
 #include "Platform/Console.h"
 #include "Platform/Encoding.h"
 

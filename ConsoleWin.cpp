@@ -1,4 +1,4 @@
-#include "PlatformPch.h"
+#include "Precompile.h"
 #include "Console.h"
 
 #include "Platform/Assert.h"

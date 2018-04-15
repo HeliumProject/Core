@@ -1,5 +1,5 @@
-#include "PlatformPch.h"
-#include "Platform/File.h"
+#include "Precompile.h"
+#include "File.h"
 
 using namespace Helium;
 

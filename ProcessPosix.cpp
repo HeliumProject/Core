@@ -1,5 +1,5 @@
-#include "PlatformPch.h"
-#include "Platform/Process.h"
+#include "Precompile.h"
+#include "Process.h"
 
 #include "Platform/Assert.h"
 #include "Platform/Error.h"

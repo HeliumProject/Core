@@ -1,4 +1,4 @@
-#include "PlatformPch.h"
-#include "Platform/Memory.h"
+#include "Precompile.h"
+#include "Memory.h"
 
 using namespace Helium;

@@ -1,4 +1,5 @@
-#include "Platform/Semaphore.h"
+#include "Precompile.h"
+#include "Semaphore.h"
 
 #include "Platform/Assert.h"
 

@@ -1,5 +1,5 @@
-#include "PlatformPch.h"
-#include "Platform/Encoding.h"
+#include "Precompile.h"
+#include "Encoding.h"
 
 bool Helium::ConvertString( const char* src, wchar_t* dest, size_t destCount )
 {

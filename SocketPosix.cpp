@@ -1,4 +1,5 @@
-#include "Platform/Socket.h"
+#include "Precompile.h"
+#include "Socket.h"
 
 #include "Platform/Console.h"
 #include "Platform/Assert.h"

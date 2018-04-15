@@ -1,5 +1,5 @@
-#include "PlatformPch.h"
-#include "Platform/Thread.h"
+#include "Precompile.h"
+#include "Thread.h"
 
 using namespace Helium;
 

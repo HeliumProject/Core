@@ -1,5 +1,5 @@
-#include "Platform/Condition.h"
-//#include "Platform/Platform.h"
+#include "Precompile.h"
+#include "Condition.h"
 
 #include "Platform/Assert.h"
 

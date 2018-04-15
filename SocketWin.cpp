@@ -1,5 +1,6 @@
-#include "PlatformPch.h"
-#include "Platform/Socket.h"
+#include "Precompile.h"
+#include "Socket.h"
+
 #include "Platform/Assert.h"
 #include "Platform/Console.h"
 

@@ -1,5 +1,6 @@
-#include "PlatformPch.h"
-#include "Platform/Locks.h"
+#include "Precompile.h"
+#include "Locks.h"
+
 #include "Platform/Error.h"
 #include "Platform/System.h"
 #include "Platform/Assert.h"

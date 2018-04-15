@@ -1,13 +1,14 @@
-#include "PlatformPch.h"
-#include "Platform/Assert.h"
-#include "Platform/Trace.h"
+#include "Precompile.h"
+#include "Assert.h"
+
+#include "Platform/Atomic.h"
 #include "Platform/Console.h"
 #include "Platform/Exception.h"
+#include "Platform/Trace.h"
+
 #include <vector>
 
 #if HELIUM_ASSERT_ENABLED
-
-#include "Platform/Atomic.h"
 
 using namespace Helium;
 

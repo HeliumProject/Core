@@ -1,5 +1,5 @@
-#include "PlatformPch.h"
-#include "Platform/Trace.h"
+#include "Precompile.h"
+#include "Trace.h"
 
 #if HELIUM_ENABLE_TRACE
 

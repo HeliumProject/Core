@@ -1,5 +1,5 @@
-#include "PlatformPch.h"
-#include "Platform/MemoryHeap.h"
+#include "Precompile.h"
+#include "MemoryHeap.h"
 
 #if HELIUM_HEAP
 

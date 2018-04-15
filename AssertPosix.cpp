@@ -1,4 +1,5 @@
-#include "Platform/Assert.h"
+#include "Precompile.h"
+#include "Assert.h"
 
 #include <cstdio>
 

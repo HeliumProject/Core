@@ -1,5 +1,5 @@
-#include "PlatformPch.h"
-#include "Platform/Timer.h"
+#include "Precompile.h"
+#include "Timer.h"
 
 using namespace Helium;
 

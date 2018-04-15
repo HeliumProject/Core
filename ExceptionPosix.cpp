@@ -1,4 +1,4 @@
-#include "PlatformPch.h"
+#include "Precompile.h"
 #include "Exception.h"
 
 #include "Platform/Types.h"

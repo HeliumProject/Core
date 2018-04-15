@@ -1,5 +1,6 @@
-#include "PlatformPch.h"
-#include "Platform/Error.h"
+#include "Precompile.h"
+#include "Error.h"
+
 #include "Platform/Encoding.h"
 
 using namespace Helium;

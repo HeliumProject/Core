@@ -1,4 +1,5 @@
-#include "Platform/Thread.h"
+#include "Precompile.h"
+#include "Thread.h"
 
 #include "Platform/Assert.h"
 #include "Platform/Exception.h"
