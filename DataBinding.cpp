@@ -1,4 +1,4 @@
-#include "InspectPch.h"
+#include "Precompile.h"
 #include "Inspect/DataBinding.h"
 
 using namespace Helium;
