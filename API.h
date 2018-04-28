@@ -1,0 +1,29 @@
+#pragma once
+
+#include "Platform/System.h"
+
+#include "Foundation/Profile.h"
+
+#if HELIUM_SHARED
+# ifdef HELIUM_MATH_EXPORTS
+#  define HELIUM_MATH_API HELIUM_API_EXPORT
+# else
+#  define HELIUM_MATH_API HELIUM_API_IMPORT
+# endif
+#else
+#define HELIUM_MATH_API
+#endif
+
+#define HELIUM_MATH_PROFILE 0
+
+#if HELIUM_PROFILE_INSTRUMENT_ALL || HELIUM_MATH_PROFILE
+# define HELIUM_MATH_FUNCTION_TIMER() HELIUM_PROFILE_FUNCTION_TIMER()
+#else
+# define HELIUM_MATH_FUNCTION_TIMER()
+#endif
+
+#if HELIUM_PROFILE_INSTRUMENT_ALL || HELIUM_MATH_PROFILE
+# define HELIUM_MATH_SCOPE_TIMER( ... ) HELIUM_PROFILE_SCOPE_TIMER( __VA_ARGS__ )
+#else
+# define HELIUM_MATH_SCOPE_TIMER( ... )
+#endif
