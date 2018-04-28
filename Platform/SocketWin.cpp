@@ -5,6 +5,7 @@
 #include "Platform/Console.h"
 
 #include <mstcpip.h>
+#include <WS2tcpip.h>
 
 using namespace Helium;
 
@@ -13,17 +14,17 @@ using namespace Helium;
 #define KEEPALIVE_INTERVAL 1000
 
 // globals
-static int32_t g_InitCount = 0;
+static uint32_t g_InitCount = 0;
 static WSADATA g_WSAData;
 
 bool Helium::InitializeSockets()
 {
 	if ( ++g_InitCount == 1 )
 	{
-		int result = WSAStartup(MAKEWORD(2,2), &g_WSAData);
-		if (result != NO_ERROR)
+		int result = ::WSAStartup( MAKEWORD(2,2), &g_WSAData );
+		if ( result != NO_ERROR )
 		{
-			Helium::Print( "Error initializing socket layer (%d)\n", WSAGetLastError() );
+			Helium::Print( "Error initializing socket layer (%d)\n", ::WSAGetLastError() );
 			return false;
 		}
 	}
@@ -35,10 +36,10 @@ void Helium::CleanupSockets()
 {
 	if ( --g_InitCount == 0 )
 	{
-		int result = WSACleanup();
-		if (result != NO_ERROR)
+		int result = ::WSACleanup();
+		if ( result != NO_ERROR )
 		{
-			Helium::Print( "Error cleaning up socket layer (%d)\n", WSAGetLastError() );
+			Helium::Print( "Error cleaning up socket layer (%d)\n", ::WSAGetLastError() );
 		}
 	}
 }
@@ -81,11 +82,11 @@ bool Socket::Create( SocketProtocol protocol )
 
 	if (protocol == SocketProtocols::Tcp)
 	{
-		m_Handle = ::WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED);
+		m_Handle = ::WSASocketW(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED);
 	}
 	else
 	{
-		m_Handle = ::WSASocket(AF_INET, SOCK_DGRAM, IPPROTO_UDP, NULL, 0, WSA_FLAG_OVERLAPPED);
+		m_Handle = ::WSASocketW(AF_INET, SOCK_DGRAM, IPPROTO_UDP, NULL, 0, WSA_FLAG_OVERLAPPED);
 	}
 
 	m_Protocol = protocol;
@@ -174,11 +175,18 @@ bool Socket::Connect( uint16_t port, const char* ip )
 {
 	if ( HELIUM_VERIFY( m_Protocol == Helium::SocketProtocols::Tcp ) )
 	{
+		IN_ADDR inAddr;
+		InetPton( AF_INET, ip, &inAddr );
+
 		struct sockaddr_in addr;
 		addr.sin_family = AF_INET;
-		addr.sin_addr.s_addr = ip ? inet_addr(ip) : htonl(INADDR_BROADCAST);
-		addr.sin_port = htons(port);
-		return ::connect( m_Handle, (SOCKADDR*)&addr, sizeof(sockaddr_in)) != SOCKET_ERROR;
+		addr.sin_addr.s_addr = inAddr.S_un.S_addr;
+		addr.sin_port = htons( port );
+
+		WSABUF buf;
+		buf.len = 0;
+		buf.buf = NULL;
+		return ::WSAConnect( m_Handle, (struct sockaddr*)&addr, sizeof(sockaddr_in), NULL, &buf, NULL, NULL) != SOCKET_ERROR;
 	}
 
 	return false;
@@ -190,7 +198,7 @@ bool Socket::Accept( Socket& server_socket, sockaddr_in* client_info )
 	{
 		int lengthname = sizeof(sockaddr_in);
 		m_Protocol = Helium::SocketProtocols::Tcp;
-		m_Handle = ::accept( server_socket.m_Handle, (struct sockaddr *)client_info, &lengthname);
+		m_Handle = ::WSAAccept( server_socket.m_Handle, (struct sockaddr *)client_info, &lengthname, NULL, NULL );
 		return m_Handle != INVALID_SOCKET;
 	}
 
@@ -277,10 +285,13 @@ bool Socket::Write( void* buffer, uint32_t bytes, uint32_t& wrote, const char* i
 	DWORD flags = 0;
 	DWORD wrote_local = 0;
 
-	sockaddr_in addr;
+	IN_ADDR inAddr;
+	InetPton(AF_INET, ip, &inAddr);
+
+	struct sockaddr_in addr;
 	addr.sin_family = AF_INET;
+	addr.sin_addr.s_addr = inAddr.S_un.S_addr;
 	addr.sin_port = htons(port);
-	addr.sin_addr.s_addr = ip ? inet_addr(ip) : htonl(INADDR_BROADCAST);
 
 	bool udp = m_Protocol == SocketProtocols::Udp;
 	if (udp)
