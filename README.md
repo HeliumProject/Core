@@ -1,12 +1,11 @@
-[![Build Status](https://travis-ci.org/HeliumProject/Engine.svg?branch=master)](https://travis-ci.org/HeliumProject/Engine)
+[![Build Status](https://travis-ci.org/HeliumProject/Core.svg?branch=master)](https://travis-ci.org/HeliumProject/Core)
 
-<a href="http://heliumproject.org/">![Helium Game Engine](https://raw.github.com/HeliumProject/Engine/master/Documentation/Helium.png)</a>
+<a href="http://heliumproject.org/">![Helium Core](https://raw.github.com/HeliumProject/Core/master/Documentation/Helium.png)</a>
 
-Helium aspires to be a fully-featured open-source game engine:
+Helium Core aspires to be a fully-featured C++ platform abstraction and standard library:
 * Permissively licensed (BSD-style)
-* Designed to scale to desktop, console, and mobile
-* Utilize familiar industry-standard DCC user interface and usability design
-* Import content using production proven interchange formats (like FBX)
+* Designed to scale to desktop, console, and mobile applications
+* Implement patterns like Reflection, IPC, and RPC that help build sophisticated, modern applications
 
 # Documentation #
 
@@ -17,7 +16,7 @@ Introductions
 # Resources #
 
 * Website: [http://heliumproject.org](http://heliumproject.org)
-* GitHub: [http://github.com/HeliumProject/Engine](http://github.com/HeliumProject/Engine)
+* GitHub: [http://github.com/HeliumProject/Core](http://github.com/HeliumProject/Core)
 * Slack: [http://heliumproject.slack.com](http://heliumproject.slack.com) (ask @gorlak for an invite)
 
 # Building #
