@@ -8,88 +8,20 @@ addons:
     packages:
     - gcc-5
     - g++-5
-matrix:
-  include:
-  - os: linux
-    compiler: gcc
-    env:
-    - CONFIG=debug
-    - ARCH=x86
-  - os: linux
-    compiler: gcc
-    env:
-    - CONFIG=intermediate
-    - ARCH=x86
-  - os: linux
-    compiler: gcc
-    env:
-    - CONFIG=profile
-    - ARCH=x86
-  - os: linux
-    compiler: gcc
-    env:
-    - CONFIG=release
-    - ARCH=x86
-  - os: osx
-    compiler: clang
-    env:
-    - CONFIG=debug
-    - ARCH=x86
-  - os: osx
-    compiler: clang
-    env:
-    - CONFIG=intermediate
-    - ARCH=x86
-  - os: osx
-    compiler: clang
-    env:
-    - CONFIG=profile
-    - ARCH=x86
-  - os: osx
-    compiler: clang
-    env:
-    - CONFIG=release
-    - ARCH=x86
-  - os: linux
-    compiler: gcc
-    env:
-    - CONFIG=debug
-    - ARCH=x86_64
-  - os: linux
-    compiler: gcc
-    env:
-    - CONFIG=intermediate
-    - ARCH=x86_64
-  - os: linux
-    compiler: gcc
-    env:
-    - CONFIG=profile
-    - ARCH=x86_64
-  - os: linux
-    compiler: gcc
-    env:
-    - CONFIG=release
-    - ARCH=x86_64
-  - os: osx
-    compiler: clang
-    env:
-    - CONFIG=debug
-    - ARCH=x86_64
-  - os: osx
-    compiler: clang
-    env:
-    - CONFIG=intermediate
-    - ARCH=x86_64
-  - os: osx
-    compiler: clang
-    env:
-    - CONFIG=profile
-    - ARCH=x86_64
-  - os: osx
-    compiler: clang
-    env:
-    - CONFIG=release
-    - ARCH=x86_64
+os:
+- osx
+- linux
+env:
+- CONFIG=debug
+- CONFIG=intermediate
+- CONFIG=profile
+- CONFIG=release
+- ARCH=x86
+- ARCH=x86_64
+- SHARED=0
+- SHARED=1
+- RTTI=0
+- RTTI=1
 git:
   submodules: false
 before_install:
