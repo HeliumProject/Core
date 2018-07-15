@@ -1,72 +1,64 @@
 language: cpp
-
-#linux globals
 dist: trusty
 sudo: required
 addons:
   apt:
     sources:
-      - ubuntu-toolchain-r-test
+    - ubuntu-toolchain-r-test
     packages:
-      - gcc-5
-      - g++-5
-
+    - gcc-5
+    - g++-5
 matrix:
   include:
-    - os: linux
-      compiler: gcc
-      env:
-        - CONFIG=debug
-    - os: linux
-      compiler: gcc
-      env:
-        - CONFIG=intermediate
-    - os: linux
-      compiler: gcc
-      env:
-        - CONFIG=profile
-    - os: linux
-      compiler: gcc
-      env:
-        - CONFIG=release
-    - os: osx
-      compiler: clang
-      env:
-        - CONFIG=debug
-    - os: osx
-      compiler: clang
-      env:
-        - CONFIG=intermediate
-    - os: osx
-      compiler: clang
-      env:
-        - CONFIG=profile
-    - os: osx
-      compiler: clang
-      env:
-        - CONFIG=release
-
+  - os: linux
+    compiler: gcc
+    env:
+    - CONFIG=debug
+  - os: linux
+    compiler: gcc
+    env:
+    - CONFIG=intermediate
+  - os: linux
+    compiler: gcc
+    env:
+    - CONFIG=profile
+  - os: linux
+    compiler: gcc
+    env:
+    - CONFIG=release
+  - os: osx
+    compiler: clang
+    env:
+    - CONFIG=debug
+  - os: osx
+    compiler: clang
+    env:
+    - CONFIG=intermediate
+  - os: osx
+    compiler: clang
+    env:
+    - CONFIG=profile
+  - os: osx
+    compiler: clang
+    env:
+    - CONFIG=release
 git:
   submodules: false
-
 before_install:
 - git submodule update --init --recursive
-- ./.travis.before_install.$TRAVIS_OS_NAME.sh
-
+- "./.travis.before_install.$TRAVIS_OS_NAME.sh"
 script:
 - cd Dependencies
-- ../premake.sh gmake
+- "../premake.sh gmake"
 - cd Build
 - make -j4 config=${CONFIG}_x64
 - cd ../..
-- ./premake.sh gmake
+- "./premake.sh gmake"
 - cd Build
 - make -j4 config=${CONFIG}_x64
-
 notifications:
   slack:
-    rooms:
-      secure: nn6rH9yj4/eJYNkAXrMIk4oVrweT3rznA5ATtuHzFeeG5uMT0qr1c1yQqDsSKsxtPan1RFo2awJ/PZkGQmuRVTcmVuaHs0eLPVrTXgfy2yjjuqwg4aLlK7PBEnv6oxUDyJOo9K9RYMcPIqXu0vcikgo+C4Oc6qL5MiOa7RleVjI=
+    secure: erE1FUcoYhvbyzC0eDyldOf3YIAP5tTvxPQkcLn+vo4blbQDyPZyAds6bEtJM9T6jTRLvkmiukYfUKXbKzThW9mAUubJg/rHhVyYN604CalM5OMGWgzmvtKkk87k4rZBp2SYNXsIJzpMRma+DmN+oJgoa/GPP970280O2u4aJbKwBWt+ZBYCCJz9Lj2OrSmEax6jvEasheFM3iBOSN5Qt/n0TYDSJeuJSncKJvLApEa+84MyO5/tP0XK7lKVaLkq/zP59Y2o+iVXdeLlvDMPxQrsamfoEPMF5+kSAJwrRREXC97nXHVQgb+o909YBBIZ5p6QLgiX0QToi6hmxXnaDrmrMrn4pC0bXlVmhhP+1gXMo3u5iKJxtsC0gnmqYYc1xgK7Z80RQRMHf46trEB2bsvAkHOfmUMPZjRbx1bGA9rdJj6zaz5gt80SXUKnMJ8v9D6Izzr8Q/gz08+P7N26iYN5kgyqodtUPVj7F7yBqz50OzdzHaGL7h1gxErPVHMylkVQxDaThu9CdY3OaAweFS40AYgOgaOq5xIQkBUi0H3OXtizlQ+EmKHwFDQ7U1gfSQC3oZN/RNdIRJPbuvTmratoSVcbZ3I24s5IhDGAF/Xae3zrpyAe2HKrUyGy/0X9rzXMW6Kf7FVcNkZgxFV4NJ7L00s6TQqAJ+YKvSkDIyw=
     on_start: never
     on_success: always
     on_failure: always
