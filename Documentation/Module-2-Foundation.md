@@ -1,4 +1,4 @@
-<a href="http://heliumproject.org/">![Helium Game Engine](https://raw.githubusercontent.com/HeliumProject/Helium/master/Editor/Icons/Helium/Helium.png)</a>
+<a href="http://heliumproject.org/">![Helium Core](https://raw.github.com/HeliumProject/Core/master/Documentation/Helium.png)</a>
 
 Foundation is a platform agnostic container and utility library that provides:
 * Linear allocation based C++ containers (DynamicArray, Map, Set, Hashtable, etc...)
@@ -15,11 +15,7 @@ Foundation is a platform agnostic container and utility library that provides:
 * CRC-32 and MD5 generation
 * TUID, a 64-bit unique identifier
 
-Design
-======
+## Design
 
 Foundation is designed to contain code appropriate for any platform, including handheld and console platforms.  It is a general purpose C++ library.
 
-Location
-========
-https://github.com/HeliumProject/Foundation

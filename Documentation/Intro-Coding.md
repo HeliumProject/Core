@@ -1,3 +1,5 @@
+<a href="http://heliumproject.org/">![Helium Core](https://raw.github.com/HeliumProject/Core/master/Documentation/Helium.png)</a>
+
 # Coding Guidelines
 
 ## Naming Conventions
