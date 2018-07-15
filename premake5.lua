@@ -170,9 +170,9 @@ project( "ReflectTests" )
 
 	links
 	{
-		"Platform",
-		"Foundation",
 		"Reflect",
+		"Foundation",
+		"Platform",
 	}
 
 project( "Persist" )
@@ -354,14 +354,14 @@ project( "CoreTests" )
 
 	links
 	{
-		"googletest",
-		"Platform",
-		"Foundation",
-		"Reflect",
 		"Persist",
 		"Mongo",
 		"Inspect",
 		"Math",
+		"Reflect",
+		"Foundation",
+		"Platform",
+		"googletest",
 	}
 
 	configuration "linux"
