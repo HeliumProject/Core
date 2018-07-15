@@ -14,34 +14,82 @@ matrix:
     compiler: gcc
     env:
     - CONFIG=debug
+    - ARCH=x86
   - os: linux
     compiler: gcc
     env:
     - CONFIG=intermediate
+    - ARCH=x86
   - os: linux
     compiler: gcc
     env:
     - CONFIG=profile
+    - ARCH=x86
   - os: linux
     compiler: gcc
     env:
     - CONFIG=release
+    - ARCH=x86
   - os: osx
     compiler: clang
     env:
     - CONFIG=debug
+    - ARCH=x86
   - os: osx
     compiler: clang
     env:
     - CONFIG=intermediate
+    - ARCH=x86
   - os: osx
     compiler: clang
     env:
     - CONFIG=profile
+    - ARCH=x86
   - os: osx
     compiler: clang
     env:
     - CONFIG=release
+    - ARCH=x86
+  - os: linux
+    compiler: gcc
+    env:
+    - CONFIG=debug
+    - ARCH=x86_64
+  - os: linux
+    compiler: gcc
+    env:
+    - CONFIG=intermediate
+    - ARCH=x86_64
+  - os: linux
+    compiler: gcc
+    env:
+    - CONFIG=profile
+    - ARCH=x86_64
+  - os: linux
+    compiler: gcc
+    env:
+    - CONFIG=release
+    - ARCH=x86_64
+  - os: osx
+    compiler: clang
+    env:
+    - CONFIG=debug
+    - ARCH=x86_64
+  - os: osx
+    compiler: clang
+    env:
+    - CONFIG=intermediate
+    - ARCH=x86_64
+  - os: osx
+    compiler: clang
+    env:
+    - CONFIG=profile
+    - ARCH=x86_64
+  - os: osx
+    compiler: clang
+    env:
+    - CONFIG=release
+    - ARCH=x86_64
 git:
   submodules: false
 before_install:
@@ -49,13 +97,13 @@ before_install:
 - "./.travis.before_install.$TRAVIS_OS_NAME.sh"
 script:
 - cd Dependencies
-- "../premake.sh gmake"
+- "../premake.sh gmake --architecture=${ARCH}"
 - cd Build
-- make -j4 config=${CONFIG}_x64
+- make -j4 config=${CONFIG}
 - cd ../..
-- "./premake.sh gmake"
+- "./premake.sh gmake --architecture=${ARCH}"
 - cd Build
-- make -j4 config=${CONFIG}_x64
+- make -j4 config=${CONFIG}
 notifications:
   slack:
     on_start: never

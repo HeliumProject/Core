@@ -10,25 +10,25 @@ fi
 
 pushd Build
 
-make $@ config=debug_x64
+make $@ config=debug
 if [ "$?" -ne "0" ]; then
 	echo "Debug failed!"
 	exit 1
 fi
 
-make $@ config=intermediate_x64
+make $@ config=intermediate
 if [ "$?" -ne "0" ]; then
 	echo "Intermediate failed!"
 	exit 1
 fi
 
-make $@ config=profile_x64
+make $@ config=profile
 if [ "$?" -ne "0" ]; then
 	echo "Profile failed!"
 	exit 1
 fi
 
-make $@ config=release_x64
+make $@ config=release
 if [ "$?" -ne "0" ]; then
 	echo "Release failed!"
 	exit 1

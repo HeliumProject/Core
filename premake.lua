@@ -19,23 +19,6 @@ Helium.DoBasicProjectSettings = function()
 		"HELIUM_HEAP=1",
 	}
 
-	if _OPTIONS[ "gfxapi" ] == "direct3d" then
-		defines
-		{
-			"HELIUM_DIRECT3D=1",
-		}
-	elseif _OPTIONS[ "gfxapi" ] == "opengl" then
-		defines
-		{
-			"HELIUM_OPENGL=1",
-		}
-		includedirs
-		{
-			"Dependencies/glew/include",
-			"Dependencies/glfw/include",
-		}
-	end
-
 	if tools then
 		defines
 		{
@@ -77,7 +60,6 @@ Helium.DoBasicProjectSettings = function()
 		{
 			"-stdlib=libc++",
 			"-framework CoreFoundation",
-			"-framework CoreGraphics",
 			"-framework Carbon",
 			"-framework IOKit",
 		}

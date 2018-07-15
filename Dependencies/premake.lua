@@ -114,7 +114,6 @@ Helium.DoBasicWorkspaceSettings = function()
 	defines
 	{
 		"UNICODE=1",
-		"FBXSDK_SHARED=1",
 	}
 
 	characterset "Unicode"
@@ -123,14 +122,6 @@ Helium.DoBasicWorkspaceSettings = function()
 	{
 		"NoMinimalRebuild",
 	}
-
-	configuration "x64"
-		defines
-		{
-			-- Explicitly define "__SSE__" and "__SSE2__" on x86-64 platforms, as Visual C++ does not define them automatically.
-			"__SSE__",
-			"__SSE2__",
-		}
 
 	configuration "windows"
 		defines
