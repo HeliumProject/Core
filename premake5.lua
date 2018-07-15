@@ -319,6 +319,19 @@ project( "Core" )
 
 	configuration {}
 
+	links
+	{
+		"Persist",
+		"Mongo",
+		"Inspect",
+		"Math",
+		"Reflect",
+		"Foundation",
+		"Platform",
+		"googletest",
+		"mongo-c",
+	}
+
 	configuration { "SharedLib", "linux" }
 		links
 		{
@@ -362,6 +375,7 @@ project( "CoreTests" )
 		"Foundation",
 		"Platform",
 		"googletest",
+		"mongo-c",
 	}
 
 	configuration "linux"
