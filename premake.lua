@@ -8,8 +8,8 @@ newoption
 
 newoption
 {
-	trigger = "rtti",
-	description = "Enable run-time type information",
+	trigger = "nortti",
+	description = "Disable run-time type information",
 }
 
 -- Common settings for projects linking with libraries.
@@ -38,18 +38,8 @@ Helium.DoBasicProjectSettings = function()
 		}
 	end
 
-	if _OPTIONS['rtti'] then
-		rtti "On"
-		defines
-		{
-			"HELIUM_RTTI=1",
-		}
-	else
+	if _OPTIONS['nortti'] then
 		rtti "Off"
-		defines
-		{
-			"HELIUM_RTTI=0",
-		}
 	end
 
 	includedirs
