@@ -241,3 +241,120 @@ project( "Math" )
 		}
 
 	configuration {}
+
+--[[
+project( "Core" )
+
+	if os.host() == "windows" then
+		pchheader( "Precompile.h" )
+		pchsource( "Source/Precompile.cpp" )	
+	end
+
+	Helium.DoBasicProjectSettings()
+
+	if _OPTIONS['shared'] then
+		kind "SharedLib"
+	else
+		kind "StaticLib"
+	end
+
+	defines
+	{
+		"HELIUM_HEAP=0",
+	}
+
+	files
+	{
+		"Source/**.cpp",
+		"Source/**.h",
+		"Source/**.inl",
+	}
+
+	excludes
+	{
+		"Source/**Tests.*",
+	}
+
+	configuration "windows"
+		excludes
+		{
+			"Source/Platform/*Posix.*",
+			"Source/Platform/*Mac.*",
+			"Source/Platform/*Lin.*",
+		}
+
+	configuration "macosx"
+		excludes
+		{
+			"Source/Platform/*Win.*",
+			"Source/Platform/*Lin.*",
+		}
+
+	configuration "linux"
+		excludes
+		{
+			"Source/Platform/*Win.*",
+			"Source/Platform/*Mac.*",
+		}
+
+	configuration { "SharedLib", "linux" }
+		links
+		{
+			"pthread",
+			"dl",
+		}
+
+	configuration {}
+
+project( "CoreTests" )
+
+	configuration {}
+
+	kind "ConsoleApp"
+
+	Helium.DoBasicProjectSettings()
+
+	includedirs
+	{
+		".",
+		"Dependencies/googletest/googletest/include"
+	}
+
+	links
+	{
+		"googletest"
+	}
+
+	postbuildcommands
+	{
+		"\"%{cfg.linktarget.abspath}\""
+	}
+
+	configuration "linux"
+		links
+		{
+			"pthread",
+			"dl",
+			"rt",
+			"m",
+			"stdc++",
+		}
+
+	files
+	{
+		"Source/**Tests.*",
+	}
+
+	links
+	{
+		"Platform",
+		"Foundation",
+		"Reflect",
+		"Persist",
+		"Mongo",
+		"Inspect",
+		"Math",
+	}
+
+	configuration {}
+--]]

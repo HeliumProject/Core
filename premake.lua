@@ -1,5 +1,17 @@
 require './Dependencies/premake'
 
+newoption
+{
+	trigger = "shared",
+	description = "Build as shared libraries",
+}
+
+newoption
+{
+	trigger = "rtti",
+	description = "Enable run-time type information",
+}
+
 -- Common settings for projects linking with libraries.
 Helium.DoBasicProjectSettings = function()
 
@@ -19,18 +31,28 @@ Helium.DoBasicProjectSettings = function()
 		"HELIUM_HEAP=1",
 	}
 
-	if tools then
+	if _OPTIONS['shared'] then
 		defines
 		{
 			"HELIUM_SHARED=1",
-			"HELIUM_TOOLS=1",
+		}
+	else
+		defines
+		{
+			"HELIUM_SHARED=0",
+		}
+	end
+
+	if _OPTIONS['rtti'] then
+		rtti "On"
+		defines
+		{
 			"HELIUM_RTTI=1",
 		}
 	else
 		rtti "Off"
 		defines
 		{
-			"HELIUM_SHARED=0",
 			"HELIUM_RTTI=0",
 		}
 	end
@@ -146,7 +168,7 @@ Helium.DoModuleProjectSettings = function( baseDirectory, tokenPrefix, moduleNam
 
 	Helium.DoBasicProjectSettings()
 
-	if tools then
+	if _OPTIONS['shared'] then
 		kind "SharedLib"
 	else
 		kind "StaticLib"
