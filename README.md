@@ -59,22 +59,24 @@ First, grab our source tree from git and ensure that you fetch all the submodule
 
 Next, generate the project files using premake.  An appropriate build of premake is includedin the repository.
 
-On Windows, generate Visual Studio 201x projects (replace 201x with your desired version):
+On Windows, generate Visual Studio 201x projects (replace 2015 with your desired version):
 
     cd Dependencies
     ..\premake vs2015
     start Build\Dependencies.sln
-    
+
+In Visual Studio to go `Build` > `Batch Build` > Click `Select All` then `Build`
+
     cd ..
     premake vs2015
     start Build\Helium.sln
 
 On OSX and Linux, use premake to generate makefiles (Xcode support inside premake is on hold as of late):
 
-    cd Dependencies/Build
+    cd Dependencies
     ../premake.sh gmake
-    make -j8
-    
-    cd ../Build
+    make -C Build -j8
+
+    cd ..
     ./premake.sh gmake
-    make -j8
+    make -C Build -j8

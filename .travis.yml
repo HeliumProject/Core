@@ -12,84 +12,52 @@ matrix:
   include:
   - os: linux
     compiler: gcc
-    env:
-    - CONFIG=debug
-    - ARCH=x86
+    env: CONFIG=debug ARCH=x86_64
   - os: linux
     compiler: gcc
-    env:
-    - CONFIG=intermediate
-    - ARCH=x86
+    env: CONFIG=intermediate ARCH=x86_64
   - os: linux
     compiler: gcc
-    env:
-    - CONFIG=profile
-    - ARCH=x86
+    env: CONFIG=profile ARCH=x86_64
   - os: linux
     compiler: gcc
-    env:
-    - CONFIG=release
-    - ARCH=x86
+    env: CONFIG=release ARCH=x86_64
   - os: osx
     compiler: clang
-    env:
-    - CONFIG=debug
-    - ARCH=x86
+    env: CONFIG=debug ARCH=x86_64
   - os: osx
     compiler: clang
-    env:
-    - CONFIG=intermediate
-    - ARCH=x86
+    env: CONFIG=intermediate ARCH=x86_64
   - os: osx
     compiler: clang
-    env:
-    - CONFIG=profile
-    - ARCH=x86
+    env: CONFIG=profile ARCH=x86_64
   - os: osx
     compiler: clang
-    env:
-    - CONFIG=release
-    - ARCH=x86
+    env: CONFIG=release ARCH=x86_64
   - os: linux
     compiler: gcc
-    env:
-    - CONFIG=debug
-    - ARCH=x86_64
+    env: CONFIG=debug ARCH=x86
   - os: linux
     compiler: gcc
-    env:
-    - CONFIG=intermediate
-    - ARCH=x86_64
+    env: CONFIG=intermediate ARCH=x86
   - os: linux
     compiler: gcc
-    env:
-    - CONFIG=profile
-    - ARCH=x86_64
+    env: CONFIG=profile ARCH=x86
   - os: linux
     compiler: gcc
-    env:
-    - CONFIG=release
-    - ARCH=x86_64
+    env: CONFIG=release ARCH=x86
   - os: osx
     compiler: clang
-    env:
-    - CONFIG=debug
-    - ARCH=x86_64
+    env: CONFIG=debug ARCH=x86
   - os: osx
     compiler: clang
-    env:
-    - CONFIG=intermediate
-    - ARCH=x86_64
+    env: CONFIG=intermediate ARCH=x86
   - os: osx
     compiler: clang
-    env:
-    - CONFIG=profile
-    - ARCH=x86_64
+    env: CONFIG=profile ARCH=x86
   - os: osx
     compiler: clang
-    env:
-    - CONFIG=release
-    - ARCH=x86_64
+    env: CONFIG=release ARCH=x86
 git:
   submodules: false
 before_install:
@@ -100,13 +68,7 @@ script:
 - "../premake.sh gmake --architecture=${ARCH}"
 - make -C Build -j4 config=${CONFIG}
 - cd ..
-- "./premake.sh gmake --architecture=${ARCH}"
-- make -C Build clean config=${CONFIG} && make -C Build -j4 config=${CONFIG}
-- "./premake.sh gmake --architecture=${ARCH} --shared"
-- make -C Build clean config=${CONFIG} && make -C Build -j4 config=${CONFIG}
-- "./premake.sh gmake --architecture=${ARCH} --nortti"
-- make -C Build clean config=${CONFIG} && make -C Build -j4 config=${CONFIG}
-- "./premake.sh gmake --architecture=${ARCH} --shared --nortti"
+- "./premake.sh gmake --architecture=${ARCH} ${ARGS}"
 - make -C Build clean config=${CONFIG} && make -C Build -j4 config=${CONFIG}
 notifications:
   slack:
