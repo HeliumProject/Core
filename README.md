@@ -13,6 +13,13 @@ Introductions
 * [History](Documentation/Intro-History.md)
 * [Coding](Documentation/Intro-Coding.md)
 
+Modules
+* [Platform](Documentation/Module-1-Platform.md)
+* [Foundation](Documentation/Module-2-Foundation.md)
+* [Reflect](Documentation/Module-3-Reflect.md)
+* [Persist](Documentation/Module-4-Persist.md)
+* [Mongo](Documentation/Module-5-Mongo.md)
+
 # Resources #
 
 * Website: [http://heliumproject.org](http://heliumproject.org)
