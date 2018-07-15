@@ -55,15 +55,6 @@ void NumericTest( bool clamp )
         EXPECT_TRUE( clamp ? dest == NumericLimits<float32_t>::Maximum : dest == 0 );
     }
 
-    // int64_t->float32_t
-    {
-        int64_t source = NumericLimits<int64_t>::Maximum;
-        float32_t dest = 0;
-        RangeCast( source, dest, clamp );
-        float32_t test = (float32_t)NumericLimits<int64_t>::Maximum;
-        EXPECT_TRUE( dest == test );
-    }
-
     // float64_t->int32_t
     {
         float64_t source = NumericLimits<float64_t>::Maximum;
