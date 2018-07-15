@@ -6,4 +6,4 @@ sudo apt-get update
 sudo DEBIAN_FRONTEND=noninteractive Dependencies/install-packages-linux.sh
 
 # Update compiler
-sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5 60 --slave /usr/bin/g++ g++ /usr/bin/g++-5
+sudo Dependencies/install-packages-linux-update-alternatives.sh
