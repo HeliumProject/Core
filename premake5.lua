@@ -263,6 +263,7 @@ project( "Math" )
 
 	configuration {}
 
+--[[
 project( "Core" )
 
 	if os.host() == "windows" then
@@ -380,4 +381,4 @@ project( "CoreTests" )
 	{
 		"\"%{cfg.linktarget.abspath}\""
 	}
-
+]]--
