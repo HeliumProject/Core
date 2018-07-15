@@ -60,14 +60,6 @@ Helium.GetProcessorCount = function()
 	end
 end
 
-Helium.Build32Bit = function()
-	if ( _OPTIONS[ "32bit" ] ) then
-		return true
-	else
-		return not os.is64bit()
-	end
-end
-
 Helium.Sleep = function( seconds )
 	if os.host() == "windows" then
 		os.execute("ping 127.0.0.1 -n " .. seconds + 1 .. " -w 1000 >:nul 2>&1")
@@ -100,24 +92,14 @@ end
 
 newoption
 {
-	trigger = "32bit",
-	description = "Build for both 32-bit and 64-bit target machines"
+	trigger = "architecture",
+	description = "Specify architecture (see premake 'architecture' action for choices)",
+	default = (function() if os.is64bit() then return 'x86_64' else return 'x86' end end)(),
 }
 
 Helium.DoBasicWorkspaceSettings = function()
 
-	if Helium.Build32Bit() then
-		platforms
-		{
-			"x32",
-		}
-	else
-		platforms
-		{
-			"x64",
-		}
-	end
-
+	architecture( _OPTIONS[ "architecture" ] )
 	location "Build"
 	objdir "Build"
 
