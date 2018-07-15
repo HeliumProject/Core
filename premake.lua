@@ -26,11 +26,6 @@ Helium.DoBasicProjectSettings = function()
 		"FatalWarnings",
 	}
 
-	defines
-	{
-		"HELIUM_HEAP=1",
-	}
-
 	if _OPTIONS['shared'] then
 		defines
 		{
@@ -104,11 +99,6 @@ Helium.DoTestsProjectSettings = function()
 
 	Helium.DoBasicProjectSettings()
 
-	defines
-	{
-		"HELIUM_HEAP=0"
-	}
-
 	includedirs
 	{
 		".",
@@ -145,6 +135,7 @@ Helium.DoModuleProjectSettings = function( baseDirectory, tokenPrefix, moduleNam
 
 	defines
 	{
+		"HELIUM_HEAP=1",
 		"HELIUM_MODULE=" .. moduleName
 	}
 
