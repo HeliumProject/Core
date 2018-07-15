@@ -58,6 +58,54 @@ matrix:
   - os: osx
     compiler: clang
     env: CONFIG=release ARCH=x86
+  - os: linux
+    compiler: gcc
+    env: CONFIG=debug ARCH=x86_64 ARGS=--shared
+  - os: linux
+    compiler: gcc
+    env: CONFIG=intermediate ARCH=x86_64 ARGS=--shared
+  - os: linux
+    compiler: gcc
+    env: CONFIG=profile ARCH=x86_64 ARGS=--shared
+  - os: linux
+    compiler: gcc
+    env: CONFIG=release ARCH=x86_64 ARGS=--shared
+  - os: osx
+    compiler: clang
+    env: CONFIG=debug ARCH=x86_64 ARGS=--shared
+  - os: osx
+    compiler: clang
+    env: CONFIG=intermediate ARCH=x86_64 ARGS=--shared
+  - os: osx
+    compiler: clang
+    env: CONFIG=profile ARCH=x86_64 ARGS=--shared
+  - os: osx
+    compiler: clang
+    env: CONFIG=release ARCH=x86_64 ARGS=--shared
+  - os: linux
+    compiler: gcc
+    env: CONFIG=debug ARCH=x86 ARGS=--shared
+  - os: linux
+    compiler: gcc
+    env: CONFIG=intermediate ARCH=x86 ARGS=--shared
+  - os: linux
+    compiler: gcc
+    env: CONFIG=profile ARCH=x86 ARGS=--shared
+  - os: linux
+    compiler: gcc
+    env: CONFIG=release ARCH=x86 ARGS=--shared
+  - os: osx
+    compiler: clang
+    env: CONFIG=debug ARCH=x86 ARGS=--shared
+  - os: osx
+    compiler: clang
+    env: CONFIG=intermediate ARCH=x86 ARGS=--shared
+  - os: osx
+    compiler: clang
+    env: CONFIG=profile ARCH=x86 ARGS=--shared
+  - os: osx
+    compiler: clang
+    env: CONFIG=release ARCH=x86 ARGS=--shared
 git:
   submodules: false
 before_install:
@@ -69,7 +117,7 @@ script:
 - make -C Build -j4 config=${CONFIG}
 - cd ..
 - "./premake.sh gmake --architecture=${ARCH} ${ARGS}"
-- make -C Build clean config=${CONFIG} && make -C Build -j4 config=${CONFIG}
+- make -C Build -j4 config=${CONFIG}
 notifications:
   slack:
     on_start: never
