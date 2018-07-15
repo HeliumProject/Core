@@ -145,6 +145,11 @@ project( "Reflect" )
 		"Source/Reflect/**",
 	}
 
+	excludes
+	{
+		"Source/Reflect/*Tests.*",
+	}
+
 	configuration "SharedLib"
 		links
 		{
@@ -153,6 +158,22 @@ project( "Reflect" )
 		}
 
 	configuration {}
+
+project( "ReflectTests" )
+
+	Helium.DoTestsProjectSettings()
+
+	files
+	{
+		"Source/Reflect/*Tests.*",
+	}
+
+	links
+	{
+		"Platform",
+		"Foundation",
+		"Reflect",
+	}
 
 project( "Persist" )
 
@@ -242,7 +263,6 @@ project( "Math" )
 
 	configuration {}
 
---[[
 project( "Core" )
 
 	if os.host() == "windows" then
@@ -297,6 +317,8 @@ project( "Core" )
 			"Source/Platform/*Mac.*",
 		}
 
+	configuration {}
+
 	configuration { "SharedLib", "linux" }
 		links
 		{
@@ -320,14 +342,26 @@ project( "CoreTests" )
 		"Dependencies/googletest/googletest/include"
 	}
 
-	links
+	defines
 	{
-		"googletest"
+		"HELIUM_HEAP=0",
 	}
 
-	postbuildcommands
+	files
 	{
-		"\"%{cfg.linktarget.abspath}\""
+		"Source/**Tests.*",
+	}
+
+	links
+	{
+		"googletest",
+		"Platform",
+		"Foundation",
+		"Reflect",
+		"Persist",
+		"Mongo",
+		"Inspect",
+		"Math",
 	}
 
 	configuration "linux"
@@ -340,21 +374,10 @@ project( "CoreTests" )
 			"stdc++",
 		}
 
-	files
-	{
-		"Source/**Tests.*",
-	}
-
-	links
-	{
-		"Platform",
-		"Foundation",
-		"Reflect",
-		"Persist",
-		"Mongo",
-		"Inspect",
-		"Math",
-	}
-
 	configuration {}
---]]
+
+	postbuildcommands
+	{
+		"\"%{cfg.linktarget.abspath}\""
+	}
+

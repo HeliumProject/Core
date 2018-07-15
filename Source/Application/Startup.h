@@ -76,8 +76,8 @@ namespace Helium
     // Application behavior
     //
 
-    // Which streams should go into the trace file
-    HELIUM_APPLICATION_API Log::Stream GetTraceStreams(); 
+    // Which channels should go into the trace file
+    HELIUM_APPLICATION_API Log::Channel GetTraceChannels(); 
 
 
     //

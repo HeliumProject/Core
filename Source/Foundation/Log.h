@@ -17,28 +17,28 @@ namespace Helium
 		const static uint32_t MAX_PRINT_SIZE = 8192;
 
 		//
-		// Output streams, these speak to the qualitative value of the print:
+		// Output channels, these speak to the qualitative value of the print:
 		//  - normal is any print that updates the status of a process to a normal user
 		//  - debug is any print that is only really meaningful to developers, and not indicative of a problem
 		//  - warning is notification that there is a minor problem happening, but things will turn out OK
 		//  - error is notification that there is a serious problem and something needs attention to work as expected
 		//
 
-		namespace Streams
+		namespace Channels
 		{
-			enum Stream
+			enum Channel
 			{
 				Error    = 1 << 0,
 				Warning  = 1 << 1,
 				Normal   = 1 << 2,
 				Debug    = 1 << 3,
 				Profile  = 1 << 4,
-				Count    = 5, // careful, this needs to be updated based on the number of streams
+				Count    = 5, // careful, this needs to be updated based on the number of channels
 				All      = 0xffffffff,
 			};
 		}
 
-		typedef uint32_t Stream; 
+		typedef uint32_t Channel;
 
 		//
 		// Verbosity levels, these speak to the quantitative value of the print:
@@ -64,12 +64,12 @@ namespace Helium
 
 		struct HELIUM_FOUNDATION_API Statement
 		{
-			std::string     m_String;
-			Stream      m_Stream;
-			Level       m_Level;
-			int         m_Indent;
+			std::string m_String;
+			Channel m_Channel;
+			Level m_Level;
+			int m_Indent;
 
-			inline Statement( const std::string& string, Stream stream = Streams::Normal, Level level = Levels::Default, int indent = 0 );
+			inline Statement( const std::string& string, Channel channel = Channels::Normal, Level level = Levels::Default, int indent = 0 );
 
 			inline void ApplyIndent();
 
@@ -98,14 +98,14 @@ namespace Helium
 		//
 
 		// the trace file gets everything Console delivers to the console and more
-		HELIUM_FOUNDATION_API bool AddTraceFile( const std::string& fileName, Stream stream, ThreadId threadId = ThreadId (), bool append = false );
+		HELIUM_FOUNDATION_API bool AddTraceFile( const std::string& fileName, Channel channel, ThreadId threadId = ThreadId (), bool append = false );
 		HELIUM_FOUNDATION_API void RemoveTraceFile( const std::string& fileName );
 
-		template <bool (*AddFunc)(const std::string& fileName, Stream stream, ThreadId threadId, bool append), void (*RemoveFunc)(const std::string& fileName)>
+		template <bool (*AddFunc)(const std::string& fileName, Channel channel, ThreadId threadId, bool append), void (*RemoveFunc)(const std::string& fileName)>
 		class FileHandle
 		{
 		public:
-			inline FileHandle(const std::string& file, Stream stream, ThreadId threadId = ThreadId (), bool append = false );
+			inline FileHandle(const std::string& file, Channel channel, ThreadId threadId = ThreadId (), bool append = false );
 			inline ~FileHandle();
 
 			inline const std::string& GetFile();
@@ -127,19 +127,19 @@ namespace Helium
 		HELIUM_FOUNDATION_API void UnIndent(int col = -1);
 
 		//
-		// Tracking APIs configure what streams and levels to use, and allows access to warning/error counters
+		// Tracking APIs configure what channels and levels to use, and allows access to warning/error counters
 		//
 
 		// verbosity setting
 		HELIUM_FOUNDATION_API Level GetLevel();
 		HELIUM_FOUNDATION_API void SetLevel(Level level);
 
-		// enable stream calls
-		HELIUM_FOUNDATION_API bool IsStreamEnabled( Stream stream );
-		HELIUM_FOUNDATION_API void EnableStream( Stream stream, bool enable );
+		// enable channel calls
+		HELIUM_FOUNDATION_API bool IsChannelEnabled( Channel channel );
+		HELIUM_FOUNDATION_API void EnableChannel( Channel channel, bool enable );
 
-		// get the print color for the given stream
-		HELIUM_FOUNDATION_API ConsoleColor GetStreamColor(Stream stream);
+		// get the print color for the given channel
+		HELIUM_FOUNDATION_API ConsoleColor GetChannelColor(Channel channel);
 
 		// enter/leave this library's section
 		HELIUM_FOUNDATION_API void LockMutex();
@@ -151,7 +151,7 @@ namespace Helium
 
 		// main printing function used by all prototypes
 		HELIUM_FOUNDATION_API void PrintString(const char* string,	// the string to print
-			Stream stream = Streams::Normal,							// the stream its going into
+			Channel channel = Channels::Normal,							// the channel its going into
 			Level level = Levels::Default,								// the verbosity level
 			ConsoleColor color = ConsoleColors::None,					// the color to use (None for auto)
 			int indent = -1,											// the amount to indent
@@ -162,7 +162,7 @@ namespace Helium
 		HELIUM_FOUNDATION_API void PrintStatement(const Statement& statement);
 
 		// print several statements
-		HELIUM_FOUNDATION_API void PrintStatements(const std::vector< Statement >& statements, uint32_t streams = Streams::All);
+		HELIUM_FOUNDATION_API void PrintStatements(const std::vector< Statement >& statements, uint32_t channels = Channels::All);
 
 		// simple way to print a particular color
 		HELIUM_FOUNDATION_API void PrintColor(ConsoleColor color, const char* fmt, ...);
@@ -195,7 +195,7 @@ namespace Helium
 			inline ~Indentation();
 		};
 
-		// like an indentation, but prints to the basic output stream the name of the heading
+		// like an indentation, but prints to the basic output channel the name of the heading
 		class HELIUM_FOUNDATION_API Heading
 		{
 		public:
@@ -207,13 +207,13 @@ namespace Helium
 		class HELIUM_FOUNDATION_API Bullet
 		{
 		private:
-			Stream m_Stream;
+			Channel m_Channel;
 			Level  m_Level;
 			bool   m_Valid;
 
 		public:
 			Bullet(const char *fmt, ...);
-			Bullet(Stream stream, Level level, const char *fmt, ...);
+			Bullet(Channel channel, Level level, const char *fmt, ...);
 
 			~Bullet();
 
@@ -227,7 +227,7 @@ namespace Helium
 		class HELIUM_FOUNDATION_API Listener
 		{
 		public:
-			Listener( uint32_t throttle = Streams::All, uint32_t* errorCount = NULL, uint32_t* warningCount = NULL, std::vector< Statement >* consoleOutput = NULL );
+			Listener( uint32_t throttle = Channels::All, uint32_t* errorCount = NULL, uint32_t* warningCount = NULL, std::vector< Statement >* consoleOutput = NULL );
 			~Listener();
 
 			void Start();

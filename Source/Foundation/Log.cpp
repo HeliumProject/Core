@@ -14,8 +14,6 @@
 #include <time.h>
 #include <sys/timeb.h>
 
-#include <fstream>
-#include <iostream>
 #include <map>
 
 #if HELIUM_OS_WIN
@@ -93,12 +91,12 @@ FileManager g_FileManager;
 
 struct OutputFile
 {
-	Stream       m_StreamType;
+	Channel       m_ChannelType;
 	int          m_RefCount;
 	ThreadId m_ThreadId;
 
 	OutputFile()
-		: m_StreamType( Streams::Normal )
+		: m_ChannelType( Channels::Normal )
 		, m_RefCount( 0 )
 		, m_ThreadId()
 	{
@@ -109,7 +107,7 @@ struct OutputFile
 typedef std::map< std::string, OutputFile > M_OutputFile;
 static M_OutputFile g_TraceFiles;
 
-static uint32_t g_Streams = Streams::Normal | Streams::Warning | Streams::Error;
+static uint32_t g_Channels = Channels::Normal | Channels::Warning | Channels::Error;
 static Level g_Level = Levels::Default;
 static int g_Indent = 0;
 
@@ -208,16 +206,16 @@ void Redirect(const std::string& fileName, const char* str, bool stampNewLine = 
 	}
 }
 
-bool AddFile( M_OutputFile& files, const std::string& fileName, Stream stream, ThreadId threadId, bool append )
+bool AddFile( M_OutputFile& files, const std::string& fileName, Channel channel, ThreadId threadId, bool append )
 {
 	Helium::MutexScopeLock mutex (g_Mutex);
 
 	M_OutputFile::iterator found = files.find( fileName );
 	if ( found != files.end() )
 	{
-		if ( found->second.m_StreamType != stream )
+		if ( found->second.m_ChannelType != channel )
 		{
-			HELIUM_BREAK(); // trying to add the same file, but with a different stream type
+			HELIUM_BREAK(); // trying to add the same file, but with a different channel type
 		}
 
 		if ( found->second.m_ThreadId != threadId )
@@ -241,7 +239,7 @@ bool AddFile( M_OutputFile& files, const std::string& fileName, Stream stream, T
 
 				g_FileManager.Opened( fileName, f );
 				OutputFile info;
-				info.m_StreamType = stream;
+				info.m_ChannelType = channel;
 				info.m_RefCount = 1;
 				info.m_ThreadId = threadId;
 				files[ fileName ] = info;
@@ -275,9 +273,9 @@ void RemoveFile( M_OutputFile& files, const std::string& fileName )
 	}
 }
 
-bool Log::AddTraceFile( const std::string& fileName, Stream stream, ThreadId threadId, bool append )
+bool Log::AddTraceFile( const std::string& fileName, Channel channel, ThreadId threadId, bool append )
 {
-	return AddFile( g_TraceFiles, fileName, stream, threadId, append );
+	return AddFile( g_TraceFiles, fileName, channel, threadId, append );
 }
 
 void Log::RemoveTraceFile( const std::string& fileName )
@@ -315,40 +313,40 @@ void Log::SetLevel(Level level)
 	g_Level = level;
 }
 
-bool Log::IsStreamEnabled( Stream stream )
+bool Log::IsChannelEnabled( Channel channel )
 {
-	return ( g_Streams & stream ) == stream;
+	return ( g_Channels & channel ) == channel;
 }
 
-void Log::EnableStream( Stream stream, bool enable )
+void Log::EnableChannel( Channel channel, bool enable )
 {
 	if ( enable )
 	{
-		g_Streams |= stream;
+		g_Channels |= channel;
 	}
 	else
 	{
-		g_Streams &= ~stream;
+		g_Channels &= ~channel;
 	}
 }
 
-ConsoleColor Log::GetStreamColor( Log::Stream stream )
+ConsoleColor Log::GetChannelColor( Log::Channel channel )
 {
-	switch (stream)
+	switch (channel)
 	{
-	case Streams::Normal:
+	case Channels::Normal:
 		return ConsoleColors::None;
 
-	case Streams::Debug:
+	case Channels::Debug:
 		return ConsoleColors::Aqua;
 
-	case Streams::Profile:
+	case Channels::Profile:
 		return ConsoleColors::Green;
 
-	case Streams::Warning:
+	case Channels::Warning:
 		return ConsoleColors::Yellow;
 
-	case Streams::Error:
+	case Channels::Error:
 		return ConsoleColors::Red;
 
 	default:
@@ -369,7 +367,7 @@ void Log::UnlockMutex()
 	g_Mutex.Unlock();
 }
 
-void Log::PrintString(const char* string, Stream stream, Level level, ConsoleColor color, int indent, char* output, uint32_t outputSize)
+void Log::PrintString(const char* string, Channel channel, Level level, ConsoleColor color, int indent, char* output, uint32_t outputSize)
 {
 	Helium::MutexScopeLock mutex (g_Mutex);
 
@@ -379,7 +377,7 @@ void Log::PrintString(const char* string, Stream stream, Level level, ConsoleCol
 	M_OutputFile::iterator end = g_TraceFiles.end();
 	for( ; itr != end; ++itr )
 	{
-		if ( ( (*itr).second.m_StreamType & stream ) == stream
+		if ( ( (*itr).second.m_ChannelType & channel ) == channel
 			&& ( (*itr).second.m_ThreadId == ThreadId () || (*itr).second.m_ThreadId == Thread::GetCurrentId() ) )
 		{
 			trace = true;
@@ -387,7 +385,7 @@ void Log::PrintString(const char* string, Stream stream, Level level, ConsoleCol
 	}
 
 	// determine if we should be displayed
-	bool display = ( g_Streams & stream ) == stream && level <= g_Level;
+	bool display = ( g_Channels & channel ) == channel && level <= g_Level;
 
 	// check for nothing to do
 	if ( trace || display || output )
@@ -398,7 +396,7 @@ void Log::PrintString(const char* string, Stream stream, Level level, ConsoleCol
 		}
 
 		// the statement
-		Statement statement ( string, stream, level, indent );
+		Statement statement ( string, channel, level, indent );
 
 		// construct the print statement
 		ListenerArgs args ( statement );
@@ -423,11 +421,11 @@ void Log::PrintString(const char* string, Stream stream, Level level, ConsoleCol
 				// deduce the color if we were told to do so
 				if ( color == ConsoleColors::None )
 				{
-					color = GetStreamColor( stream );
+					color = GetChannelColor( channel );
 				}
 
 				// print the statement to the window
-				Helium::PrintString(color, stream == Streams::Error ? stderr : stdout, statement.m_String);
+				Helium::PrintString(color, channel == Channels::Error ? stderr : stdout, statement.m_String);
 			}
 
 			// send the text to the debugger, if no debugger nothing happens
@@ -442,7 +440,7 @@ void Log::PrintString(const char* string, Stream stream, Level level, ConsoleCol
 			end = g_TraceFiles.end();
 			for( ; itr != end; ++itr )
 			{
-				if ( ( (*itr).second.m_StreamType & stream ) == stream
+				if ( ( (*itr).second.m_ChannelType & channel ) == channel
 					&& ( (*itr).second.m_ThreadId == ThreadId () || (*itr).second.m_ThreadId == Thread::GetCurrentId() ) )
 				{
 					Redirect( (*itr).first, statement.m_String.c_str(), stampNewLine );
@@ -468,10 +466,10 @@ void Log::PrintStatement(const Statement& statement)
 {
 	Helium::MutexScopeLock mutex (g_Mutex);
 
-	PrintString( statement.m_String.c_str(), statement.m_Stream, statement.m_Level, GetStreamColor( statement.m_Stream ), statement.m_Indent );
+	PrintString( statement.m_String.c_str(), statement.m_Channel, statement.m_Level, GetChannelColor( statement.m_Channel ), statement.m_Indent );
 }
 
-void Log::PrintStatements(const std::vector< Statement >& statements, uint32_t streamFilter)
+void Log::PrintStatements(const std::vector< Statement >& statements, uint32_t channelFilter)
 {
 	Helium::MutexScopeLock mutex (g_Mutex);
 
@@ -479,7 +477,7 @@ void Log::PrintStatements(const std::vector< Statement >& statements, uint32_t s
 	std::vector< Statement >::const_iterator end = statements.end();
 	for ( ; itr != end; ++itr )
 	{
-		if ( itr->m_Stream & streamFilter )
+		if ( itr->m_Channel & channelFilter )
 		{
 			PrintStatement( *itr );
 		}
@@ -496,7 +494,7 @@ void Log::PrintColor(ConsoleColor color, const char* fmt, ...)
 	int size = StringPrintArgs(string, fmt, args);
 	string[ sizeof(string)/sizeof(string[0]) - 1] = 0; 
 	HELIUM_ASSERT(size >= 0);
-	PrintString(string, Streams::Normal, Levels::Default, color); 
+	PrintString(string, Channels::Normal, Levels::Default, color); 
 	va_end(args); 
 }
 
@@ -511,7 +509,7 @@ void Log::Print(const char *fmt,...)
 	string[ sizeof(string)/sizeof(string[0]) - 1] = 0; 
 	HELIUM_ASSERT(size >= 0);
 
-	PrintString(string, Streams::Normal, Levels::Default, Log::GetStreamColor( Streams::Normal ));
+	PrintString(string, Channels::Normal, Levels::Default, Log::GetChannelColor( Channels::Normal ));
 	va_end(args);      
 }
 
@@ -526,7 +524,7 @@ void Log::Print(Level level, const char *fmt,...)
 	string[ sizeof(string)/sizeof(string[0]) - 1] = 0; 
 	HELIUM_ASSERT(size >= 0);
 
-	PrintString(string, Streams::Normal, level, Log::GetStreamColor( Streams::Normal ));
+	PrintString(string, Channels::Normal, level, Log::GetChannelColor( Channels::Normal ));
 	va_end(args);       
 }
 
@@ -545,7 +543,7 @@ void Log::Debug(const char *fmt,...)
 	string[ sizeof(string)/sizeof(string[0]) - 1] = 0; 
 	HELIUM_ASSERT(size >= 0);
 
-	PrintString(string, Streams::Debug, Levels::Default, Log::GetStreamColor( Streams::Debug ), 0);
+	PrintString(string, Channels::Debug, Levels::Default, Log::GetChannelColor( Channels::Debug ), 0);
 	va_end(args);
 }
 
@@ -564,7 +562,7 @@ void Log::Debug(Level level, const char *fmt,...)
 	string[ sizeof(string)/sizeof(string[0]) - 1] = 0; 
 	HELIUM_ASSERT(size >= 0);
 
-	PrintString(string, Streams::Debug, level, Log::GetStreamColor( Streams::Debug ), 0);
+	PrintString(string, Channels::Debug, level, Log::GetChannelColor( Channels::Debug ), 0);
 	va_end(args);
 }
 
@@ -583,7 +581,7 @@ void Log::Profile(const char *fmt,...)
 	string[ sizeof(string)/sizeof(string[0]) - 1] = 0; 
 	HELIUM_ASSERT(size >= 0);
 
-	PrintString(string, Streams::Profile, Levels::Default, Log::GetStreamColor( Streams::Profile ), 0);
+	PrintString(string, Channels::Profile, Levels::Default, Log::GetChannelColor( Channels::Profile ), 0);
 	va_end(args);
 }
 
@@ -602,7 +600,7 @@ void Log::Profile(Level level, const char *fmt,...)
 	string[ sizeof(string)/sizeof(string[0]) - 1] = 0; 
 	HELIUM_ASSERT(size >= 0);
 
-	PrintString(string, Streams::Profile, level, Log::GetStreamColor( Streams::Profile ), 0);
+	PrintString(string, Channels::Profile, level, Log::GetChannelColor( Channels::Profile ), 0);
 	va_end(args);
 }
 
@@ -621,7 +619,7 @@ void Log::Warning(const char *fmt,...)
 	string[ sizeof(string)/sizeof(string[0]) - 1] = 0; 
 	HELIUM_ASSERT(size >= 0);
 
-	PrintString(string, Streams::Warning, Levels::Default, Log::GetStreamColor( Streams::Warning ), 0);
+	PrintString(string, Channels::Warning, Levels::Default, Log::GetChannelColor( Channels::Warning ), 0);
 	va_end(args);      
 }
 
@@ -640,7 +638,7 @@ void Log::Warning(Level level, const char *fmt,...)
 	string[ sizeof(string)/sizeof(string[0]) - 1] = 0; 
 	HELIUM_ASSERT(size >= 0);
 
-	PrintString(string, Streams::Warning, level, Log::GetStreamColor( Streams::Warning ), 0);
+	PrintString(string, Channels::Warning, level, Log::GetChannelColor( Channels::Warning ), 0);
 	va_end(args);      
 }
 
@@ -659,7 +657,7 @@ void Log::Error(const char *fmt,...)
 	string[ sizeof(string)/sizeof(string[0]) - 1] = 0; 
 	HELIUM_ASSERT(size >= 0);
 
-	PrintString(string, Streams::Error, Levels::Default, Log::GetStreamColor( Streams::Error ), 0);
+	PrintString(string, Channels::Error, Levels::Default, Log::GetChannelColor( Channels::Error ), 0);
 	va_end(args);
 }
 
@@ -678,7 +676,7 @@ void Log::Error(Level level, const char *fmt,...)
 	string[ sizeof(string)/sizeof(string[0]) - 1] = 0; 
 	HELIUM_ASSERT(size >= 0);
 
-	PrintString(string, Streams::Error, level, Log::GetStreamColor( Streams::Error ), 0);
+	PrintString(string, Channels::Error, level, Log::GetChannelColor( Channels::Error ), 0);
 	va_end(args);
 }
 
@@ -694,7 +692,7 @@ Log::Heading::Heading(const char *fmt, ...)
 	string[ sizeof(string)/sizeof(string[0]) - 1] = 0; 
 	HELIUM_ASSERT(size >= 0);
 
-	PrintString(string, Streams::Normal, Levels::Default, Log::GetStreamColor( Streams::Normal ));
+	PrintString(string, Channels::Normal, Levels::Default, Log::GetChannelColor( Channels::Normal ));
 	va_end(args);      
 
 	// now indent
@@ -712,7 +710,7 @@ Log::Heading::~Heading()
 std::vector<std::string> g_OutlineState;
 
 Log::Bullet::Bullet(const char *fmt, ...)
-: m_Stream( Streams::Normal )
+: m_Channel( Channels::Normal )
 , m_Level( Log::Levels::Default )
 , m_Valid( fmt != NULL )
 {
@@ -727,8 +725,8 @@ Log::Bullet::Bullet(const char *fmt, ...)
 	}
 }
 
-Log::Bullet::Bullet(Stream stream, Log::Level level, const char *fmt, ...)
-: m_Stream( stream )
+Log::Bullet::Bullet(Channel channel, Log::Level level, const char *fmt, ...)
+: m_Channel( channel )
 , m_Level( level )
 , m_Valid( fmt != NULL )
 {
@@ -749,8 +747,8 @@ Log::Bullet::~Bullet()
 	{
 		Helium::MutexScopeLock mutex (g_Mutex);
 
-		// this gates the output to the console for streams and levels that the user did not elect to see on in the console
-		bool print = ( ( g_Streams & m_Stream ) == m_Stream ) && ( m_Level <= g_Level );
+		// this gates the output to the console for channels and levels that the user did not elect to see on in the console
+		bool print = ( ( g_Channels & m_Channel ) == m_Channel ) && ( m_Level <= g_Level );
 
 		if ( print )
 		{
@@ -775,8 +773,8 @@ void Log::Bullet::CreateBullet(const char *fmt, va_list args)
 {
 	static char delims[] = { 'o', '*', '>', '-' };
 
-	// this gates the output to the console for streams and levels that the user did not elect to see on in the console
-	bool print = ( ( g_Streams & m_Stream ) == m_Stream ) && ( m_Level <= g_Level );
+	// this gates the output to the console for channels and levels that the user did not elect to see on in the console
+	bool print = ( ( g_Channels & m_Channel ) == m_Channel ) && ( m_Level <= g_Level );
 
 	if ( print )
 	{
@@ -816,9 +814,9 @@ void Log::Bullet::CreateBullet(const char *fmt, va_list args)
 	static char output[MAX_PRINT_SIZE];
 	if (g_Indent == 1)
 	{
-		PrintString( "\n", m_Stream, m_Level, Log::GetStreamColor( m_Stream ), -1, output, sizeof( output ) );
+		PrintString( "\n", m_Channel, m_Level, Log::GetChannelColor( m_Channel ), -1, output, sizeof( output ) );
 	}
-	PrintString( string, m_Stream, m_Level, Log::GetStreamColor( m_Stream ), -1, output, sizeof( output ) );
+	PrintString( string, m_Channel, m_Level, Log::GetChannelColor( m_Channel ), -1, output, sizeof( output ) );
 
 	// push state
 	g_OutlineState.push_back( output );
@@ -905,12 +903,12 @@ void Listener::Print( ListenerArgs& args )
 {
 	if ( m_Thread == Thread::GetCurrentId() )
 	{
-		if ( args.m_Statement.m_Stream == Log::Streams::Warning && m_WarningCount )
+		if ( args.m_Statement.m_Channel == Log::Channels::Warning && m_WarningCount )
 		{
 			(*m_WarningCount)++;
 		}
 
-		if ( args.m_Statement.m_Stream == Log::Streams::Error && m_ErrorCount )
+		if ( args.m_Statement.m_Channel == Log::Channels::Error && m_ErrorCount )
 		{
 			(*m_ErrorCount)++;
 		}
@@ -920,7 +918,7 @@ void Listener::Print( ListenerArgs& args )
 			m_LogOutput->push_back( args.m_Statement );
 		}
 
-		if ( m_Throttle & args.m_Statement.m_Stream )
+		if ( m_Throttle & args.m_Statement.m_Channel )
 		{
 			args.m_Skip = true;
 		}

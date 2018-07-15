@@ -54,9 +54,9 @@ ShutdownSignature::Event Helium::g_ShuttingDown;
 static bool g_ShutdownStarted = false;
 static bool g_ShutdownComplete = false;
 
-// default to these streams for trace files, it is up to the app to ask for these, when creating a TraceFile
+// default to these channels for trace files, it is up to the app to ask for these, when creating a TraceFile
 static std::vector< std::string > g_TraceFiles;
-static Log::Stream g_TraceStreams  = Log::Streams::Normal | Log::Streams::Warning | Log::Streams::Error; 
+static Log::Channel g_TraceChannels  = Log::Channels::Normal | Log::Channels::Warning | Log::Channels::Error; 
 
 // so you can set _crtBreakAlloc in the debugger (expression evaluator doesn't like it)
 #if HELIUM_OS_WIN
@@ -122,21 +122,21 @@ void Helium::Startup( int argc, const char** argv )
         }
 
 #ifdef HELIUM_DEBUG
-        Log::EnableStream( Log::Streams::Debug, true );
+        Log::EnableChannel( Log::Channels::Debug, true );
 #else
-        Log::EnableStream( Log::Streams::Debug, Helium::GetCmdLineFlag( StartupArgs::Debug ) );
+        Log::EnableChannel( Log::Channels::Debug, Helium::GetCmdLineFlag( StartupArgs::Debug ) );
 #endif
 
 #ifdef HELIUM_PROFILE
-        Log::EnableStream( Log::Streams::Profile, true );
+        Log::EnableChannel( Log::Channels::Profile, true );
 #else
-        Log::EnableStream( Log::Streams::Profile, Helium::GetCmdLineFlag( StartupArgs::Profile ) );
+        Log::EnableChannel( Log::Channels::Profile, Helium::GetCmdLineFlag( StartupArgs::Profile ) );
 #endif
 
         if( Helium::GetCmdLineFlag( StartupArgs::Debug ) )
         {
-            // add the debug stream to the trace
-            g_TraceStreams |= Log::Streams::Debug; 
+            // add the debug channel to the trace
+            g_TraceChannels |= Log::Channels::Debug; 
         }
 
         if( Helium::GetCmdLineFlag( StartupArgs::Profile ) )
@@ -144,8 +144,8 @@ void Helium::Startup( int argc, const char** argv )
             // init profiling
             Profile::Startup();
 
-            // add the profile stream to the trace
-            g_TraceStreams |= Log::Streams::Profile; 
+            // add the profile channel to the trace
+            g_TraceChannels |= Log::Channels::Profile; 
         }
 
         // handle invalid parameters, etc...
@@ -189,7 +189,7 @@ int Helium::Shutdown( int code )
 
             // Print general success or failure, depends on the result code
             Log::Print( "%s: ", GetProcessName().c_str() );
-            Log::PrintString( code ? "Failed" : "Succeeeded", Log::Streams::Normal, Log::Levels::Default, code ? ConsoleColors::Red : ConsoleColors::Green );
+            Log::PrintString( code ? "Failed" : "Succeeeded", Log::Channels::Normal, Log::Levels::Default, code ? ConsoleColors::Red : ConsoleColors::Green );
         }
 
         // Raise Shutdown Event
@@ -229,22 +229,22 @@ int Helium::Shutdown( int code )
     return code;
 }
 
-Log::Stream Helium::GetTraceStreams()
+Log::Channel Helium::GetTraceChannels()
 {
-    return g_TraceStreams; 
+    return g_TraceChannels; 
 }
 
 void Helium::InitializeStandardTraceFiles()
 {
     std::string path = GetProcessPath();
     g_TraceFiles.push_back( path + ".log" );
-    Log::AddTraceFile( g_TraceFiles.back(), Helium::GetTraceStreams() );
+    Log::AddTraceFile( g_TraceFiles.back(), Helium::GetTraceChannels() );
 
     g_TraceFiles.push_back( path + "Warnings.log" );
-    Log::AddTraceFile( g_TraceFiles.back(), Log::Streams::Warning );
+    Log::AddTraceFile( g_TraceFiles.back(), Log::Channels::Warning );
 
     g_TraceFiles.push_back( path + "Errors.log" );
-    Log::AddTraceFile( g_TraceFiles.back(), Log::Streams::Error );
+    Log::AddTraceFile( g_TraceFiles.back(), Log::Channels::Error );
 }
 
 void Helium::CleanupStandardTraceFiles()

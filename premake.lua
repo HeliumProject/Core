@@ -106,7 +106,7 @@ Helium.DoTestsProjectSettings = function()
 
 	defines
 	{
-		"HELIUM_MODULE=Tests"
+		"HELIUM_HEAP=0"
 	}
 
 	includedirs
