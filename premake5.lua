@@ -326,13 +326,6 @@ project( "Core" )
 
 	links
 	{
-		"Persist",
-		"Mongo",
-		"Inspect",
-		"Math",
-		"Reflect",
-		"Foundation",
-		"Platform",
 		"googletest",
 		"mongo-c",
 	}
