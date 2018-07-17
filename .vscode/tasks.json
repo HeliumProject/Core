@@ -16,7 +16,7 @@
             ],
             "windows": {
                 "args": [
-                    "vs2015"
+                    "vs2017"
                 ],
                 "command": ".\\premake.bat"
             }
@@ -30,41 +30,9 @@
                 "panel": "new"
             },
             "args": [
-                "config=debug_x64"
-            ],
-            "problemMatcher": {
-                "owner": "cpp",
-                "fileLocation": [
-                    "relative",
-                    "${workspaceRoot}"
-                ],
-                "pattern": {
-                    "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
-                    "file": 1,
-                    "line": 2,
-                    "column": 3,
-                    "severity": 4,
-                    "message": 5
-                }
-            },
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "windows": {
-                "command": "make.cmd"
-            }
-        },
-        {
-            "label": "Build All",
-            "type": "shell",
-            "command": "make",
-            "presentation": {
-                "reveal": "always",
-                "panel": "new"
-            },
-            "args": [
-                "all"
+                "-C",
+                "Build",
+                "config=debug"
             ],
             "problemMatcher": {
                 "owner": "cpp",
