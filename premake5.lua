@@ -267,7 +267,7 @@ project( "Core" )
 
 	if os.host() == "windows" then
 		pchheader( "Precompile.h" )
-		pchsource( "Source/Precompile.cpp" )	
+		pchsource( "Source/Monolithic/Precompile.cpp" )
 	end
 
 	Helium.DoBasicProjectSettings()
@@ -281,6 +281,11 @@ project( "Core" )
 	defines
 	{
 		"HELIUM_HEAP=0",
+	}
+
+	includedirs
+	{
+		"Source/Monolithic"
 	}
 
 	files
