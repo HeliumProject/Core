@@ -3,8 +3,8 @@
 
 #include "Inspect/Canvas.h"
 #include "Inspect/Container.h"
-#include "Inspect/Controls/LabelControl.h"
-#include "Inspect/Controls/ButtonControl.h"
+#include "Inspect/LabelControl.h"
+#include "Inspect/ButtonControl.h"
 
 using namespace Helium;
 using namespace Helium::Inspect;

@@ -1,5 +1,5 @@
 #include "Precompile.h"
-#include "Inspect/Controls/ValueControl.h"
+#include "Inspect/ValueControl.h"
 #include "Inspect/Canvas.h"
 
 HELIUM_DEFINE_CLASS( Helium::Inspect::Value );

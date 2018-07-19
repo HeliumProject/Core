@@ -1,5 +1,5 @@
 #include "Precompile.h"
-#include "Inspect/Controls/FileDialogButtonControl.h"
+#include "Inspect/FileDialogButtonControl.h"
 
 HELIUM_DEFINE_CLASS( Helium::Inspect::FileDialogButton );
 

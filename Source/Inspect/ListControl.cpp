@@ -1,5 +1,5 @@
 #include "Precompile.h"
-#include "Inspect/Controls/ListControl.h"
+#include "Inspect/ListControl.h"
 #include "Inspect/Canvas.h"
 
 #include "Foundation/Tokenize.h"

@@ -6,7 +6,6 @@
 #include "Platform/Console.h"
 #include "Platform/Process.h"
 
-#include <assert.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/ptrace.h>
@@ -48,7 +47,7 @@ bool Helium::IsDebuggerPresent()
 
   size = sizeof(info);
   junk = sysctl(mib, sizeof(mib) / sizeof(*mib), &info, &size, NULL, 0);
-  assert(junk == 0);
+  HELIUM_ASSERT(junk == 0);
 
   // We're being debugged if the P_TRACED flag is set.
 

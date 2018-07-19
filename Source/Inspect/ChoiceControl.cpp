@@ -1,5 +1,5 @@
 #include "Precompile.h"
-#include "Inspect/Controls/ChoiceControl.h"
+#include "Inspect/ChoiceControl.h"
 #include "Inspect/Container.h"
 
 HELIUM_DEFINE_CLASS( Helium::Inspect::Choice );

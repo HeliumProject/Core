@@ -1,5 +1,5 @@
 #include "Precompile.h"
-#include "Inspect/Controls/ColorPickerControl.h"
+#include "Inspect/ColorPickerControl.h"
 #include "Inspect/Container.h"
 
 #include <sstream>

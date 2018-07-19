@@ -1,5 +1,5 @@
 #include "Precompile.h"
-#include "Inspect/Controls/LabelControl.h"
+#include "Inspect/LabelControl.h"
 #include "Inspect/Container.h"
 #include "Inspect/DataBinding.h"
 

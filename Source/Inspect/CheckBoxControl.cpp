@@ -1,5 +1,5 @@
 #include "Precompile.h"
-#include "Inspect/Controls/CheckBoxControl.h"
+#include "Inspect/CheckBoxControl.h"
 #include "Inspect/Container.h"
 
 HELIUM_DEFINE_CLASS( Helium::Inspect::CheckBox );

@@ -2,6 +2,12 @@ require './Dependencies/premake'
 
 newoption
 {
+	trigger = "pch",
+	description = "Build with precompiled headers",
+}
+
+newoption
+{
 	trigger = "shared",
 	description = "Build as shared libraries",
 }
@@ -129,22 +135,21 @@ Helium.DoModuleProjectSettings = function( baseDirectory, tokenPrefix, moduleNam
 		"HELIUM_MODULE=" .. moduleName
 	}
 
-	if os.host() == "windows" then
-
-		local header = "Precompile.h"
-		if os.host() == "macosx" then
-			header = path.join( moduleName, header )
-			header = path.join( baseDirectory, header )
-			header = path.join( "..", header )
-			header = path.join( "..", header )
-		end
-		pchheader( header )
+	if _OPTIONS["pch"] then
+		pchheader( "Precompile.h" )
 
 		local source = "Precompile.cpp"
 		source = path.join( moduleName, source )
 		source = path.join( baseDirectory, source )
 		pchsource( source )
-		
+
+		local include = ""
+		source = path.join( moduleName, include )
+		source = path.join( baseDirectory, include )
+		includedirs
+		{
+			include,
+		}
 	end
 
 	Helium.DoBasicProjectSettings()

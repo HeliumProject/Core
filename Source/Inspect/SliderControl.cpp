@@ -1,5 +1,5 @@
 #include "Precompile.h"
-#include "Inspect/Controls/SliderControl.h"
+#include "Inspect/SliderControl.h"
 #include "Inspect/Canvas.h"
 
 HELIUM_DEFINE_CLASS( Helium::Inspect::Slider );

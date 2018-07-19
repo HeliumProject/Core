@@ -7,7 +7,7 @@
 
 #include <type_traits>
 #include <cstdarg>
-#include <string.h>
+#include <cstring>
 
 /// @defgroup utilitymacros General Utility Macros
 //@{
