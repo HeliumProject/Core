@@ -64,12 +64,12 @@ void NumericTest( bool clamp )
     }
 }
 
-TEST(NumericClamp, GoogleTestTest)
+TEST(Foundation, NumericClamp)
 {
 	NumericTest(true);
 }
 
-TEST(NumericNoClamp, GoogleTestTest)
+TEST(Foundation, NumericNoClamp)
 {
 	NumericTest(false);
 }

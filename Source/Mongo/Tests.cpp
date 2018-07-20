@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
 
-TEST(Platform, NullTest)
+TEST(Mongo, NullTest)
 {
 }

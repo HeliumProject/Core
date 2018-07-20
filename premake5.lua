@@ -128,8 +128,8 @@ if not _OPTIONS["monolithic"] then
 
 		links
 		{
+			"Foundation",
 			"Platform",
-			"Foundation"
 		}
 
 	project( "Application" )
@@ -141,14 +141,35 @@ if not _OPTIONS["monolithic"] then
 			"Source/Application/**",
 		}
 
+		excludes
+		{
+			"Source/Application/*Tests.*",
+		}
+
 		configuration "SharedLib"
 			links
 			{
-				"Platform",
 				"Foundation",
+				"Platform",
 			}
 
 		configuration {}
+
+	project( "ApplicationTests" )
+
+		Helium.DoTestsProjectSettings()
+
+		files
+		{
+			"Source/Application/*Tests.*",
+		}
+
+		links
+		{
+			"Application",
+			"Foundation",
+			"Platform",
+		}
 
 	project( "Reflect" )
 
@@ -167,8 +188,8 @@ if not _OPTIONS["monolithic"] then
 		configuration "SharedLib"
 			links
 			{
-				"Platform",
 				"Foundation",
+				"Platform",
 			}
 
 		configuration {}
@@ -198,6 +219,11 @@ if not _OPTIONS["monolithic"] then
 			"Source/Persist/**",
 		}
 
+		excludes
+		{
+			"Source/Persist/*Tests.*",
+		}
+
 		configuration "SharedLib"
 			links
 			{
@@ -208,6 +234,23 @@ if not _OPTIONS["monolithic"] then
 			}
 
 		configuration {}
+
+	project( "PersistTests" )
+
+		Helium.DoTestsProjectSettings()
+
+		files
+		{
+			"Source/Persist/*Tests.*",
+		}
+
+		links
+		{
+			"Persist",
+			"Reflect",
+			"Foundation",
+			"Platform",
+		}
 
 	project( "Mongo" )
 
@@ -218,6 +261,11 @@ if not _OPTIONS["monolithic"] then
 			"Source/Mongo/**",
 		}
 
+		excludes
+		{
+			"Source/Mongo/*Tests.*",
+		}
+
 		configuration "SharedLib"
 			links
 			{
@@ -230,6 +278,25 @@ if not _OPTIONS["monolithic"] then
 
 		configuration {}
 
+	project( "MongoTests" )
+
+		Helium.DoTestsProjectSettings()
+
+		files
+		{
+			"Source/Mongo/*Tests.*",
+		}
+
+		links
+		{
+			"Mongo",
+			"Persist",
+			"Reflect",
+			"Foundation",
+			"Platform",
+			"mongo-c",
+		}
+
 	project( "Inspect" )
 
 		Helium.DoModuleProjectSettings( "Source", "HELIUM", "Inspect", "INSPECT" )
@@ -239,18 +306,43 @@ if not _OPTIONS["monolithic"] then
 			"Source/Inspect/**",
 		}
 
+		excludes
+		{
+			"Source/Inspect/*Tests.*",
+		}
+
 		configuration "SharedLib"
 			links
 			{
-				"Platform",
-				"Foundation",
-				"Application",
-				"Reflect",
-				"Persist",
 				"Math",
+				"Persist",
+				"Reflect",
+				"Application",
+				"Foundation",
+				"Platform",
 			}
 
 		configuration {}
+
+	project( "InspectTests" )
+
+		Helium.DoTestsProjectSettings()
+
+		files
+		{
+			"Source/Inspect/*Tests.*",
+		}
+
+		links
+		{
+			"Inspect",
+			"Math",
+			"Persist",
+			"Reflect",
+			"Application",
+			"Foundation",
+			"Platform",
+		}
 
 	project( "Math" )
 
@@ -261,16 +353,37 @@ if not _OPTIONS["monolithic"] then
 			"Source/Math/**",
 		}
 
+		excludes
+		{
+			"Source/Math/*Tests.*",
+		}
+
 		configuration "SharedLib"
 			links
 			{
-				"Platform",
-				"Foundation",
 				"Reflect",
-				"Persist",
+				"Foundation",
+				"Platform",
 			}
 
 		configuration {}
+
+	project( "MathTests" )
+
+		Helium.DoTestsProjectSettings()
+
+		files
+		{
+			"Source/Math/*Tests.*",
+		}
+
+		links
+		{
+			"Math",
+			"Reflect",
+			"Foundation",
+			"Platform",
+		}
 end
 
 if not _OPTIONS["modular"] then
