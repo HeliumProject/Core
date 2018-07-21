@@ -9,7 +9,7 @@
 using namespace Helium;
 using namespace Helium::Reflect;
 
-struct HELIUM_REFLECT_API TestEnumeration : Reflect::Enum
+struct TestEnumeration : Reflect::Enum
 {
 	enum Enum
 	{
@@ -21,7 +21,7 @@ struct HELIUM_REFLECT_API TestEnumeration : Reflect::Enum
 	static void PopulateMetaType(MetaEnum& info);
 };
 
-struct HELIUM_REFLECT_API TestStructure : Reflect::Struct
+struct TestStructure : Reflect::Struct
 {
 	uint8_t  m_Uint8;
 	uint16_t m_Uint16;
@@ -50,7 +50,7 @@ struct HELIUM_REFLECT_API TestStructure : Reflect::Struct
 	static void PopulateMetaType(MetaStruct& comp);
 };
 
-class HELIUM_REFLECT_API TestObject : public Reflect::Object
+class TestObject : public Reflect::Object
 {
 public:
 	TestStructure m_Struct;
