@@ -13,12 +13,14 @@ install:
   - git submodule update --init
   - if "%PLATFORM%" equ "x86" set BITS=32
   - if "%PLATFORM%" equ "x64" set BITS=64
+  - if "%PLATFORM%" equ "x86" set ARCH=x86
+  - if "%PLATFORM%" equ "x64" set ARCH=x86_64
   - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars%BITS%.bat"
 
 build_script:
   - cmd: cd Dependencies
-  - cmd: ..\premake vs2017
+  - cmd: ..\premake --architecture=%ARCH% vs2017
   - cmd: msbuild Build\Dependencies.sln /p:Configuration=%CONFIGURATION% /p:Platform=%PLATFORM% /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" /verbosity:minimal
   - cmd: cd ..
-  - cmd: premake vs2017
+  - cmd: premake --architecture=%ARCH% vs2017
   - cmd: msbuild Build\Core.sln /p:Configuration=%CONFIGURATION% /p:Platform=%PLATFORM% /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" /verbosity:minimal
