@@ -11,6 +11,9 @@ configuration:
 
 install:
   - git submodule update --init
+  - if "%PLATFORM%" equ "Win32" set BITS=32
+  - if "%PLATFORM%" equ "x64" set BITS=64
+  - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars%BITS%.bat"
 
 build_script:
   - cmd: cd Dependencies
