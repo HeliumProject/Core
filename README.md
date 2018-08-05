@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/HeliumProject/Core.svg?branch=master)](https://travis-ci.org/HeliumProject/Core)
+[![Build Status](https://travis-ci.org/HeliumProject/Core.svg?branch=master)](https://travis-ci.org/HeliumProject/Core) [![Build Status](https://ci.appveyor.com/api/projects/status/github/gorlak/P4Win?branch=master&svg=true)](https://ci.appveyor.com/project/GeoffEvans/p4win)
 
 <a href="http://heliumproject.org/">![Helium Core](https://raw.github.com/HeliumProject/Core/master/Documentation/Helium.png)</a>
 

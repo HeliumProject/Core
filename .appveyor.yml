@@ -1,0 +1,21 @@
+image:
+  - Visual Studio 2017
+
+platform:
+  - Win32
+  - x64
+
+configuration:
+  - Debug
+  - Release
+
+install:
+  - git submodule update --init
+
+build_script:
+  - cmd: cd Dependencies
+  - cmd: ..\premake vs2017
+  - cmd: msbuild Build\Dependencies.sln /p:Configuration=%CONFIGURATION% /p:Platform=%PLATFORM% /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" /verbosity:minimal
+  - cmd: cd ..
+  - cmd: premake vs2017
+  - cmd: msbuild Build\Core.sln /p:Configuration=%CONFIGURATION% /p:Platform=%PLATFORM% /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" /verbosity:minimal
