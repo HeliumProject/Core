@@ -7,7 +7,13 @@ platform:
 
 configuration:
   - Debug
+  - Intermediate
+  - Profile
   - Release
+
+environment:
+  ARGS: ""
+  ARGS: "--shared"
 
 install:
   - git submodule update --init
@@ -24,5 +30,5 @@ build_script:
   - cmd: ..\premake --architecture=%ARCH% vs2017
   - cmd: msbuild Build\Dependencies.sln /p:Configuration=%CONFIGURATION% /p:Platform=%PLAT% /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" /verbosity:minimal
   - cmd: cd ..
-  - cmd: premake --architecture=%ARCH% vs2017
+  - cmd: premake --architecture=%ARCH% %ARGS% vs2017
   - cmd: msbuild Build\Core.sln /p:Configuration=%CONFIGURATION% /p:Platform=%PLAT% /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" /verbosity:minimal
