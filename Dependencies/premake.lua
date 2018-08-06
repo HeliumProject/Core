@@ -38,7 +38,7 @@ Helium.GetSystemVersion = function()
 	else
 		version = Helium.ExecuteAndCapture( "uname -r" )
 	end
-	
+
 	return version
 end
 
@@ -84,7 +84,7 @@ Helium.Publish = function( files )
 
 		print( path .. "\n\t-> " .. destination )
 		os.copyfile( path, destination ) -- linux returns non-zero if the target file is identical (!?)
-		
+
 		-- the files were copied, complete this entry
 		files[ i ] = nil
 	end
@@ -110,7 +110,7 @@ Helium.DoBasicWorkspaceSettings = function()
 		"Profile",
 		"Release",
 	}
-	
+
 	defines
 	{
 		"UNICODE=1",

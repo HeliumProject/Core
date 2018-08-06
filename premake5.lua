@@ -405,6 +405,8 @@ if not _OPTIONS["modular"] then
 		defines
 		{
 			"HELIUM_HEAP=0",
+			"HELIUM_MONOLITHIC=1",
+			"HELIUM_MONOLITHIC_EXPORTS",
 		}
 
 		includedirs
@@ -480,6 +482,7 @@ if not _OPTIONS["modular"] then
 		defines
 		{
 			"HELIUM_HEAP=0",
+			"HELIUM_MONOLITHIC=1",
 		}
 
 		files
@@ -489,13 +492,7 @@ if not _OPTIONS["modular"] then
 
 		links
 		{
-			"Persist",
-			"Mongo",
-			"Inspect",
-			"Math",
-			"Reflect",
-			"Foundation",
-			"Platform",
+			"Core",
 			"googletest",
 			"mongo-c",
 		}

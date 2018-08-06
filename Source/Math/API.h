@@ -5,13 +5,21 @@
 #include "Foundation/Profile.h"
 
 #if HELIUM_SHARED
-# ifdef HELIUM_MATH_EXPORTS
-#  define HELIUM_MATH_API HELIUM_API_EXPORT
+# if HELIUM_MONOLITHIC
+#  ifdef HELIUM_MONOLITHIC_EXPORTS
+#   define HELIUM_MATH_API HELIUM_API_EXPORT
+#  else
+#   define HELIUM_MATH_API HELIUM_API_IMPORT
+#  endif
 # else
-#  define HELIUM_MATH_API HELIUM_API_IMPORT
+#  ifdef HELIUM_MATH_EXPORTS
+#   define HELIUM_MATH_API HELIUM_API_EXPORT
+#  else
+#   define HELIUM_MATH_API HELIUM_API_IMPORT
+#  endif
 # endif
 #else
-#define HELIUM_MATH_API
+# define HELIUM_MATH_API
 #endif
 
 #define HELIUM_MATH_PROFILE 0
