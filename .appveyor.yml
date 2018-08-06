@@ -11,9 +11,10 @@ configuration:
   - Profile
   - Release
 
-matrix:
-  - ARGS: ""
-  - ARGS: "--shared"
+environment:
+  matrix:
+    - ARGS: ""
+    - ARGS: "--shared"
 
 install:
   - git submodule update --init
