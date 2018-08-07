@@ -118,6 +118,10 @@ script:
 - cd ..
 - "./premake.sh --architecture=${ARCH} ${ARGS} gmake"
 - make -C Build -j4 config=${CONFIG}
+- rm -rf Bin
+- rm -rf Build
+- "./premake.sh --architecture=${ARCH} --monolithic ${ARGS} gmake"
+- make -C Build -j4 config=${CONFIG}
 notifications:
   slack:
     on_start: never

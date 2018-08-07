@@ -22,14 +22,8 @@ configuration "Release"
 
 newoption
 {
-	trigger = "modular",
-	description = "Build modular libs only",
-}
-
-newoption
-{
 	trigger = "monolithic",
-	description = "Build monolithic lib only",
+	description = "Build monolithic lib",
 }
 
 if not _OPTIONS["monolithic"] then
@@ -386,7 +380,7 @@ if not _OPTIONS["monolithic"] then
 		}
 end
 
-if not _OPTIONS["modular"] then
+if _OPTIONS["monolithic"] then
 	project( "Core" )
 
 		if _OPTIONS["pch"] then
