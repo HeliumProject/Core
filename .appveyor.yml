@@ -31,8 +31,8 @@ build_script:
   - cmd: ..\premake --architecture=%ARCH% vs2017
   - cmd: msbuild Build\Dependencies.sln /p:Configuration=%CONFIGURATION% /p:Platform=%PLAT% /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" /verbosity:minimal
   - cmd: cd ..
-  - cmd: premake --architecture=%ARCH% %ARGS% vs2017
+  - cmd: premake --architecture=%ARCH% --monolithic %ARGS% vs2017
   - cmd: msbuild Build\Core.sln /p:Configuration=%CONFIGURATION% /p:Platform=%PLAT% /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" /verbosity:minimal
   - cmd: rmdir /s /q Build
-  - cmd: premake --architecture=%ARCH% --monolithic %ARGS% vs2017
+  - cmd: premake --architecture=%ARCH% %ARGS% vs2017
   - cmd: msbuild Build\Core.sln /p:Configuration=%CONFIGURATION% /p:Platform=%PLAT% /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" /verbosity:minimal

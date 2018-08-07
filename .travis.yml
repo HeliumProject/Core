@@ -116,10 +116,10 @@ script:
 - "../premake.sh --architecture=${ARCH} gmake"
 - make -C Build -j4 config=${CONFIG}
 - cd ..
-- "./premake.sh --architecture=${ARCH} ${ARGS} gmake"
+- "./premake.sh --architecture=${ARCH} --monolithic ${ARGS} gmake"
 - make -C Build -j4 config=${CONFIG}
 - rm -rf Build
-- "./premake.sh --architecture=${ARCH} --monolithic ${ARGS} gmake"
+- "./premake.sh --architecture=${ARCH} ${ARGS} gmake"
 - make -C Build -j4 config=${CONFIG}
 notifications:
   slack:
