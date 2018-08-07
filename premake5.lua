@@ -461,6 +461,10 @@ if not _OPTIONS["modular"] then
 			{
 				"pthread",
 				"dl",
+				"rt",
+				"m",
+				"stdc++",
+				"c",
 			}
 
 		configuration {}
@@ -505,6 +509,7 @@ if not _OPTIONS["modular"] then
 				"rt",
 				"m",
 				"stdc++",
+				"c",
 			}
 
 		configuration {}
