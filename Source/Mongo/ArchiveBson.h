@@ -1,5 +1,7 @@
 #pragma once
 
+#include "API.h"
+
 #include "Platform/Utility.h"
 
 #include "Foundation/DynamicArray.h"
@@ -18,7 +20,7 @@ namespace Helium
 	{
 		const char* GetBsonErrorString( int status );
 
-		struct HELIUM_PERSIST_API BsonDate : Helium::Reflect::Struct
+		struct HELIUM_MONGO_API BsonDate : Helium::Reflect::Struct
 		{
 			int64_t millis; // milliseconds since epoch UTC
 
@@ -36,7 +38,7 @@ namespace Helium
 		};
 		HELIUM_COMPILE_ASSERT( sizeof( bson_date_t ) == 8 );
 
-		struct HELIUM_PERSIST_API BsonObjectId : Helium::Reflect::Struct
+		struct HELIUM_MONGO_API BsonObjectId : Helium::Reflect::Struct
 		{
 			uint8_t bytes[12]; // uint32_t timestamp, uint8_t machine[3], uint8_t process[2], uint8_t counter[3]
 
@@ -68,7 +70,7 @@ namespace Helium
 			};
 		}
 
-		struct HELIUM_PERSIST_API BsonGeoPoint : Helium::Reflect::Struct
+		struct HELIUM_MONGO_API BsonGeoPoint : Helium::Reflect::Struct
 		{
 			String type;
 			float32_t coordinates[2];
@@ -84,7 +86,7 @@ namespace Helium
 			static void PopulateMetaType( Helium::Reflect::MetaStruct& structure );
 		};
 
-		struct HELIUM_PERSIST_API BsonGeoLineString : Helium::Reflect::Struct
+		struct HELIUM_MONGO_API BsonGeoLineString : Helium::Reflect::Struct
 		{
 			String type;
 			DynamicArray< DynamicArray< float32_t > > coordinates;
@@ -98,7 +100,7 @@ namespace Helium
 			static void PopulateMetaType( Helium::Reflect::MetaStruct& structure );
 		};
 
-		struct HELIUM_PERSIST_API BsonGeoPolygon : Helium::Reflect::Struct
+		struct HELIUM_MONGO_API BsonGeoPolygon : Helium::Reflect::Struct
 		{
 			String type;
 			DynamicArray< DynamicArray< DynamicArray< float32_t > > > coordinates;
@@ -112,9 +114,12 @@ namespace Helium
 			static void PopulateMetaType( Helium::Reflect::MetaStruct& structure );
 		};
 
-		class HELIUM_PERSIST_API ArchiveWriterBson : public ArchiveWriter
+		class HELIUM_MONGO_API ArchiveWriterBson : public ArchiveWriter
 		{
 		public:
+			static void Startup();
+			static void Shutdown();
+			static SmartPtr< ArchiveWriter > AllocateWriter( const FilePath& path, Reflect::ObjectIdentifier* identifier );
 			static void WriteToStream( const Reflect::ObjectPtr& object, Stream& stream, Reflect::ObjectIdentifier* identifier = NULL, uint32_t flags = 0 );
 			static void WriteToStream( const Reflect::ObjectPtr* objects, size_t count, Stream& stream, Reflect::ObjectIdentifier* identifier = NULL, uint32_t flags = 0 );
 			static void WriteToBson( const Reflect::ObjectPtr& object, bson* b, const char* name = NULL, Reflect::ObjectIdentifier* identifier = NULL, uint32_t flags = 0 );
@@ -122,7 +127,6 @@ namespace Helium
 			ArchiveWriterBson( const FilePath& path, Reflect::ObjectIdentifier* identifier = NULL, uint32_t flags = 0x0 );
 			ArchiveWriterBson( Stream *stream, Reflect::ObjectIdentifier* identifier = NULL, uint32_t flags = 0x0 );
 			
-			virtual ArchiveType GetType() const override;
 			virtual void Open() override;
 			virtual void Close() override; 
 
@@ -137,9 +141,12 @@ namespace Helium
 			AutoPtr< Stream >     m_Stream;
 		};
 
-		class HELIUM_PERSIST_API ArchiveReaderBson : public ArchiveReader
+		class HELIUM_MONGO_API ArchiveReaderBson : public ArchiveReader
 		{
 		public:
+			static void Startup();
+			static void Shutdown();
+			static SmartPtr< ArchiveReader > AllocateReader( const FilePath& path, Reflect::ObjectResolver* resolver );
 			static void ReadFromStream( Stream& stream, Reflect::ObjectPtr& object, Reflect::ObjectResolver* resolver = NULL, uint32_t flags = 0 );
 			static void ReadFromStream( Stream& stream, DynamicArray< Reflect::ObjectPtr > & objects, Reflect::ObjectResolver* resolver = NULL, uint32_t flags = 0 );
 			static void ReadFromBson( bson_iterator* i, const Reflect::ObjectPtr& object, Reflect::ObjectResolver* resolver = NULL, uint32_t flags = 0 );
@@ -147,7 +154,6 @@ namespace Helium
 			ArchiveReaderBson( const FilePath& path, Reflect::ObjectResolver* resolver = NULL, uint32_t flags = 0x0 );
 			ArchiveReaderBson( Stream *stream, Reflect::ObjectResolver* resolver = NULL, uint32_t flags = 0x0 );
 			
-			virtual ArchiveType GetType() const override;
 			virtual void Open() override;
 			virtual void Close() override; 
 
@@ -170,4 +176,4 @@ namespace Helium
 	}
 }
 
-#include "Persist/ArchiveBson.inl"
+#include "Mongo/ArchiveBson.inl"

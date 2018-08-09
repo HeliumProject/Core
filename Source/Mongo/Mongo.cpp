@@ -66,6 +66,9 @@ void Mongo::Initialize()
 	{
 		mongo_init_sockets();
 		bson_set_oid_inc( &Increment );
+
+		ArchiveWriterBson::Startup();
+		ArchiveReaderBson::Startup();
 	}
 }
 
@@ -74,6 +77,9 @@ void Mongo::Cleanup()
 	if ( --Mongo::initCount == 0 )
 	{
 		bson_set_oid_inc( NULL );
+
+		ArchiveWriterBson::Shutdown();
+		ArchiveReaderBson::Shutdown();
 	}
 }
 

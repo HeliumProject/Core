@@ -13,6 +13,21 @@ using namespace Helium;
 using namespace Helium::Reflect;
 using namespace Helium::Persist;
 
+void ArchiveWriterMessagePack::Startup()
+{
+	Register( "msgpack", &AllocateWriter );
+}
+
+void ArchiveWriterMessagePack::Shutdown()
+{
+	Unregister( "msgpack" );
+}
+
+SmartPtr< ArchiveWriter > ArchiveWriterMessagePack::AllocateWriter( const FilePath& path, Reflect::ObjectIdentifier* identifier )
+{
+	return new ArchiveWriterMessagePack( path, identifier );
+}
+
 void ArchiveWriterMessagePack::WriteToStream( const ObjectPtr& object, Stream& stream, ObjectIdentifier* identifier, uint32_t flags )
 {
 	ArchiveWriterMessagePack archive ( &stream, identifier, flags );
@@ -38,11 +53,6 @@ ArchiveWriterMessagePack::ArchiveWriterMessagePack( Stream *stream, ObjectIdenti
 	m_Stream.Reset( stream );
 	m_Stream.Orphan( true );
 	m_Writer.SetStream( stream );
-}
-
-ArchiveType ArchiveWriterMessagePack::GetType() const
-{
-	return ArchiveTypes::MessagePack;
 }
 
 void ArchiveWriterMessagePack::Open()
@@ -348,6 +358,21 @@ void ArchiveWriterMessagePack::SerializeTranslator( Pointer pointer, Translator*
 	}
 }
 
+void ArchiveReaderMessagePack::Startup()
+{
+	Register( "msgpack", &AllocateReader );
+}
+
+void ArchiveReaderMessagePack::Shutdown()
+{
+	Unregister( "msgpack" );
+}
+
+SmartPtr< ArchiveReader > ArchiveReaderMessagePack::AllocateReader( const FilePath& path, Reflect::ObjectResolver* resolver )
+{
+	return new ArchiveReaderMessagePack( path, resolver );
+}
+
 void ArchiveReaderMessagePack::ReadFromStream( Stream& stream, ObjectPtr& object, ObjectResolver* resolver, uint32_t flags )
 {
 	DynamicArray< ObjectPtr > objects;
@@ -380,11 +405,6 @@ ArchiveReaderMessagePack::ArchiveReaderMessagePack( Stream *stream, ObjectResolv
 	m_Stream.Reset( stream );
 	m_Stream.Orphan( true );
 	m_Reader.SetStream( stream );
-}
-
-ArchiveType ArchiveReaderMessagePack::GetType() const
-{
-	return ArchiveTypes::MessagePack;
 }
 
 void ArchiveReaderMessagePack::Open()

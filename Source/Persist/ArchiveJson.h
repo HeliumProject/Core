@@ -54,6 +54,9 @@ namespace Helium
 		class HELIUM_PERSIST_API ArchiveWriterJson : public ArchiveWriter
 		{
 		public:
+			static void Startup();
+			static void Shutdown();
+			static SmartPtr< ArchiveWriter > AllocateWriter( const FilePath& path, Reflect::ObjectIdentifier* identifier );
 			static void WriteToStream( const Reflect::ObjectPtr& object, Stream& stream, Reflect::ObjectIdentifier* identifier = NULL, uint32_t flags = 0 );
 			static void WriteToStream( const Reflect::ObjectPtr* objects, size_t count, Stream& stream, Reflect::ObjectIdentifier* identifier = NULL, uint32_t flags = 0 );
 			static void WriteToJson( const Reflect::ObjectPtr& object, RapidJsonWriter& writer, const char* name = NULL, Reflect::ObjectIdentifier* identifier = NULL, uint32_t flags = 0 );
@@ -61,7 +64,6 @@ namespace Helium
 			ArchiveWriterJson( const FilePath& path, Reflect::ObjectIdentifier* identifier = NULL, uint32_t flags = 0x0 );
 			ArchiveWriterJson( Stream *stream, Reflect::ObjectIdentifier* identifier = NULL, uint32_t flags = 0x0 );
 			
-			virtual ArchiveType GetType() const override;
 			virtual void Open() override;
 			virtual void Close() override;
 
@@ -80,6 +82,9 @@ namespace Helium
 		class HELIUM_PERSIST_API ArchiveReaderJson : public ArchiveReader
 		{
 		public:
+			static void Startup();
+			static void Shutdown();
+			static SmartPtr< ArchiveReader > AllocateReader( const FilePath& path, Reflect::ObjectResolver* resolver );
 			static void ReadFromStream( Stream& stream, Reflect::ObjectPtr& object, Reflect::ObjectResolver* resolver = NULL, uint32_t flags = 0 );
 			static void ReadFromStream( Stream& stream, DynamicArray< Reflect::ObjectPtr >& objects, Reflect::ObjectResolver* resolver = NULL, uint32_t flags = 0 );
 			static void ReadFromJson( rapidjson::Value& value, const Reflect::ObjectPtr& object, Reflect::ObjectResolver* resolver = NULL, uint32_t flags = 0 );
@@ -87,7 +92,6 @@ namespace Helium
 			ArchiveReaderJson( const FilePath& path, Reflect::ObjectResolver* resolver = NULL, uint32_t flags = 0x0 );
 			ArchiveReaderJson( Stream *stream, Reflect::ObjectResolver* resolver = NULL, uint32_t flags = 0x0 );
 			
-			virtual ArchiveType GetType() const override;
 			virtual void Open() override;
 			virtual void Close() override;
 

@@ -14,13 +14,15 @@ namespace Helium
 		class HELIUM_PERSIST_API ArchiveWriterMessagePack : public ArchiveWriter
 		{
 		public:
+			static void Startup();
+			static void Shutdown();
+			static SmartPtr< ArchiveWriter > AllocateWriter( const FilePath& path, Reflect::ObjectIdentifier* identifier );
 			static void WriteToStream( const Reflect::ObjectPtr& object, Stream& stream, Reflect::ObjectIdentifier* identifier = NULL, uint32_t flags = 0 );
 			static void WriteToStream( const Reflect::ObjectPtr* objects, size_t count, Stream& stream, Reflect::ObjectIdentifier* identifier = NULL, uint32_t flags = 0 );
 
 			ArchiveWriterMessagePack( const FilePath& path, Reflect::ObjectIdentifier* identifier = NULL, uint32_t flags = 0x0 );
 			ArchiveWriterMessagePack( Stream *stream, Reflect::ObjectIdentifier* identifier = NULL, uint32_t flags = 0x0 );
 			
-			virtual ArchiveType GetType() const override;
 			virtual void Open() override;
 			virtual void Close() override; 
 
@@ -39,13 +41,15 @@ namespace Helium
 		class HELIUM_PERSIST_API ArchiveReaderMessagePack : public ArchiveReader
 		{
 		public:
+			static void Startup();
+			static void Shutdown();
+			static SmartPtr< ArchiveReader > AllocateReader( const FilePath& path, Reflect::ObjectResolver* resolver );
 			static void ReadFromStream( Stream& stream, Reflect::ObjectPtr& object, Reflect::ObjectResolver* resolver = NULL, uint32_t flags = 0 );
 			static void ReadFromStream( Stream& stream, DynamicArray< Reflect::ObjectPtr >& objects, Reflect::ObjectResolver* resolver = NULL, uint32_t flags = 0 );
 
 			ArchiveReaderMessagePack( const FilePath& path, Reflect::ObjectResolver* resolver = NULL, uint32_t flags = 0x0 );
 			ArchiveReaderMessagePack( Stream *stream, Reflect::ObjectResolver* resolver = NULL, uint32_t flags = 0x0 );
 			
-			virtual ArchiveType GetType() const override;
 			virtual void Open() override;
 			virtual void Close() override; 
 

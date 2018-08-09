@@ -1,5 +1,5 @@
 #include "Precompile.h"
-#include "Persist/ArchiveBson.h"
+#include "Mongo/ArchiveBson.h"
 
 #include "Foundation/Endian.h"
 #include "Foundation/FileStream.h"
@@ -93,6 +93,21 @@ void BsonGeoPolygon::PopulateMetaType( Helium::Reflect::MetaStruct& type )
 	type.AddField( &BsonGeoPolygon::coordinates, "coordinates" );
 }
 
+void ArchiveWriterBson::Startup()
+{
+	Register( "bson", &AllocateWriter );
+}
+
+void ArchiveWriterBson::Shutdown()
+{
+	Unregister( "bson" );
+}
+
+SmartPtr< ArchiveWriter > ArchiveWriterBson::AllocateWriter( const FilePath& path, Reflect::ObjectIdentifier* identifier )
+{
+	return new ArchiveWriterBson( path, identifier );
+}
+
 void ArchiveWriterBson::WriteToStream( const ObjectPtr& object, Stream& stream, ObjectIdentifier* identifier, uint32_t flags )
 {
 	ArchiveWriterBson archive ( &stream, identifier, flags );
@@ -123,11 +138,6 @@ ArchiveWriterBson::ArchiveWriterBson( Stream *stream, ObjectIdentifier* identifi
 {
 	m_Stream.Reset( stream );
 	m_Stream.Orphan( true );
-}
-
-ArchiveType ArchiveWriterBson::GetType() const
-{
-	return ArchiveTypes::Bson;
 }
 
 void ArchiveWriterBson::Open()
@@ -452,6 +462,21 @@ void ArchiveWriterBson::SerializeTranslator( bson* b, const char* name, Pointer 
 	}
 }
 
+void ArchiveReaderBson::Startup()
+{
+	Register( "bson", &AllocateReader );
+}
+
+void ArchiveReaderBson::Shutdown()
+{
+	Unregister( "bson" );
+}
+
+SmartPtr< ArchiveReader > ArchiveReaderBson::AllocateReader( const FilePath& path, Reflect::ObjectResolver* resolver )
+{
+	return new ArchiveReaderBson( path, resolver );
+}
+
 void ArchiveReaderBson::ReadFromStream( Stream& stream, ObjectPtr& object, ObjectResolver* resolver, uint32_t flags )
 {
 	DynamicArray< ObjectPtr > objects;
@@ -490,11 +515,6 @@ ArchiveReaderBson::ArchiveReaderBson( Stream *stream, ObjectResolver* resolver, 
 {
 	m_Stream.Reset( stream );
 	m_Stream.Orphan( true );
-}
-
-ArchiveType ArchiveReaderBson::GetType() const
-{
-	return ArchiveTypes::Bson;
 }
 
 void ArchiveReaderBson::Open()

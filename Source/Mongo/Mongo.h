@@ -12,7 +12,7 @@
 #include "Reflect/Object.h"
 #include "Reflect/TranslatorDeduction.h"
 
-#include "Persist/ArchiveBson.h"
+#include "ArchiveBson.h"
 
 #include <mongo-c/src/mongo.h>
 

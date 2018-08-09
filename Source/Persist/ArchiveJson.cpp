@@ -14,6 +14,21 @@ using namespace Helium;
 using namespace Helium::Reflect;
 using namespace Helium::Persist;
 
+void ArchiveWriterJson::Startup()
+{
+	Register( "json", &AllocateWriter );
+}
+
+void ArchiveWriterJson::Shutdown()
+{
+	Unregister( "json" );
+}
+
+SmartPtr< ArchiveWriter > ArchiveWriterJson::AllocateWriter( const FilePath& path, Reflect::ObjectIdentifier* identifier )
+{
+	return new ArchiveWriterJson( path, identifier );
+}
+
 void ArchiveWriterJson::WriteToStream( const ObjectPtr& object, Stream& stream, ObjectIdentifier* identifier, uint32_t flags )
 {
 	ArchiveWriterJson archive ( &stream, identifier, flags );
@@ -45,11 +60,6 @@ ArchiveWriterJson::ArchiveWriterJson( Stream *stream, ObjectIdentifier* identifi
 	m_Stream.Reset( stream );
 	m_Stream.Orphan( true );
 	m_Output.SetStream( stream );
-}
-
-ArchiveType ArchiveWriterJson::GetType() const
-{
-	return ArchiveTypes::Json;
 }
 
 void ArchiveWriterJson::Open()
@@ -366,6 +376,21 @@ void ArchiveWriterJson::SerializeTranslator( RapidJsonWriter& writer, Pointer po
 	}
 }
 
+void ArchiveReaderJson::Startup()
+{
+	Register( "json", &AllocateReader );
+}
+
+void ArchiveReaderJson::Shutdown()
+{
+	Unregister( "json" );
+}
+
+SmartPtr< ArchiveReader > ArchiveReaderJson::AllocateReader( const FilePath& path, Reflect::ObjectResolver* resolver )
+{
+	return new ArchiveReaderJson( path, resolver );
+}
+
 void ArchiveReaderJson::ReadFromStream( Stream& stream, ObjectPtr& object, ObjectResolver* resolver, uint32_t flags )
 {
 	DynamicArray< ObjectPtr > objects;
@@ -406,11 +431,6 @@ ArchiveReaderJson::ArchiveReaderJson( Stream *stream, ObjectResolver* resolver, 
 {
 	m_Stream.Reset( stream );
 	m_Stream.Orphan( true );
-}
-
-ArchiveType ArchiveReaderJson::GetType() const
-{
-	return ArchiveTypes::Json;
 }
 
 void ArchiveReaderJson::Open()
