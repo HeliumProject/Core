@@ -12,7 +12,7 @@
 
 #define MONGO_HAVE_STDINT 1
 #define MONGO_STATIC_BUILD 1
-#include <mongo-c/src/bson.h>
+#include <bson.h>
 
 namespace Helium
 {

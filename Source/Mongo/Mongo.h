@@ -14,7 +14,7 @@
 
 #include "ArchiveBson.h"
 
-#include <mongo-c/src/mongo.h>
+#include <mongo.h>
 
 #include <functional>
 
