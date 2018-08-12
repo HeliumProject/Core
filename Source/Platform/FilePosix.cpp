@@ -43,7 +43,7 @@ bool File::IsOpen() const
 
 bool File::Open( const char* filename, FileMode mode, bool truncate )
 {
-	mode_t flags = 0;
+	int flags = 0;
 	switch ( mode )
 	{
 	case FileModes::Read:
@@ -59,9 +59,11 @@ bool File::Open( const char* filename, FileMode mode, bool truncate )
 		break;
 	}
 
+	mode_t permissions = 0;
 	if ( mode & FileModes::Write )
 	{
 		flags |= O_CREAT;
+		permissions |= S_IRUSR | S_IWUSR;
 
 		if ( truncate )
 		{
@@ -69,7 +71,7 @@ bool File::Open( const char* filename, FileMode mode, bool truncate )
 		}
 	}
 
-	m_Handle = open( filename, flags );
+	m_Handle = open( filename, flags, permissions);
 	return m_Handle >= 0;
 }
 
