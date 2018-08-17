@@ -62,7 +62,7 @@ namespace Helium
 
 	private:
 #ifdef HELIUM_OS_WIN
-		typedef HANDLE Handle;
+		typedef void* Handle;
 #else
 		typedef int Handle;
 #endif

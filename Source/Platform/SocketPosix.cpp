@@ -230,7 +230,7 @@ bool Socket::Write(void* buffer, uint32_t bytes, uint32_t& wrote, const char* ip
 	return true;
 }
 
-int Socket::Select(Handle range, fd_set* read_set, fd_set* write_set, struct timeval* timeout)
+int Socket::Select(Handle range, fd_set* read_set, fd_set* write_set, timeval* timeout)
 {
 	return ::select(range, read_set, write_set, 0, timeout);
 }

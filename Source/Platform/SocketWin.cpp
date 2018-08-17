@@ -1,6 +1,7 @@
 #include "Precompile.h"
 #include "Socket.h"
 
+#include "Platform/SystemWin.h"
 #include "Platform/Assert.h"
 #include "Platform/Console.h"
 
@@ -15,6 +16,9 @@ using namespace Helium;
 // globals
 static int32_t g_InitCount = 0;
 static WSADATA g_WSAData;
+
+HELIUM_COMPILE_ASSERT( sizeof( SOCKET ) == sizeof( Socket::Handle ) );
+HELIUM_COMPILE_ASSERT( sizeof( OVERLAPPED ) == sizeof( Socket::Overlapped ) );
 
 bool Helium::InitializeSockets()
 {
@@ -218,11 +222,11 @@ bool Socket::Read( void* buffer, uint32_t bytes, uint32_t& read, sockaddr_in* pe
 	int wsa_result;
 	if ( udp )
 	{
-		wsa_result = ::WSARecvFrom(m_Handle, &buf, 1, &read_local, &flags, (SOCKADDR*)(peer ? peer : &addr), &addrSize, &m_Overlapped, NULL);
+		wsa_result = ::WSARecvFrom(m_Handle, &buf, 1, &read_local, &flags, (SOCKADDR*)(peer ? peer : &addr), &addrSize, reinterpret_cast<LPWSAOVERLAPPED>( &m_Overlapped ), NULL);
 	}
 	else
 	{
-		wsa_result = ::WSARecv(m_Handle, &buf, 1, &read_local, &flags, &m_Overlapped, NULL);
+		wsa_result = ::WSARecv(m_Handle, &buf, 1, &read_local, &flags, reinterpret_cast<LPWSAOVERLAPPED>(&m_Overlapped), NULL);
 	}
 
 	if ( wsa_result != 0 )
@@ -245,7 +249,7 @@ bool Socket::Read( void* buffer, uint32_t bytes, uint32_t& read, sockaddr_in* pe
 				return false;
 			}
 
-			if ( !::WSAGetOverlappedResult(m_Handle, &m_Overlapped, &read_local, false, &flags) )
+			if ( !::WSAGetOverlappedResult(m_Handle, reinterpret_cast<LPWSAOVERLAPPED>(&m_Overlapped), &read_local, false, &flags) )
 			{
 				Helium::Print("Failed read (%d)\n", WSAGetLastError());
 				return false;
@@ -294,11 +298,11 @@ bool Socket::Write( void* buffer, uint32_t bytes, uint32_t& wrote, const char* i
 	int wsa_result;
 	if ( udp )
 	{
-		wsa_result = ::WSASendTo(m_Handle, &buf, 1, &wrote_local, 0, (SOCKADDR *)&addr, sizeof(sockaddr_in), &m_Overlapped, NULL);
+		wsa_result = ::WSASendTo(m_Handle, &buf, 1, &wrote_local, 0, (SOCKADDR *)&addr, sizeof(sockaddr_in), reinterpret_cast<LPWSAOVERLAPPED>(&m_Overlapped), NULL);
 	}
 	else
 	{
-		wsa_result = ::WSASend(m_Handle, &buf, 1, &wrote_local, 0, &m_Overlapped, NULL);
+		wsa_result = ::WSASend(m_Handle, &buf, 1, &wrote_local, 0, reinterpret_cast<LPWSAOVERLAPPED>(&m_Overlapped), NULL);
 	}
 
 	if ( wsa_result != 0 )
@@ -321,7 +325,7 @@ bool Socket::Write( void* buffer, uint32_t bytes, uint32_t& wrote, const char* i
 				return false;
 			}
 
-			if ( !::WSAGetOverlappedResult(m_Handle, &m_Overlapped, &wrote_local, false, &flags) )
+			if ( !::WSAGetOverlappedResult(m_Handle, reinterpret_cast<LPWSAOVERLAPPED>(&m_Overlapped), &wrote_local, false, &flags) )
 			{
 				Helium::Print("Failed write (%d)\n", WSAGetLastError());
 				return false;
@@ -339,7 +343,7 @@ bool Socket::Write( void* buffer, uint32_t bytes, uint32_t& wrote, const char* i
 	return true;
 }
 
-int Socket::Select( Handle range, fd_set* read_set, fd_set* write_set,struct timeval* timeout )
+int Socket::Select( Handle range, fd_set* read_set, fd_set* write_set, timeval* timeout )
 {
 	return ::select( 0, read_set, write_set, 0, timeout);
 }

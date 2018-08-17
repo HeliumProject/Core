@@ -2,6 +2,7 @@
 #include "Console.h"
 
 #include "Platform/Assert.h"
+#include "Platform/SystemWin.h"
 
 #include <stdlib.h>
 #include <io.h>

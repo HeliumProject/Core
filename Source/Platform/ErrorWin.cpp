@@ -2,6 +2,7 @@
 #include "Error.h"
 
 #include "Platform/Encoding.h"
+#include "Platform/SystemWin.h"
 
 using namespace Helium;
 

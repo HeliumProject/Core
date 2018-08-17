@@ -1,3 +1,10 @@
+#include "Precompile.h"
+#include "Atomic.h"
+
+#include "Platform/Types.h"
+#include "Platform/Assert.h"
+#include "Platform/SystemWin.h"
+
 #define _GENERATE_ATOMIC_WORKER( PREFIX, OPERATION, PARAM_LIST, ACTION ) \
     PREFIX Helium::Atomic##OPERATION PARAM_LIST ACTION \
     PREFIX Helium::Atomic##OPERATION##Acquire PARAM_LIST ACTION \
@@ -118,26 +125,26 @@ _GENERATE_ATOMIC_WORKER(
     } )
 
 _GENERATE_ATOMIC_WORKER(
-    template< typename T > T*,
-    Exchange,
-    ( T* volatile & rAtomic, T* value ),
+    void*,
+    ExchangePointer,
+    ( void* volatile & rAtomic, void* value ),
     {
 #if !((__GNUC__ >= 4) && (__GNUC_MINOR__ >= 7))
-        return static_cast<T*>( __sync_val_compare_and_swap( static_cast< T* volatile* >( &rAtomic ), rAtomic, value ) );
+        return static_cast<void*>( __sync_val_compare_and_swap( static_cast< void* volatile* >( &rAtomic ), rAtomic, value ) );
 #else
-        return static_cast<T*>( __atomic_exchange_n( static_cast< T* volatile* >( &rAtomic ), value, __ATOMIC_SEQ_CST ) );
+        return static_cast<void*>( __atomic_exchange_n( static_cast< void* volatile* >( &rAtomic ), value, __ATOMIC_SEQ_CST ) );
 #endif
     } )
 
 _GENERATE_ATOMIC_WORKER(
-    template< typename T > T*,
-    CompareExchange,
-    ( T* volatile & rAtomic, T* value, T* compare ),
+    void*,
+    CompareExchangePointer,
+    ( void* volatile & rAtomic, void* value, void* compare ),
     {
 #if !((__GNUC__ >= 4) && (__GNUC_MINOR__ >= 7))
-        return static_cast<T*>( __sync_val_compare_and_swap( reinterpret_cast< T* volatile* >( &rAtomic ), compare, value ) );
+        return static_cast<void*>( __sync_val_compare_and_swap( reinterpret_cast< void* volatile* >( &rAtomic ), compare, value ) );
 #else
-        __atomic_compare_exchange_n( static_cast< T* volatile* >( &rAtomic ), &compare, value, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST );
+        __atomic_compare_exchange_n( static_cast< void* volatile* >( &rAtomic ), &compare, value, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST );
         return compare;
 #endif
     } )

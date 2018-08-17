@@ -145,7 +145,30 @@ namespace Helium
 	{
 	public:
 #if HELIUM_OS_WIN
-        typedef CRITICAL_SECTION Handle;
+		struct Handle
+		{
+			struct Debug
+			{
+				uint16_t Type;
+				uint16_t CreatorBackTraceIndex;
+				void* CriticalSection;
+				struct ListEntry
+				{
+					struct _LIST_ENTRY *Flink;
+					struct _LIST_ENTRY *Blink;
+				} ProcessLocksList;
+				uint32_t EntryCount;
+				uint32_t ContentionCount;
+				uint32_t Flags;
+				uint16_t CreatorBackTraceIndexHigh;
+				uint16_t SpareWORD;
+			} *DebugInfo;
+			int32_t LockCount;
+			int32_t RecursionCount;
+			void* OwningThread;        // from the thread's ClientId->UniqueThread
+			void* LockSemaphore;
+			uintptr_t SpinCount;        // force size on 64-bit systems when packed
+		};
 #else
 		typedef pthread_mutex_t Handle;
 #endif

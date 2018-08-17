@@ -1,6 +1,10 @@
 #include "Precompile.h"
 #include "Exception.h"
 
+#if HELIUM_OS_WIN
+# include "Platform/SystemWin.h"
+#endif
+
 #include "Platform/Assert.h"
 #include "Platform/Encoding.h"
 #include "Platform/Console.h"

@@ -513,7 +513,7 @@ void Helium::MEMORY_HEAP_CLASS_NAME::AddAllocation( void* pMemory )
         do
         {
             currentAllocationCount = lastAllocationCount;
-            lastAllocationCount = reinterpret_cast< size_t >( AtomicCompareExchangeUnsafe(
+            lastAllocationCount = reinterpret_cast< size_t >( AtomicCompareExchangePointerUnsafe(
                 reinterpret_cast< void* volatile& >( m_allocationCount ),
                 reinterpret_cast< void* >( currentAllocationCount + 1 ),
                 reinterpret_cast< void* >( currentAllocationCount ) ) );
@@ -524,7 +524,7 @@ void Helium::MEMORY_HEAP_CLASS_NAME::AddAllocation( void* pMemory )
         do
         {
             currentBytesActual = lastBytesActual;
-            lastAllocationCount = reinterpret_cast< size_t >( AtomicCompareExchangeUnsafe(
+            lastAllocationCount = reinterpret_cast< size_t >( AtomicCompareExchangePointerUnsafe(
                 reinterpret_cast< void* volatile& >( m_bytesActual ),
                 reinterpret_cast< void* >( currentBytesActual + byteCount ),
                 reinterpret_cast< void* >( currentBytesActual ) ) );
@@ -566,7 +566,7 @@ void Helium::MEMORY_HEAP_CLASS_NAME::RemoveAllocation( void* pMemory )
         do
         {
             currentAllocationCount = lastAllocationCount;
-            lastAllocationCount = reinterpret_cast< size_t >( AtomicCompareExchangeUnsafe(
+            lastAllocationCount = reinterpret_cast< size_t >( AtomicCompareExchangePointerUnsafe(
                 reinterpret_cast< void* volatile& >( m_allocationCount ),
                 reinterpret_cast< void* >( currentAllocationCount - 1 ),
                 reinterpret_cast< void* >( currentAllocationCount ) ) );
@@ -577,7 +577,7 @@ void Helium::MEMORY_HEAP_CLASS_NAME::RemoveAllocation( void* pMemory )
         do
         {
             currentBytesActual = lastBytesActual;
-            lastAllocationCount = reinterpret_cast< size_t >( AtomicCompareExchangeUnsafe(
+            lastAllocationCount = reinterpret_cast< size_t >( AtomicCompareExchangePointerUnsafe(
                 reinterpret_cast< void* volatile& >( m_bytesActual ),
                 reinterpret_cast< void* >( currentBytesActual - byteCount ),
                 reinterpret_cast< void* >( currentBytesActual ) ) );

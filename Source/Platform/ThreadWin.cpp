@@ -1,6 +1,7 @@
 #include "Precompile.h"
 #include "Thread.h"
 
+#include "Platform/SystemWin.h"
 #include "Platform/Assert.h"
 #include "Platform/Error.h"
 #include "Platform/Console.h"
@@ -8,6 +9,8 @@
 #include "Platform/Encoding.h"
 
 #include <process.h>
+
+#undef Yield
 
 using namespace Helium;
 

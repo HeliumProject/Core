@@ -11,6 +11,10 @@
 #include <string.h>
 #include <algorithm>
 
+#if HELIUM_OS_WIN
+# include "Platform/SystemWin.h"
+#endif
+
 using namespace Helium;
 using namespace Helium::IPC;
 

@@ -1,7 +1,7 @@
 #include "Precompile.h"
 #include "Timer.h"
 
-#include "Platform/System.h"
+#include "Platform/SystemWin.h"
 #include "Platform/Assert.h"
 
 using namespace Helium;

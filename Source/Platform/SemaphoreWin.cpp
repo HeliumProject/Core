@@ -1,6 +1,7 @@
 #include "Precompile.h"
 #include "Semaphore.h"
 
+#include "Platform/SystemWin.h"
 #include "Platform/Assert.h"
 #include "Platform/Error.h"
 #include "Platform/Console.h"

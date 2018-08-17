@@ -1,6 +1,8 @@
 #include "Precompile.h"
 #include "Encoding.h"
 
+#include "Platform/SystemWin.h"
+
 bool Helium::ConvertString( const char* src, wchar_t* dest, size_t destCount )
 {
 	return ::MultiByteToWideChar( CP_UTF8, 0, src, -1, dest, (int)destCount ) != 0;

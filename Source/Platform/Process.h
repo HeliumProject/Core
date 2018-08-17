@@ -22,11 +22,11 @@
 namespace Helium
 {
 #if HELIUM_OS_WIN
-	typedef HANDLE  ProcessHandle;
-	typedef HMODULE ModuleHandle;
+	typedef void* ProcessHandle;
+	typedef void* ModuleHandle;
 #else
-	typedef pid_t   ProcessHandle;
-	typedef void*   ModuleHandle;
+	typedef pid_t ProcessHandle;
+	typedef void* ModuleHandle;
 #endif
 
 	/// Creates a new process with no window or output, use it for running scripts and file association apps

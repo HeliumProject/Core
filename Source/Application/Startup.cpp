@@ -25,8 +25,9 @@
 #include <algorithm>
 
 #if HELIUM_OS_WIN
-#include <crtdbg.h>
-#include <malloc.h>
+# include "Platform/SystemWin.h"
+# include <crtdbg.h>
+# include <malloc.h>
 #endif
 
 using namespace Helium;

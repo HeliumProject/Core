@@ -21,6 +21,10 @@ using namespace Helium;
 
 #if HELIUM_OS_WIN
 
+#include "Platform/SystemWin.h"
+
+#undef GetUserName
+
 ExceptionReport::ExceptionReport( const ExceptionArgs& args )
 	: m_Args ( args )
 {

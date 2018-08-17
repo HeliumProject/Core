@@ -69,15 +69,3 @@
 #if HELIUM_CPU_X86
 # include "Platform/CpuX86.h"
 #endif
-
-#if HELIUM_OS_WIN
-# include "Platform/SystemWin.h"
-#endif
-
-#if HELIUM_OS_MAC
-# include "Platform/SystemMac.h"
-#endif
-
-#if HELIUM_OS_LINUX
-# include "Platform/SystemLinux.h"
-#endif

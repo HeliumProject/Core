@@ -6,11 +6,6 @@
 # include <pthread.h>
 #endif
 
-// WinBase.h defines Yield() as an empty macro, so we undefine it so it can be used as a function name.
-#ifdef Yield
-#undef Yield
-#endif
-
 namespace Helium
 {
 	namespace ThreadPriorities
@@ -57,7 +52,7 @@ namespace Helium
 	private:
 #if HELIUM_OS_WIN
 		/// Platform-specific thread handle type.
-		typedef HANDLE    Handle;
+		typedef void*     Handle;
 #else
 
 		/// Posix threads handle

@@ -1,6 +1,7 @@
 #include "Precompile.h"
 #include "File.h"
 
+#include "Platform/SystemWin.h"
 #include "Platform/Assert.h"
 #include "Platform/Encoding.h"
 #include "Platform/Types.h"

@@ -1,6 +1,8 @@
 #include "Precompile.h"
 #include "MemoryHeap.h"
 
+#include "Platform/SystemWin.h"
+
 #if HELIUM_HEAP
 
 using namespace Helium;

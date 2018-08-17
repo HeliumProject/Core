@@ -11,7 +11,9 @@
 #include <cctype>
 
 #if HELIUM_OS_WIN
+# include "Platform/SystemWin.h"
 # include <iphlpapi.h>
+# pragma comment ( lib, "iphlpapi.lib" )
 #elif HELIUM_OS_MAC
 # include <sys/types.h>
 # include <sys/socket.h>
@@ -26,8 +28,6 @@
 #endif
 
 using namespace Helium;
-
-#pragma comment ( lib, "iphlpapi.lib" )
 
 const tuid TUID::Null = 0x0;
 

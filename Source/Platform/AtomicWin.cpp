@@ -1,3 +1,10 @@
+#include "Precompile.h"
+#include "Atomic.h"
+
+#include "Platform/Types.h"
+#include "Platform/Assert.h"
+#include "Platform/SystemWin.h"
+
 // Windows (non-Itanium platforms) doesn't reorder reads and writes, so memory barriers aren't needed.  As such, all
 // variants of each Atomic*() function are the same.  On the downside, we can't easily debug these functions when using
 // macros to generate them, and build times may be somewhat slower.
@@ -117,21 +124,21 @@ _GENERATE_ATOMIC_WORKER(
 #if defined( HELIUM_CPU_X86_32 )
 
 _GENERATE_ATOMIC_WORKER(
-    template< typename T > T*,
-    Exchange,
-    ( T* volatile & rAtomic, T* value ),
+    void*,
+    ExchangePointer,
+    ( void* volatile & rAtomic, void* value ),
     {
-        return reinterpret_cast< T* >( _InterlockedExchange(
+        return reinterpret_cast< void* >( _InterlockedExchange(
             reinterpret_cast< volatile long* >( &rAtomic ),
             reinterpret_cast< long >( value ) ) );
     } )
 
 _GENERATE_ATOMIC_WORKER(
-    template< typename T > T*,
-    CompareExchange,
-    ( T* volatile & rAtomic, T* value, T* compare ),
+    void*,
+    CompareExchangePointer,
+    ( void* volatile & rAtomic, void* value, void* compare ),
     {
-        return reinterpret_cast< T* >( _InterlockedCompareExchange(
+        return reinterpret_cast< void* >( _InterlockedCompareExchange(
             reinterpret_cast< volatile long* >( &rAtomic ),
             reinterpret_cast< long >( value ),
             reinterpret_cast< long >( compare ) ) );
@@ -140,21 +147,21 @@ _GENERATE_ATOMIC_WORKER(
 #else
 
 _GENERATE_ATOMIC_WORKER(
-    template< typename T > T*,
-    Exchange,
-    ( T* volatile & rAtomic, T* value ),
+    void*,
+    ExchangePointer,
+    ( void* volatile & rAtomic, void* value ),
     {
-        return static_cast< T* >( _InterlockedExchangePointer(
+        return static_cast< void* >( _InterlockedExchangePointer(
             reinterpret_cast< void* volatile * >( &rAtomic ),
             value ) );
     } )
 
 _GENERATE_ATOMIC_WORKER(
-    template< typename T > T*,
-    CompareExchange,
-    ( T* volatile & rAtomic, T* value, T* compare ),
+    void*,
+    CompareExchangePointer,
+    ( void* volatile & rAtomic, void* value, void* compare ),
     {
-        return static_cast< T* >( _InterlockedCompareExchangePointer(
+        return static_cast< void* >( _InterlockedCompareExchangePointer(
             reinterpret_cast< void* volatile * >( &rAtomic ),
             value,
             compare ) );

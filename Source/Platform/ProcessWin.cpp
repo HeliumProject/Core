@@ -12,7 +12,11 @@
 #include <direct.h>
 #include <VersionHelpers.h>
 
+#undef GetUserName
+
 using namespace Helium;
+
+HELIUM_COMPILE_ASSERT( sizeof( HMODULE ) == sizeof( ModuleHandle ) );
 
 static bool GetEnvVar( wchar_t* var, std::string& value )
 {
@@ -348,11 +352,11 @@ void Helium::UnloadModule( ModuleHandle handle )
 {
 	if ( handle != HELIUM_INVALID_MODULE )
 	{
-		HELIUM_VERIFY( ::FreeLibrary( handle ) );
+		HELIUM_VERIFY( ::FreeLibrary( reinterpret_cast<HMODULE>( handle ) ) );
 	}
 }
 
 void* Helium::GetModuleFunction( ModuleHandle handle, const char* functionName )
 {
-	return ::GetProcAddress( handle, functionName );
+	return ::GetProcAddress( reinterpret_cast<HMODULE>(handle), functionName );
 }

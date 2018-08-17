@@ -1,6 +1,7 @@
 #include "Precompile.h"
 #include "Condition.h"
 
+#include "Platform/SystemWin.h"
 #include "Platform/Error.h"
 #include "Platform/Console.h"
 #include "Platform/Assert.h"

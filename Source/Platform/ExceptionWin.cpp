@@ -1,6 +1,9 @@
 #include "Precompile.h"
 #include "Exception.h"
 
+#include "Platform/SystemWin.h"
+#undef Yield
+
 #include "Platform/Types.h"
 #include "Platform/Locks.h"
 #include "Platform/Error.h"
