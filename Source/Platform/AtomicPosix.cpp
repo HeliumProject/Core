@@ -3,7 +3,7 @@
 
 #include "Platform/Types.h"
 #include "Platform/Assert.h"
-#include "Platform/SystemWin.h"
+#include "Platform/System.h"
 
 #define _GENERATE_ATOMIC_WORKER( PREFIX, OPERATION, PARAM_LIST, ACTION ) \
     PREFIX Helium::Atomic##OPERATION PARAM_LIST ACTION \
