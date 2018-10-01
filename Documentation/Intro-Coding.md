@@ -242,7 +242,7 @@ throw Helium::Exception( "mTracks[AT_ROTATE_X]->isSampled() && mTracks[AT_ROTATE
 
 ## Spacing, Tabs, Newlines, etc.
 
-- Use spaces instead of tab characters.
+- Use tabs for indentation.
 - Use 4-space indenting.
 - Place curly braces on their own line.
 - Put spaces after open parentheses and before close parentheses.
