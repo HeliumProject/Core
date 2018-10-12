@@ -167,6 +167,8 @@ namespace Helium
         
     }
 }
+
+#include "Module/Bar.inl"
 ```
 
 ```
@@ -174,7 +176,7 @@ namespace Helium
 ```
 
 ```cpp
-void Helium::Bar::Bar()
+void Helium::Bar::Inline()
 {
 }
 ```
