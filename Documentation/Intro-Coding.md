@@ -157,9 +157,25 @@ namespace Helium
         Bar();
         ~Bar();
 
+        // this function is recommended for inlining, so it's definition
+        //  is in another header that corresponds to this .h file (the .inl)
+        inline void Inline();
+        
+        // this function is not recommended for inline, so it's definition
+        //  is in a compiled TU (translation unit)
         void Func();
-        ...
+        
     }
+}
+```
+
+```
+  Module/Bar.inl
+```
+
+```cpp
+void Helium::Bar::Bar()
+{
 }
 ```
 
@@ -179,38 +195,6 @@ Bar~Bar()
 }
 
 void Bar::Func()
-{
-}
-```
-
-```
-  Module/Subsystem/Blah.h
-```
-
-```cpp
-namespace Helium
-{
-    class Blah
-    {
-    public:
-        Blah();
-        ~Blah();
-    }
-}
-```
-
-```
-  Module/Subsystem/Blah.cpp
-```
-
-```cpp
-using namespace Helium;
-
-Blah::Blah()
-{
-}
-
-Blah::~Blah();
 {
 }
 ```
