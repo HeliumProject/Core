@@ -61,7 +61,7 @@ TEST( PlatformFileTest, CreateCloseDelete )
 	f.Open( fileName, FileMode::Write );
 	f.Close();
 
-	ASSERT_TRUE( Delete( fileName ) );
+	ASSERT_TRUE( DeleteFile( fileName ) );
 	ASSERT_FALSE( f.Open( fileName, FileMode::Read ) );
 }
 
@@ -204,12 +204,12 @@ TEST( PlatformFileTest, MakePathMakeFileAndMove )
 	f.Close();
 
 	const std::string newFullPath = "foo_folder3";
-	Move( fullPath.c_str(), newFullPath.c_str() );
+	MoveFile( fullPath.c_str(), newFullPath.c_str() );
 
 	const std::string newFilePath = newFullPath + PathSeparator + fileName;
-	Move( filePath.c_str(), newFilePath.c_str() );
+	MoveFile( filePath.c_str(), newFilePath.c_str() );
 
-	ASSERT_TRUE( Delete( newFilePath.c_str() ) );
+	ASSERT_TRUE( DeleteFile( newFilePath.c_str() ) );
 	ASSERT_TRUE( DeleteEmptyDirectory( newFullPath.c_str() ) );
 
 	f.Open( newFilePath.c_str(), FileMode::Read );

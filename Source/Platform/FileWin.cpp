@@ -406,21 +406,21 @@ bool Helium::DeleteEmptyDirectory( const char* path )
 	return ::RemoveDirectoryW( convertedChars ) == TRUE;
 }
 
-bool Helium::Copy( const char* source, const char* dest, bool overwrite )
+bool Helium::CopyFile( const char* source, const char* dest, bool overwrite )
 {
 	HELIUM_TCHAR_TO_WIDE( source, convertedSource );
 	HELIUM_TCHAR_TO_WIDE( dest, convertedDest );
 	return ( TRUE == ::CopyFile( convertedSource, convertedDest, overwrite ? FALSE : TRUE ) );
 }
 
-bool Helium::Move( const char* source, const char* dest )
+bool Helium::MoveFile( const char* source, const char* dest )
 {
 	HELIUM_TCHAR_TO_WIDE( source, convertedSource );
 	HELIUM_TCHAR_TO_WIDE( dest, convertedDest );
 	return ( TRUE == ::MoveFile( convertedSource, convertedDest ) );
 }
 
-bool Helium::Delete( const char* path )
+bool Helium::DeleteFile( const char* path )
 {
 	HELIUM_TCHAR_TO_WIDE( path, convertedPath );
 	return ( TRUE == ::DeleteFile( convertedPath ) );
