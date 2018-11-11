@@ -9,10 +9,6 @@
 #include <stdio.h>
 #include <vector>
 
-#ifndef HELIUM_OS_WIN
-#include <unistd.h>
-#endif
-
 using namespace Helium;
 
 TEST( PlatformFileTest, IsNonInitializedFileOpen )
@@ -35,7 +31,7 @@ TEST( PlatformFileTest, OpenNonExistingFileForWrite )
 	ASSERT_TRUE( f.Open( fileName, FileMode::Write ) );
 	ASSERT_TRUE( f.Close() );
 
-	remove( fileName );
+	DeleteFile( fileName );
 }
 
 TEST( PlatformFileTest, CreateCloseOpenForRead )
@@ -50,7 +46,7 @@ TEST( PlatformFileTest, CreateCloseOpenForRead )
 	ASSERT_TRUE( f.IsOpen() );
 	f.Close();
 
-	remove( fileName );
+	DeleteFile( fileName );
 }
 
 TEST( PlatformFileTest, CreateCloseDelete )
@@ -87,7 +83,7 @@ TEST( PlatformFileTest, CheckWriteToFile )
 	ASSERT_TRUE( outputData.size() == inputData.size() );
 	ASSERT_TRUE( std::equal( outputData.begin(), outputData.end(), inputData.begin() ) );
 
-	remove( fileName );
+	DeleteFile( fileName );
 }
 
 
