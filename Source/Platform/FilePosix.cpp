@@ -363,7 +363,7 @@ bool Helium::MakePath( const char* path )
 	{
 		if ( stat( currentDirectory.c_str(), &status ) != 0 )
 		{
-			if ( !mkdir( currentDirectory.c_str(), 0777 ) )
+			if ( mkdir( currentDirectory.c_str(), 0777 ) != 0 )
 			{
 				if ( errno != EEXIST )
 				{
@@ -454,5 +454,5 @@ bool Helium::Move( const char* source, const char* dest )
 
 bool Helium::Delete( const char* path )
 {
-	return unlink( path ) != 0;
+	return unlink( path ) == 0;
 }
