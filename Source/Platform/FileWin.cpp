@@ -11,6 +11,9 @@
 
 #undef CreateDirectory
 #undef DeleteDirectory
+#undef CopyFile
+#undef MoveFile
+#undef DeleteFile
 
 using namespace Helium;
 
@@ -410,18 +413,18 @@ bool Helium::CopyFile( const char* source, const char* dest, bool overwrite )
 {
 	HELIUM_TCHAR_TO_WIDE( source, convertedSource );
 	HELIUM_TCHAR_TO_WIDE( dest, convertedDest );
-	return ( TRUE == ::CopyFile( convertedSource, convertedDest, overwrite ? FALSE : TRUE ) );
+	return ( TRUE == ::CopyFileW( convertedSource, convertedDest, overwrite ? FALSE : TRUE ) );
 }
 
 bool Helium::MoveFile( const char* source, const char* dest )
 {
 	HELIUM_TCHAR_TO_WIDE( source, convertedSource );
 	HELIUM_TCHAR_TO_WIDE( dest, convertedDest );
-	return ( TRUE == ::MoveFile( convertedSource, convertedDest ) );
+	return ( TRUE == ::MoveFileW( convertedSource, convertedDest ) );
 }
 
 bool Helium::DeleteFile( const char* path )
 {
 	HELIUM_TCHAR_TO_WIDE( path, convertedPath );
-	return ( TRUE == ::DeleteFile( convertedPath ) );
+	return ( TRUE == ::DeleteFileW( convertedPath ) );
 }
