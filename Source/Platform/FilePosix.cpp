@@ -449,5 +449,5 @@ bool Helium::MoveFile( const char* source, const char* dest )
 
 bool Helium::DeleteFile( const char* path )
 {
-	return unlink( path ) == 0;
+	return 0 == unlink( path );
 }
