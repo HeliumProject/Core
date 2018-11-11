@@ -9,6 +9,9 @@
 #include <vector>
 #include <sys/stat.h>
 
+#undef CreateDirectory
+#undef DeleteDirectory
+
 using namespace Helium;
 
 static uint64_t FromWindowsTime( FILETIME time )
@@ -349,7 +352,7 @@ bool Helium::MakePath( const char* path )
 	if ( directories.size() == 1 )
 	{
 		HELIUM_TCHAR_TO_WIDE( path, convertedPath );
-		if ( !CreateDirectory( convertedPath, NULL ) )
+		if ( !CreateDirectoryW( convertedPath, NULL ) )
 		{
 			return ::GetLastError() == ERROR_ALREADY_EXISTS;
 		}
@@ -367,7 +370,7 @@ bool Helium::MakePath( const char* path )
 
 			if ( ( (*currentDirectory.rbegin()) != ':' ) && ( _wstat64( convertedCurrentDirectory, &statInfo ) != 0 ) )
 			{
-				if ( !CreateDirectory( convertedCurrentDirectory, NULL ) )
+				if ( !CreateDirectoryW( convertedCurrentDirectory, NULL ) )
 				{
 					if ( ::GetLastError() != ERROR_ALREADY_EXISTS )
 					{
@@ -389,6 +392,18 @@ bool Helium::MakePath( const char* path )
 	}
 
 	return true;
+}
+
+bool Helium::CreateDirectory( const char* path )
+{
+	HELIUM_TCHAR_TO_WIDE( path, convertedChars );
+	return ::CreateDirectoryW( convertedChars, NULL ) == TRUE;
+}
+
+bool Helium::DeleteEmptyDirectory( const char* path )
+{
+	HELIUM_TCHAR_TO_WIDE( path, convertedChars );
+	return ::RemoveDirectoryW( convertedChars ) == TRUE;
 }
 
 bool Helium::Copy( const char* source, const char* dest, bool overwrite )

@@ -387,6 +387,16 @@ bool Helium::MakePath( const char* path )
 	return true;
 }
 
+bool Helium::CreateDirectory( const char* path )
+{
+	return 0 == mkdir( path, 0777 );
+}
+
+bool Helium::DeleteEmptyDirectory( const char* path )
+{
+	return 0 == rmdir( path );
+}
+
 bool Helium::Copy( const char* source, const char* dest, bool overwrite )
 {
 #if HELIUM_OS_LINUX

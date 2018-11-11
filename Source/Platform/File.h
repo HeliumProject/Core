@@ -151,6 +151,8 @@ namespace Helium
 	HELIUM_PLATFORM_API bool IsAbsolute( const char* path );
 	HELIUM_PLATFORM_API void SplitDirectories( const std::string& path, std::vector< std::string >& output );
 	HELIUM_PLATFORM_API bool MakePath( const char* path );
+	HELIUM_PLATFORM_API bool CreateDirectory( const char* path );
+	HELIUM_PLATFORM_API bool DeleteEmptyDirectory( const char* path );
 	HELIUM_PLATFORM_API bool Copy( const char* source, const char* dest, bool overwrite );
 	HELIUM_PLATFORM_API bool Move( const char* source, const char* dest );
 	HELIUM_PLATFORM_API bool Delete( const char* path );
