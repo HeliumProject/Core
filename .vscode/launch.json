@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Launch Debug",
+            "name": "Launch LLDB Debug",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/Bin/Debug/PlatformTests",
@@ -13,8 +13,20 @@
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/Bin/Debug",
             "environment": [],
-            "externalConsole": true,
+            "externalConsole": false,
             "MIMode": "lldb"
+        },
+        {
+            "name": "Launch GDB Debug",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/Bin/Debug/PlatformTests",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/Bin/Debug",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb"
         }
     ]
 }

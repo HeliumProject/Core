@@ -195,10 +195,10 @@ TEST( PlatformFileTest, MakePathMakeFileAndMove )
 	const std::string fullPath = "foo_folder2";
 	MakePath( fullPath.c_str() );
 
-	File f;
 	const std::string fileName( "foo3.data" );
 	const std::string filePath = fullPath + PathSeparator + fileName;
 
+	File f;
 	f.Open( filePath.c_str(), FileMode::Write );
 	ASSERT_TRUE( f.IsOpen() );
 	f.Close();
