@@ -444,12 +444,7 @@ bool Helium::CopyFile( const char* source, const char* dest, bool overwrite )
 
 bool Helium::MoveFile( const char* source, const char* dest )
 {
-	if ( CopyFile( source, dest, true ) )
-	{
-		return DeleteFile( source );
-	}
-
-	return false;
+	return 0 == rename( source, dest );
 }
 
 bool Helium::DeleteFile( const char* path )
