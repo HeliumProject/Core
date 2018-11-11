@@ -210,12 +210,9 @@ TEST( PlatformFileTest, MakePathMakeFileAndMove )
 	Move( filePath.c_str(), newFilePath.c_str() );
 
 	ASSERT_TRUE( Delete( newFilePath.c_str() ) );
-	ASSERT_TRUE( DeleteEmptyDirectory( fullPath.c_str() ) );
+	ASSERT_TRUE( DeleteEmptyDirectory( newFullPath.c_str() ) );
 
 	f.Open( newFilePath.c_str(), FileMode::Read );
 	ASSERT_FALSE( f.IsOpen() );
 	f.Close();
-
-	ASSERT_FALSE( Delete( newFilePath.c_str() ) );
-	ASSERT_TRUE( DeleteEmptyDirectory( newFullPath.c_str() ) );
 }
