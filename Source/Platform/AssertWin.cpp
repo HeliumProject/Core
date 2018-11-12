@@ -24,6 +24,7 @@ void Helium::FatalExit( int exitCode )
 /// @param[in] pMessageText  Assert message text.
 bool Assert::TriggerImplementation( const char* pMessageText )
 {
+	Helium::FatalExit(-1);
 	if ( ::IsDebuggerPresent() )
 	{
 		return true;

@@ -463,17 +463,17 @@ bool FilePath::Create() const
 
 bool FilePath::Copy( const Helium::FilePath& target, bool overwrite ) const
 {
-	return Helium::Copy( Data(), target.Data(), overwrite );
+	return Helium::CopyFile( Data(), target.Data(), overwrite );
 }
 
 bool FilePath::Move( const Helium::FilePath& target ) const 
 {
-	return Helium::Move( Data(), target.Data() );
+	return Helium::MoveFile( Data(), target.Data() );
 }
 
 bool FilePath::Delete() const
 {
-	return Helium::Delete( Data() );
+	return Helium::DeleteFile( Data() );
 }
 
 std::string FilePath::MD5() const

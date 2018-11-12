@@ -363,7 +363,7 @@ bool Helium::MakePath( const char* path )
 	{
 		if ( stat( currentDirectory.c_str(), &status ) != 0 )
 		{
-			if ( !mkdir( currentDirectory.c_str(), 0777 ) )
+			if ( mkdir( currentDirectory.c_str(), 0777 ) != 0 )
 			{
 				if ( errno != EEXIST )
 				{
@@ -387,7 +387,17 @@ bool Helium::MakePath( const char* path )
 	return true;
 }
 
-bool Helium::Copy( const char* source, const char* dest, bool overwrite )
+bool Helium::CreateDirectory( const char* path )
+{
+	return 0 == mkdir( path, 0777 );
+}
+
+bool Helium::DeleteEmptyDirectory( const char* path )
+{
+	return 0 == rmdir( path );
+}
+
+bool Helium::CopyFile( const char* source, const char* dest, bool overwrite )
 {
 #if HELIUM_OS_LINUX
 	struct stat status;
@@ -432,17 +442,12 @@ bool Helium::Copy( const char* source, const char* dest, bool overwrite )
 #endif
 }
 
-bool Helium::Move( const char* source, const char* dest )
+bool Helium::MoveFile( const char* source, const char* dest )
 {
-	if ( Copy( source, dest, true ) )
-	{
-		return Delete( source );
-	}
-
-	return false;
+	return 0 == rename( source, dest );
 }
 
-bool Helium::Delete( const char* path )
+bool Helium::DeleteFile( const char* path )
 {
-	return unlink( path ) != 0;
+	return 0 == unlink( path );
 }
