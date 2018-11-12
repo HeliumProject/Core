@@ -340,10 +340,6 @@ bool Helium::IsAbsolute( const char* path )
 
 bool Helium::MakePath( const char* path )
 {
-	// this 
-	HELIUM_ASSERT(strlen(path));
-
-	// or this
 	if (!strlen(path))
 	{
 		return false;

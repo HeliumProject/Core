@@ -168,8 +168,7 @@ TEST( PlatformFileTest, PathIsNotAbsolute )
 
 TEST( PlatformFileTest, FailToMakePath )
 {
-	//ASSERT_DEATH(MakePath(""), "");
-	//ASSERT_FALSE(MakePath(""));
+	ASSERT_FALSE(MakePath(""));
 }
 
 TEST( PlatformFileTest, MakePath )
