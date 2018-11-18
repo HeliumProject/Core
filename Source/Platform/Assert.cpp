@@ -13,6 +13,7 @@
 using namespace Helium;
 
 volatile int32_t Assert::sm_active = 0;
+volatile bool Assert::sm_assertIsFatal = false;
 
 /// Handle an assertion.
 ///
@@ -120,8 +121,16 @@ bool Assert::Trigger(
 # endif
 #endif
 
-	// Present the assert message and get how we should proceed.
-	bool result = TriggerImplementation( messageText );
+	bool result = false;
+	if (sm_assertIsFatal)
+	{
+		Helium::FatalExit(-1);
+	}
+	else
+	{
+		// Present the assert message and get how we should proceed.
+		result = TriggerImplementation(messageText);
+	}
 
 	AtomicExchangeRelease( sm_active, 0 );
 
