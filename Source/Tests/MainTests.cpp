@@ -6,7 +6,7 @@ int main(int argc, char** argv) {
 	printf("Running main() from MainTests.cpp\n");
 	
 #if HELIUM_ASSERT_ENABLED 
-	Helium::Assert::SetAssertIsFatal(true);
+	Helium::Assert::SetFatal(true);
 #endif
 
 	testing::InitGoogleTest(&argc, argv);

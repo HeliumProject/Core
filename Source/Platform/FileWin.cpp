@@ -340,7 +340,7 @@ bool Helium::IsAbsolute( const char* path )
 
 bool Helium::MakePath( const char* path )
 {
-	HELIUM_ASSERT(strlen(path));
+	HELIUM_ASSERT(path[0] != '\0');
 
 	std::vector< std::string > directories;
 	SplitDirectories( path, directories );

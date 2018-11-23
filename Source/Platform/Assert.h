@@ -77,15 +77,15 @@ namespace Helium
 		/// @name Static Utility Functions
 		//@{
 		static bool Trigger( const char* pExpression, const char* pFunction, const char* pFile, int line, const char* pMessage, ... );
-		static void SetAssertIsFatal(bool isFatal) { sm_assertIsFatal = isFatal; }
+		static void SetFatal(bool value);
 		//@}
 
 	private:
 		/// Non-zero if the assert handler is currently active, zero if not.
-		static volatile int32_t sm_active;
+		static int32_t sm_active;
 
 		/// call abort when this is true and an assertion fails 
-		static volatile bool sm_assertIsFatal;
+		static bool sm_fatal;
 
 		/// @name Private Static Utility Functions
 		//@{
