@@ -166,10 +166,12 @@ TEST( PlatformFileTest, PathIsNotAbsolute )
 	ASSERT_TRUE( IsAbsolute( fullPath.c_str() ) );
 }
 
+#if HELIUM_ASSERT_ENABLED 
 TEST( PlatformFileTest, FailToMakePath )
 {
-	ASSERT_FALSE(MakePath(""));
+	ASSERT_DEATH(MakePath(""), "");
 }
+#endif
 
 TEST( PlatformFileTest, MakePath )
 {

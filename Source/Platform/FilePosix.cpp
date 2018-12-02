@@ -340,6 +340,8 @@ bool Helium::IsAbsolute( const char* path )
 
 bool Helium::MakePath( const char* path )
 {
+	HELIUM_ASSERT(path[0] != '\0');
+
 	std::string fullPath;
 	if ( !GetFullPath( path, fullPath ) )
 	{
