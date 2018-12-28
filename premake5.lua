@@ -1,7 +1,12 @@
 require( './premake' )
 
-workspace "Core"
+-- This is a breadcrumb for the travis scripts
+print("Writing solution.txt...")
+local file = io.open("./Build/solution.txt", "w");
+file:write("Core\n");
+file:close();
 
+workspace "Core"
 Helium.DoBasicWorkspaceSettings()
 
 configuration "Debug"

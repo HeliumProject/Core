@@ -1,5 +1,11 @@
 require( './premake' )
 
+-- This is a breadcrumb for the travis scripts
+print("Writing solution.txt...")
+local file = io.open("./Build/solution.txt", "w");
+file:write("Dependencies\n");
+file:close();
+
 workspace "Dependencies"
 Helium.DoBasicWorkspaceSettings()
 

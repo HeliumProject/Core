@@ -34,6 +34,14 @@ matrix:
   - os: osx
     compiler: clang
     env: CONFIG=release ARCH=x86_64
+  - os: windows
+    env: CONFIG=debug ARCH=x86_64
+  - os: windows
+    env: CONFIG=intermediate ARCH=x86_64
+  - os: windows
+    env: CONFIG=profile ARCH=x86_64
+  - os: windows
+    env: CONFIG=release ARCH=x86_64
   - os: linux
     compiler: gcc
     env: CONFIG=debug ARCH=x86
@@ -57,6 +65,14 @@ matrix:
     env: CONFIG=profile ARCH=x86
   - os: osx
     compiler: clang
+    env: CONFIG=release ARCH=x86
+  - os: windows
+    env: CONFIG=debug ARCH=x86
+  - os: windows
+    env: CONFIG=intermediate ARCH=x86
+  - os: windows
+    env: CONFIG=profile ARCH=x86
+  - os: windows
     env: CONFIG=release ARCH=x86
   - os: linux
     compiler: gcc
@@ -81,6 +97,14 @@ matrix:
     env: CONFIG=profile ARCH=x86_64 ARGS=--shared
   - os: osx
     compiler: clang
+    env: CONFIG=release ARCH=x86_64 ARGS=--shared
+  - os: windows
+    env: CONFIG=debug ARCH=x86_64 ARGS=--shared
+  - os: windows
+    env: CONFIG=intermediate ARCH=x86_64 ARGS=--shared
+  - os: windows
+    env: CONFIG=profile ARCH=x86_64 ARGS=--shared
+  - os: windows
     env: CONFIG=release ARCH=x86_64 ARGS=--shared
   - os: linux
     compiler: gcc
@@ -105,6 +129,14 @@ matrix:
     env: CONFIG=profile ARCH=x86 ARGS=--shared
   - os: osx
     compiler: clang
+    env: CONFIG=release ARCH=x86 ARGS=--shared
+  - os: windows
+    env: CONFIG=debug ARCH=x86 ARGS=--shared
+  - os: windows
+    env: CONFIG=intermediate ARCH=x86 ARGS=--shared
+  - os: windows
+    env: CONFIG=profile ARCH=x86 ARGS=--shared
+  - os: windows
     env: CONFIG=release ARCH=x86 ARGS=--shared
 git:
   submodules: false
@@ -114,10 +146,10 @@ before_install:
 script:
 - cd Dependencies
 - "../premake.sh --architecture=${ARCH} gmake"
-- make -C Build -j4 config=${CONFIG}
+- "../make.sh ${CONFIG}"
 - cd ..
 - "./premake.sh --architecture=${ARCH} ${ARGS} gmake"
-- make -C Build -j4 config=${CONFIG}
+- "./make.sh ${CONFIG}"
 notifications:
   slack:
     secure: WGphmpc2xT8R701bspa9Q3z/I/zBoU+Sf069IXq/ATqgzqKBMxyjexQY4SwQmsEuZwC13Ax31uaT9hpcv02gEB29PDnCUFoRyWrdCrSDPsfAUvjY9LEDkUlxYXyeOqJ+jR7yleSIRK7CVyXJgHYvGXn9wwa7w/2JzgUvnhN8hFMLHWqX+bJ9oRPcZAzNkdT2TWxM5SkJCw5NL8UnSnY2Si1BKS1EFj3RX2FBgyHbYdBxXwTMSpSkzWpqvhTZruYLT7Hi9ZpUKgA0XIPxV+o2+ZYcoUczlBSa2yAK0yyestltMWhraYbCnIY6cRoqFXTRlX7SRSPYzf+HpDIZqlziX3jsNiUreYmWNZrp2sf4Lh76xUGsAvaqi3AeywPiWtT/t6z7GGHjIZ5TEIDRlFaMopTGNRTObEFG9VFCTFFprN7siie6roxAKs76gqC6t8w05fLS88Urerdf7dAMCo7ruVJ9dCKQgkLFM4XkNXrOKa2vNq1Iy0y30upd2SeuY0LTKlBS7BbeTxVsZOSO4obmy5HvJNzT76z8kw7OMBMwdVTaw8wLw3xuJkquZx+1em5ymO/YGzTelz34r5Dw6IMPn3Dfve1Q5skOTsGdJGNrxCogLhe6dEyj1ArKPzmYqmEA8y53pgCnbZ5IdQmmjYrri3ihUMrCOZkMYUjPwJrYe18=
