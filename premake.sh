@@ -12,6 +12,9 @@ if [ ! -f $DIR/Dependencies/premake/bin/release/premake5 ]; then
 		make -f Bootstrap.mak linux
 	else
 		VSINSTALL=`"/c/Program Files (x86)/Microsoft Visual Studio/Installer/vswhere.exe" -property installationPath`
+		if [ -z "$VAR" ]; then
+			VSINSTALL=`"/c/Program Files (x86)/Microsoft Visual Studio/Installer/vswhere.exe" -products 'Microsoft.VisualStudio.Product.BuildTools' -property installationPath`
+		fi
 		echo $VSINSTALL
 		VSINSTALL_BASH=`cygpath -a "$VSINSTALL"`
 		echo $VSINSTALL_BASH
