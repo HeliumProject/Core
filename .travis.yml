@@ -12,132 +12,132 @@ matrix:
   include:
   - os: linux
     compiler: gcc
-    env: CONFIG=debug ARCH=x86_64
+    env: ACTION=gmake CONFIG=debug ARCH=x86_64
   - os: linux
     compiler: gcc
-    env: CONFIG=intermediate ARCH=x86_64
+    env: ACTION=gmake CONFIG=intermediate ARCH=x86_64
   - os: linux
     compiler: gcc
-    env: CONFIG=profile ARCH=x86_64
+    env: ACTION=gmake CONFIG=profile ARCH=x86_64
   - os: linux
     compiler: gcc
-    env: CONFIG=release ARCH=x86_64
+    env: ACTION=gmake CONFIG=release ARCH=x86_64
   - os: osx
     compiler: clang
-    env: CONFIG=debug ARCH=x86_64
+    env: ACTION=gmake CONFIG=debug ARCH=x86_64
   - os: osx
     compiler: clang
-    env: CONFIG=intermediate ARCH=x86_64
+    env: ACTION=gmake CONFIG=intermediate ARCH=x86_64
   - os: osx
     compiler: clang
-    env: CONFIG=profile ARCH=x86_64
+    env: ACTION=gmake CONFIG=profile ARCH=x86_64
   - os: osx
     compiler: clang
-    env: CONFIG=release ARCH=x86_64
+    env: ACTION=gmake CONFIG=release ARCH=x86_64
   - os: windows
-    env: CONFIG=debug ARCH=x86_64
+    env: ACTION=vs2017 CONFIG=debug ARCH=x86_64
   - os: windows
-    env: CONFIG=intermediate ARCH=x86_64
+    env: ACTION=vs2017 CONFIG=intermediate ARCH=x86_64
   - os: windows
-    env: CONFIG=profile ARCH=x86_64
+    env: ACTION=vs2017 CONFIG=profile ARCH=x86_64
   - os: windows
-    env: CONFIG=release ARCH=x86_64
+    env: ACTION=vs2017 CONFIG=release ARCH=x86_64
   - os: linux
     compiler: gcc
-    env: CONFIG=debug ARCH=x86
+    env: ACTION=gmake CONFIG=debug ARCH=x86
   - os: linux
     compiler: gcc
-    env: CONFIG=intermediate ARCH=x86
+    env: ACTION=gmake CONFIG=intermediate ARCH=x86
   - os: linux
     compiler: gcc
-    env: CONFIG=profile ARCH=x86
+    env: ACTION=gmake CONFIG=profile ARCH=x86
   - os: linux
     compiler: gcc
-    env: CONFIG=release ARCH=x86
+    env: ACTION=gmake CONFIG=release ARCH=x86
   - os: osx
     compiler: clang
-    env: CONFIG=debug ARCH=x86
+    env: ACTION=gmake CONFIG=debug ARCH=x86
   - os: osx
     compiler: clang
-    env: CONFIG=intermediate ARCH=x86
+    env: ACTION=gmake CONFIG=intermediate ARCH=x86
   - os: osx
     compiler: clang
-    env: CONFIG=profile ARCH=x86
+    env: ACTION=gmake CONFIG=profile ARCH=x86
   - os: osx
     compiler: clang
-    env: CONFIG=release ARCH=x86
+    env: ACTION=gmake CONFIG=release ARCH=x86
   - os: windows
-    env: CONFIG=debug ARCH=x86
+    env: ACTION=vs2017 CONFIG=debug ARCH=x86
   - os: windows
-    env: CONFIG=intermediate ARCH=x86
+    env: ACTION=vs2017 CONFIG=intermediate ARCH=x86
   - os: windows
-    env: CONFIG=profile ARCH=x86
+    env: ACTION=vs2017 CONFIG=profile ARCH=x86
   - os: windows
-    env: CONFIG=release ARCH=x86
+    env: ACTION=vs2017 CONFIG=release ARCH=x86
   - os: linux
     compiler: gcc
-    env: CONFIG=debug ARCH=x86_64 ARGS=--shared
+    env: ACTION=gmake CONFIG=debug ARCH=x86_64 ARGS=--shared
   - os: linux
     compiler: gcc
-    env: CONFIG=intermediate ARCH=x86_64 ARGS=--shared
+    env: ACTION=gmake CONFIG=intermediate ARCH=x86_64 ARGS=--shared
   - os: linux
     compiler: gcc
-    env: CONFIG=profile ARCH=x86_64 ARGS=--shared
+    env: ACTION=gmake CONFIG=profile ARCH=x86_64 ARGS=--shared
   - os: linux
     compiler: gcc
-    env: CONFIG=release ARCH=x86_64 ARGS=--shared
+    env: ACTION=gmake CONFIG=release ARCH=x86_64 ARGS=--shared
   - os: osx
     compiler: clang
-    env: CONFIG=debug ARCH=x86_64 ARGS=--shared
+    env: ACTION=gmake CONFIG=debug ARCH=x86_64 ARGS=--shared
   - os: osx
     compiler: clang
-    env: CONFIG=intermediate ARCH=x86_64 ARGS=--shared
+    env: ACTION=gmake CONFIG=intermediate ARCH=x86_64 ARGS=--shared
   - os: osx
     compiler: clang
-    env: CONFIG=profile ARCH=x86_64 ARGS=--shared
+    env: ACTION=gmake CONFIG=profile ARCH=x86_64 ARGS=--shared
   - os: osx
     compiler: clang
-    env: CONFIG=release ARCH=x86_64 ARGS=--shared
+    env: ACTION=gmake CONFIG=release ARCH=x86_64 ARGS=--shared
   - os: windows
-    env: CONFIG=debug ARCH=x86_64 ARGS=--shared
+    env: ACTION=vs2017 CONFIG=debug ARCH=x86_64 ARGS=--shared
   - os: windows
-    env: CONFIG=intermediate ARCH=x86_64 ARGS=--shared
+    env: ACTION=vs2017 CONFIG=intermediate ARCH=x86_64 ARGS=--shared
   - os: windows
-    env: CONFIG=profile ARCH=x86_64 ARGS=--shared
+    env: ACTION=vs2017 CONFIG=profile ARCH=x86_64 ARGS=--shared
   - os: windows
-    env: CONFIG=release ARCH=x86_64 ARGS=--shared
+    env: ACTION=vs2017 CONFIG=release ARCH=x86_64 ARGS=--shared
   - os: linux
     compiler: gcc
-    env: CONFIG=debug ARCH=x86 ARGS=--shared
+    env: ACTION=gmake CONFIG=debug ARCH=x86 ARGS=--shared
   - os: linux
     compiler: gcc
-    env: CONFIG=intermediate ARCH=x86 ARGS=--shared
+    env: ACTION=gmake CONFIG=intermediate ARCH=x86 ARGS=--shared
   - os: linux
     compiler: gcc
-    env: CONFIG=profile ARCH=x86 ARGS=--shared
+    env: ACTION=gmake CONFIG=profile ARCH=x86 ARGS=--shared
   - os: linux
     compiler: gcc
-    env: CONFIG=release ARCH=x86 ARGS=--shared
+    env: ACTION=gmake CONFIG=release ARCH=x86 ARGS=--shared
   - os: osx
     compiler: clang
-    env: CONFIG=debug ARCH=x86 ARGS=--shared
+    env: ACTION=gmake CONFIG=debug ARCH=x86 ARGS=--shared
   - os: osx
     compiler: clang
-    env: CONFIG=intermediate ARCH=x86 ARGS=--shared
+    env: ACTION=gmake CONFIG=intermediate ARCH=x86 ARGS=--shared
   - os: osx
     compiler: clang
-    env: CONFIG=profile ARCH=x86 ARGS=--shared
+    env: ACTION=gmake CONFIG=profile ARCH=x86 ARGS=--shared
   - os: osx
     compiler: clang
-    env: CONFIG=release ARCH=x86 ARGS=--shared
+    env: ACTION=gmake CONFIG=release ARCH=x86 ARGS=--shared
   - os: windows
-    env: CONFIG=debug ARCH=x86 ARGS=--shared
+    env: ACTION=vs2017 CONFIG=debug ARCH=x86 ARGS=--shared
   - os: windows
-    env: CONFIG=intermediate ARCH=x86 ARGS=--shared
+    env: ACTION=vs2017 CONFIG=intermediate ARCH=x86 ARGS=--shared
   - os: windows
-    env: CONFIG=profile ARCH=x86 ARGS=--shared
+    env: ACTION=vs2017 CONFIG=profile ARCH=x86 ARGS=--shared
   - os: windows
-    env: CONFIG=release ARCH=x86 ARGS=--shared
+    env: ACTION=vs2017 CONFIG=release ARCH=x86 ARGS=--shared
 git:
   submodules: false
 before_install:
@@ -145,10 +145,10 @@ before_install:
 - "./.travis.before_install.$TRAVIS_OS_NAME.sh"
 script:
 - cd Dependencies
-- "../premake.sh --architecture=${ARCH} gmake"
+- "../premake.sh --architecture=${ARCH} ${ACTION}"
 - "../make.sh ${CONFIG}"
 - cd ..
-- "./premake.sh --architecture=${ARCH} ${ARGS} gmake"
+- "./premake.sh --architecture=${ARCH} ${ARGS} ${ACTION}"
 - "./make.sh ${CONFIG}"
 notifications:
   slack:
