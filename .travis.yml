@@ -144,6 +144,7 @@ before_install:
 - git submodule update --init --recursive
 - "./.travis.before_install.$TRAVIS_OS_NAME.sh"
 script:
+- ls -la "/c/Program Files (x86)/Microsoft Visual Studio"
 - cd Dependencies
 - "../premake.sh --architecture=${ARCH} ${ACTION}"
 #- "../make.sh ${CONFIG}"
