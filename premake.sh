@@ -12,7 +12,10 @@ if [ ! -f $DIR/Dependencies/premake/bin/release/premake5 ]; then
 		make -f Bootstrap.mak linux
 	else
 		VSINSTALL=`"/c/Program Files (x86)/Microsoft Visual Studio/Installer/vswhere.exe" -property installationPath`
+		echo $VSINSTALL
 		VSINSTALL_BASH=`cygpath -a "$VSINSTALL"`
+		echo $VSINSTALL_BASH
+		echo Calling premake bootstrap...
 		cmd //c "$VSINSTALL_BASH/VC/Auxiliary/Build/vcvars64.bat" \&\& nmake -f Bootstrap.mak windows
 	fi
 
