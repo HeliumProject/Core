@@ -149,7 +149,7 @@ bool Thread::TryJoin()
 		m_Handle = 0;
 	}
 
-	return false;
+	return result;
 }
 
 /// Get whether this thread is valid (created).
