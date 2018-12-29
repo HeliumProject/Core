@@ -1,11 +1,5 @@
 require( './premake' )
 
--- This is a breadcrumb for the travis scripts
-print("Writing solution.txt...")
-local file = io.open("./Build/solution.txt", "w");
-file:write("Core\n");
-file:close();
-
 workspace "Core"
 Helium.DoBasicWorkspaceSettings()
 
@@ -524,3 +518,19 @@ if not _OPTIONS["modular"] then
 			"\"%{cfg.linktarget.abspath}\""
 		}
 end
+
+-- These are breadcrumbs for the travis scripts
+
+print("Writing solution.txt...")
+local file = io.open("./Build/solution.txt", "w");
+file:write("Core\n");
+file:close();
+
+print("Writing platform.txt...")
+local file = io.open("./Build/platform.txt", "w");
+if _OPTIONS[ "architecture" ] == 'x86_64' then
+	file:write("x64\n");
+else
+	file:write("Win32\n");
+end
+file:close();

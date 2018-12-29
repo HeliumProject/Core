@@ -31,7 +31,8 @@ else
 
 	VSINSTALL_BASH=`cygpath -a "$VSINSTALL"`
 	SOLUTION=`cat solution.txt`
-	cmd //c "$VSINSTALL_BASH/VC/Auxiliary/Build/vcvars64.bat" \&\& msbuild $SOLUTION.sln //p:Configuration=$1 //verbosity:minimal
+	PLATFORM=`cat platform.txt`
+	cmd //c "$VSINSTALL_BASH/VC/Auxiliary/Build/vcvars64.bat" \&\& msbuild $SOLUTION.sln //p:Configuration=$1 //p:Platform=$PLATFORM //verbosity:minimal
 
 	if [ "$?" -ne "0" ]; then
 		exit 1
