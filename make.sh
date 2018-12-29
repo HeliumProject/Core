@@ -4,9 +4,11 @@ pushd Build
 
 if [ `uname` == "Darwin" ]; then
 	JOBS=`sysctl -n hw.ncpu`
+	echo Building with $JOBS jobs
 	make -j$JOBS config=$1
 elif [ `uname` == "Linux" ]; then
 	JOBS=`nproc`
+	echo Building with $JOBS jobs
 	make -j$JOBS config=$1
 else
 	VSINSTALL=`"/c/Program Files (x86)/Microsoft Visual Studio/Installer/vswhere.exe" -property installationPath`
