@@ -145,7 +145,8 @@ before_install:
 - "./.travis.before_install.$TRAVIS_OS_NAME.sh"
 script:
 - set -e
-- cd Dependencies
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then unset -f cd; fi
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then shell_session_update() { :; }; fi- cd Dependencies
 - "../premake.sh --architecture=${ARCH} ${ACTION}"
 - "../make.sh ${CONFIG}"
 - cd ..
