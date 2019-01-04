@@ -20,7 +20,7 @@ int work(const uint32_t count)
 	for (uint32_t i = 0; i < count; i++)
 	{
 		foo += int(sqrt(i * 2));
-		foo /= 2; int(sqrt(i * 2));
+		foo /= 2;
 	}
 	return foo;
 }
