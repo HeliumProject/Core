@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <math.h>
+#include <chrono>
 
 #include "Platform/Thread.h"
 
@@ -14,18 +15,22 @@ const uint32_t LIGHT_WORKLOAD = 100;
 const uint32_t MEDIUM_WORKLOAD = 1000000;
 const uint32_t HEAVY_WORKLOAD = ~0;
 
-int work(const uint32_t count)
+uint64_t work(const uint32_t count)
 {
-	int foo = 0;
+	volatile uint64_t foo = 0;
 	for (uint32_t i = 0; i < count; i++)
 	{
+		// nonoptimizable foobar workload
+		std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
 		foo += int(sqrt(i * 2));
 		foo /= 2;
+		std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
+		foo += std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count();
 	}
 	return foo;
 }
 
-int g_tmp = 0;
+volatile uint64_t g_tmp = 0;
 
 class Worker : public Runnable
 {
