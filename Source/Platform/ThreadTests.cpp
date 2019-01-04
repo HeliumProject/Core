@@ -1,6 +1,7 @@
 #include "Precompile.h"
 
 #include <memory>
+#include <math.h>
 
 #include "Platform/Thread.h"
 
@@ -13,7 +14,7 @@ const uint32_t LIGHT_WORKLOAD = 100;
 const uint32_t MEDIUM_WORKLOAD = 1000000;
 const uint32_t HEAVY_WORKLOAD = ~0;
 
-void work(const uint32_t count)
+int work(const uint32_t count)
 {
 	int foo = 0;
 	for (uint32_t i = 0; i < count; i++)
@@ -21,7 +22,10 @@ void work(const uint32_t count)
 		foo += int(sqrt(i * 2));
 		foo /= 2; int(sqrt(i * 2));
 	}
+	return foo;
 }
+
+int g_tmp = 0;
 
 class Worker : public Runnable
 {
@@ -44,7 +48,7 @@ public:
 			Thread::Sleep(m_sleepMilliseconds);
 		}
 
-		work(m_count);
+		g_tmp = work(m_count);
 	}
 };
 
