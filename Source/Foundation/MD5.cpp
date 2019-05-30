@@ -486,6 +486,20 @@ inline void md5_finish(md5_state_t *pms, md5_byte_t digest[16])
 
 /* End Copyright (C) 1999, 2002 Aladdin Enterprises, begin Helium open source */
 
+inline static std::string OutputMD5(md5_byte_t digest[16])
+{
+	char hex_output[16 * 2 + 1] = { 0 };
+	const size_t print_size = 3u;
+
+	for (int di = 0; di < 16; ++di)
+	{
+		char* where = hex_output + di * 2;
+		Helium::StringPrint(where, print_size, "%02X", digest[di]);
+	}
+
+	return hex_output;
+}
+
 std::string Helium::MD5(const void* data, uint32_t count)
 {
     md5_state_t state;
@@ -496,14 +510,7 @@ std::string Helium::MD5(const void* data, uint32_t count)
     md5_byte_t digest[16];
     md5_finish(&state, digest);
 
-    char hex_output[16*2 + 1];
-    for (int di = 0; di < 16; ++di)
-    {
-		char* where = hex_output + di * 2;
-        StringPrint(where, where - hex_output, "%02X", digest[di]);
-    }
-
-    return hex_output;
+	return OutputMD5(digest);
 }
 
 std::string Helium::MD5(const std::string& data)
@@ -538,12 +545,5 @@ std::string Helium::FileMD5(const std::string& filePath, uint32_t packetSize)
     md5_byte_t digest[16];
     md5_finish(&state, digest);
 
-    char hex_output[16*2 + 1];
-    for (int di = 0; di < 16; ++di)
-    {
-		char* where = hex_output + di * 2;
-        StringPrint(where, where - hex_output, "%02X", digest[di]);
-    }
-
-    return hex_output;
+	return OutputMD5(digest);
 }
