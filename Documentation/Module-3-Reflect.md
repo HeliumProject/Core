@@ -1,4 +1,4 @@
-<a href="http://heliumproject.org/">![Helium Core](https://raw.github.com/HeliumProject/Core/master/Documentation/Helium.png)</a>
+<a href="http://heliumproject.github.io/">![Helium Core](https://raw.github.com/HeliumProject/Core/master/Documentation/Helium.png)</a>
 
 Reflect is an implementation of C++ reflection (also known as introspection).  Reflection adds the ability for a C++ program to know about its own topology and coding factors.  This information can in turn be used to automate what would otherwise be rote programming tasks.  Removing human elements from rote programming tasks can lower the cost of adding new features to an application, and can reduce the number of moving parts that need modification by an engineer (which reduces the number of bugs that can be introduced by any given feature).
 

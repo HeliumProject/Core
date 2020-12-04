@@ -1,4 +1,4 @@
-<a href="http://heliumproject.org/">![Helium Core](https://raw.github.com/HeliumProject/Core/master/Documentation/Helium.png)</a>
+<a href="http://heliumproject.github.io/">![Helium Core](https://raw.github.com/HeliumProject/Core/master/Documentation/Helium.png)</a>
 
 Platform is a very basic C++ wrapper of basic operating system components including:
 * Asserts

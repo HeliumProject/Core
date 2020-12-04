@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/HeliumProject/Core.svg?branch=master)](https://travis-ci.org/HeliumProject/Core)
 
-<a href="http://heliumproject.org/">![Helium Core](https://raw.github.com/HeliumProject/Core/master/Documentation/Helium.png)</a>
+<a href="http://heliumproject.github.io/">![Helium Core](https://raw.github.com/HeliumProject/Core/master/Documentation/Helium.png)</a>
 
 Helium Core aspires to be a fully-featured C++ platform abstraction and standard library:
 * Permissively licensed (BSD-style)
@@ -22,7 +22,7 @@ Modules
 
 # Resources #
 
-* Website: [http://heliumproject.org](http://heliumproject.org)
+* Website: [http://heliumproject.github.io](http://heliumproject.github.io)
 * GitHub: [http://github.com/HeliumProject/Core](http://github.com/HeliumProject/Core)
 * Slack: [http://heliumproject.slack.com](http://heliumproject.slack.com) (ask @gorlak for an invite)
 

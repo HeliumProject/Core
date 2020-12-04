@@ -1,4 +1,4 @@
-<a href="http://heliumproject.org/">![Helium Core](https://raw.github.com/HeliumProject/Core/master/Documentation/Helium.png)</a>
+<a href="http://heliumproject.github.io/">![Helium Core](https://raw.github.com/HeliumProject/Core/master/Documentation/Helium.png)</a>
 
 Mongo completely automates the serialization of an object to and from a MongoDB database.  The [Reflect](https://github.com/HeliumProject/Reflect) C++ reflection library provides information about the member variable layout of a class of object.  Model objects contain only a single new member variable: id, which follows the `_id` variable that stores the internal unique id of an object in MongoDB.
 

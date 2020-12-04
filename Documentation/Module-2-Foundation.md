@@ -1,4 +1,4 @@
-<a href="http://heliumproject.org/">![Helium Core](https://raw.github.com/HeliumProject/Core/master/Documentation/Helium.png)</a>
+<a href="http://heliumproject.github.io/">![Helium Core](https://raw.github.com/HeliumProject/Core/master/Documentation/Helium.png)</a>
 
 Foundation is a platform agnostic container and utility library that provides:
 * Linear allocation based C++ containers (DynamicArray, Map, Set, Hashtable, etc...)
