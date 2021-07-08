@@ -7,7 +7,7 @@
 
 namespace Helium
 {
-	// Scan from STDOUT
+	// Scan from STDIN
 	HELIUM_PLATFORM_API int Scan(const char* fmt, ...);
 	HELIUM_PLATFORM_API int Scan(const wchar_t* fmt, ...);
 	HELIUM_PLATFORM_API int ScanArgs(const char* fmt, va_list args);
