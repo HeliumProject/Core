@@ -27,7 +27,7 @@ jobs:
     - name: Premake Dependencies
       run: |
         cd ${{ github.workspace }}\Dependencies
-        cmd.exe /c call premake.bat vs2022
+        cmd.exe /c call ..\premake.bat vs2022
 
     - name: Premake Core
       run: |
