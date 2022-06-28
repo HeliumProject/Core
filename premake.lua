@@ -21,7 +21,7 @@ newoption
 -- Common settings for projects linking with libraries.
 Helium.DoBasicProjectSettings = function()
 
-	configuration {}
+	filter {}
 
 	language "C++"
 
@@ -55,7 +55,7 @@ Helium.DoBasicProjectSettings = function()
 		"Dependencies/mongo-c/src",
 	}
 
-	configuration { "windows", "SharedLib or *App" }
+	filter { "system:windows", "kind:SharedLib or *App" }
 		links
 		{
 			"dbghelp",
@@ -63,13 +63,13 @@ Helium.DoBasicProjectSettings = function()
 			"wininet",
 		}
 
-	configuration "macosx or linux"
+	filter "system:macosx or linux"
 		buildoptions
 		{
 			"-std=c++11",
 		}
 
-	configuration { "macosx", "SharedLib or *App" }
+	filter { "system:macosx", "kind:SharedLib or *App" }
 		linkoptions
 		{
 			"-stdlib=libc++",
@@ -78,19 +78,19 @@ Helium.DoBasicProjectSettings = function()
 			"-framework IOKit",
 		}
 
-	configuration "linux"
+	filter "system:linux"
 		buildoptions
 		{
 			"-pthread",
 		}
 
-	configuration {}
+	filter {}
 
 end
 
 Helium.DoTestsProjectSettings = function()
 
-	configuration {}
+	filter {}
 
 	kind "ConsoleApp"
 
@@ -112,7 +112,7 @@ Helium.DoTestsProjectSettings = function()
 		"\"%{cfg.linktarget.abspath}\""
 	}
 
-	configuration "linux"
+	filter "system:linux"
 		links
 		{
 			"pthread",
@@ -122,13 +122,13 @@ Helium.DoTestsProjectSettings = function()
 			"stdc++",
 		}
 
-	configuration {}
+	filter {}
 
 end
 
 Helium.DoModuleProjectSettings = function( baseDirectory, tokenPrefix, moduleName, moduleNameUpper )
 
-	configuration {}
+	filter {}
 
 	defines
 	{
@@ -166,7 +166,7 @@ Helium.DoModuleProjectSettings = function( baseDirectory, tokenPrefix, moduleNam
 	end
 
 	if os.host() == "windows" then
-		configuration "SharedLib"
+		filter "kind:SharedLib"
 			defines
 			{
 				tokenPrefix .. moduleNameUpper .. "_EXPORTS",
@@ -174,13 +174,13 @@ Helium.DoModuleProjectSettings = function( baseDirectory, tokenPrefix, moduleNam
 	end
 
 	if os.host() == "macosx" then
-		configuration "SharedLib"
+		filter "kind:SharedLib"
 			linkoptions
 			{
 				"-Wl,-install_name,@executable_path/lib" .. project().name .. ".dylib",
 			}
 	end
 
-	configuration {}
+	filter {}
 
 end

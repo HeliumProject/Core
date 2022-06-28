@@ -3,338 +3,304 @@ require( './premake' )
 workspace "Core"
 Helium.DoBasicWorkspaceSettings()
 
-configuration "Debug"
+filter "configurations:Debug"
 	targetdir( "Bin/Debug/" )
 	libdirs { "Bin/Debug/" }
 
-configuration "Intermediate"
+filter "configurations:Intermediate"
 	targetdir( "Bin/Intermediate/" )
 	libdirs { "Bin/Intermediate/" }
 
-configuration "Profile"
+filter "configurations:Profile"
 	targetdir( "Bin/Profile/" )
 	libdirs { "Bin/Profile/" }
 
-configuration "Release"
+filter "configurations:Release"
 	targetdir( "Bin/Release/" )
 	libdirs { "Bin/Release/" }
 
-newoption
-{
-	trigger = "modular",
-	description = "Build modular libs only",
-}
+filter {}
 
-newoption
-{
-	trigger = "monolithic",
-	description = "Build monolithic lib only",
-}
+project( "Platform" )
 
-if not _OPTIONS["monolithic"] then
+	Helium.DoModuleProjectSettings( "Source", "HELIUM", "Platform", "PLATFORM" )
 
-	project( "Platform" )
+	files
+	{
+		"Source/Platform/*.cpp",
+		"Source/Platform/*.h",
+		"Source/Platform/*.inl",
+	}
 
-		Helium.DoModuleProjectSettings( "Source", "HELIUM", "Platform", "PLATFORM" )
+	excludes
+	{
+		"Source/Platform/*Tests.*",
+	}
 
-		files
-		{
-			"Source/Platform/*.cpp",
-			"Source/Platform/*.h",
-			"Source/Platform/*.inl",
-		}
-
+	filter "system:windows"
 		excludes
 		{
-			"Source/Platform/*Tests.*",
+			"Source/Platform/*Posix.*",
+			"Source/Platform/*Mac.*",
+			"Source/Platform/*Lin.*",
 		}
 
-		configuration "windows"
-			excludes
-			{
-				"Source/Platform/*Posix.*",
-				"Source/Platform/*Mac.*",
-				"Source/Platform/*Lin.*",
-			}
-
-		configuration "macosx"
-			excludes
-			{
-				"Source/Platform/*Win.*",
-				"Source/Platform/*Lin.*",
-			}
-
-		configuration "linux"
-			excludes
-			{
-				"Source/Platform/*Win.*",
-				"Source/Platform/*Mac.*",
-			}
-
-		configuration { "SharedLib", "linux" }
-			links
-			{
-				"pthread",
-				"dl",
-			}
-
-		configuration {}
-
-	project( "PlatformTests" )
-
-		Helium.DoTestsProjectSettings()
-
-		files
+	filter "system:macosx"
+		excludes
 		{
-			"Source/Platform/*Tests.*",
+			"Source/Platform/*Win.*",
+			"Source/Platform/*Lin.*",
 		}
 
+	filter "system:linux"
+		excludes
+		{
+			"Source/Platform/*Win.*",
+			"Source/Platform/*Mac.*",
+		}
+
+	filter { "kind:SharedLib", "system:linux" }
 		links
 		{
-			"Platform"
+			"pthread",
+			"dl",
 		}
 
-	project( "Foundation" )
+	filter {}
 
-		Helium.DoModuleProjectSettings( "Source", "HELIUM", "Foundation", "FOUNDATION" )
+project( "PlatformTests" )
 
-		files
+	Helium.DoTestsProjectSettings()
+
+	files
+	{
+		"Source/Platform/*Tests.*",
+	}
+
+	links
+	{
+		"Platform"
+	}
+
+project( "Foundation" )
+
+	Helium.DoModuleProjectSettings( "Source", "HELIUM", "Foundation", "FOUNDATION" )
+
+	files
+	{
+		"Source/Foundation/**",
+	}
+
+	excludes
+	{
+		"Source/Foundation/*Tests.*",
+	}
+
+	filter "kind:SharedLib"
+		links
 		{
-			"Source/Foundation/**",
+			"Platform",
 		}
 
-		excludes
-		{
-			"Source/Foundation/*Tests.*",
-		}
+	filter {}
 
-		configuration "SharedLib"
-			links
-			{
-				"Platform",
-			}
+project( "FoundationTests" )
 
-		configuration {}
+	Helium.DoTestsProjectSettings()
 
-	project( "FoundationTests" )
+	files
+	{
+		"Source/Foundation/*Tests.*",
+	}
 
-		Helium.DoTestsProjectSettings()
+	links
+	{
+		"Foundation",
+		"Platform",
+	}
 
-		files
-		{
-			"Source/Foundation/*Tests.*",
-		}
+project( "Application" )
 
+	Helium.DoModuleProjectSettings( "Source", "HELIUM", "Application", "APPLICATION" )
+
+	files
+	{
+		"Source/Application/**",
+	}
+
+	excludes
+	{
+		"Source/Application/*Tests.*",
+	}
+
+	filter "kind:SharedLib"
 		links
 		{
 			"Foundation",
 			"Platform",
 		}
 
-	project( "Application" )
+	filter {}
 
-		Helium.DoModuleProjectSettings( "Source", "HELIUM", "Application", "APPLICATION" )
+project( "ApplicationTests" )
 
-		files
-		{
-			"Source/Application/**",
-		}
+	Helium.DoTestsProjectSettings()
 
-		excludes
-		{
-			"Source/Application/*Tests.*",
-		}
+	files
+	{
+		"Source/Application/*Tests.*",
+	}
 
-		configuration "SharedLib"
-			links
-			{
-				"Foundation",
-				"Platform",
-			}
+	links
+	{
+		"Application",
+		"Foundation",
+		"Platform",
+	}
 
-		configuration {}
+project( "Reflect" )
 
-	project( "ApplicationTests" )
+	Helium.DoModuleProjectSettings( "Source", "HELIUM", "Reflect", "REFLECT" )
 
-		Helium.DoTestsProjectSettings()
+	files
+	{
+		"Source/Reflect/**",
+	}
 
-		files
-		{
-			"Source/Application/*Tests.*",
-		}
+	excludes
+	{
+		"Source/Reflect/*Tests.*",
+	}
 
+	filter "kind:SharedLib"
 		links
 		{
-			"Application",
 			"Foundation",
 			"Platform",
 		}
 
-	project( "Reflect" )
+	filter {}
 
-		Helium.DoModuleProjectSettings( "Source", "HELIUM", "Reflect", "REFLECT" )
+project( "ReflectTests" )
 
-		files
-		{
-			"Source/Reflect/**",
-		}
+	Helium.DoTestsProjectSettings()
 
-		excludes
-		{
-			"Source/Reflect/*Tests.*",
-		}
+	files
+	{
+		"Source/Reflect/*Tests.*",
+	}
 
-		configuration "SharedLib"
-			links
-			{
-				"Foundation",
-				"Platform",
-			}
+	links
+	{
+		"Reflect",
+		"Foundation",
+		"Platform",
+	}
 
-		configuration {}
+project( "Persist" )
 
-	project( "ReflectTests" )
+	Helium.DoModuleProjectSettings( "Source", "HELIUM", "Persist", "PERSIST" )
 
-		Helium.DoTestsProjectSettings()
+	files
+	{
+		"Source/Persist/**",
+	}
 
-		files
-		{
-			"Source/Reflect/*Tests.*",
-		}
+	excludes
+	{
+		"Source/Persist/*Tests.*",
+	}
 
+	filter "kind:SharedLib"
 		links
 		{
+			"Platform",
+			"Foundation",
 			"Reflect",
-			"Foundation",
-			"Platform",
-		}
-
-	project( "Persist" )
-
-		Helium.DoModuleProjectSettings( "Source", "HELIUM", "Persist", "PERSIST" )
-
-		files
-		{
-			"Source/Persist/**",
-		}
-
-		excludes
-		{
-			"Source/Persist/*Tests.*",
-		}
-
-		configuration "SharedLib"
-			links
-			{
-				"Platform",
-				"Foundation",
-				"Reflect",
-				"mongo-c",
-			}
-
-		configuration {}
-
-	project( "PersistTests" )
-
-		Helium.DoTestsProjectSettings()
-
-		files
-		{
-			"Source/Persist/*Tests.*",
-		}
-
-		links
-		{
-			"Persist",
-			"Reflect",
-			"Foundation",
-			"Platform",
-		}
-
-	project( "Mongo" )
-
-		Helium.DoModuleProjectSettings( "Source", "HELIUM", "Mongo", "MONGO" )
-
-		files
-		{
-			"Source/Mongo/**",
-		}
-
-		excludes
-		{
-			"Source/Mongo/*Tests.*",
-		}
-
-		configuration "SharedLib"
-			links
-			{
-				"Platform",
-				"Foundation",
-				"Reflect",
-				"Persist",
-				"mongo-c",
-			}
-
-		configuration {}
-
-	project( "MongoTests" )
-
-		Helium.DoTestsProjectSettings()
-
-		files
-		{
-			"Source/Mongo/*Tests.*",
-		}
-
-		links
-		{
-			"Mongo",
-			"Persist",
-			"Reflect",
-			"Foundation",
-			"Platform",
 			"mongo-c",
 		}
 
-	project( "Inspect" )
+	filter {}
 
-		Helium.DoModuleProjectSettings( "Source", "HELIUM", "Inspect", "INSPECT" )
+project( "PersistTests" )
 
-		files
-		{
-			"Source/Inspect/**",
-		}
+	Helium.DoTestsProjectSettings()
 
-		excludes
-		{
-			"Source/Inspect/*Tests.*",
-		}
+	files
+	{
+		"Source/Persist/*Tests.*",
+	}
 
-		configuration "SharedLib"
-			links
-			{
-				"Math",
-				"Persist",
-				"Reflect",
-				"Application",
-				"Foundation",
-				"Platform",
-			}
+	links
+	{
+		"Persist",
+		"Reflect",
+		"Foundation",
+		"Platform",
+	}
 
-		configuration {}
+project( "Mongo" )
 
-	project( "InspectTests" )
+	Helium.DoModuleProjectSettings( "Source", "HELIUM", "Mongo", "MONGO" )
 
-		Helium.DoTestsProjectSettings()
+	files
+	{
+		"Source/Mongo/**",
+	}
 
-		files
-		{
-			"Source/Inspect/*Tests.*",
-		}
+	excludes
+	{
+		"Source/Mongo/*Tests.*",
+	}
 
+	filter "kind:SharedLib"
 		links
 		{
-			"Inspect",
+			"Platform",
+			"Foundation",
+			"Reflect",
+			"Persist",
+			"mongo-c",
+		}
+
+	filter {}
+
+project( "MongoTests" )
+
+	Helium.DoTestsProjectSettings()
+
+	files
+	{
+		"Source/Mongo/*Tests.*",
+	}
+
+	links
+	{
+		"Mongo",
+		"Persist",
+		"Reflect",
+		"Foundation",
+		"Platform",
+		"mongo-c",
+	}
+
+project( "Inspect" )
+
+	Helium.DoModuleProjectSettings( "Source", "HELIUM", "Inspect", "INSPECT" )
+
+	files
+	{
+		"Source/Inspect/**",
+	}
+
+	excludes
+	{
+		"Source/Inspect/*Tests.*",
+	}
+
+	filter "kind:SharedLib"
+		links
+		{
 			"Math",
 			"Persist",
 			"Reflect",
@@ -343,181 +309,68 @@ if not _OPTIONS["monolithic"] then
 			"Platform",
 		}
 
-	project( "Math" )
+	filter {}
 
-		Helium.DoModuleProjectSettings( "Source", "HELIUM", "Math", "MATH" )
+project( "InspectTests" )
 
-		files
-		{
-			"Source/Math/**",
-		}
+	Helium.DoTestsProjectSettings()
 
-		excludes
-		{
-			"Source/Math/*Tests.*",
-		}
+	files
+	{
+		"Source/Inspect/*Tests.*",
+	}
 
-		configuration "SharedLib"
-			links
-			{
-				"Reflect",
-				"Foundation",
-				"Platform",
-			}
+	links
+	{
+		"Inspect",
+		"Math",
+		"Persist",
+		"Reflect",
+		"Application",
+		"Foundation",
+		"Platform",
+	}
 
-		configuration {}
+project( "Math" )
 
-	project( "MathTests" )
+	Helium.DoModuleProjectSettings( "Source", "HELIUM", "Math", "MATH" )
 
-		Helium.DoTestsProjectSettings()
+	files
+	{
+		"Source/Math/**",
+	}
 
-		files
-		{
-			"Source/Math/*Tests.*",
-		}
+	excludes
+	{
+		"Source/Math/*Tests.*",
+	}
 
+	filter "kind:SharedLib"
 		links
 		{
-			"Math",
 			"Reflect",
 			"Foundation",
 			"Platform",
 		}
-end
 
-if not _OPTIONS["modular"] then
-	project( "Core" )
+	filter {}
 
-		if _OPTIONS["pch"] then
-			pchheader( "Precompile.h" )
-			pchsource( "Source/Monolithic/Precompile.cpp" )
-		end
+project( "MathTests" )
 
-		Helium.DoBasicProjectSettings()
+	Helium.DoTestsProjectSettings()
 
-		if _OPTIONS['shared'] then
-			kind "SharedLib"
-		else
-			kind "StaticLib"
-		end
+	files
+	{
+		"Source/Math/*Tests.*",
+	}
 
-		defines
-		{
-			"HELIUM_HEAP=0",
-			"HELIUM_MONOLITHIC=1",
-			"HELIUM_MONOLITHIC_EXPORTS",
-		}
-
-		includedirs
-		{
-			"Source/Monolithic"
-		}
-
-		files
-		{
-			"Source/**.cpp",
-			"Source/**.h",
-			"Source/**.inl",
-		}
-
-		excludes
-		{
-			"Source/**Tests.*",
-		}
-
-		configuration "windows"
-			excludes
-			{
-				"Source/Platform/*Posix.*",
-				"Source/Platform/*Mac.*",
-				"Source/Platform/*Lin.*",
-			}
-
-		configuration "macosx"
-			excludes
-			{
-				"Source/Platform/*Win.*",
-				"Source/Platform/*Lin.*",
-			}
-
-		configuration "linux"
-			excludes
-			{
-				"Source/Platform/*Win.*",
-				"Source/Platform/*Mac.*",
-			}
-
-		configuration {}
-
-		links
-		{
-			"googletest",
-			"mongo-c",
-		}
-
-		configuration { "SharedLib", "linux" }
-			links
-			{
-				"pthread",
-				"dl",
-				"rt",
-				"m",
-				"stdc++",
-				"c",
-			}
-
-		configuration {}
-
-	project( "CoreTests" )
-
-		configuration {}
-
-		kind "ConsoleApp"
-
-		Helium.DoBasicProjectSettings()
-
-		includedirs
-		{
-			".",
-			"Dependencies/googletest/googletest/include"
-		}
-
-		defines
-		{
-			"HELIUM_HEAP=0",
-			"HELIUM_MONOLITHIC=1",
-		}
-
-		files
-		{
-			"Source/**Tests.*",
-		}
-
-		links
-		{
-			"Core",
-			"googletest",
-			"mongo-c",
-		}
-
-		configuration "linux"
-			links
-			{
-				"pthread",
-				"dl",
-				"rt",
-				"m",
-				"stdc++",
-				"c",
-			}
-
-		configuration {}
-
-		postbuildcommands
-		{
-			"\"%{cfg.linktarget.abspath}\""
-		}
-end
+	links
+	{
+		"Math",
+		"Reflect",
+		"Foundation",
+		"Platform",
+	}
 
 -- These are breadcrumbs for the travis scripts
 

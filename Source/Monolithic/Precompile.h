@@ -1,8 +1,0 @@
-#include "Application/Precompile.h"
-#include "Foundation/Precompile.h"
-#include "Inspect/Precompile.h"
-#include "Math/Precompile.h"
-#include "Mongo/Precompile.h"
-#include "Persist/Precompile.h"
-#include "Platform/Precompile.h"
-#include "Reflect/Precompile.h"

@@ -1,6 +1,6 @@
 Helium = {}
 
-Helium.RequiredPremakeVersion = '5.0.0-alpha8'
+Helium.RequiredPremakeVersion = '5.0.0-beta1'
 
 Helium.ExecuteAndCapture = function( cmd, raw )
 	local f = assert( io.popen( cmd, 'r' ) )
@@ -123,7 +123,7 @@ Helium.DoBasicWorkspaceSettings = function()
 		"NoMinimalRebuild",
 	}
 
-	configuration "windows"
+	filter "system:windows"
 		defines
 		{
 			"WIN32",
@@ -133,7 +133,7 @@ Helium.DoBasicWorkspaceSettings = function()
 			"_WINSOCK_DEPRECATED_NO_WARNINGS",
 		}
 
-	configuration "Debug"
+	filter "configurations:Debug"
 		defines
 		{
 			"_DEBUG",
@@ -141,7 +141,7 @@ Helium.DoBasicWorkspaceSettings = function()
 		}
 		symbols "On"
 
-	configuration "Intermediate"
+	filter "configurations:Intermediate"
 		defines
 		{
 			"HELIUM_INTERMEDIATE=1",
@@ -150,7 +150,7 @@ Helium.DoBasicWorkspaceSettings = function()
 		optimize "Speed"
 		editandcontinue "Off"
 
-	configuration "Profile"
+	filter "configurations:Profile"
 		defines
 		{
 			"NDEBUG",
@@ -161,7 +161,7 @@ Helium.DoBasicWorkspaceSettings = function()
 		editandcontinue "Off"
 		omitframepointer "On"
 
-	configuration "Release"
+	filter "configurations:Release"
 		defines
 		{
 			"NDEBUG",
@@ -172,7 +172,7 @@ Helium.DoBasicWorkspaceSettings = function()
 		editandcontinue "Off"
 		omitframepointer "On"
 
-	configuration "windows"
+	filter "system:windows"
 		buildoptions
 		{
 			"/MP",
@@ -184,31 +184,31 @@ Helium.DoBasicWorkspaceSettings = function()
 			"/ignore:4221", -- disable warning about linking .obj files with not symbols defined (conditionally compiled away)
 		}
 
-	configuration { "windows", "Debug" }
+	filter { "system:windows", "configurations:Debug" }
 		buildoptions
 		{
 			"/Ob0",
 		}
 
-	configuration { "windows", "not Debug" }
+	filter { "system:windows", "configurations:not Debug" }
 		buildoptions
 		{
 			"/Ob2",
 			"/Oi",
 		}
 
-	configuration { "macosx" }
+	filter { "system:macosx" }
 		buildoptions
 		{
 			"-stdlib=libc++", -- clang's stdlib
 		}
 
-	configuration { "linux" }
+	filter { "system:linux" }
 		buildoptions
 		{
 			"-fPIC"
 		}
 
-	configuration {}
+	filter {}
 
 end

@@ -286,7 +286,7 @@ std::exception* Helium::GetStandardException(uintptr_t addr)
 		if (cppException)
 		{
 			// this will explode if the address isn't really a c++ exception (std::exception)
-			cppException->what();
+			(void)cppException->what();
 		}
 
 		// i guess we lived!

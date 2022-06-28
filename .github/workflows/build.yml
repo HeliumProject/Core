@@ -1,0 +1,46 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - main
+  pull_request: {}
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        configuration: [Debug, Intermediate, Profile, Release]
+
+    name: Windows ${{ matrix.configuration }}
+    runs-on: [windows-latest]
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v1
+      with:
+          submodules: recursive
+
+    - name: Setup vcvars
+      uses: ilammy/msvc-dev-cmd@v1
+
+    - name: Premake Dependencies
+      run: |
+        cd ${{ github.workspace }}\Dependencies
+        cmd.exe /c call premake.bat vs2022
+
+    - name: Premake Core
+      run: |
+        cd ${{ github.workspace }}
+        cmd.exe /c call premake.bat vs2022
+
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v1.0.2
+
+    - name: Build Dependencies ${{ matrix.configuration }}
+      run: |
+        MSBuild.exe Dependencies\Build\Dependencies.sln -p:Configuration=${{ matrix.configuration }} /p:Platform=x64
+
+    - name: Build Core ${{ matrix.configuration }}
+      run: |
+        MSBuild.exe Build\P4Win.sln -p:Configuration=${{ matrix.configuration }} /p:Platform=x64

@@ -3,17 +3,19 @@ require( './premake' )
 workspace "Dependencies"
 Helium.DoBasicWorkspaceSettings()
 
-configuration "Debug"
+filter "configurations:Debug"
 	targetdir( "../Bin/Debug/" )
 
-configuration "Intermediate"
+filter "configurations:Intermediate"
 	targetdir( "../Bin/Intermediate/" )
 
-configuration "Profile"
+filter "configurations:Profile"
 	targetdir( "../Bin/Profile/" )
 
-configuration "Release"
+filter "configurations:Release"
 	targetdir( "../Bin/Release/" )
+
+filter {}
 
 project "googletest"
 	uuid "1DCBDADD-043A-4853-8118-5D437106309A"
