@@ -40,21 +40,21 @@ jobs:
       uses: microsoft/setup-msbuild@v1.0.2
 
     - name: Build Dependencies ${{ matrix.config }}
-      if: "${{ matrix.premake_arch }}" == ""
+      if: ${{ matrix.premake_arch == '' }}
       run: |
         MSBuild.exe Dependencies\Build\Dependencies.sln -p:Configuration=${{ matrix.config }} /p:Platform=x64
 
     - name: Build Core ${{ matrix.config }}
-      if: "${{ matrix.premake_arch }}" == ""
+      if: ${{ matrix.premake_arch == '' }}
       run: |
         MSBuild.exe Build\Core.sln -p:Configuration=${{ matrix.config }} /p:Platform=x64
 
     - name: Build Dependencies ${{ matrix.config }}
-      if: "${{ matrix.premake_arch }}" == "--arch=x86"
+      if: ${{ matrix.premake_arch == '--arch=x86' }}
       run: |
         MSBuild.exe Dependencies\Build\Dependencies.sln -p:Configuration=${{ matrix.config }} /p:Platform=Win32
 
     - name: Build Core ${{ matrix.config }}
-      if: "${{ matrix.premake_arch }}" == "--arch=x86"
+      if: ${{ matrix.premake_arch == '--arch=x86' }}
       run: |
         MSBuild.exe Build\Core.sln -p:Configuration=${{ matrix.config }} /p:Platform=Win32
