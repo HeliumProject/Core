@@ -37,7 +37,7 @@ jobs:
     - name: Build Dependencies ${{ matrix.config }}
       run: |
         cd ${{ github.workspace }}/Dependencies
-        ./make.sh ${{ matrix.config }}
+        ../make.sh ${{ matrix.config }}
 
     - name: Build Core ${{ matrix.config }}
       run: |
@@ -73,7 +73,7 @@ jobs:
     - name: Build Dependencies ${{ matrix.config }}
       run: |
         cd ${{ github.workspace }}/Dependencies
-        ./make.sh ${{ matrix.config }}
+        ../make.sh ${{ matrix.config }}
 
     - name: Build Core ${{ matrix.config }}
       run: |
