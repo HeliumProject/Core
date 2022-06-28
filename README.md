@@ -1,4 +1,4 @@
-![Build Status](https://github.com/HeliumProject/Core/actions/workflows/build.yml/badge.svg?branch=master)
+[![Build Status](https://github.com/HeliumProject/Core/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/HeliumProject/Core/actions/workflows/build.yml)
 
 <a href="http://heliumproject.github.io/">![Helium Core](https://raw.github.com/HeliumProject/Core/master/Documentation/Helium.png)</a>
 
