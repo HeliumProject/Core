@@ -43,4 +43,4 @@ jobs:
 
     - name: Build Core ${{ matrix.configuration }}
       run: |
-        MSBuild.exe Build\P4Win.sln -p:Configuration=${{ matrix.configuration }} /p:Platform=x64
+        MSBuild.exe Build\Core.sln -p:Configuration=${{ matrix.configuration }} /p:Platform=x64
