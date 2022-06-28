@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/HeliumProject/Core.svg?branch=master)](https://travis-ci.org/HeliumProject/Core)
+![Build Status](https://github.com/HeliumProject/Core/actions/workflows/build.yml/badge.svg?branch=master)
 
 <a href="http://heliumproject.github.io/">![Helium Core](https://raw.github.com/HeliumProject/Core/master/Documentation/Helium.png)</a>
 
