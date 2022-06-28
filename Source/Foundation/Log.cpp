@@ -179,22 +179,20 @@ void Redirect(const std::string& fileName, const char* str, bool stampNewLine = 
 		char* temp = (char*)alloca( sizeof(char) * count );
 		if ( stampNewLine )
 		{
+			uint32_t timestamp = 0;
+
 #if defined(HELIUM_OS_WIN)
 			_timeb currentTime;
 			_ftime( &currentTime );
+			timestamp = (uint32_t) currentTime.time;
 #else
-			struct timeb currentTime;
-			ftime( &currentTime );
+			timestamp = time(nullptr);
 #endif
 
-			uint32_t time = (uint32_t) currentTime.time;
-			uint32_t milli = currentTime.millitm;
-			uint32_t sec = time % 60; time /= 60;
-			uint32_t min = time % 60; time -= currentTime.timezone; time /= 60;
-			time += currentTime.dstflag ? 1 : 0;
-			uint32_t hour = time % 24;
-
-			length = StringPrint( temp, count, "[%02d:%02d:%02d.%03d TID:%d] %s", hour, min, sec, milli, Thread::GetCurrentId(), str );
+			uint32_t sec = timestamp % 60; timestamp /= 60;
+			uint32_t min = timestamp % 60; timestamp /= 60;
+			uint32_t hour = timestamp % 24;
+			length = StringPrint( temp, count, "[%02d:%02d:%02d TID:%d] %s", hour, min, sec, Thread::GetCurrentId(), str );
 		}
 		else
 		{
