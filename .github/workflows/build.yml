@@ -7,14 +7,87 @@ on:
   pull_request: {}
 
 jobs:
-  build:
+
+  build-linux:
     strategy:
       matrix:
         config: [Debug, Intermediate, Profile, Release]
         premake_arch: ["", "--arch=x86"]
         premake_shared: ["", "--shared"]
 
-    name: Windows ${{ matrix.config }} ${{ matrix.shared }}
+    name: GNU/Linux ${{ matrix.config }} ${{ matrix.premake_arch }} ${{ matrix.premake_shared }}
+    runs-on: [ubuntu-latest]
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v1
+      with:
+          submodules: recursive
+
+    - name: Premake Dependencies
+      run: |
+        cd ${{ github.workspace }}/Dependencies
+        cmd.exe /c call ..\premake.sh gmake ${{ matrix.premake_arch }}
+
+    - name: Premake Core
+      run: |
+        cd ${{ github.workspace }}
+        cmd.exe /c call premake.bat gmake ${{ matrix.premake_arch }} ${{ matrix.premake_shared }}
+
+    - name: Build Dependencies ${{ matrix.config }}
+      run: |
+        cd ${{ github.workspace }}/Dependencies
+        gmake ${{ matrix.config }}
+
+    - name: Build Core ${{ matrix.config }}
+      run: |
+        cd ${{ github.workspace }}
+        gmake ${{ matrix.config }}
+
+  build-macos:
+    strategy:
+      matrix:
+        config: [Debug, Intermediate, Profile, Release]
+        premake_arch: ["", "--arch=x86"]
+        premake_shared: ["", "--shared"]
+
+    name: macOS ${{ matrix.config }} ${{ matrix.premake_arch }} ${{ matrix.premake_shared }}
+    runs-on: [macos-latest]
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v1
+      with:
+          submodules: recursive
+
+    - name: Premake Dependencies
+      run: |
+        cd ${{ github.workspace }}/Dependencies
+        cmd.exe /c call ..\premake.sh gmake ${{ matrix.premake_arch }}
+
+    - name: Premake Core
+      run: |
+        cd ${{ github.workspace }}
+        cmd.exe /c call premake.bat gmake ${{ matrix.premake_arch }} ${{ matrix.premake_shared }}
+
+    - name: Build Dependencies ${{ matrix.config }}
+      run: |
+        cd ${{ github.workspace }}/Dependencies
+        gmake ${{ matrix.config }}
+
+    - name: Build Core ${{ matrix.config }}
+      run: |
+        cd ${{ github.workspace }}
+        gmake ${{ matrix.config }}
+
+  build-windows:
+    strategy:
+      matrix:
+        config: [Debug, Intermediate, Profile, Release]
+        premake_arch: ["", "--arch=x86"]
+        premake_shared: ["", "--shared"]
+
+    name: Windows ${{ matrix.config }} ${{ matrix.premake_arch }} ${{ matrix.premake_shared }}
     runs-on: [windows-latest]
 
     steps:
