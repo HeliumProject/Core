@@ -10,9 +10,10 @@ jobs:
   build:
     strategy:
       matrix:
+        shared: ["", "--shared"]
         configuration: [Debug, Intermediate, Profile, Release]
 
-    name: Windows ${{ matrix.configuration }}
+    name: Windows ${{ matrix.configuration }} ${{ matrix.shared }}
     runs-on: [windows-latest]
 
     steps:
@@ -32,7 +33,7 @@ jobs:
     - name: Premake Core
       run: |
         cd ${{ github.workspace }}
-        cmd.exe /c call premake.bat vs2022
+        cmd.exe /c call premake.bat vs2022 ${{ matrix.shared }}
 
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v1.0.2
