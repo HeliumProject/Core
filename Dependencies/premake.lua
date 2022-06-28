@@ -92,14 +92,14 @@ end
 
 newoption
 {
-	trigger = "architecture",
+	trigger = "arch",
 	description = "Specify architecture (see premake 'architecture' action for choices)",
 	default = (function() if os.is64bit() then return 'x86_64' else return 'x86' end end)(),
 }
 
 Helium.DoBasicWorkspaceSettings = function()
 
-	architecture( _OPTIONS[ "architecture" ] )
+	architecture( _OPTIONS[ "arch" ] )
 	location "Build"
 	objdir "Build"
 

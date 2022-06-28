@@ -61,7 +61,7 @@ file:close();
 
 print("Writing platform.txt...")
 local file = io.open("./Build/platform.txt", "w");
-if _OPTIONS[ "architecture" ] == 'x86_64' then
+if _OPTIONS[ "arch" ] == 'x86_64' then
 	file:write("x64\n");
 else
 	file:write("Win32\n");
