@@ -37,12 +37,12 @@ jobs:
     - name: Build Dependencies ${{ matrix.config }}
       run: |
         cd ${{ github.workspace }}/Dependencies
-        ./make ${{ matrix.config }}
+        ./make.sh ${{ matrix.config }}
 
     - name: Build Core ${{ matrix.config }}
       run: |
         cd ${{ github.workspace }}
-        ./make ${{ matrix.config }}
+        ./make.sh ${{ matrix.config }}
 
   build-macos:
     strategy:
@@ -73,12 +73,12 @@ jobs:
     - name: Build Dependencies ${{ matrix.config }}
       run: |
         cd ${{ github.workspace }}/Dependencies
-        ./make ${{ matrix.config }}
+        ./make.sh ${{ matrix.config }}
 
     - name: Build Core ${{ matrix.config }}
       run: |
         cd ${{ github.workspace }}
-        ./make ${{ matrix.config }}
+        ./make.sh ${{ matrix.config }}
 
   build-windows:
     strategy:
