@@ -12,7 +12,7 @@ jobs:
     strategy:
       matrix:
         config: [Debug, Intermediate, Profile, Release]
-        premake_arch: ["", "--arch=x86"]
+        premake_arch: [""]
         premake_shared: ["", "--shared"]
 
     name: GNU/Linux ${{ matrix.config }} ${{ matrix.premake_arch }} ${{ matrix.premake_shared }}
@@ -48,7 +48,7 @@ jobs:
     strategy:
       matrix:
         config: [Debug, Intermediate, Profile, Release]
-        premake_arch: ["", "--arch=x86"]
+        premake_arch: [""]
         premake_shared: ["", "--shared"]
 
     name: macOS ${{ matrix.config }} ${{ matrix.premake_arch }} ${{ matrix.premake_shared }}
@@ -112,22 +112,22 @@ jobs:
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v1.0.2
 
-    - name: Build Dependencies ${{ matrix.config }}
+    - name: Build Dependencies x64 ${{ matrix.config }}
       if: ${{ matrix.premake_arch == '' }}
       run: |
         MSBuild.exe Dependencies\Build\Dependencies.sln -p:Configuration=${{ matrix.config }} /p:Platform=x64
 
-    - name: Build Core ${{ matrix.config }}
+    - name: Build Core x64 ${{ matrix.config }}
       if: ${{ matrix.premake_arch == '' }}
       run: |
         MSBuild.exe Build\Core.sln -p:Configuration=${{ matrix.config }} /p:Platform=x64
 
-    - name: Build Dependencies ${{ matrix.config }}
+    - name: Build Dependencies Win32 ${{ matrix.config }}
       if: ${{ matrix.premake_arch == '--arch=x86' }}
       run: |
         MSBuild.exe Dependencies\Build\Dependencies.sln -p:Configuration=${{ matrix.config }} /p:Platform=Win32
 
-    - name: Build Core ${{ matrix.config }}
+    - name: Build Core Win32 ${{ matrix.config }}
       if: ${{ matrix.premake_arch == '--arch=x86' }}
       run: |
         MSBuild.exe Build\Core.sln -p:Configuration=${{ matrix.config }} /p:Platform=Win32
