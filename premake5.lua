@@ -371,19 +371,3 @@ project( "MathTests" )
 		"Foundation",
 		"Platform",
 	}
-
--- These are breadcrumbs for the travis scripts
-
-print("Writing solution.txt...")
-local file = io.open("./Build/solution.txt", "w");
-file:write("Core\n");
-file:close();
-
-print("Writing platform.txt...")
-local file = io.open("./Build/platform.txt", "w");
-if _OPTIONS[ "arch" ] == 'x86_64' then
-	file:write("x64\n");
-else
-	file:write("Win32\n");
-end
-file:close();
