@@ -1,6 +1,12 @@
+[submodule "Dependencies/glfw"]
+	path = Dependencies/glfw
+	url = https://github.com/HeliumProject/glfw.git
 [submodule "Dependencies/googletest"]
 	path = Dependencies/googletest
 	url = https://github.com/HeliumProject/googletest.git
+[submodule "Dependencies/imgui"]
+	path = Dependencies/imgui
+	url = https://github.com/HeliumProject/imgui.git
 [submodule "Dependencies/mongo-c"]
 	path = Dependencies/mongo-c
 	url = https://github.com/HeliumProject/mongo-c.git
