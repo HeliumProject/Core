@@ -12,7 +12,7 @@
 
 #include <time.h>
 
-HELIUM_DEFINE_BASE_STRUCT( Helium::Persist::BsonDate );
+HELIUM_DEFINE_BASE_STRUCT( Helium::Persist::BsonDateTime );
 HELIUM_DEFINE_BASE_STRUCT( Helium::Persist::BsonObjectId );
 HELIUM_DEFINE_BASE_STRUCT( Helium::Persist::BsonGeoPoint );
 HELIUM_DEFINE_BASE_STRUCT( Helium::Persist::BsonGeoLineString );
@@ -22,40 +22,21 @@ using namespace Helium;
 using namespace Helium::Reflect;
 using namespace Helium::Persist;
 
-const char* Persist::GetBsonErrorString( int status )
-{
-	// if this is non-power-of-two then we have multiple errors
-	HELIUM_ASSERT( ( abs(status) & ( abs(status) - 1 ) ) == 0 );
-
-	switch( status )
-	{
-	case BSON_SIZE_OVERFLOW:        return "Trying to create a BSON object larger than INT_MAX";
-	case BSON_NOT_UTF8:             return "A key or a string is not valid UTF-8";
-	case BSON_FIELD_HAS_DOT:        return "A key contains '.' character";
-	case BSON_FIELD_INIT_DOLLAR:    return "A key starts with '$' character";
-	case BSON_ALREADY_FINISHED:     return "Trying to modify a finished BSON object";
-	case BSON_NOT_IN_SUBOBJECT:     return "Trying bson_append_finish_object() and not in sub";
-	case BSON_DOES_NOT_OWN_DATA:    return "Trying to expand a BSON object which does not own its data block";
-	}
-
-	return "Unknown error";
-}
-
 BsonObjectId BsonObjectId::Null;
 
-void BsonDate::PopulateMetaType( Reflect::MetaStruct& type )
+void BsonDateTime::PopulateMetaType( Reflect::MetaStruct& type )
 {
-	type.AddField( &BsonDate::millis, "millis" );
+	type.AddField( &BsonDateTime::millis, "millis" );
 }
 
-BsonDate BsonDate::Now()
+BsonDateTime BsonDateTime::Now()
 {
     time_t t;
     time( &t );
 
-    BsonDate d;
-    d.millis = t * 1000;
-    return d;
+    BsonDateTime dt;
+    dt.millis = t * 1000;
+    return dt;
 }
 
 void BsonObjectId::IntoString( String& str ) const
@@ -67,7 +48,7 @@ void BsonObjectId::IntoString( String& str ) const
 
 void BsonObjectId::FromString( const String& str )
 {
-	bson_oid_from_string( (bson_oid_t*)this, str.GetData() );
+	bson_oid_init_from_string( (bson_oid_t*)this, str.GetData() );
 }
 
 void BsonObjectId::PopulateMetaType( Reflect::MetaStruct& type )
@@ -122,7 +103,7 @@ void ArchiveWriterBson::WriteToStream( const ObjectPtr* objects, size_t count, S
 	archive.Close();
 }
 
-void ArchiveWriterBson::WriteToBson( const ObjectPtr& object, bson* b, const char* name, Reflect::ObjectIdentifier* identifier, uint32_t flags )
+void ArchiveWriterBson::WriteToBson( const ObjectPtr& object, bson_t* b, const char* name, Reflect::ObjectIdentifier* identifier, uint32_t flags )
 {
 	ArchiveWriterBson archive ( NULL, identifier, flags );
 	archive.SerializeInstance( b, name, object, object->GetMetaClass(), object );
@@ -168,12 +149,13 @@ void ArchiveWriterBson::Write( const ObjectPtr* objects, size_t count )
 	// the master object
 	m_Objects.AddArray( objects, count );
 
-	bson b[1];
-	bson_init( b );
+	bson_t bson;
+	bson_init( &bson );
 
 	try
 	{
-		HELIUM_VERIFY( BSON_OK == bson_append_start_array( b, "objects" ) );
+		bson_t childArray;
+		HELIUM_VERIFY( bson_append_array_begin( &bson, "objects", -1, &childArray) );
 
 		// objects can get changed during this iteration (in Identify), so use indices
 		for ( size_t index = 0; index < m_Objects.GetSize(); ++index )
@@ -183,32 +165,33 @@ void ArchiveWriterBson::Write( const ObjectPtr* objects, size_t count )
 
 			char num[16];
 			Helium::StringPrint( num, "%d", index );
-			HELIUM_VERIFY( BSON_OK == bson_append_start_object( b, num ) );
-			SerializeInstance( b, objectClass->m_Name, object, objectClass, object );
-			HELIUM_VERIFY( BSON_OK == bson_append_finish_object( b ) );
+
+			bson_t objectDocument;
+			HELIUM_VERIFY( bson_append_document_begin( &childArray, num, -1, &objectDocument ) );
+			SerializeInstance( &objectDocument, objectClass->m_Name, object, objectClass, object );
+			HELIUM_VERIFY( bson_append_document_end( &childArray, &objectDocument ) );
 
 			info.m_State = ArchiveStates::ObjectProcessed;
 			info.m_Progress = (int)(((float)(index) / (float)m_Objects.GetSize()) * 100.0f);
 			e_Status.Raise( info );
 		}
 
-		HELIUM_VERIFY( BSON_OK == bson_append_finish_array( b ) );
+		HELIUM_VERIFY( bson_append_array_end( &bson, &childArray ) );
 
 		// notify completion of last object processed
 		info.m_State = ArchiveStates::ObjectProcessed;
 		info.m_Progress = 100;
 		e_Status.Raise( info );
 
-		HELIUM_VERIFY( BSON_OK == bson_finish( b ) );
-		m_Stream->Write( bson_data( b ), bson_size( b ), 1 );
+		m_Stream->Write( bson_get_data( &bson ), bson.len, 1 );
 	}
 	catch( ... )
 	{
-		bson_destroy( b );
+		bson_destroy( &bson );
 		throw;
 	}
 
-	bson_destroy( b );
+	bson_destroy( &bson );
 
 	// do cleanup
 	m_Stream->Flush();
@@ -218,7 +201,7 @@ void ArchiveWriterBson::Write( const ObjectPtr* objects, size_t count )
 	e_Status.Raise( info );
 }
 
-void ArchiveWriterBson::SerializeInstance( bson* b, const char* name, void* instance, const MetaStruct* structure, Object* object )
+void ArchiveWriterBson::SerializeInstance( bson_t* bson, const char* name, void* instance, const MetaStruct* structure, Object* object )
 {
 #if PERSIST_ARCHIVE_VERBOSE
 	Log::Print("Serializing %s\n", structure->m_Name );
@@ -248,9 +231,13 @@ void ArchiveWriterBson::SerializeInstance( bson* b, const char* name, void* inst
 		}
 	}
 
+	bson_t* parent = bson;
+	bson_t childDocument;
+
 	if ( name )
 	{
-		HELIUM_VERIFY( BSON_OK == bson_append_start_object( b, name ) );
+		HELIUM_VERIFY( bson_append_document_begin( bson, name, -1, &childDocument ) );
+		bson = &childDocument;
 	}
 
 	object->PreSerialize( NULL );
@@ -263,7 +250,7 @@ void ArchiveWriterBson::SerializeInstance( bson* b, const char* name, void* inst
 
 		object->PreSerialize( field );
 
-		SerializeField( b, instance, field, object );
+		SerializeField( bson, instance, field, object );
 
 		object->PostSerialize( field );
 	}
@@ -272,11 +259,12 @@ void ArchiveWriterBson::SerializeInstance( bson* b, const char* name, void* inst
 
 	if ( name )
 	{
-		HELIUM_VERIFY( BSON_OK == bson_append_finish_object( b ) );
+		HELIUM_VERIFY( bson_append_document_end( parent, &childDocument ) );
+		bson = parent;
 	}
 }
 
-void ArchiveWriterBson::SerializeField( bson* b, void* instance, const Field* field, Object* object )
+void ArchiveWriterBson::SerializeField( bson_t* bson, void* instance, const Field* field, Object* object )
 {
 #if PERSIST_ARCHIVE_VERBOSE
 	Log::Print("Serializing field %s\n", field->m_Name);
@@ -284,24 +272,25 @@ void ArchiveWriterBson::SerializeField( bson* b, void* instance, const Field* fi
 
 	if ( field->m_Count > 1 )
 	{
-		HELIUM_VERIFY( BSON_OK == bson_append_start_array( b, field->m_Name ) );
+		bson_t childArray;
+		HELIUM_VERIFY( bson_append_array_begin( bson, field->m_Name, -1, &childArray ) );
 
 		for ( uint32_t i=0; i<field->m_Count; ++i )
 		{
 			char num[16];
 			Helium::StringPrint( num, "%d", i );
-			SerializeTranslator( b, num, Pointer ( field, instance, object, i ), field->m_Translator, field, object );
+			SerializeTranslator( &childArray, num, Pointer ( field, instance, object, i ), field->m_Translator, field, object );
 		}
 
-		HELIUM_VERIFY( BSON_OK == bson_append_finish_array( b ) );
+		HELIUM_VERIFY( bson_append_array_end( bson, &childArray ) );
 	}
 	else
 	{
-		SerializeTranslator( b, field->m_Name, Pointer ( field, instance, object ), field->m_Translator, field, object );
+		SerializeTranslator( bson, field->m_Name, Pointer ( field, instance, object ), field->m_Translator, field, object );
 	}
 }
 
-void ArchiveWriterBson::SerializeTranslator( bson* b, const char* name, Pointer pointer, Translator* translator, const Field* field, Object* object )
+void ArchiveWriterBson::SerializeTranslator( bson_t* bson, const char* name, Pointer pointer, Translator* translator, const Field* field, Object* object )
 {
 	switch ( translator->GetMetaId() )
 	{
@@ -315,53 +304,53 @@ void ArchiveWriterBson::SerializeTranslator( bson* b, const char* name, Pointer 
 			switch ( scalar->m_Type )
 			{
 			case ScalarTypes::Boolean:
-				HELIUM_VERIFY( BSON_OK == bson_append_bool( b, name, pointer.As<bool>() ) );
+				HELIUM_VERIFY( bson_append_bool( bson, name, -1, pointer.As<bool>() ) );
 				break;
 
 			case ScalarTypes::Unsigned8:
-				HELIUM_VERIFY( BSON_OK == bson_append_int( b, name, pointer.As<uint8_t>() ) );
+				HELIUM_VERIFY( bson_append_int32( bson, name, -1, pointer.As<uint8_t>() ) );
 				break;
 
 			case ScalarTypes::Unsigned16:
-				HELIUM_VERIFY( BSON_OK == bson_append_int( b, name, pointer.As<uint16_t>() ) );
+				HELIUM_VERIFY( bson_append_int32( bson, name, -1, pointer.As<uint16_t>() ) );
 				break;
 
 			case ScalarTypes::Unsigned32:
-				HELIUM_VERIFY( BSON_OK == bson_append_int( b, name, pointer.As<uint32_t>() ) );
+				HELIUM_VERIFY( bson_append_int32( bson, name, -1, pointer.As<uint32_t>() ) );
 				break;
 
 			case ScalarTypes::Unsigned64:
-				HELIUM_VERIFY( BSON_OK == bson_append_long( b, name, pointer.As<int64_t>() ) ); // uint64_t isn't supported, just hope for the best
+				HELIUM_VERIFY( bson_append_int64( bson, name, -1, pointer.As<int64_t>() ) ); // uint64_t isn't supported, just hope for the best
 				break;
 
 			case ScalarTypes::Signed8:
-				HELIUM_VERIFY( BSON_OK == bson_append_int( b, name, pointer.As<int8_t>() ) );
+				HELIUM_VERIFY( bson_append_int32( bson, name, -1, pointer.As<int8_t>() ) );
 				break;
 
 			case ScalarTypes::Signed16:
-				HELIUM_VERIFY( BSON_OK == bson_append_int( b, name, pointer.As<int16_t>() ) );
+				HELIUM_VERIFY( bson_append_int32( bson, name, -1, pointer.As<int16_t>() ) );
 				break;
 
 			case ScalarTypes::Signed32:
-				HELIUM_VERIFY( BSON_OK == bson_append_int( b, name, pointer.As<int32_t>() ) );
+				HELIUM_VERIFY( bson_append_int32( bson, name, -1, pointer.As<int32_t>() ) );
 				break;
 
 			case ScalarTypes::Signed64:
-				HELIUM_VERIFY( BSON_OK == bson_append_long( b, name, pointer.As<int64_t>() ) );
+				HELIUM_VERIFY( bson_append_int64( bson, name, -1, pointer.As<int64_t>() ) );
 				break;
 
 			case ScalarTypes::Float32:
-				HELIUM_VERIFY( BSON_OK == bson_append_double( b, name, pointer.As<float32_t>() ) );
+				HELIUM_VERIFY( bson_append_double( bson, name, -1, pointer.As<float32_t>() ) );
 				break;
 
 			case ScalarTypes::Float64:
-				HELIUM_VERIFY( BSON_OK == bson_append_double( b, name, pointer.As<float64_t>() ) );
+				HELIUM_VERIFY( bson_append_double( bson, name, -1, pointer.As<float64_t>() ) );
 				break;
 
 			case ScalarTypes::String:
 				String str;
 				scalar->Print( pointer, str, this );
-				HELIUM_VERIFY( BSON_OK == bson_append_string( b, name, str.GetData() ) );
+				HELIUM_VERIFY( bson_append_utf8( bson, name, -1, str.GetData(), (int)str.GetSize() ) );
 				break;
 			}
 			break;
@@ -371,19 +360,19 @@ void ArchiveWriterBson::SerializeTranslator( bson* b, const char* name, Pointer 
 		{
 			StructureTranslator* structure = static_cast< StructureTranslator* >( translator );
 			const MetaStruct* metaStruct = structure->GetMetaStruct();
-			if ( metaStruct == Reflect::GetMetaStruct< BsonDate >() )
+			if ( metaStruct == Reflect::GetMetaStruct< BsonDateTime >() )
 			{
-				bson_append_date( b, name, pointer.As< BsonDate >().millis );
+				bson_append_date_time( bson, name, -1, pointer.As< BsonDateTime >().millis );
 			}
 			else if ( metaStruct == Reflect::GetMetaStruct< BsonObjectId >() )
 			{
 				bson_oid_t oid;
 				MemoryCopy( oid.bytes, pointer.As< BsonObjectId >().bytes, sizeof( bson_oid_t ) );
-				bson_append_oid( b, name, &oid );
+				bson_append_oid( bson, name, -1, &oid );
 			}
 			else
 			{
-				SerializeInstance( b, name, pointer.m_Address, structure->GetMetaStruct(), object );
+				SerializeInstance( bson, name, pointer.m_Address, structure->GetMetaStruct(), object );
 			}
 			break;
 		}
@@ -396,17 +385,18 @@ void ArchiveWriterBson::SerializeTranslator( bson* b, const char* name, Pointer 
 			DynamicArray< Pointer > items;
 			set->GetItems( pointer, items );
 
-			HELIUM_VERIFY( BSON_OK == bson_append_start_array( b, name ) );
+			bson_t childArray;
+			HELIUM_VERIFY( bson_append_array_begin( bson, name, -1, &childArray ) );
 
 			uint32_t index = 0;
 			for ( DynamicArray< Pointer >::Iterator itr = items.Begin(), end = items.End(); itr != end; ++itr, ++index )
 			{
 				char num[16];
 				Helium::StringPrint( num, "%d", index );
-				SerializeTranslator( b, num, *itr, itemTranslator, field, object );
+				SerializeTranslator( &childArray, num, *itr, itemTranslator, field, object );
 			}
 
-			HELIUM_VERIFY( BSON_OK == bson_append_finish_array( b ) );
+			HELIUM_VERIFY( bson_append_array_end( bson, &childArray ) );
 			break;
 		}
 
@@ -418,17 +408,18 @@ void ArchiveWriterBson::SerializeTranslator( bson* b, const char* name, Pointer 
 			DynamicArray< Pointer > items;
 			sequence->GetItems( pointer, items );
 
-			HELIUM_VERIFY( BSON_OK == bson_append_start_array( b, name ) );
+			bson_t childArray;
+			HELIUM_VERIFY( bson_append_array_begin( bson, name, -1, &childArray ) );
 
 			uint32_t index = 0;
 			for ( DynamicArray< Pointer >::Iterator itr = items.Begin(), end = items.End(); itr != end; ++itr, ++index )
 			{
 				char num[16];
 				Helium::StringPrint( num, "%d", index );
-				SerializeTranslator( b, num, *itr, itemTranslator, field, object );
+				SerializeTranslator( &childArray, num, *itr, itemTranslator, field, object );
 			}
 
-			HELIUM_VERIFY( BSON_OK == bson_append_finish_array( b ) );
+			HELIUM_VERIFY( bson_append_array_end( bson, &childArray ) );
 			break;
 		}
 
@@ -441,7 +432,8 @@ void ArchiveWriterBson::SerializeTranslator( bson* b, const char* name, Pointer 
 			DynamicArray< Pointer > keys, values;
 			association->GetItems( pointer, keys, values );
 
-			HELIUM_VERIFY( BSON_OK == bson_append_start_object( b, name ) );
+			bson_t childDocument;
+			HELIUM_VERIFY( bson_append_document_begin( bson, name, -1, &childDocument ) );
 
 			for ( DynamicArray< Pointer >::Iterator keyItr = keys.Begin(), valueItr = values.Begin(), keyEnd = keys.End(), valueEnd = values.End();
 				keyItr != keyEnd && valueItr != valueEnd;
@@ -449,10 +441,10 @@ void ArchiveWriterBson::SerializeTranslator( bson* b, const char* name, Pointer 
 			{
 				String name;
 				keyTranslator->Print( *keyItr, name, m_Identifier );
-				SerializeTranslator( b, name.GetData(), *valueItr, valueTranslator, field, object );
+				SerializeTranslator( &childDocument, name.GetData(), *valueItr, valueTranslator, field, object );
 			}
 
-			HELIUM_VERIFY( BSON_OK == bson_append_finish_object( b ) );
+			HELIUM_VERIFY( bson_append_document_end( bson, &childDocument ) );
 			break;
 		}
 
@@ -494,7 +486,7 @@ void ArchiveReaderBson::ReadFromStream( Stream& stream, DynamicArray< ObjectPtr 
 	archive.Close();
 }
 
-void ArchiveReaderBson::ReadFromBson( bson_iterator* i, const ObjectPtr& object, ObjectResolver* resolver, uint32_t flags )
+void ArchiveReaderBson::ReadFromBson( bson_iter_t* i, const ObjectPtr& object, ObjectResolver* resolver, uint32_t flags )
 {
 	ArchiveReaderBson archive( NULL, resolver, flags );
 	archive.DeserializeInstance( i, object.Ptr(), object->GetMetaClass(), object );
@@ -542,13 +534,13 @@ void ArchiveReaderBson::Read( DynamicArray< Reflect::ObjectPtr >& objects )
 
 	m_Objects = objects;
 
-	bson_iterator i[1];
-	bson_iterator_init( i, m_Bson );
+	bson_iter_t iterator;
+	bson_iter_init( &iterator, &m_Bson );
 
-	if ( HELIUM_VERIFY( bson_iterator_type( i ) == BSON_ARRAY ) )
+	if ( HELIUM_VERIFY( bson_iter_type( &iterator ) == BSON_TYPE_ARRAY ) )
 	{
-		bson_iterator_subiterator( i, m_Next );
-		for ( size_t i=0; bson_iterator_more( m_Next ); ++i )
+		bson_iter_recurse( &iterator, &m_Next );
+		for ( size_t i=0; bson_iter_next( &m_Next ); ++i )
 		{
 			if ( i+1 > m_Objects.GetSize() )
 			{
@@ -573,7 +565,7 @@ void ArchiveReaderBson::Read( DynamicArray< Reflect::ObjectPtr >& objects )
 
 	objects = m_Objects;
 
-	bson_destroy( m_Bson );
+	bson_destroy( &m_Bson );
 }
 
 void ArchiveReaderBson::Start()
@@ -598,24 +590,19 @@ void ArchiveReaderBson::Start()
 	m_Stream->Read( m_Buffer.GetData(),  static_cast< size_t >( m_Size ), 1 );
 	m_Buffer[ static_cast< size_t >( m_Size ) ] = '\0';
 
-	if ( !HELIUM_VERIFY( BSON_OK == bson_init_finished_data( m_Bson, reinterpret_cast< char* >( m_Buffer.GetData() ), false ) ) )
+	if ( !HELIUM_VERIFY( bson_init_static( &m_Bson, m_Buffer.GetData(), m_Size ) ) )
 	{
-		throw Persist::Exception( "Bson error: ", GetBsonErrorString( m_Bson->err ) );
+		throw Persist::Exception( "Bson error." );
 	}
 }
 
 bool ArchiveReaderBson::ReadNext( Reflect::ObjectPtr& object, size_t index )
 {
-	if ( !bson_iterator_more( m_Next ) )
+	bson_iter_t iterator;
+	bson_iter_recurse( &m_Next, &iterator );
+	if ( HELIUM_VERIFY( bson_iter_type( &iterator ) == BSON_TYPE_DOCUMENT ) )
 	{
-		return false;
-	}
-
-	bson_iterator i[1];
-	bson_iterator_subiterator( m_Next, i );
-	if ( HELIUM_VERIFY( bson_iterator_type( i ) == BSON_OBJECT ) )
-	{
-		const char* key = bson_iterator_key( i );
+		const char* key = bson_iter_key( &iterator );
 
 		uint32_t objectClassCrc = 0;
 		if ( key )
@@ -636,26 +623,25 @@ bool ArchiveReaderBson::ReadNext( Reflect::ObjectPtr& object, size_t index )
 
 		if ( object.ReferencesObject() )
 		{
-			bson_iterator elem[1];
-			bson_iterator_subiterator( i, elem );
-			DeserializeInstance( elem, object, object->GetMetaClass(), object );
+			bson_iter_t child;
+			bson_iter_recurse( &iterator, &child );
+			DeserializeInstance( &child, object, object->GetMetaClass(), object );
 		}
 	}
-
-	bson_iterator_next( m_Next );
-	return true;
+	
+	return bson_iter_next( &m_Next );
 }
 
-void ArchiveReaderBson::DeserializeInstance( bson_iterator* i, void* instance, const MetaStruct* structure, Object* object )
+void ArchiveReaderBson::DeserializeInstance( bson_iter_t* iterator, void* instance, const MetaStruct* structure, Object* object )
 {
 #if PERSIST_ARCHIVE_VERBOSE
 	Log::Print("Deserializing %s\n", structure->m_Name);
 #endif
 	object->PreDeserialize( NULL );
 
-	while( bson_iterator_next( i ) )
+	while( bson_iter_next( iterator ) )
 	{
-		const char* key = bson_iterator_key( i );
+		const char* key = bson_iter_key( iterator );
 
 		uint32_t fieldCrc = 0;
 		if ( key )
@@ -668,7 +654,7 @@ void ArchiveReaderBson::DeserializeInstance( bson_iterator* i, void* instance, c
 		{
 			object->PreDeserialize( field );
 
-			DeserializeField( i, instance, field, object );
+			DeserializeField( iterator, instance, field, object );
 
 			object->PostDeserialize( field );
 		}
@@ -696,7 +682,7 @@ void ArchiveReaderBson::DeserializeInstance( bson_iterator* i, void* instance, c
 	object->PostDeserialize( NULL );
 }
 
-void ArchiveReaderBson::DeserializeField( bson_iterator* i, void* instance, const Field* field, Object* object )
+void ArchiveReaderBson::DeserializeField( bson_iter_t* iterator, void* instance, const Field* field, Object* object )
 {
 #if PERSIST_ARCHIVE_VERBOSE
 	Log::Print("Deserializing field %s\n", field->m_Name);
@@ -704,51 +690,51 @@ void ArchiveReaderBson::DeserializeField( bson_iterator* i, void* instance, cons
 	
 	if ( field->m_Count > 1 )
 	{
-		if ( bson_iterator_type( i ) == BSON_ARRAY )
+		if ( bson_iter_type( iterator ) == BSON_TYPE_ARRAY )
 		{
-			bson_iterator elem[1];
-			bson_iterator_subiterator( i, elem );
+			bson_iter_t child;
+			bson_iter_recurse( iterator, &child );
 
 			uint32_t index = 0;
-			while( bson_iterator_next( elem ) )
+			while( bson_iter_next( &child ) )
 			{
 				if ( index >= field->m_Count )
 				{
 					break;
 				}
 
-				DeserializeTranslator( elem, Pointer ( field, instance, object, index++ ), field->m_Translator, field, object );
+				DeserializeTranslator( &child, Pointer ( field, instance, object, index++ ), field->m_Translator, field, object );
 			}
 		}
 		else
 		{
-			DeserializeTranslator( i, Pointer ( field, instance, object, 0 ), field->m_Translator, field, object );
+			DeserializeTranslator( iterator, Pointer ( field, instance, object, 0 ), field->m_Translator, field, object );
 		}
 	}
 	else
 	{
-		DeserializeTranslator( i, Pointer ( field, instance, object ), field->m_Translator, field, object );
+		DeserializeTranslator( iterator, Pointer ( field, instance, object ), field->m_Translator, field, object );
 	}
 }
 
-void ArchiveReaderBson::DeserializeTranslator( bson_iterator* i, Pointer pointer, Translator* translator, const Field* field, Object* object )
+void ArchiveReaderBson::DeserializeTranslator( bson_iter_t* iterator, Pointer pointer, Translator* translator, const Field* field, Object* object )
 {
-	switch ( bson_iterator_type( i ) )
+	switch ( bson_iter_type( iterator ) )
 	{
-	case BSON_BOOL:
+	case BSON_TYPE_BOOL:
 		{
 			if ( translator->IsA( MetaIds::ScalarTranslator) )
 			{
 				ScalarTranslator* scalar = static_cast< ScalarTranslator* >( translator );
 				if ( scalar->m_Type == ScalarTypes::Boolean )
 				{
-					pointer.As<bool>() = bson_iterator_bool( i ) != 0;
+					pointer.As<bool>() = bson_iter_bool( iterator ) != 0;
 				}
 			}
 			break;
 		}
 
-	case BSON_INT:
+	case BSON_TYPE_INT32:
 		{
 			if ( translator->IsA( MetaIds::ScalarTranslator ) )
 			{
@@ -761,50 +747,50 @@ void ArchiveReaderBson::DeserializeTranslator( bson_iterator* i, Pointer pointer
 					break;
 				
 				case ScalarTypes::Unsigned8:
-					RangeCastInteger( bson_iterator_int( i ), pointer.As<uint8_t>(), clamp );
+					RangeCastInteger( bson_iter_int32( iterator ), pointer.As<uint8_t>(), clamp );
 					break;
 
 				case ScalarTypes::Unsigned16:
-					RangeCastInteger( bson_iterator_int( i ), pointer.As<uint16_t>(), clamp );
+					RangeCastInteger( bson_iter_int32( iterator ), pointer.As<uint16_t>(), clamp );
 					break;
 
 				case ScalarTypes::Unsigned32:
-					RangeCastInteger( bson_iterator_int( i ), pointer.As<uint32_t>(), clamp );
+					RangeCastInteger( bson_iter_int32( iterator ), pointer.As<uint32_t>(), clamp );
 					break;
 
 				case ScalarTypes::Unsigned64:
-					RangeCastInteger( bson_iterator_int( i ), pointer.As<uint64_t>(), clamp );
+					RangeCastInteger( bson_iter_int32( iterator ), pointer.As<uint64_t>(), clamp );
 					break;
 
 				case ScalarTypes::Signed8:
-					RangeCastInteger( bson_iterator_int( i ), pointer.As<int8_t>(), clamp );
+					RangeCastInteger( bson_iter_int32( iterator ), pointer.As<int8_t>(), clamp );
 					break;
 
 				case ScalarTypes::Signed16:
-					RangeCastInteger( bson_iterator_int( i ), pointer.As<int16_t>(), clamp );
+					RangeCastInteger( bson_iter_int32( iterator ), pointer.As<int16_t>(), clamp );
 					break;
 
 				case ScalarTypes::Signed32:
-					RangeCastInteger( bson_iterator_int( i ), pointer.As<int32_t>(), clamp );
+					RangeCastInteger( bson_iter_int32( iterator ), pointer.As<int32_t>(), clamp );
 					break;
 
 				case ScalarTypes::Signed64:
-					RangeCastInteger( bson_iterator_int( i ), pointer.As<int64_t>(), clamp );
+					RangeCastInteger( bson_iter_int32( iterator ), pointer.As<int64_t>(), clamp );
 					break;
 
 				case ScalarTypes::Float32:
-					RangeCastFloat( bson_iterator_int( i ), pointer.As<float32_t>(), clamp );
+					RangeCastFloat( bson_iter_int32( iterator ), pointer.As<float32_t>(), clamp );
 					break;
 
 				case ScalarTypes::Float64:
-					RangeCastFloat( bson_iterator_int( i ), pointer.As<float64_t>(), clamp );
+					RangeCastFloat( bson_iter_int32( iterator ), pointer.As<float64_t>(), clamp );
 					break;
 				}
 			}
 			break;
 		}
 
-	case BSON_LONG:
+	case BSON_TYPE_INT64:
 		{
 			if ( translator->IsA( MetaIds::ScalarTranslator ) )
 			{
@@ -817,50 +803,50 @@ void ArchiveReaderBson::DeserializeTranslator( bson_iterator* i, Pointer pointer
 					break;
 				
 				case ScalarTypes::Unsigned8:
-					RangeCastInteger( bson_iterator_long( i ), pointer.As<uint8_t>(), clamp );
+					RangeCastInteger( bson_iter_int64( iterator ), pointer.As<uint8_t>(), clamp );
 					break;
 
 				case ScalarTypes::Unsigned16:
-					RangeCastInteger( bson_iterator_long( i ), pointer.As<uint16_t>(), clamp );
+					RangeCastInteger( bson_iter_int64( iterator ), pointer.As<uint16_t>(), clamp );
 					break;
 
 				case ScalarTypes::Unsigned32:
-					RangeCastInteger( bson_iterator_long( i ), pointer.As<uint32_t>(), clamp );
+					RangeCastInteger( bson_iter_int64( iterator ), pointer.As<uint32_t>(), clamp );
 					break;
 
 				case ScalarTypes::Unsigned64:
-					RangeCastInteger( bson_iterator_long( i ), pointer.As<uint64_t>(), clamp );
+					RangeCastInteger( bson_iter_int64( iterator ), pointer.As<uint64_t>(), clamp );
 					break;
 
 				case ScalarTypes::Signed8:
-					RangeCastInteger( bson_iterator_long( i ), pointer.As<int8_t>(), clamp );
+					RangeCastInteger( bson_iter_int64( iterator ), pointer.As<int8_t>(), clamp );
 					break;
 
 				case ScalarTypes::Signed16:
-					RangeCastInteger( bson_iterator_long( i ), pointer.As<int16_t>(), clamp );
+					RangeCastInteger( bson_iter_int64( iterator ), pointer.As<int16_t>(), clamp );
 					break;
 
 				case ScalarTypes::Signed32:
-					RangeCastInteger( bson_iterator_long( i ), pointer.As<int32_t>(), clamp );
+					RangeCastInteger( bson_iter_int64( iterator ), pointer.As<int32_t>(), clamp );
 					break;
 
 				case ScalarTypes::Signed64:
-					RangeCastInteger( bson_iterator_long( i ), pointer.As<int64_t>(), clamp );
+					RangeCastInteger( bson_iter_int64( iterator ), pointer.As<int64_t>(), clamp );
 					break;
 
 				case ScalarTypes::Float32:
-					RangeCastFloat( bson_iterator_long( i ), pointer.As<float32_t>(), clamp );
+					RangeCastFloat( bson_iter_int64( iterator ), pointer.As<float32_t>(), clamp );
 					break;
 
 				case ScalarTypes::Float64:
-					RangeCastFloat( bson_iterator_long( i ), pointer.As<float64_t>(), clamp );
+					RangeCastFloat( bson_iter_int64( iterator ), pointer.As<float64_t>(), clamp );
 					break;
 				}
 			}
 			break;
 		}
 
-	case BSON_DOUBLE:
+	case BSON_TYPE_DOUBLE:
 		{
 			if ( translator->IsA( MetaIds::ScalarTranslator ) )
 			{
@@ -873,77 +859,78 @@ void ArchiveReaderBson::DeserializeTranslator( bson_iterator* i, Pointer pointer
 					break;
 				
 				case ScalarTypes::Unsigned8:
-					RangeCastInteger( bson_iterator_double( i ), pointer.As<uint8_t>(), clamp );
+					RangeCastInteger( bson_iter_double( iterator ), pointer.As<uint8_t>(), clamp );
 					break;
 
 				case ScalarTypes::Unsigned16:
-					RangeCastInteger( bson_iterator_double( i ), pointer.As<uint16_t>(), clamp );
+					RangeCastInteger( bson_iter_double( iterator ), pointer.As<uint16_t>(), clamp );
 					break;
 
 				case ScalarTypes::Unsigned32:
-					RangeCastInteger( bson_iterator_double( i ), pointer.As<uint32_t>(), clamp );
+					RangeCastInteger( bson_iter_double( iterator ), pointer.As<uint32_t>(), clamp );
 					break;
 
 				case ScalarTypes::Unsigned64:
-					RangeCastInteger( bson_iterator_double( i ), pointer.As<uint64_t>(), clamp );
+					RangeCastInteger( bson_iter_double( iterator ), pointer.As<uint64_t>(), clamp );
 					break;
 
 				case ScalarTypes::Signed8:
-					RangeCastInteger( bson_iterator_double( i ), pointer.As<int8_t>(), clamp );
+					RangeCastInteger( bson_iter_double( iterator ), pointer.As<int8_t>(), clamp );
 					break;
 
 				case ScalarTypes::Signed16:
-					RangeCastInteger( bson_iterator_double( i ), pointer.As<int16_t>(), clamp );
+					RangeCastInteger( bson_iter_double( iterator ), pointer.As<int16_t>(), clamp );
 					break;
 
 				case ScalarTypes::Signed32:
-					RangeCastInteger( bson_iterator_double( i ), pointer.As<int32_t>(), clamp );
+					RangeCastInteger( bson_iter_double( iterator ), pointer.As<int32_t>(), clamp );
 					break;
 
 				case ScalarTypes::Signed64:
-					RangeCastInteger( bson_iterator_double( i ), pointer.As<int64_t>(), clamp );
+					RangeCastInteger( bson_iter_double( iterator ), pointer.As<int64_t>(), clamp );
 					break;
 
 				case ScalarTypes::Float32:
-					RangeCastFloat( bson_iterator_double( i ), pointer.As<float32_t>(), clamp );
+					RangeCastFloat( bson_iter_double( iterator ), pointer.As<float32_t>(), clamp );
 					break;
 
 				case ScalarTypes::Float64:
-					RangeCastFloat( bson_iterator_double( i ), pointer.As<float64_t>(), clamp );
+					RangeCastFloat( bson_iter_double( iterator ), pointer.As<float64_t>(), clamp );
 					break;
 				}
 			}
 			break;
 		}
 
-	case BSON_STRING:
+	case BSON_TYPE_UTF8:
 		{
 			if ( translator->IsA( MetaIds::ScalarTranslator ) )
 			{
 				ScalarTranslator* scalar = static_cast< ScalarTranslator* >( translator );
 				if ( scalar->m_Type == ScalarTypes::String )
 				{
-					String str ( bson_iterator_string( i ) );
+					uint32_t length = 0;
+					String str ( bson_iter_utf8( iterator, &length ), length );
 					scalar->Parse( str, pointer, this, m_Flags | ArchiveFlags::Notify ? true : false );
 				}
 			}
 			break;
 		}
 
-	case BSON_ARRAY:
+	case BSON_TYPE_ARRAY:
 		{
 			if ( translator->GetMetaId() == MetaIds::SetTranslator )
 			{
 				SetTranslator* set = static_cast< SetTranslator* >( translator );
 				Translator* itemTranslator = set->GetItemTranslator();
 
-				bson_iterator elem[1];
-				bson_iterator_subiterator( i, elem );
+				bson_iter_t child;
+				bson_iter_recurse( iterator, &child );
 
-				while( bson_iterator_next( elem ) )
+				while( bson_iter_next( &child ) )
 				{
 					Variable item ( itemTranslator );
-					DeserializeTranslator( elem, item, itemTranslator, field, object );
+					DeserializeTranslator( &child, item, itemTranslator, field, object );
 					set->InsertItem( pointer, item );
 				}
 			}
@@ -952,28 +939,28 @@ void ArchiveReaderBson::DeserializeTranslator( bson_iterator* i, Pointer pointer
 				SequenceTranslator* sequence = static_cast< SequenceTranslator* >( translator );
 				Translator* itemTranslator = sequence->GetItemTranslator();
 
-				bson_iterator elem[1];
-				bson_iterator_subiterator( i, elem );
+				bson_iter_t child;
+				bson_iter_recurse( iterator, &child );
 
-				while( bson_iterator_next( elem ) )
+				while( bson_iter_next( &child ) )
 				{
 					Variable item ( itemTranslator );
-					DeserializeTranslator( elem, item, itemTranslator, field, object );
+					DeserializeTranslator( &child, item, itemTranslator, field, object );
 					sequence->Insert( pointer, sequence->GetLength( pointer ), item );
 				}
 			}
 			break;
 		}
 
-	case BSON_OBJECT:
+	case BSON_TYPE_DOCUMENT:
 		{
 			if ( translator->GetMetaId() == MetaIds::StructureTranslator )
 			{
 				StructureTranslator* structure = static_cast< StructureTranslator* >( translator );
 
-				bson_iterator elem[1];
-				bson_iterator_subiterator( i, elem );
-				DeserializeInstance( elem, pointer.m_Address,  structure->GetMetaStruct(), object );
+				bson_iter_t child;
+				bson_iter_recurse( iterator, &child );
+				DeserializeInstance( &child, pointer.m_Address,  structure->GetMetaStruct(), object );
 			}
 			else if ( translator->GetMetaId() == MetaIds::AssociationTranslator )
 			{
@@ -981,37 +968,37 @@ void ArchiveReaderBson::DeserializeTranslator( bson_iterator* i, Pointer pointer
 				ScalarTranslator* keyTranslator = assocation->GetKeyTranslator();
 				Translator* valueTranslator = assocation->GetValueTranslator();
 
-				bson_iterator elem[1];
-				bson_iterator_subiterator( i, elem );
+				bson_iter_t child;
+				bson_iter_recurse( iterator, &child );
 
-				while( bson_iterator_next( elem ) )
+				while( bson_iter_next( &child ) )
 				{
 					Variable keyVariable ( keyTranslator );
 					Variable valueVariable ( valueTranslator );
-					String key ( bson_iterator_key( elem ) );
+					String key ( bson_iter_key( &child ) );
 					keyTranslator->Parse( key, keyVariable, m_Resolver );
-					DeserializeTranslator( elem, valueVariable, valueTranslator, field, object );
+					DeserializeTranslator( &child, valueVariable, valueTranslator, field, object );
 					assocation->SetItem( pointer, keyVariable, valueVariable );
 				}
 			}
 			break;
 		}
 
-	case BSON_DATE:
+	case BSON_TYPE_DATE_TIME:
 		{
 			if ( translator->GetMetaId() == MetaIds::StructureTranslator )
 			{
 				StructureTranslator* structure = static_cast< StructureTranslator* >( translator );
 				const MetaStruct* metaStruct = structure->GetMetaStruct();
-				if ( metaStruct == Reflect::GetMetaStruct< BsonDate >() )
+				if ( metaStruct == Reflect::GetMetaStruct< BsonDateTime >() )
 				{
-					pointer.As< BsonDate >().millis = bson_iterator_date( i );
+					pointer.As< BsonDateTime >().millis = bson_iter_date_time( iterator );
 				}
 			}
 			break;
 		}
 
-	case BSON_OID:
+	case BSON_TYPE_OID:
 		{
 			if ( translator->GetMetaId() == MetaIds::StructureTranslator )
 			{
@@ -1019,7 +1006,7 @@ void ArchiveReaderBson::DeserializeTranslator( bson_iterator* i, Pointer pointer
 				const MetaStruct* metaStruct = structure->GetMetaStruct();
 				if ( metaStruct == Reflect::GetMetaStruct< BsonObjectId >() )
 				{
-					MemoryCopy( pointer.As< BsonObjectId >().bytes, bson_iterator_oid( i ), sizeof( bson_oid_t ) );
+					MemoryCopy( pointer.As< BsonObjectId >().bytes, bson_iter_oid( iterator ), sizeof( bson_oid_t ) );
 				}
 			}
 			break;

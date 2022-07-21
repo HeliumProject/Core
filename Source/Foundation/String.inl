@@ -71,6 +71,17 @@ bool Helium::StringBase< CharType, Allocator >::IsEmpty() const
 	return( m_buffer.GetSize() <= 1 );
 }
 
+/// Get whether this string is non-empty.
+///
+/// @return  True if this string is non-empty, false if it is empty.
+///
+/// @see GetSize()
+template< typename CharType, typename Allocator >
+bool Helium::StringBase< CharType, Allocator >::IsOccupied() const
+{
+	return( m_buffer.GetSize() > 1 );
+}
+
 /// Resize this array, retaining any existing data that fits within the new size.
 ///
 /// If the new size is smaller than the current size, no memory will be freed for the string buffer itself, and any

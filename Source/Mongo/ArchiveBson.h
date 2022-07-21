@@ -10,33 +10,28 @@
 
 #include "Persist/Archive.h"
 
-#define MONGO_HAVE_STDINT 1
-#define MONGO_STATIC_BUILD 1
-#include <bson.h>
+#include <bson/bson.h>
 
 namespace Helium
 {
 	namespace Persist
 	{
-		const char* GetBsonErrorString( int status );
-
-		struct HELIUM_MONGO_API BsonDate : Helium::Reflect::Struct
+		struct HELIUM_MONGO_API BsonDateTime : Helium::Reflect::Struct
 		{
 			int64_t millis; // milliseconds since epoch UTC
 
-			inline BsonDate();
+			inline BsonDateTime();
 
-			inline bool operator==( const BsonDate& rhs ) const;
-			inline bool operator!=( const BsonDate& rhs ) const;
-			inline bool operator<( const BsonDate& rhs ) const;
-			inline bool operator>( const BsonDate& rhs ) const;
+			inline bool operator==( const BsonDateTime& rhs ) const;
+			inline bool operator!=( const BsonDateTime& rhs ) const;
+			inline bool operator<( const BsonDateTime& rhs ) const;
+			inline bool operator>( const BsonDateTime& rhs ) const;
 
-			static BsonDate Now();
+			static BsonDateTime Now();
 
-			HELIUM_DECLARE_BASE_STRUCT( BsonDate );
+			HELIUM_DECLARE_BASE_STRUCT( BsonDateTime );
 			static void PopulateMetaType( Helium::Reflect::MetaStruct& structure );
 		};
-		HELIUM_COMPILE_ASSERT( sizeof( bson_date_t ) == 8 );
 
 		struct HELIUM_MONGO_API BsonObjectId : Helium::Reflect::Struct
 		{
@@ -122,7 +117,7 @@ namespace Helium
 			static SmartPtr< ArchiveWriter > AllocateWriter( const FilePath& path, Reflect::ObjectIdentifier* identifier );
 			static void WriteToStream( const Reflect::ObjectPtr& object, Stream& stream, Reflect::ObjectIdentifier* identifier = NULL, uint32_t flags = 0 );
 			static void WriteToStream( const Reflect::ObjectPtr* objects, size_t count, Stream& stream, Reflect::ObjectIdentifier* identifier = NULL, uint32_t flags = 0 );
-			static void WriteToBson( const Reflect::ObjectPtr& object, bson* b, const char* name = NULL, Reflect::ObjectIdentifier* identifier = NULL, uint32_t flags = 0 );
+			static void WriteToBson( const Reflect::ObjectPtr& object, bson_t* bson, const char* name = NULL, Reflect::ObjectIdentifier* identifier = NULL, uint32_t flags = 0 );
 
 			ArchiveWriterBson( const FilePath& path, Reflect::ObjectIdentifier* identifier = NULL, uint32_t flags = 0x0 );
 			ArchiveWriterBson( Stream *stream, Reflect::ObjectIdentifier* identifier = NULL, uint32_t flags = 0x0 );
@@ -134,9 +129,9 @@ namespace Helium
 			virtual void Write( const Reflect::ObjectPtr* objects, size_t count ) override;
 
 		private:
-			void SerializeInstance( bson* b, const char* name, void* instance, const Reflect::MetaStruct* structure, Reflect::Object* object );
-			void SerializeField( bson* b, void* instance, const Reflect::Field* field, Reflect::Object* object );
-			void SerializeTranslator( bson* b, const char* name, Reflect::Pointer pointer, Reflect::Translator* translator, const Reflect::Field* field, Reflect::Object* object );
+			void SerializeInstance( bson_t* bson, const char* name, void* instance, const Reflect::MetaStruct* structure, Reflect::Object* object );
+			void SerializeField( bson_t* bson, void* instance, const Reflect::Field* field, Reflect::Object* object );
+			void SerializeTranslator( bson_t* bson, const char* name, Reflect::Pointer pointer, Reflect::Translator* translator, const Reflect::Field* field, Reflect::Object* object );
 
 			AutoPtr< Stream >     m_Stream;
 		};
@@ -149,7 +144,7 @@ namespace Helium
 			static SmartPtr< ArchiveReader > AllocateReader( const FilePath& path, Reflect::ObjectResolver* resolver );
 			static void ReadFromStream( Stream& stream, Reflect::ObjectPtr& object, Reflect::ObjectResolver* resolver = NULL, uint32_t flags = 0 );
 			static void ReadFromStream( Stream& stream, DynamicArray< Reflect::ObjectPtr > & objects, Reflect::ObjectResolver* resolver = NULL, uint32_t flags = 0 );
-			static void ReadFromBson( bson_iterator* i, const Reflect::ObjectPtr& object, Reflect::ObjectResolver* resolver = NULL, uint32_t flags = 0 );
+			static void ReadFromBson( bson_iter_t* iterator, const Reflect::ObjectPtr& object, Reflect::ObjectResolver* resolver = NULL, uint32_t flags = 0 );
 
 			ArchiveReaderBson( const FilePath& path, Reflect::ObjectResolver* resolver = NULL, uint32_t flags = 0x0 );
 			ArchiveReaderBson( Stream *stream, Reflect::ObjectResolver* resolver = NULL, uint32_t flags = 0x0 );
@@ -163,15 +158,15 @@ namespace Helium
 		private:
 			void Start();
 			bool ReadNext( Reflect::ObjectPtr &object, size_t index );
-			void DeserializeInstance( bson_iterator* i, void* instance, const Reflect::MetaStruct* composite, Reflect::Object* object );
-			void DeserializeField( bson_iterator* i, void* instance, const Reflect::Field* field, Reflect::Object* object );
-			void DeserializeTranslator( bson_iterator* i, Reflect::Pointer pointer, Reflect::Translator* translator, const Reflect::Field* field, Reflect::Object* object );
+			void DeserializeInstance( bson_iter_t* iterator, void* instance, const Reflect::MetaStruct* composite, Reflect::Object* object );
+			void DeserializeField( bson_iter_t* iterator, void* instance, const Reflect::Field* field, Reflect::Object* object );
+			void DeserializeTranslator( bson_iter_t* iterator, Reflect::Pointer pointer, Reflect::Translator* translator, const Reflect::Field* field, Reflect::Object* object );
 
 			DynamicArray< uint8_t > m_Buffer;
 			AutoPtr< Stream >       m_Stream;
 			int64_t                 m_Size;
-			bson                    m_Bson[1];
-			bson_iterator           m_Next[1];
+			bson_t                  m_Bson;
+			bson_iter_t             m_Next;
 		};
 	}
 }

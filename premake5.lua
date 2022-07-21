@@ -217,7 +217,7 @@ project( "Persist" )
 			"Platform",
 			"Foundation",
 			"Reflect",
-			"mongo-c",
+			"bson-static-1.0",
 		}
 
 	filter {}
@@ -237,6 +237,7 @@ project( "PersistTests" )
 		"Reflect",
 		"Foundation",
 		"Platform",
+		"bson-static-1.0",
 	}
 
 project( "Mongo" )
@@ -260,7 +261,29 @@ project( "Mongo" )
 			"Foundation",
 			"Reflect",
 			"Persist",
-			"mongo-c",
+			"bson-static-1.0",
+			"mongoc-static-1.0",
+		}
+
+	filter { "kind:SharedLib", "configurations:Debug" }
+		links
+		{
+			"zlibd",
+		}
+
+	filter { "kind:SharedLib", "configurations:not Debug" }
+		links
+		{
+			"zlib",
+		}
+
+	filter { "kind:SharedLib", "system:windows" }
+		links
+		{
+			"bcrypt",
+			"crypt32",
+			"dnsapi",
+			"secur32",
 		}
 
 	filter {}
@@ -281,8 +304,32 @@ project( "MongoTests" )
 		"Reflect",
 		"Foundation",
 		"Platform",
-		"mongo-c",
+		"bson-static-1.0",
+		"mongoc-static-1.0",
 	}
+
+	filter "configurations:Debug"
+		links
+		{
+			"zlibd",
+		}
+
+	filter "configurations:not Debug"
+		links
+		{
+			"zlib",
+		}
+
+	filter "system:windows"
+		links
+		{
+			"bcrypt",
+			"crypt32",
+			"dnsapi",
+			"secur32",
+		}
+
+	filter {}
 
 project( "Inspect" )
 

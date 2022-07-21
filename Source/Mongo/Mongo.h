@@ -14,7 +14,7 @@
 
 #include "ArchiveBson.h"
 
-#include <mongo.h>
+#include <mongoc/mongoc.h>
 
 #include <functional>
 
@@ -24,9 +24,8 @@ namespace Helium
 {
 	namespace Mongo
 	{
-		HELIUM_MONGO_API void        Initialize();
-		HELIUM_MONGO_API void        Cleanup();
-		HELIUM_MONGO_API const char* GetErrorString( int status );
+		HELIUM_MONGO_API void Startup();
+		HELIUM_MONGO_API void Shutdown();
 
 		class HELIUM_MONGO_API Model : public Helium::Reflect::Object
 		{
@@ -44,7 +43,7 @@ namespace Helium
 		class HELIUM_MONGO_API Cursor
 		{
 		public:
-			Cursor( Database* db = NULL, mongo_cursor* cursor = NULL );
+			Cursor( Database* db = NULL, mongoc_cursor_t* cursor = NULL );
 			Cursor( const Cursor& rhs );
 			~Cursor();
 
@@ -62,8 +61,8 @@ namespace Helium
 			bool Next( const Helium::StrongPtr< Model >& object );
 
 		private:
-			mutable Database*     db;
-			mutable mongo_cursor* cursor;
+			mutable Database* db;
+			mutable mongoc_cursor_t* cursor;
 		};
 
 		class HELIUM_MONGO_API Database : public Helium::NonCopyable
@@ -73,58 +72,56 @@ namespace Helium
 			~Database();
 
 			// db ops/preferences
-			inline const char* GetName() const;
-			void SetName( const char* name );
-			bool Connect( const char* addr, uint16_t port = HELIUM_MONGO_DEFAULT_PORT );
-			inline bool IsConnected( bool pingServer );
-			inline mongo* GetConnection();
+			bool Connect( const char* serverUriWithDatabase );
+			inline mongoc_client_t* GetClient();
+			inline mongoc_database_t* GetDatabase();
 
 			// thread verification
 			inline void SetThread( Helium::ThreadId threadId = Thread::GetCurrentId() );
 			inline bool IsCorrectThread() const;
 
 			// server routines
-			int64_t GetServerTime( bool inMilliseconds = false );
+			int64_t GetServerTime();
 
 			// database routines
 			bool Drop();
 
 			// collection routines
-			bool DropCollection( const char* name );
-			double GetCollectionCount( const char* name );
-			bool CreateCappedCollection( const char* name, int cappedSizeInBytes, int cappedMaxCount = 0 );
+			bool DropCollection( const char* collectionName );
+			int64_t GetCollectionCount( const char* collectionName, bool estimated = true );
+			bool CreateCappedCollection( const char* collectionName, int cappedSizeInBytes, int cappedMaxCount = 0 );
 
 			// single insert
-			bool Insert( const Helium::StrongPtr< Model >& object, const char* collection = NULL );
+			bool Insert( const Helium::StrongPtr< Model >& object, const char* collectionName = NULL );
 
 			// single update
-			bool Update( const Helium::StrongPtr< Model >& object, const char* collection = NULL );
+			bool Update( const Helium::StrongPtr< Model >& object, const char* collectionName = NULL );
 
 			// batch insert, default collection will be named for the type of collection objects
-			bool Insert( Helium::StrongPtr< Model >* objects, size_t count, const char* collection = NULL );
+			bool Insert( Helium::StrongPtr< Model >* objects, size_t count, const char* collectionName = NULL );
 
 			// single fetch
-			bool Get( const Helium::StrongPtr< Model >& object, const char* collection = NULL );
+			bool Get( const Helium::StrongPtr< Model >& object, const char* collectionName = NULL );
 
 			// index ops
-			bool EnsureIndex( const char* collection, const bson* key, const char* name = NULL, int options = 0x0 );
+			bool EnsureIndex( const char* collectionName, const bson_t* key, const char* name = NULL, int options = 0x0 );
 
 			// find
 			//  query == NULL will return all objects by default
 			//  fields == NULL will populate all fields in result objects, populate to determine which fields are updated
 			//  collection == NULL uses collection named for the type specified in the cursor object
-			Cursor Find( const char* collection, const bson* query = NULL, int limit = 0, int skip = 0, int options = 0 );
+			Cursor Find( const char* collectionName, const bson_t* query = NULL, int limit = 0, int skip = 0, int options = 0 );
 
 			// remove
 			//  collection == NULL uses collection named for the type specified in the cursor object
 			//  query == NULL will remove all objects by default
-			bool Remove( const char* collection, const bson* query = NULL );
+			bool Remove( const char* collectionName, const bson_t* query = NULL );
 
 		private:
-			Helium::String       name;
-			bool                 isConnected;
-			mongo                conn[1];
-			Helium::ThreadId threadId;
+			String name;
+			ThreadId threadId;
+			mongoc_client_t* client;
+			mongoc_database_t* database;
 		};
 	}
 }

@@ -31,6 +31,7 @@ namespace Helium
 		//@{
 		size_t GetSize() const;
 		bool IsEmpty() const;
+		bool IsOccupied() const;
 		void Resize( size_t size, CharType fill = static_cast< CharType >( ' ' ) );
 
 		size_t GetCapacity() const;

@@ -51,9 +51,22 @@ Helium.DoBasicProjectSettings = function()
 	includedirs
 	{
 		"Source",
-		"Dependencies/rapidjson/include",
-		"Dependencies/mongo-c/src",
+		"Dependencies/vcpkg-installed/" .. Helium.GetVcpkgTriplet() .. "/include",
 	}
+
+	filter "configurations:Debug"
+		libdirs
+		{
+			"Dependencies/vcpkg-installed/" .. Helium.GetVcpkgTriplet() .. "/debug/lib",
+			"Dependencies/vcpkg-installed/" .. Helium.GetVcpkgTriplet() .. "/debug/lib/manual-link",
+		}
+
+	filter "configurations:not Debug"
+		libdirs
+		{
+			"Dependencies/vcpkg-installed/" .. Helium.GetVcpkgTriplet() .. "/lib",
+			"Dependencies/vcpkg-installed/" .. Helium.GetVcpkgTriplet() .. "/lib/manual-link",
+		}
 
 	filter { "system:windows", "kind:SharedLib or *App" }
 		links
@@ -99,13 +112,21 @@ Helium.DoTestsProjectSettings = function()
 	includedirs
 	{
 		".",
-		"Dependencies/googletest/googletest/include"
 	}
 
-	links
-	{
-		"googletest"
-	}
+	filter "configurations:Debug"
+		links
+		{
+			"gtestd",
+			"gtest_maind",
+		}
+
+	filter "configurations:not Debug"
+		links
+		{
+			"gtest",
+			"gtest_main",
+		}
 
 	postbuildcommands
 	{

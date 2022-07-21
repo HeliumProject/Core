@@ -7,6 +7,8 @@
 #include "Foundation/Event.h"
 #include "Foundation/FilePath.h"
 
+#include <set>
+
 namespace Helium
 {
 	namespace DirectoryFlags
@@ -38,10 +40,10 @@ namespace Helium
 			m_Size = 0x0;
 		}
 
-		FilePath      m_Path;
-		uint64_t  m_CreateTime;
-		uint64_t  m_ModTime;
-		uint64_t  m_Size;
+		FilePath m_Path;
+		uint64_t m_CreateTime;
+		uint64_t m_ModTime;
+		uint64_t m_Size;
 	};
 
 	class HELIUM_FOUNDATION_API DirectoryIterator
@@ -65,11 +67,11 @@ namespace Helium
 		bool Find();
 		void Close();
 
-		FilePath					m_Path;
-		uint32_t				m_Flags;
-		Directory				m_Directory;
-		DirectoryIteratorItem	m_Item;
-		bool					m_Done;
+		FilePath m_Path;
+		uint32_t m_Flags;
+		Directory m_Directory;
+		DirectoryIteratorItem m_Item;
+		bool m_Done;
 	};
 
 	typedef Helium::Signature< const DirectoryIteratorItem& > DirectoryItemSignature;

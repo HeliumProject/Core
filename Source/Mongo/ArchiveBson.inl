@@ -1,24 +1,24 @@
-Helium::Persist::BsonDate::BsonDate()
+Helium::Persist::BsonDateTime::BsonDateTime()
 	: millis( 0x0 )
 {
 }
 
-bool Helium::Persist::BsonDate::operator==( const BsonDate& rhs ) const
+bool Helium::Persist::BsonDateTime::operator==( const BsonDateTime& rhs ) const
 {
 	return millis == rhs.millis;
 }
 
-bool Helium::Persist::BsonDate::operator!=( const BsonDate& rhs ) const
+bool Helium::Persist::BsonDateTime::operator!=( const BsonDateTime& rhs ) const
 {
 	return millis != rhs.millis;
 }
 
-bool Helium::Persist::BsonDate::operator<( const BsonDate& rhs ) const
+bool Helium::Persist::BsonDateTime::operator<( const BsonDateTime& rhs ) const
 {
 	return millis < rhs.millis;
 }
 
-bool Helium::Persist::BsonDate::operator>( const BsonDate& rhs ) const
+bool Helium::Persist::BsonDateTime::operator>( const BsonDateTime& rhs ) const
 {
 	return millis > rhs.millis;
 }

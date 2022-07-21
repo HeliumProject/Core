@@ -1,0 +1,3 @@
+vcpkg-installed/
+mongodb*.zip
+mongodb*/

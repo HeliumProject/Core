@@ -9,29 +9,14 @@ Helium::StrongPtr< DefaultType > Helium::Mongo::Cursor::Next()
 	return Reflect::SafeCast< DefaultType >( Next( Reflect::GetMetaClass< DefaultType >() ) );
 }
 
-inline const char* Helium::Mongo::Database::GetName() const
+mongoc_client_t* Helium::Mongo::Database::GetClient()
 {
-	return this->name.GetData();
+	return client;
 }
 
-inline void Helium::Mongo::Database::SetName( const char* name )
+mongoc_database_t* Helium::Mongo::Database::GetDatabase()
 {
-	this->name = name;
-}
-
-bool Helium::Mongo::Database::IsConnected( bool pingServer )
-{
-	if ( isConnected && pingServer && HELIUM_VERIFY_MSG( IsCorrectThread(), "Database access from improper thread" ) )
-	{
-		isConnected = MONGO_OK == mongo_check_connection( this->conn );
-	}
-
-	return isConnected;
-}
-
-mongo* Helium::Mongo::Database::GetConnection()
-{
-	return &conn[0];
+	return database;
 }
 
 void Helium::Mongo::Database::SetThread( Helium::ThreadId threadId )

@@ -1,18 +1,6 @@
-[submodule "Dependencies/glfw"]
-	path = Dependencies/glfw
-	url = https://github.com/HeliumProject/glfw.git
-[submodule "Dependencies/googletest"]
-	path = Dependencies/googletest
-	url = https://github.com/HeliumProject/googletest.git
-[submodule "Dependencies/imgui"]
-	path = Dependencies/imgui
-	url = https://github.com/HeliumProject/imgui.git
-[submodule "Dependencies/mongo-c"]
-	path = Dependencies/mongo-c
-	url = https://github.com/HeliumProject/mongo-c.git
 [submodule "Dependencies/premake"]
 	path = Dependencies/premake
 	url = https://github.com/HeliumProject/premake-core.git
-[submodule "Dependencies/rapidjson"]
-	path = Dependencies/rapidjson
-	url = https://github.com/HeliumProject/rapidjson.git
+[submodule "Dependencies/vcpkg"]
+	path = Dependencies/vcpkg
+	url = https://github.com/HeliumProject/vcpkg

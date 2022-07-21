@@ -1,13 +1,10 @@
 #pragma once
 
-#include <set>
-#include <vector>
-
-#include "Platform/File.h"
-
 #include "Foundation/API.h"
-#include "Foundation/SmartPtr.h"
 #include "Foundation/String.h"
+
+#include <string>
+#include <vector>
 
 namespace Helium
 {
@@ -31,7 +28,7 @@ namespace Helium
 
 		FilePath& operator+=( const char* rhs );
 		FilePath& operator+=( const std::string& rhs );
-		FilePath& operator+=( const Helium::FilePath& rhs );
+		FilePath& operator+=( const FilePath& rhs );
 
 		const std::string& Get() const;
 		void Set( const std::string& path );
@@ -41,6 +38,10 @@ namespace Helium
 		size_t Length() const;
 		bool Empty() const;
 		const char* Data() const;
+
+		void Append( const char* component );
+		void Append( const std::string& component );
+		void Append( const FilePath& component );
 
 		void Split( FilePath& directory, FilePath& filename ) const;
 		void Split( FilePath& directory, FilePath& filename, std::string& extension ) const;

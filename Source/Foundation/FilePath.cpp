@@ -136,6 +136,24 @@ const char* FilePath::Data() const
 	return m_Path.data();
 }
 
+void FilePath::Append( const char* component )
+{
+	GuaranteeSeparator( *this );
+	m_Path += component;
+}
+
+void FilePath::Append( const std::string& component )
+{
+	GuaranteeSeparator( *this );
+	m_Path += component;
+}
+
+void FilePath::Append( const FilePath& component )
+{
+	GuaranteeSeparator( *this );
+	m_Path += component.m_Path;
+}
+
 void FilePath::Split( FilePath& directory, FilePath& filename ) const
 {
 	directory = Directory();

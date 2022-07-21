@@ -90,6 +90,16 @@ Helium.Publish = function( files )
 	end
 end
 
+Helium.GetVcpkgTriplet = function()
+	local triplet = "vcpkg-" .. os.host()
+
+	if os.host() == "windows" then
+		triplet = triplet .. "-" .. _ACTION
+	end
+
+	return triplet
+end
+
 newoption
 {
 	trigger = "arch",
