@@ -34,12 +34,12 @@ jobs:
     - name: Premake Dependencies
       run: |
         cd ${{ github.workspace }}/Dependencies
-        ../premake.sh gmake ${{ matrix.premake_arch }}
+        ../premake.sh gmake2 ${{ matrix.premake_arch }}
 
     - name: Premake Core
       run: |
         cd ${{ github.workspace }}
-        ./premake.sh gmake ${{ matrix.premake_arch }} ${{ matrix.premake_shared }}
+        ./premake.sh gmake2 ${{ matrix.premake_arch }} ${{ matrix.premake_shared }}
 
     - name: Build Dependencies ${{ matrix.config }}
       run: |
@@ -70,12 +70,12 @@ jobs:
     - name: Premake Dependencies
       run: |
         cd ${{ github.workspace }}/Dependencies
-        ../premake.sh gmake ${{ matrix.premake_arch }}
+        ../premake.sh gmake2 ${{ matrix.premake_arch }}
 
     - name: Premake Core
       run: |
         cd ${{ github.workspace }}
-        ./premake.sh gmake ${{ matrix.premake_arch }} ${{ matrix.premake_shared }}
+        ./premake.sh gmake2 ${{ matrix.premake_arch }} ${{ matrix.premake_shared }}
 
     - name: Build Dependencies ${{ matrix.config }}
       run: |
