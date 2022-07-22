@@ -21,6 +21,16 @@ jobs:
       with:
           submodules: recursive
 
+    - name: Install System Packages
+      run: |
+        cd ${{ github.workspace }}/Dependencies
+        sudo ./install-system-packages-ubuntu.sh
+
+    - name: Install Local Packages
+      run: |
+        cd ${{ github.workspace }}/Dependencies
+        sudo ./install-local-packages-ubuntu.sh
+
     - name: Premake Dependencies
       run: |
         cd ${{ github.workspace }}/Dependencies
@@ -95,6 +105,11 @@ jobs:
 
     - name: Setup vcvars
       uses: ilammy/msvc-dev-cmd@v1
+
+    - name: Install Local Packages
+      run: |
+        cd ${{ github.workspace }}\Dependencies
+        cmd.exe /c call install-local-packages-windows.bat
 
     - name: Premake Dependencies
       run: |
