@@ -36,10 +36,10 @@ jobs:
         cd ${{ github.workspace }}/Dependencies
         ./vcpkg.sh
 
-    - name: Premake Dependencies
-      run: |
-        cd ${{ github.workspace }}/Dependencies
-        ../premake.sh gmake2 ${{ matrix.premake_arch }}
+    # - name: Premake Dependencies
+    #   run: |
+    #     cd ${{ github.workspace }}/Dependencies
+    #     ../premake.sh gmake2 ${{ matrix.premake_arch }}
 
     - name: Premake Core
       run: |
@@ -77,10 +77,10 @@ jobs:
         cd ${{ github.workspace }}/Dependencies
         ./vcpkg.sh
 
-    - name: Premake Dependencies
-      run: |
-        cd ${{ github.workspace }}/Dependencies
-        ../premake.sh gmake2 ${{ matrix.premake_arch }}
+    # - name: Premake Dependencies
+    #   run: |
+    #     cd ${{ github.workspace }}/Dependencies
+    #     ../premake.sh gmake2 ${{ matrix.premake_arch }}
 
     - name: Premake Core
       run: |
@@ -126,10 +126,10 @@ jobs:
         cd ${{ github.workspace }}\Dependencies
         cmd.exe /c call vcpkg.bat vs2022
 
-    - name: Premake Dependencies
-      run: |
-        cd ${{ github.workspace }}\Dependencies
-        cmd.exe /c call ..\premake.bat vs2022 ${{ matrix.premake_arch }}
+    # - name: Premake Dependencies
+    #   run: |
+    #     cd ${{ github.workspace }}\Dependencies
+    #     cmd.exe /c call ..\premake.bat vs2022 ${{ matrix.premake_arch }}
 
     - name: Premake Core
       run: |
