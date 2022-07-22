@@ -101,7 +101,8 @@ jobs:
     strategy:
       matrix:
         config: [Debug, Intermediate, Profile, Release]
-        premake_arch: ["", "--arch=x86"]
+        # "--arch=x86"
+        premake_arch: [""]
         premake_shared: ["", "--shared"]
 
     name: Windows ${{ matrix.config }} ${{ matrix.premake_arch }} ${{ matrix.premake_shared }}
@@ -154,7 +155,7 @@ jobs:
       run: |
         MSBuild.exe Build\Core.sln -p:Configuration=${{ matrix.config }} /p:Platform=x64
 
-    - name: Build Core Win32 ${{ matrix.config }}
-      if: ${{ matrix.premake_arch == '--arch=x86' }}
-      run: |
-        MSBuild.exe Build\Core.sln -p:Configuration=${{ matrix.config }} /p:Platform=Win32
+    # - name: Build Core Win32 ${{ matrix.config }}
+    #   if: ${{ matrix.premake_arch == '--arch=x86' }}
+    #   run: |
+    #     MSBuild.exe Build\Core.sln -p:Configuration=${{ matrix.config }} /p:Platform=Win32
