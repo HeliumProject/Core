@@ -64,13 +64,7 @@ void MongoSession::Initialize()
 
 void MongoSession::Cleanup()
 {
-	bson_t request;
-	bson_init( &request );
-	EXPECT_TRUE( bson_append_int32( &request, "shutdown", -1, 1 ) );
-
-	bson_t reply;
-	bson_error_t error;
-	bool shutdownResult = mongoc_client_command_simple( admin.GetClient(), "admin", &request, nullptr, &reply, &error ); // this will error due to socket closure from the server
+	admin.RequestShutdown();
 
 	int mongoResult = Helium::SpawnResult( mongod );
 	EXPECT_EQ( mongoResult, 0 );

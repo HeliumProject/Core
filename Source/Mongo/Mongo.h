@@ -71,10 +71,15 @@ namespace Helium
 			Database( const char* name = "" );
 			~Database();
 
+			// server ops
+			void RequestShutdown();
+
 			// db ops/preferences
 			bool Connect( const char* serverUriWithDatabase );
+#if !HELIUM_SHARED
 			inline mongoc_client_t* GetClient();
 			inline mongoc_database_t* GetDatabase();
+#endif
 
 			// thread verification
 			inline void SetThread( Helium::ThreadId threadId = Thread::GetCurrentId() );

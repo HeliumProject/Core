@@ -195,6 +195,18 @@ Database::~Database()
 	}
 }
 
+void Database::RequestShutdown()
+{
+	bson_t request;
+	bson_init( &request );
+	HELIUM_VERIFY( bson_append_int32( &request, "shutdown", -1, 1 ) );
+
+	bson_error_t error;
+	bool shutdownResult = mongoc_client_command_simple( client, "admin", &request, nullptr, nullptr, &error ); // this will error due to socket closure from the server
+
+	bson_destroy( &request );
+}
+
 bool Database::Connect( const char* serverUriWithDatabase )
 {
 	this->threadId = Thread::GetCurrentId();
