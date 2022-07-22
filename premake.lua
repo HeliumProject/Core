@@ -128,11 +128,6 @@ Helium.DoTestsProjectSettings = function()
 			"gtest_main",
 		}
 
-	postbuildcommands
-	{
-		"\"%{cfg.linktarget.abspath}\""
-	}
-
 	filter "system:linux"
 		links
 		{
@@ -144,6 +139,11 @@ Helium.DoTestsProjectSettings = function()
 		}
 
 	filter {}
+
+	postbuildcommands
+	{
+		"\"%{cfg.linktarget.abspath}\""
+	}
 
 end
 
