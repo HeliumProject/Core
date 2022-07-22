@@ -261,20 +261,30 @@ project( "Mongo" )
 			"Foundation",
 			"Reflect",
 			"Persist",
-			"bson-static-1.0",
 			"mongoc-static-1.0",
+			"bson-static-1.0",
 		}
 
-	filter { "kind:SharedLib", "configurations:Debug" }
+	filter { "kind:SharedLib", "configurations:Debug", "system:windows" }
 		links
 		{
 			"zlibd",
 		}
 
-	filter { "kind:SharedLib", "configurations:not Debug" }
+	filter { "kind:SharedLib", "configurations:not Debug", "system:windows" }
 		links
 		{
 			"zlib",
+		}
+
+	filter { "kind:SharedLib", "system:linux" }
+		links
+		{
+			"z",
+			"resolv",
+			"rt",
+			"ssl",
+			"crypto",
 		}
 
 	filter { "kind:SharedLib", "system:windows" }
@@ -304,20 +314,30 @@ project( "MongoTests" )
 		"Reflect",
 		"Foundation",
 		"Platform",
-		"bson-static-1.0",
 		"mongoc-static-1.0",
+		"bson-static-1.0",
 	}
 
-	filter "configurations:Debug"
+	filter { "configurations:Debug", "system:windows" }
 		links
 		{
 			"zlibd",
 		}
 
-	filter "configurations:not Debug"
+	filter { "configurations:not Debug", "system:windows" }
 		links
 		{
 			"zlib",
+		}
+
+	filter "system:linux"
+		links
+		{
+			"z",
+			"resolv",
+			"rt",
+			"ssl",
+			"crypto",
 		}
 
 	filter "system:windows"

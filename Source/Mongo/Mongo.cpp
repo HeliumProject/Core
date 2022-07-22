@@ -488,17 +488,22 @@ bool Database::Get( const StrongPtr< Model >& object, const char* collectionName
 	bson_init( &query );
 	HELIUM_VERIFY( bson_append_oid( &query, "_id", -1, &oid ) );
 
+	bson_t opts;
+	bson_init( &opts );
+	HELIUM_VERIFY( bson_append_int32( &opts, "limit", -1, 1 ) );
+
 	{
 		String finalCollectionName = FinalizeCollectionName(collectionName, object->GetMetaClass());
 
 		mongoc_collection_t* collection = mongoc_database_get_collection( database, finalCollectionName.GetData() );
 
-		Cursor cursor ( this, mongoc_collection_find( collection, MONGOC_QUERY_NONE, 0, 1, 0, &query, nullptr, nullptr ) );
+		Cursor cursor ( this, mongoc_collection_find_with_opts( collection, &query, &opts, nullptr ) );
 
 		result = cursor.Next( object );
 	}
 
 	bson_destroy( &query );
+	bson_destroy( &opts );
 	return result;
 }
 
@@ -516,10 +521,8 @@ bool Database::Insert( StrongPtr< Model >* objects, size_t count, const char* co
 
 	bool result = true;
 	const MetaClass* metaClass = (*objects)->GetMetaClass();
-	Helium::DynamicArray< bson_t > bsons;
-	Helium::DynamicArray< bson_t* > pointers;
-	bsons.Reserve( count );
-	pointers.Reserve( count );
+	bson_t* bsons = (bson_t*)alloca(sizeof(bson_t) * count);
+	const bson_t** pointers = (const bson_t**)alloca(sizeof(bson_t*) * count);
 	for ( size_t i=0; i<count && result; ++i )
 	{
 		if ( !HELIUM_VERIFY( metaClass == objects[i]->GetMetaClass() ) )
@@ -532,10 +535,9 @@ bool Database::Insert( StrongPtr< Model >* objects, size_t count, const char* co
 			continue;
 		}
 
-		bsons.Add( bson_t() );
-		bson_t* b = &bsons.GetLast();
+		bson_t* b = &bsons[i];
+		pointers[i] = b;
 		bson_init( b );
-		pointers.Add( b );
 
 		bson_oid_t oid;
 		bson_oid_init( &oid, nullptr );
@@ -561,16 +563,16 @@ bool Database::Insert( StrongPtr< Model >* objects, size_t count, const char* co
 		mongoc_collection_t* collection = mongoc_database_get_collection( database, finalCollectionName.GetData() );
 
 		bson_error_t error;
-		if ( !mongoc_collection_insert_many( collection, const_cast< const bson_t** >( pointers.GetData() ), pointers.GetSize(), nullptr, nullptr, &error ) )
+		if ( !mongoc_collection_insert_many( collection, pointers, count, nullptr, nullptr, &error ) )
 		{
 			Log::Error( "mongoc_collection_insert_many failed: %d.%d: %s\n", error.domain, error.code, error.message );
 			result = false;
 		}
 	}
 
-	for ( size_t i=0; i<pointers.GetSize(); ++i )
+	for ( size_t i=0; i<count; ++i )
 	{
-		bson_destroy( pointers[i] );
+		bson_destroy( &bsons[i] );
 	}
 
 	return result;
@@ -583,16 +585,37 @@ bool Database::EnsureIndex( const char* collectionName, const bson_t* key, const
 		return false;
 	}
 
-	mongoc_collection_t* collection = mongoc_database_get_collection( database, collectionName );
+	bson_t bson;
+	bson_init( &bson );
+
+	HELIUM_VERIFY( bson_append_utf8( &bson, "createIndexes", -1, collectionName, -1 ) );
+
+	bson_t childArray;
+	bson_t childDocument;
+	HELIUM_VERIFY( bson_append_array_begin( &bson, "indexes", -1, &childArray ) );
+	{
+		HELIUM_VERIFY( bson_append_document_begin( &childArray, "0", -1, &childDocument ) );
+		{
+			HELIUM_VERIFY( bson_append_document( &childDocument, "key", -1, key ) );
+			HELIUM_VERIFY( bson_append_utf8( &childDocument, "name", -1, name, -1 ) );
+		}
+		HELIUM_VERIFY( bson_append_document_end( &childDocument, &childArray ) );
+	}
+	HELIUM_VERIFY( bson_append_array_end( &childArray, &bson ) );
 
 	bson_error_t error;
-	if ( !mongoc_collection_ensure_index( collection, key, nullptr, &error ) )
+	bool result = true;
+	if ( !mongoc_database_write_command_with_opts( database, &bson, nullptr, nullptr, &error ) )
 	{
-		Log::Error( "mongoc_collection_ensure_index failed: %d.%d: %s\n", error.domain, error.code, error.message );
-		return false;
+		Log::Error( "mongoc_database_write_command_with_opts failed: %d.%d: %s\n", error.domain, error.code, error.message );
+		result = false;
 	}
 
-	return true;
+	bson_destroy( &bson );
+	bson_destroy( &childArray );
+	bson_destroy( &childDocument );
+
+	return result;
 }
 
 Cursor Database::Find( const char* collectionName, const bson_t* query, int limit, int skip, int options )
@@ -602,11 +625,16 @@ Cursor Database::Find( const char* collectionName, const bson_t* query, int limi
 		return Cursor();
 	}
 
-	mongoc_collection_t* collection = mongoc_database_get_collection( database, collectionName );
+	bson_t opts;
+	bson_init( &opts );
+	HELIUM_VERIFY( bson_append_int32( &opts, "limit", -1, limit ) );
+	HELIUM_VERIFY( bson_append_int32( &opts, "skip", -1, skip ) );
 
-	// we don't currently support specifying fields because we need to ensure _type is sent back, and
-	//  merging bson documents is difficult/impossible with the current version of the bson api
-	mongoc_cursor_t* c = mongoc_collection_find( collection, MONGOC_QUERY_NONE, skip, limit, 0, query, nullptr, nullptr );
+	mongoc_collection_t* collection = mongoc_database_get_collection( database, collectionName );
+	mongoc_cursor_t* c = mongoc_collection_find_with_opts( collection, query, &opts, nullptr );
+
+	bson_destroy( &opts );
+
 	if ( c )
 	{
 		return Cursor( this, c );

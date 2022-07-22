@@ -11,11 +11,11 @@ elif [ `uname` == "Darwin" ]; then
   VCPKG_TRIPLETS+=( vcpkg-macosx )
 fi
 
-VCPKG_PORTS=glfw3 gtest imgui mongo-c-driver rapidjson
+VCPKG_PORTS="glfw3 gtest imgui libbson mongo-c-driver rapidjson zlib"
 
 echo
 echo === Bootstrapping vcpkg ===
-"$DIR/vcpkg/bootstrap-vcpkg.sh"
+"$DIR/vcpkg/bootstrap-vcpkg.sh" -disableMetrics
 
 for VCPKG_TRIPLET in ${VCPKG_TRIPLETS[@]}
 do
