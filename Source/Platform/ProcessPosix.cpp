@@ -52,6 +52,8 @@ ProcessHandle Helium::Spawn( const std::string& cmd )
 	{
 		return pid;
 	}
+
+	return 0;
 }
 
 bool Helium::SpawnRunning( ProcessHandle handle )
