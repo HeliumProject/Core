@@ -53,7 +53,7 @@ ProcessHandle Helium::Spawn( const std::string& cmd )
 		return pid;
 	}
 
-	return 0;
+	return HELIUM_INVALID_PROCESS;
 }
 
 bool Helium::SpawnRunning( ProcessHandle handle )
