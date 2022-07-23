@@ -18,6 +18,12 @@ newoption
 	description = "Disable run-time type information",
 }
 
+newoption
+{
+	trigger = "postbuildtests",
+	description = "Run test suites as post-build steps",
+}
+
 -- Common settings for projects linking with libraries.
 Helium.DoBasicProjectSettings = function()
 
@@ -140,10 +146,12 @@ Helium.DoTestsProjectSettings = function()
 
 	filter {}
 
-	postbuildcommands
-	{
-		"\"%{cfg.linktarget.abspath}\""
-	}
+	if _OPTIONS['postbuildtests'] then
+		postbuildcommands
+		{
+			"\"%{cfg.linktarget.abspath}\""
+		}
+	end
 
 end
 

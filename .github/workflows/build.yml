@@ -159,3 +159,8 @@ jobs:
     #   if: ${{ matrix.premake_arch == '--arch=x86' }}
     #   run: |
     #     MSBuild.exe Build\Core.sln -p:Configuration=${{ matrix.config }} /p:Platform=Win32
+
+    - name: Test Core {{ matrix.config }}
+      run: |
+        cd ${{ github.workspace }}
+        cmd.exe /c call test.bat {{ matrix.config }}
