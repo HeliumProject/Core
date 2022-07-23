@@ -1,4 +1,4 @@
-@echo off
+REM @echo off
 
 :: MongoDB
 rmdir /s /q mongodb
