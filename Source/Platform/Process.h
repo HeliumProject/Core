@@ -36,7 +36,7 @@ namespace Helium
 	HELIUM_PLATFORM_API int Execute( const std::string& command, std::string& output );
 
 	/// Spawn another process and run it alongside the executing process
-	HELIUM_PLATFORM_API ProcessHandle Spawn( const std::string& command, bool autoKill = false );
+	HELIUM_PLATFORM_API ProcessHandle Spawn( const std::string& command );
 
 	/// Test if the spawned process is running
 	HELIUM_PLATFORM_API bool SpawnRunning( ProcessHandle handle );

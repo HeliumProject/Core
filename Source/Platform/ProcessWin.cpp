@@ -165,42 +165,14 @@ int Helium::Execute( const std::string& command, std::string& output )
 	return result;
 }
 
-ProcessHandle Helium::Spawn( const std::string& command, bool autoKill )
+ProcessHandle Helium::Spawn( const std::string& command )
 {
-	static HANDLE hJob = INVALID_HANDLE_VALUE;	
-	if ( autoKill && hJob == INVALID_HANDLE_VALUE )
-	{
-		hJob = CreateJobObject( NULL, NULL ); // GLOBAL
-		if( HELIUM_VERIFY( hJob ) )
-		{
-			// Configure all child processes associated with the job to terminate when the
-			JOBOBJECT_EXTENDED_LIMIT_INFORMATION jeli = { 0 };
-			jeli.BasicLimitInformation.LimitFlags = JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;
-			HELIUM_VERIFY( SetInformationJobObject( hJob, JobObjectExtendedLimitInformation, &jeli, sizeof(jeli)) );
-		}
-	}
-
 	STARTUPINFO si;
 	memset( &si, 0, sizeof( si ) );
 	si.cb = sizeof( si );
 
 	PROCESS_INFORMATION pi;
 	memset( &pi, 0, sizeof( pi ) );
-
-	DWORD flags = 0x0;
-
-	if ( IsWindowsVistaOrGreater() )
-	{
-		// windows vista and beyond somtimes have system software that attach child processes to jobs,
-		//  and pre-windows 8 you can only attach a process to a single job
-		flags |= CREATE_BREAKAWAY_FROM_JOB;
-	}
-
-#if !HELIUM_RELEASE
-	flags |= CREATE_NEW_CONSOLE;
-#else
-	flags |= DETACHED_PROCESS;
-#endif
 
 	ProcessHandle handle = HELIUM_INVALID_PROCESS;
 
@@ -212,18 +184,13 @@ ProcessHandle Helium::Spawn( const std::string& command, bool autoKill )
 		NULL,             // process security descriptor
 		NULL,             // thread security descriptor
 		FALSE,            // inherit handles?
-		flags,            // creation flags
+		0x0,              // creation flags
 		NULL,             // inherited environment address
 		NULL,             // startup dir; NULL = start in current
 		&si,              // pointer to startup info (input)
 		&pi ) )           // pointer to process info (output)
 	{
 		handle = pi.hProcess;
-
-		if ( autoKill && hJob )
-		{
-			HELIUM_VERIFY( ::AssignProcessToJobObject( hJob, pi.hProcess ) );
-		}
 
 		// release handles to our new process
 		::CloseHandle( pi.hThread );

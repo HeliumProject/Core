@@ -56,7 +56,7 @@ void MongoSession::Initialize()
 	mongod = Helium::Spawn( commandLine );
 	uint32_t errorCode = Helium::GetLastError();
 	std::string errorString = Helium::GetErrorString( errorCode );
-	EXPECT_TRUE( mongod != HELIUM_INVALID_PROCESS ) << "Error code:" << errorCode << ": " << errorString;
+	EXPECT_TRUE( mongod != HELIUM_INVALID_PROCESS ) << "Error code: " << errorCode << ": " << errorString;
 
 	// Give it some time to start up
 	Thread::Sleep(1000);

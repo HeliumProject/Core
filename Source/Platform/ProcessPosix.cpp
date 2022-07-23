@@ -43,25 +43,15 @@ int Helium::Execute( const std::string& command, std::string& output )
 	return pclose( f );
 }
 
-ProcessHandle Helium::Spawn( const std::string& cmd, bool autoKill )
+ProcessHandle Helium::Spawn( const std::string& cmd )
 {
 	ProcessHandle pid;
 
-	if ( autoKill )
+	const char* spawnedArgs[] = { "/bin/bash", "-c", cmd.c_str(), NULL };
+	if ( posix_spawn( &pid, spawnedArgs[0], NULL, NULL, const_cast< char* const* >( spawnedArgs ), NULL ) == 0 )
 	{
-		// NYI: http://stackoverflow.com/questions/284325/how-to-make-child-process-die-after-parent-exits
-		return 0;
+		return pid;
 	}
-	else
-	{
-		const char* spawnedArgs[] = { "/bin/bash", "-c", cmd.c_str(), NULL };
-		if ( posix_spawn( &pid, spawnedArgs[0], NULL, NULL, const_cast< char* const* >( spawnedArgs ), NULL ) == 0 )
-		{
-			return pid;
-		}
-	}
-
-	return 0;
 }
 
 bool Helium::SpawnRunning( ProcessHandle handle )
