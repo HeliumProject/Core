@@ -54,7 +54,8 @@ void MongoSession::Initialize()
 	commandLine += " --dbpath=";
 	commandLine += pathToMongoData.Get();
 	mongod = Helium::Spawn( commandLine );
-	EXPECT_TRUE( mongod != HELIUM_INVALID_PROCESS );
+	std::string error = Helium::GetErrorString();
+	EXPECT_TRUE( mongod != HELIUM_INVALID_PROCESS ) << error;
 
 	// Give it some time to start up
 	Thread::Sleep(1000);
