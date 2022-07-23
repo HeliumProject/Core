@@ -56,6 +56,11 @@ jobs:
         cd ${{ github.workspace }}
         ./make.sh ${{ matrix.config }}
 
+    - name: Test Core ${{ matrix.config }}
+      run: |
+        cd ${{ github.workspace }}
+        ./test.sh ${{ matrix.config }}
+
   build-macos:
     strategy:
       matrix:
@@ -96,6 +101,11 @@ jobs:
       run: |
         cd ${{ github.workspace }}
         ./make.sh ${{ matrix.config }}
+
+    - name: Test Core ${{ matrix.config }}
+      run: |
+        cd ${{ github.workspace }}
+        ./test.sh ${{ matrix.config }}
 
   build-windows:
     strategy:
@@ -160,7 +170,7 @@ jobs:
     #   run: |
     #     MSBuild.exe Build\Core.sln -p:Configuration=${{ matrix.config }} /p:Platform=Win32
 
-    - name: Test Core {{ matrix.config }}
+    - name: Test Core ${{ matrix.config }}
       run: |
         cd ${{ github.workspace }}
-        cmd.exe /c call test.bat {{ matrix.config }}
+        cmd.exe /c call test.bat ${{ matrix.config }}
