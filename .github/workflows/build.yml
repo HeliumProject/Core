@@ -6,6 +6,7 @@ on:
 jobs:
 
   build-linux:
+    if: ${{ false }}  # disable for now
     strategy:
       matrix:
         config: [Debug, Intermediate, Profile, Release]
