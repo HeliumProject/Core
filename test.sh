@@ -17,7 +17,7 @@ EOF
 )
 
 for line in $TESTS; do
-    $DIR/Bin/$CONFIG/$line
+    $DIR/Bin/${CONFIG^}/$line
     if [ "$?" -ne "0" ]; then
         exit 1
     fi
