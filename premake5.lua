@@ -340,6 +340,16 @@ project( "MongoTests" )
 			"crypto",
 		}
 
+	filter "system:macosx"
+		links
+		{
+			"z",
+			"resolv",
+			"ssl",
+			"crypto",
+			"sasl2",
+		}
+
 	filter "system:windows"
 		links
 		{

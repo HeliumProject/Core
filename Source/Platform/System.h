@@ -17,34 +17,65 @@
 
 #if defined( _WIN64 )
 # define HELIUM_OS_WIN 1
-# define HELIUM_OS_WIN64 1
+# define HELIUM_CPU_64 1
 # define HELIUM_CPU_X86 1
 # define HELIUM_CPU_X86_64 1
 #elif defined( _WIN32 )
 # define HELIUM_OS_WIN 1
-# define HELIUM_OS_WIN32 1
+# define HELIUM_CPU_32 1
 # define HELIUM_CPU_X86 1
 # define HELIUM_CPU_X86_32 1
+#elif defined( _M_ARM64 )
+# define HELIUM_OS_WIN 1
+# define HELIUM_CPU_64 1
+# define HELIUM_CPU_ARM 1
+# define HELIUM_CPU_ARM64 1
+#elif defined( _M_ARM )
+# define HELIUM_OS_WIN 1
+# define HELIUM_CPU_32 1
+# define HELIUM_CPU_ARM 1
+# define HELIUM_CPU_ARM32 1
+
 #elif defined( __APPLE__ )
 # define HELIUM_OS_MAC 1
 # if defined( __x86_64__ )
-#  define HELIUM_OS_MAC64 1
+#  define HELIUM_CPU_64 1
 #  define HELIUM_CPU_X86 1
 #  define HELIUM_CPU_X86_64 1
-# else
-#  define HELIUM_OS_MAC32 1
+# elif defined( __i386__ )
+#  define HELIUM_CPU_32 1
 #  define HELIUM_CPU_X86 1
 #  define HELIUM_CPU_X86_32 1
+# elif defined( __aarch64__ )
+#  define HELIUM_CPU_64 1
+#  define HELIUM_CPU_ARM 1
+#  define HELIUM_CPU_ARM64 1
+# elif defined( __arm__ )
+#  define HELIUM_CPU_32 1
+#  define HELIUM_CPU_ARM 1
+#  define HELIUM_CPU_ARM32 1
 # endif
+
 #elif defined( __gnu_linux__ )
 # define HELIUM_OS_LINUX 1
 # if defined( __x86_64__ )
+#  define HELIUM_CPU_64 1
 #  define HELIUM_CPU_X86 1
 #  define HELIUM_CPU_X86_64 1
-# else
+# elif defined( __i386__ )
+#  define HELIUM_CPU_32 1
 #  define HELIUM_CPU_X86 1
 #  define HELIUM_CPU_X86_32 1
+# elif defined( __aarch64__ )
+#  define HELIUM_CPU_64 1
+#  define HELIUM_CPU_ARM 1
+#  define HELIUM_CPU_ARM64 1
+# elif defined( __arm__ )
+#  define HELIUM_CPU_32 1
+#  define HELIUM_CPU_ARM 1
+#  define HELIUM_CPU_ARM32 1
 # endif
+
 #else
 # error Unsupported platform.
 #endif
@@ -68,4 +99,6 @@
 
 #if HELIUM_CPU_X86
 # include "Platform/CpuX86.h"
+#elif HELIUM_CPU_ARM
+# include "Platform/CpuArm.h"
 #endif

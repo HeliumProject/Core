@@ -50,9 +50,9 @@ typedef double float64_t;
 
 //@}
 
-#if HELIUM_CPU_X86_32
+#if HELIUM_CPU_32
 # define HELIUM_PRINT_POINTER "08" PRIXPTR
-#elif HELIUM_CPU_X86_64
+#elif HELIUM_CPU_64
 # define HELIUM_PRINT_POINTER "016" PRIXPTR
 #else
 #error Unknown register width!

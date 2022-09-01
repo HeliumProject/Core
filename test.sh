@@ -17,7 +17,8 @@ EOF
 )
 
 for line in $TESTS; do
-    $DIR/Bin/${CONFIG^}/$line
+    # capitalize first character of CONFIG
+    $DIR/Bin/"$(tr a-z A-Z <<< ${CONFIG:0:1})${CONFIG:1}"/$line
     if [ "$?" -ne "0" ]; then
         exit 1
     fi

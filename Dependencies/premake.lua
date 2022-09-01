@@ -42,6 +42,31 @@ Helium.GetSystemVersion = function()
 	return version
 end
 
+Helium.GetSystemArchitecture = function()
+	local arch = Helium.ExecuteAndCapture( "uname -m" )
+	
+	-- check for rosetta in our process
+	if os.host() == "macosx" then
+		if Helium.ExecuteAndCapture("sysctl -in sysctl.proc_translated") == "1" then
+			return "arm64"
+		else
+			return "x86_64"
+		end
+	end
+
+	return arch
+end
+
+Helium.GetTargetArchitecture = function()
+	local arch = _OPTIONS[ "arch" ]
+
+	if arch == "host" then
+		arch = Helium.GetSystemArchitecture()
+	end
+
+	return arch
+end
+
 Helium.GetProcessorCount = function()
 	local result = nil
 	if os.host() == "windows" then
@@ -95,6 +120,8 @@ Helium.GetVcpkgTriplet = function()
 
 	if os.host() == "windows" then
 		triplet = triplet .. "-" .. _ACTION
+	else
+		triplet = triplet .. "-" .. Helium.GetTargetArchitecture()
 	end
 
 	return triplet
@@ -104,12 +131,12 @@ newoption
 {
 	trigger = "arch",
 	description = "Specify architecture (see premake 'architecture' action for choices)",
-	default = (function() if os.is64bit() then return 'x86_64' else return 'x86' end end)(),
+	default = "host",
 }
 
 Helium.DoBasicWorkspaceSettings = function()
 
-	architecture( _OPTIONS[ "arch" ] )
+	architecture( Helium.GetTargetArchitecture() )
 	location "Build"
 	objdir "Build"
 
